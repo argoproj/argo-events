@@ -114,7 +114,7 @@ message AMQPEventSource {
   optional BasicAuth auth = 13;
 
   // URLSecret is secret reference for rabbitmq service URL
-  optional k8s.io.api.core.v1.SecretKeySelector urlSecret = 14;
+  optional .k8s.io.api.core.v1.SecretKeySelector urlSecret = 14;
 
   // Filter
   // +optional
@@ -188,11 +188,11 @@ message AWSLambdaTrigger {
 
   // AccessKey refers K8s secret containing aws access key
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector accessKey = 2;
 
   // SecretKey refers K8s secret containing aws secret key
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 3;
+  optional .k8s.io.api.core.v1.SecretKeySelector secretKey = 3;
 
   // Region is AWS region
   optional string region = 4;
@@ -262,7 +262,7 @@ message ArtifactLocation {
   optional URLArtifact url = 4;
 
   // Configmap that stores the artifact
-  optional k8s.io.api.core.v1.ConfigMapKeySelector configmap = 5;
+  optional .k8s.io.api.core.v1.ConfigMapKeySelector configmap = 5;
 
   // Git repository hosting the artifact
   optional GitArtifact git = 6;
@@ -280,10 +280,10 @@ message AzureEventHubsTrigger {
   optional string hubName = 2;
 
   // SharedAccessKeyName refers to the name of the Shared Access Key
-  optional k8s.io.api.core.v1.SecretKeySelector sharedAccessKeyName = 3;
+  optional .k8s.io.api.core.v1.SecretKeySelector sharedAccessKeyName = 3;
 
   // SharedAccessKey refers to a K8s secret containing the primary key for the
-  optional k8s.io.api.core.v1.SecretKeySelector sharedAccessKey = 4;
+  optional .k8s.io.api.core.v1.SecretKeySelector sharedAccessKey = 4;
 
   // Payload is the list of key-value extracted from an event payload to construct the request payload.
   repeated TriggerParameter payload = 5;
@@ -304,12 +304,12 @@ message AzureEventsHubEventSource {
   // SharedAccessKeyName is the name you chose for your application's SAS keys. If both this field and SharedAccessKey are not provided
   // it will try to access via Azure AD with DefaultAzureCredential, FQDN and HubName.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector sharedAccessKeyName = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector sharedAccessKeyName = 2;
 
   // SharedAccessKey is the generated value of the key. If both this field and SharedAccessKeyName are not provided
   // it will try to access via Azure AD with DefaultAzureCredential, FQDN and HubName.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector sharedAccessKey = 3;
+  optional .k8s.io.api.core.v1.SecretKeySelector sharedAccessKey = 3;
 
   // Event Hub path/name
   optional string hubName = 4;
@@ -334,7 +334,7 @@ message AzureQueueStorageEventSource {
   // ConnectionString is the connection string to access Azure Queue Storage. If this fields is not provided
   // it will try to access via Azure AD with StorageAccountName.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector connectionString = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector connectionString = 2;
 
   // QueueName is the name of the queue
   optional string queueName = 3;
@@ -375,7 +375,7 @@ message AzureServiceBusEventSource {
   // ConnectionString is the connection string for the Azure Service Bus. If this fields is not provided
   // it will try to access via Azure AD with DefaultAzureCredential and FullyQualifiedNamespace.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector connectionString = 1;
+  optional .k8s.io.api.core.v1.SecretKeySelector connectionString = 1;
 
   // QueueName is the name of the Azure Service Bus Queue
   optional string queueName = 2;
@@ -411,7 +411,7 @@ message AzureServiceBusEventSource {
 
 message AzureServiceBusTrigger {
   // ConnectionString is the connection string for the Azure Service Bus
-  optional k8s.io.api.core.v1.SecretKeySelector connectionString = 1;
+  optional .k8s.io.api.core.v1.SecretKeySelector connectionString = 1;
 
   // QueueName is the name of the Azure Service Bus Queue
   optional string queueName = 2;
@@ -457,10 +457,10 @@ message Backoff {
 // BasicAuth contains the reference to K8s secrets that holds the username and password
 message BasicAuth {
   // Username refers to the Kubernetes secret that holds the username required for basic auth.
-  optional k8s.io.api.core.v1.SecretKeySelector username = 1;
+  optional .k8s.io.api.core.v1.SecretKeySelector username = 1;
 
   // Password refers to the Kubernetes secret that holds the password required for basic auth.
-  optional k8s.io.api.core.v1.SecretKeySelector password = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector password = 2;
 }
 
 // BitbucketAuth holds the different auth strategies for connecting to Bitbucket
@@ -471,16 +471,16 @@ message BitbucketAuth {
 
   // OAuthToken refers to the K8s secret that holds the OAuth Bearer token.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector oauthToken = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector oauthToken = 2;
 }
 
 // BitbucketBasicAuth holds the information required to authenticate user via basic auth mechanism
 message BitbucketBasicAuth {
   // Username refers to the K8s secret that holds the username.
-  optional k8s.io.api.core.v1.SecretKeySelector username = 1;
+  optional .k8s.io.api.core.v1.SecretKeySelector username = 1;
 
   // Password refers to the K8s secret that holds the password.
-  optional k8s.io.api.core.v1.SecretKeySelector password = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector password = 2;
 }
 
 // BitbucketEventSource describes the event source for Bitbucket
@@ -576,11 +576,11 @@ message BitbucketServerEventSource {
 
   // AccessToken is reference to K8s secret which holds the bitbucket api access information.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector accessToken = 9;
+  optional .k8s.io.api.core.v1.SecretKeySelector accessToken = 9;
 
   // WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation).
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 10;
+  optional .k8s.io.api.core.v1.SecretKeySelector webhookSecret = 10;
 
   // BitbucketServerBaseURL is the base URL for API requests to a custom endpoint.
   optional string bitbucketserverBaseURL = 11;
@@ -676,7 +676,7 @@ message Condition {
 
   // Last time the condition transitioned from one status to another.
   // +optional
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastTransitionTime = 3;
+  optional .k8s.io.apimachinery.pkg.apis.meta.v1.Time lastTransitionTime = 3;
 
   // Unique, this should be a short, machine understandable string that gives the reason
   // for condition's last transition. For example, "ImageNotFound"
@@ -711,11 +711,11 @@ message ConfigMapPersistence {
 
 // ContainerTemplate defines customized spec for a container
 message ContainerTemplate {
-  optional k8s.io.api.core.v1.ResourceRequirements resources = 1;
+  optional .k8s.io.api.core.v1.ResourceRequirements resources = 1;
 
   optional string imagePullPolicy = 2;
 
-  optional k8s.io.api.core.v1.SecurityContext securityContext = 3;
+  optional .k8s.io.api.core.v1.SecurityContext securityContext = 3;
 }
 
 // CustomTrigger refers to the specification of the custom trigger.
@@ -727,7 +727,7 @@ message CustomTrigger {
   optional bool secure = 2;
 
   // CertSecret refers to the secret that contains cert for secure connection between sensor and custom trigger gRPC server.
-  optional k8s.io.api.core.v1.SecretKeySelector certSecret = 3;
+  optional .k8s.io.api.core.v1.SecretKeySelector certSecret = 3;
 
   // ServerNameOverride for the secure connection between sensor and custom trigger gRPC server.
   optional string serverNameOverride = 4;
@@ -787,7 +787,7 @@ message EmailTrigger {
 
   // SMTPPassword refers to the Kubernetes secret that holds the smtp password used to connect to smtp server.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector smtpPassword = 3;
+  optional .k8s.io.api.core.v1.SecretKeySelector smtpPassword = 3;
 
   // Host refers to the smtp host url to which email is send.
   optional string host = 4;
@@ -828,11 +828,11 @@ message EmitterEventSource {
 
   // Username to use to connect to broker
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector username = 4;
+  optional .k8s.io.api.core.v1.SecretKeySelector username = 4;
 
   // Password to use to connect to broker
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector password = 5;
+  optional .k8s.io.api.core.v1.SecretKeySelector password = 5;
 
   // Backoff holds parameters applied to connection.
   // +optional
@@ -872,7 +872,7 @@ message Event {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message EventBus {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+  optional .k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
   optional EventBusSpec spec = 2;
 
@@ -883,7 +883,7 @@ message EventBus {
 // EventBusList is the list of eventbus resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 message EventBusList {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
+  optional .k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
   repeated EventBus items = 2;
 }
@@ -936,7 +936,7 @@ message EventContext {
   optional string subject = 6;
 
   // Time - A Timestamp when the event happened.
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time time = 7;
+  optional .k8s.io.apimachinery.pkg.apis.meta.v1.Time time = 7;
 }
 
 // EventDependency describes a dependency
@@ -1016,7 +1016,7 @@ message EventPersistence {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message EventSource {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+  optional .k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
   optional EventSourceSpec spec = 2;
 
@@ -1031,7 +1031,7 @@ message EventSourceFilter {
 // EventSourceList is the list of eventsource resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 message EventSourceList {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
+  optional .k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
   repeated EventSource items = 2;
 }
@@ -1207,7 +1207,7 @@ message GenericEventSource {
 
   // AuthSecret holds a secret selector that contains a bearer token for authentication
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector authSecret = 6;
+  optional .k8s.io.api.core.v1.SecretKeySelector authSecret = 6;
 
   // Filter
   // +optional
@@ -1267,7 +1267,7 @@ message GitArtifact {
   optional GitCreds creds = 3;
 
   // SSHKeySecret refers to the secret that contains SSH key
-  optional k8s.io.api.core.v1.SecretKeySelector sshKeySecret = 4;
+  optional .k8s.io.api.core.v1.SecretKeySelector sshKeySecret = 4;
 
   // Path to file that contains trigger resource definition
   optional string filePath = 5;
@@ -1297,9 +1297,9 @@ message GitArtifact {
 
 // GitCreds contain reference to git username and password
 message GitCreds {
-  optional k8s.io.api.core.v1.SecretKeySelector username = 1;
+  optional .k8s.io.api.core.v1.SecretKeySelector username = 1;
 
-  optional k8s.io.api.core.v1.SecretKeySelector password = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector password = 2;
 }
 
 // GitRemoteConfig contains the configuration of a Git remote
@@ -1314,7 +1314,7 @@ message GitRemoteConfig {
 
 message GithubAppCreds {
   // PrivateKey refers to a K8s secret containing the GitHub app private key
-  optional k8s.io.api.core.v1.SecretKeySelector privateKey = 1;
+  optional .k8s.io.api.core.v1.SecretKeySelector privateKey = 1;
 
   // AppID refers to the GitHub App ID for the application you created
   optional int64 appID = 2;
@@ -1348,12 +1348,12 @@ message GithubEventSource {
 
   // APIToken refers to a K8s secret containing github api token
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector apiToken = 6;
+  optional .k8s.io.api.core.v1.SecretKeySelector apiToken = 6;
 
   // WebhookSecret refers to K8s secret containing GitHub webhook secret
   // https://developer.github.com/webhooks/securing/
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 7;
+  optional .k8s.io.api.core.v1.SecretKeySelector webhookSecret = 7;
 
   // Insecure tls verification
   optional bool insecure = 8;
@@ -1413,7 +1413,7 @@ message GitlabEventSource {
   repeated string events = 3;
 
   // AccessToken references to k8 secret which holds the gitlab api access information
-  optional k8s.io.api.core.v1.SecretKeySelector accessToken = 4;
+  optional .k8s.io.api.core.v1.SecretKeySelector accessToken = 4;
 
   // EnableSSLVerification to enable ssl verification
   // +optional
@@ -1435,7 +1435,7 @@ message GitlabEventSource {
   repeated string projects = 10;
 
   // SecretToken references to k8 secret which holds the Secret Token used by webhook config
-  optional k8s.io.api.core.v1.SecretKeySelector secretToken = 11;
+  optional .k8s.io.api.core.v1.SecretKeySelector secretToken = 11;
 
   // Filter
   // +optional
@@ -1465,11 +1465,11 @@ message HDFSEventSource {
 
   // KrbCCacheSecret is the secret selector for Kerberos ccache
   // Either ccache or keytab can be set to use Kerberos.
-  optional k8s.io.api.core.v1.SecretKeySelector krbCCacheSecret = 6;
+  optional .k8s.io.api.core.v1.SecretKeySelector krbCCacheSecret = 6;
 
   // KrbKeytabSecret is the secret selector for Kerberos keytab
   // Either ccache or keytab can be set to use Kerberos.
-  optional k8s.io.api.core.v1.SecretKeySelector krbKeytabSecret = 7;
+  optional .k8s.io.api.core.v1.SecretKeySelector krbKeytabSecret = 7;
 
   // KrbUsername is the Kerberos username used with Kerberos keytab
   // It must be set if keytab is used.
@@ -1481,7 +1481,7 @@ message HDFSEventSource {
 
   // KrbConfig is the configmap selector for Kerberos config as string
   // It must be set if either ccache or keytab is used.
-  optional k8s.io.api.core.v1.ConfigMapKeySelector krbConfigConfigMap = 10;
+  optional .k8s.io.api.core.v1.ConfigMapKeySelector krbConfigConfigMap = 10;
 
   // KrbServicePrincipalName is the principal name of Kerberos service
   // It must be set if either ccache or keytab is used.
@@ -1578,12 +1578,12 @@ message JetStreamBus {
 
   // If specified, the pod's tolerations.
   // +optional
-  repeated k8s.io.api.core.v1.Toleration tolerations = 9;
+  repeated .k8s.io.api.core.v1.Toleration tolerations = 9;
 
   // SecurityContext holds pod-level security attributes and common container settings.
   // Optional: Defaults to empty.  See type description for default values of each field.
   // +optional
-  optional k8s.io.api.core.v1.PodSecurityContext securityContext = 10;
+  optional .k8s.io.api.core.v1.PodSecurityContext securityContext = 10;
 
   // ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec.
   // If specified, these secrets will be passed to individual puller implementations for them to use. For example,
@@ -1592,7 +1592,7 @@ message JetStreamBus {
   // +optional
   // +patchMergeKey=name
   // +patchStrategy=merge
-  repeated k8s.io.api.core.v1.LocalObjectReference imagePullSecrets = 11;
+  repeated .k8s.io.api.core.v1.LocalObjectReference imagePullSecrets = 11;
 
   // If specified, indicates the Redis pod's priority. "system-node-critical"
   // and "system-cluster-critical" are two special keywords which indicate the
@@ -1616,7 +1616,7 @@ message JetStreamBus {
   // The pod's scheduling constraints
   // More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
   // +optional
-  optional k8s.io.api.core.v1.Affinity affinity = 14;
+  optional .k8s.io.api.core.v1.Affinity affinity = 14;
 
   // ServiceAccountName to apply to the StatefulSet
   // +optional
@@ -1650,7 +1650,7 @@ message JetStreamConfig {
 
   // Secret for auth
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector accessSecret = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector accessSecret = 2;
 
   // +optional
   optional string streamConfig = 3;
@@ -1900,15 +1900,15 @@ message NATSAuth {
 
   // Token used to connect
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector token = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector token = 2;
 
   // NKey used to connect
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector nkey = 3;
+  optional .k8s.io.api.core.v1.SecretKeySelector nkey = 3;
 
   // credential used to connect
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector credential = 4;
+  optional .k8s.io.api.core.v1.SecretKeySelector credential = 4;
 }
 
 // NATSBus holds the NATS eventbus information
@@ -1934,7 +1934,7 @@ message NATSConfig {
 
   // Secret for auth
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector accessSecret = 4;
+  optional .k8s.io.api.core.v1.SecretKeySelector accessSecret = 4;
 }
 
 // NATSEventsSource refers to event-source for NATS related events
@@ -2056,7 +2056,7 @@ message NativeStrategy {
 
   // If specified, the pod's tolerations.
   // +optional
-  repeated k8s.io.api.core.v1.Toleration tolerations = 7;
+  repeated .k8s.io.api.core.v1.Toleration tolerations = 7;
 
   // Metadata sets the pods's metadata, i.e. annotations and labels
   optional Metadata metadata = 8;
@@ -2064,7 +2064,7 @@ message NativeStrategy {
   // SecurityContext holds pod-level security attributes and common container settings.
   // Optional: Defaults to empty.  See type description for default values of each field.
   // +optional
-  optional k8s.io.api.core.v1.PodSecurityContext securityContext = 9;
+  optional .k8s.io.api.core.v1.PodSecurityContext securityContext = 9;
 
   // Max Age of existing messages, i.e. "72h", “4h35m”
   // +optional
@@ -2077,7 +2077,7 @@ message NativeStrategy {
   // +optional
   // +patchMergeKey=name
   // +patchStrategy=merge
-  repeated k8s.io.api.core.v1.LocalObjectReference imagePullSecrets = 11;
+  repeated .k8s.io.api.core.v1.LocalObjectReference imagePullSecrets = 11;
 
   // ServiceAccountName to apply to NATS StatefulSet
   // +optional
@@ -2105,7 +2105,7 @@ message NativeStrategy {
   // The pod's scheduling constraints
   // More info: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
   // +optional
-  optional k8s.io.api.core.v1.Affinity affinity = 15;
+  optional .k8s.io.api.core.v1.Affinity affinity = 15;
 
   // Maximum number of messages per channel, 0 means unlimited. Defaults to 1000000
   optional uint64 maxMsgs = 16;
@@ -2149,7 +2149,7 @@ message OpenWhiskTrigger {
 
   // AuthToken for authentication.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector authToken = 4;
+  optional .k8s.io.api.core.v1.SecretKeySelector authToken = 4;
 
   // Name of the action/function.
   optional string actionName = 5;
@@ -2196,7 +2196,7 @@ message PersistenceStrategy {
   optional string accessMode = 2;
 
   // Volume size, e.g. 10Gi
-  optional k8s.io.apimachinery.pkg.api.resource.Quantity volumeSize = 3;
+  optional .k8s.io.apimachinery.pkg.api.resource.Quantity volumeSize = 3;
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
@@ -2230,7 +2230,7 @@ message PubSubEventSource {
   // If it is missing, it implicitly uses Workload Identity to access.
   // https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector credentialSecret = 5;
+  optional .k8s.io.api.core.v1.SecretKeySelector credentialSecret = 5;
 
   // DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.
   // +optional
@@ -2268,7 +2268,7 @@ message PulsarEventSource {
 
   // Trusted TLS certificate secret.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector tlsTrustCertsSecret = 4;
+  optional .k8s.io.api.core.v1.SecretKeySelector tlsTrustCertsSecret = 4;
 
   // Whether the Pulsar client accept untrusted TLS certificate from broker.
   // +optional
@@ -2298,7 +2298,7 @@ message PulsarEventSource {
   // Authentication token for the pulsar client.
   // Either token or athenz can be set to use auth.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector authTokenSecret = 11;
+  optional .k8s.io.api.core.v1.SecretKeySelector authTokenSecret = 11;
 
   // Filter
   // +optional
@@ -2313,7 +2313,7 @@ message PulsarEventSource {
   // Authentication athenz privateKey secret for the pulsar client.
   // AuthAthenzSecret must be set if AuthAthenzParams is used.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector authAthenzSecret = 14;
+  optional .k8s.io.api.core.v1.SecretKeySelector authAthenzSecret = 14;
 }
 
 // PulsarTrigger refers to the specification of the Pulsar trigger.
@@ -2334,7 +2334,7 @@ message PulsarTrigger {
 
   // Trusted TLS certificate secret.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector tlsTrustCertsSecret = 5;
+  optional .k8s.io.api.core.v1.SecretKeySelector tlsTrustCertsSecret = 5;
 
   // Whether the Pulsar client accept untrusted TLS certificate from broker.
   // +optional
@@ -2351,7 +2351,7 @@ message PulsarTrigger {
   // Authentication token for the pulsar client.
   // Either token or athenz can be set to use auth.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector authTokenSecret = 9;
+  optional .k8s.io.api.core.v1.SecretKeySelector authTokenSecret = 9;
 
   // Backoff holds parameters applied to connection.
   // +optional
@@ -2366,7 +2366,7 @@ message PulsarTrigger {
   // Authentication athenz privateKey secret for the pulsar client.
   // AuthAthenzSecret must be set if AuthAthenzParams is used.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector authAthenzSecret = 12;
+  optional .k8s.io.api.core.v1.SecretKeySelector authAthenzSecret = 12;
 }
 
 message RateLimit {
@@ -2384,7 +2384,7 @@ message RedisEventSource {
 
   // Password required for authentication if any.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector password = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector password = 2;
 
   // Namespace to use to retrieve the password from. It should only be specified if password is declared
   // +optional
@@ -2426,7 +2426,7 @@ message RedisStreamEventSource {
 
   // Password required for authentication if any.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector password = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector password = 2;
 
   // DB to use. If not specified, default DB 0 will be used.
   // +optional
@@ -2474,7 +2474,7 @@ message ResourceEventSource {
   optional ResourceFilter filter = 2;
 
   // Group of the resource
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 3;
+  optional .k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 3;
 
   // EventTypes is the list of event type to watch.
   // Possible values are - ADD, UPDATE and DELETE.
@@ -2510,7 +2510,7 @@ message ResourceFilter {
 
   // If resource is created before the specified time then the event is treated as valid.
   // +optional
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time createdBy = 4;
+  optional .k8s.io.apimachinery.pkg.apis.meta.v1.Time createdBy = 4;
 
   // If the resource is created after the start time then the event is treated as valid.
   // +optional
@@ -2527,9 +2527,9 @@ message S3Artifact {
 
   optional bool insecure = 4;
 
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5;
+  optional .k8s.io.api.core.v1.SecretKeySelector accessKey = 5;
 
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
+  optional .k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
 
   repeated string events = 7;
 
@@ -2537,7 +2537,7 @@ message S3Artifact {
 
   map<string, string> metadata = 9;
 
-  optional k8s.io.api.core.v1.SecretKeySelector caCertificate = 10;
+  optional .k8s.io.api.core.v1.SecretKeySelector caCertificate = 10;
 }
 
 // S3Bucket contains information to describe an S3 Bucket
@@ -2563,10 +2563,10 @@ message SASLConfig {
 
   // User is the authentication identity (authcid) to present for
   // SASL/PLAIN or SASL/SCRAM authentication
-  optional k8s.io.api.core.v1.SecretKeySelector userSecret = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector userSecret = 2;
 
   // Password for SASL/PLAIN authentication
-  optional k8s.io.api.core.v1.SecretKeySelector passwordSecret = 3;
+  optional .k8s.io.api.core.v1.SecretKeySelector passwordSecret = 3;
 }
 
 // SFTPEventSource describes an event-source for sftp related events.
@@ -2579,16 +2579,16 @@ message SFTPEventSource {
   optional WatchPathConfig watchPathConfig = 2;
 
   // Username required for authentication if any.
-  optional k8s.io.api.core.v1.SecretKeySelector username = 3;
+  optional .k8s.io.api.core.v1.SecretKeySelector username = 3;
 
   // Password required for authentication if any.
-  optional k8s.io.api.core.v1.SecretKeySelector password = 4;
+  optional .k8s.io.api.core.v1.SecretKeySelector password = 4;
 
   // SSHKeySecret refers to the secret that contains SSH key. Key needs to contain private key and public key.
-  optional k8s.io.api.core.v1.SecretKeySelector sshKeySecret = 5;
+  optional .k8s.io.api.core.v1.SecretKeySelector sshKeySecret = 5;
 
   // Address sftp address.
-  optional k8s.io.api.core.v1.SecretKeySelector address = 6;
+  optional .k8s.io.api.core.v1.SecretKeySelector address = 6;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
@@ -2613,10 +2613,10 @@ message SNSEventSource {
   optional string topicArn = 2;
 
   // AccessKey refers K8s secret containing aws access key
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 3;
+  optional .k8s.io.api.core.v1.SecretKeySelector accessKey = 3;
 
   // SecretKey refers K8s secret containing aws secret key
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 4;
+  optional .k8s.io.api.core.v1.SecretKeySelector secretKey = 4;
 
   // Region is AWS region
   optional string region = 5;
@@ -2645,10 +2645,10 @@ message SNSEventSource {
 // SQSEventSource refers to event-source for AWS SQS related events
 message SQSEventSource {
   // AccessKey refers K8s secret containing aws access key
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 1;
+  optional .k8s.io.api.core.v1.SecretKeySelector accessKey = 1;
 
   // SecretKey refers K8s secret containing aws secret key
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector secretKey = 2;
 
   // Region is AWS region
   optional string region = 3;
@@ -2693,7 +2693,7 @@ message SQSEventSource {
 
   // SessionToken refers to K8s secret containing AWS temporary credentials(STS) session token
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector sessionToken = 13;
+  optional .k8s.io.api.core.v1.SecretKeySelector sessionToken = 13;
 }
 
 // SchemaRegistryConfig refers to configuration for a client
@@ -2740,7 +2740,7 @@ message Selector {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message Sensor {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+  optional .k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
   optional SensorSpec spec = 2;
 
@@ -2751,7 +2751,7 @@ message Sensor {
 // SensorList is the list of Sensor resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 message SensorList {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
+  optional .k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
   repeated Sensor items = 2;
 }
@@ -2804,7 +2804,7 @@ message Service {
   // +listType=map
   // +listMapKey=port
   // +listMapKey=protocol
-  repeated k8s.io.api.core.v1.ServicePort ports = 2;
+  repeated .k8s.io.api.core.v1.ServicePort ports = 2;
 
   // clusterIP is the IP address of the service and is usually assigned
   // randomly by the master. If an address is specified manually and is not in
@@ -2820,10 +2820,10 @@ message Service {
 // SlackEventSource refers to event-source for Slack related events
 message SlackEventSource {
   // Slack App signing secret
-  optional k8s.io.api.core.v1.SecretKeySelector signingSecret = 1;
+  optional .k8s.io.api.core.v1.SecretKeySelector signingSecret = 1;
 
   // Token for URL verification handshake
-  optional k8s.io.api.core.v1.SecretKeySelector token = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector token = 2;
 
   // Webhook holds configuration for a REST endpoint
   optional WebhookContext webhook = 3;
@@ -2865,7 +2865,7 @@ message SlackTrigger {
   repeated TriggerParameter parameters = 1;
 
   // SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
-  optional k8s.io.api.core.v1.SecretKeySelector slackToken = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector slackToken = 2;
 
   // Channel refers to which Slack channel to send Slack message.
   // +optional
@@ -2961,7 +2961,7 @@ message StorageGridEventSource {
   optional string region = 6;
 
   // Auth token for storagegrid api
-  optional k8s.io.api.core.v1.SecretKeySelector authToken = 7;
+  optional .k8s.io.api.core.v1.SecretKeySelector authToken = 7;
 
   // APIURL is the url of the storagegrid api.
   optional string apiURL = 8;
@@ -2991,7 +2991,7 @@ message StripeEventSource {
 
   // APIKey refers to K8s secret that holds Stripe API key. Used only if CreateWebhook is enabled.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector apiKey = 3;
+  optional .k8s.io.api.core.v1.SecretKeySelector apiKey = 3;
 
   // EventFilter describes the type of events to listen to. If not specified, all types of events will be processed.
   // More info at https://stripe.com/docs/api/events/list
@@ -3006,13 +3006,13 @@ message StripeEventSource {
 // TLSConfig refers to TLS configuration for a client.
 message TLSConfig {
   // CACertSecret refers to the secret that contains the CA cert
-  optional k8s.io.api.core.v1.SecretKeySelector caCertSecret = 1;
+  optional .k8s.io.api.core.v1.SecretKeySelector caCertSecret = 1;
 
   // ClientCertSecret refers to the secret that contains the client cert
-  optional k8s.io.api.core.v1.SecretKeySelector clientCertSecret = 2;
+  optional .k8s.io.api.core.v1.SecretKeySelector clientCertSecret = 2;
 
   // ClientKeySecret refers to the secret that contains the client key
-  optional k8s.io.api.core.v1.SecretKeySelector clientKeySecret = 3;
+  optional .k8s.io.api.core.v1.SecretKeySelector clientKeySecret = 3;
 
   // If true, skips creation of TLSConfig with certs and creates an empty TLSConfig. (Defaults to false)
   // +optional
@@ -3031,18 +3031,18 @@ message Template {
 
   // Container is the main container image to run in the sensor pod
   // +optional
-  optional k8s.io.api.core.v1.Container container = 3;
+  optional .k8s.io.api.core.v1.Container container = 3;
 
   // Volumes is a list of volumes that can be mounted by containers in a workflow.
   // +patchStrategy=merge
   // +patchMergeKey=name
   // +optional
-  repeated k8s.io.api.core.v1.Volume volumes = 4;
+  repeated .k8s.io.api.core.v1.Volume volumes = 4;
 
   // SecurityContext holds pod-level security attributes and common container settings.
   // Optional: Defaults to empty.  See type description for default values of each field.
   // +optional
-  optional k8s.io.api.core.v1.PodSecurityContext securityContext = 5;
+  optional .k8s.io.api.core.v1.PodSecurityContext securityContext = 5;
 
   // NodeSelector is a selector which must be true for the pod to fit on a node.
   // Selector which must match a node's labels for the pod to be scheduled on that node.
@@ -3052,7 +3052,7 @@ message Template {
 
   // If specified, the pod's tolerations.
   // +optional
-  repeated k8s.io.api.core.v1.Toleration tolerations = 7;
+  repeated .k8s.io.api.core.v1.Toleration tolerations = 7;
 
   // ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec.
   // If specified, these secrets will be passed to individual puller implementations for them to use. For example,
@@ -3061,7 +3061,7 @@ message Template {
   // +optional
   // +patchMergeKey=name
   // +patchStrategy=merge
-  repeated k8s.io.api.core.v1.LocalObjectReference imagePullSecrets = 8;
+  repeated .k8s.io.api.core.v1.LocalObjectReference imagePullSecrets = 8;
 
   // If specified, indicates the EventSource pod's priority. "system-node-critical"
   // and "system-cluster-critical" are two special keywords which indicate the
@@ -3084,7 +3084,7 @@ message Template {
 
   // If specified, the pod's scheduling constraints
   // +optional
-  optional k8s.io.api.core.v1.Affinity affinity = 11;
+  optional .k8s.io.api.core.v1.Affinity affinity = 11;
 }
 
 // TimeFilter describes a window in time.
@@ -3291,9 +3291,9 @@ message URLArtifact {
 
 // ValueFromSource allows you to reference keys from either a Configmap or Secret
 message ValueFromSource {
-  optional k8s.io.api.core.v1.SecretKeySelector secretKeyRef = 1;
+  optional .k8s.io.api.core.v1.SecretKeySelector secretKeyRef = 1;
 
-  optional k8s.io.api.core.v1.ConfigMapKeySelector configMapKeyRef = 2;
+  optional .k8s.io.api.core.v1.ConfigMapKeySelector configMapKeyRef = 2;
 }
 
 message WatchPathConfig {
@@ -3323,10 +3323,10 @@ message WebhookContext {
   optional string url = 4;
 
   // ServerCertPath refers the file that contains the cert.
-  optional k8s.io.api.core.v1.SecretKeySelector serverCertSecret = 5;
+  optional .k8s.io.api.core.v1.SecretKeySelector serverCertSecret = 5;
 
   // ServerKeyPath refers the file that contains private key
-  optional k8s.io.api.core.v1.SecretKeySelector serverKeySecret = 6;
+  optional .k8s.io.api.core.v1.SecretKeySelector serverKeySecret = 6;
 
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
@@ -3334,7 +3334,7 @@ message WebhookContext {
 
   // AuthSecret holds a secret selector that contains a bearer token for authentication
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector authSecret = 8;
+  optional .k8s.io.api.core.v1.SecretKeySelector authSecret = 8;
 
   // MaxPayloadSize is the maximum webhook payload size that the server will accept.
   // Requests exceeding that limit will be rejected with "request too large" response.
