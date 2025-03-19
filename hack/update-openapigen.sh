@@ -14,8 +14,8 @@ VERSION="v1alpha1"
 
 go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
     --go-header-file ${REPO_ROOT}/hack/custom-boilerplate.go.txt \
-    --output-dir pkg/apis/events/${VERSION} \
-    --output-pkg ${VERSION} \
+    --output-dir pkg/apis/events/openapi \
+    --output-pkg openapi \
     --output-file openapi_generated.go \
     github.com/argoproj/argo-events/pkg/apis/events/${VERSION}
 

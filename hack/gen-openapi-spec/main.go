@@ -9,7 +9,7 @@ import (
 	"k8s.io/kube-openapi/pkg/common"
 	"k8s.io/kube-openapi/pkg/validation/spec"
 
-	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	aeopenapi "github.com/argoproj/argo-events/pkg/apis/events/openapi"
 )
 
 type (
@@ -33,7 +33,7 @@ func main() {
 	}
 	defs := spec.Definitions{}
 	dependencies := []string{}
-	for defName, val := range aev1.GetOpenAPIDefinitions(referenceCallback) {
+	for defName, val := range aeopenapi.GetOpenAPIDefinitions(referenceCallback) {
 		defs[swaggify(defName)] = val.Schema
 		dependencies = append(dependencies, val.Dependencies...)
 	}
