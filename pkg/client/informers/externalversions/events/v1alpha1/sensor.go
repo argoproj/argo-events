@@ -19,13 +19,13 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
-	eventsv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	apiseventsv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	versioned "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/argoproj/argo-events/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/argoproj/argo-events/pkg/client/listers/events/v1alpha1"
+	eventsv1alpha1 "github.com/argoproj/argo-events/pkg/client/listers/events/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -36,7 +36,7 @@ import (
 // Sensors.
 type SensorInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.SensorLister
+	Lister() eventsv1alpha1.SensorLister
 }
 
 type sensorInformer struct {
@@ -71,7 +71,7 @@ func NewFilteredSensorInformer(client versioned.Interface, namespace string, res
 				return client.ArgoprojV1alpha1().Sensors(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&eventsv1alpha1.Sensor{},
+		&apiseventsv1alpha1.Sensor{},
 		resyncPeriod,
 		indexers,
 	)
@@ -82,9 +82,9 @@ func (f *sensorInformer) defaultInformer(client versioned.Interface, resyncPerio
 }
 
 func (f *sensorInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&eventsv1alpha1.Sensor{}, f.defaultInformer)
+	return f.factory.InformerFor(&apiseventsv1alpha1.Sensor{}, f.defaultInformer)
 }
 
-func (f *sensorInformer) Lister() v1alpha1.SensorLister {
-	return v1alpha1.NewSensorLister(f.Informer().GetIndexer())
+func (f *sensorInformer) Lister() eventsv1alpha1.SensorLister {
+	return eventsv1alpha1.NewSensorLister(f.Informer().GetIndexer())
 }

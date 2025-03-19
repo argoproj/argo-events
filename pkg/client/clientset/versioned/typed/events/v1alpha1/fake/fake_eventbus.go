@@ -19,123 +19,32 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	eventsv1alpha1 "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeEventBus implements EventBusInterface
-type FakeEventBus struct {
+// fakeEventBus implements EventBusInterface
+type fakeEventBus struct {
+	*gentype.FakeClientWithList[*v1alpha1.EventBus, *v1alpha1.EventBusList]
 	Fake *FakeArgoprojV1alpha1
-	ns   string
 }
 
-var eventbusResource = v1alpha1.SchemeGroupVersion.WithResource("eventbus")
-
-var eventbusKind = v1alpha1.SchemeGroupVersion.WithKind("EventBus")
-
-// Get takes name of the eventBus, and returns the corresponding eventBus object, and an error if there is any.
-func (c *FakeEventBus) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.EventBus, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(eventbusResource, c.ns, name), &v1alpha1.EventBus{})
-
-	if obj == nil {
-		return nil, err
+func newFakeEventBus(fake *FakeArgoprojV1alpha1, namespace string) eventsv1alpha1.EventBusInterface {
+	return &fakeEventBus{
+		gentype.NewFakeClientWithList[*v1alpha1.EventBus, *v1alpha1.EventBusList](
+			fake.Fake,
+			namespace,
+			v1alpha1.SchemeGroupVersion.WithResource("eventbus"),
+			v1alpha1.SchemeGroupVersion.WithKind("EventBus"),
+			func() *v1alpha1.EventBus { return &v1alpha1.EventBus{} },
+			func() *v1alpha1.EventBusList { return &v1alpha1.EventBusList{} },
+			func(dst, src *v1alpha1.EventBusList) { dst.ListMeta = src.ListMeta },
+			func(list *v1alpha1.EventBusList) []*v1alpha1.EventBus { return gentype.ToPointerSlice(list.Items) },
+			func(list *v1alpha1.EventBusList, items []*v1alpha1.EventBus) {
+				list.Items = gentype.FromPointerSlice(items)
+			},
+		),
+		fake,
 	}
-	return obj.(*v1alpha1.EventBus), err
-}
-
-// List takes label and field selectors, and returns the list of EventBus that match those selectors.
-func (c *FakeEventBus) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.EventBusList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(eventbusResource, eventbusKind, c.ns, opts), &v1alpha1.EventBusList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1alpha1.EventBusList{ListMeta: obj.(*v1alpha1.EventBusList).ListMeta}
-	for _, item := range obj.(*v1alpha1.EventBusList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested eventBus.
-func (c *FakeEventBus) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(eventbusResource, c.ns, opts))
-
-}
-
-// Create takes the representation of a eventBus and creates it.  Returns the server's representation of the eventBus, and an error, if there is any.
-func (c *FakeEventBus) Create(ctx context.Context, eventBus *v1alpha1.EventBus, opts v1.CreateOptions) (result *v1alpha1.EventBus, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(eventbusResource, c.ns, eventBus), &v1alpha1.EventBus{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.EventBus), err
-}
-
-// Update takes the representation of a eventBus and updates it. Returns the server's representation of the eventBus, and an error, if there is any.
-func (c *FakeEventBus) Update(ctx context.Context, eventBus *v1alpha1.EventBus, opts v1.UpdateOptions) (result *v1alpha1.EventBus, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(eventbusResource, c.ns, eventBus), &v1alpha1.EventBus{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.EventBus), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeEventBus) UpdateStatus(ctx context.Context, eventBus *v1alpha1.EventBus, opts v1.UpdateOptions) (*v1alpha1.EventBus, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(eventbusResource, "status", c.ns, eventBus), &v1alpha1.EventBus{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.EventBus), err
-}
-
-// Delete takes name of the eventBus and deletes it. Returns an error if one occurs.
-func (c *FakeEventBus) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(eventbusResource, c.ns, name, opts), &v1alpha1.EventBus{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeEventBus) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(eventbusResource, c.ns, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1alpha1.EventBusList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched eventBus.
-func (c *FakeEventBus) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.EventBus, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(eventbusResource, c.ns, name, pt, data, subresources...), &v1alpha1.EventBus{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.EventBus), err
 }

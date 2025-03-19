@@ -29,15 +29,15 @@ type FakeArgoprojV1alpha1 struct {
 }
 
 func (c *FakeArgoprojV1alpha1) EventBus(namespace string) v1alpha1.EventBusInterface {
-	return &FakeEventBus{c, namespace}
+	return newFakeEventBus(c, namespace)
 }
 
 func (c *FakeArgoprojV1alpha1) EventSources(namespace string) v1alpha1.EventSourceInterface {
-	return &FakeEventSources{c, namespace}
+	return newFakeEventSources(c, namespace)
 }
 
 func (c *FakeArgoprojV1alpha1) Sensors(namespace string) v1alpha1.SensorInterface {
-	return &FakeSensors{c, namespace}
+	return newFakeSensors(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate

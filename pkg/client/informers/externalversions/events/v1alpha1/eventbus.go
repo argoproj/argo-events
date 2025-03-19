@@ -19,13 +19,13 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
-	eventsv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	apiseventsv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	versioned "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/argoproj/argo-events/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/argoproj/argo-events/pkg/client/listers/events/v1alpha1"
+	eventsv1alpha1 "github.com/argoproj/argo-events/pkg/client/listers/events/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -36,7 +36,7 @@ import (
 // EventBus.
 type EventBusInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.EventBusLister
+	Lister() eventsv1alpha1.EventBusLister
 }
 
 type eventBusInformer struct {
@@ -71,7 +71,7 @@ func NewFilteredEventBusInformer(client versioned.Interface, namespace string, r
 				return client.ArgoprojV1alpha1().EventBus(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&eventsv1alpha1.EventBus{},
+		&apiseventsv1alpha1.EventBus{},
 		resyncPeriod,
 		indexers,
 	)
@@ -82,9 +82,9 @@ func (f *eventBusInformer) defaultInformer(client versioned.Interface, resyncPer
 }
 
 func (f *eventBusInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&eventsv1alpha1.EventBus{}, f.defaultInformer)
+	return f.factory.InformerFor(&apiseventsv1alpha1.EventBus{}, f.defaultInformer)
 }
 
-func (f *eventBusInformer) Lister() v1alpha1.EventBusLister {
-	return v1alpha1.NewEventBusLister(f.Informer().GetIndexer())
+func (f *eventBusInformer) Lister() eventsv1alpha1.EventBusLister {
+	return eventsv1alpha1.NewEventBusLister(f.Informer().GetIndexer())
 }
