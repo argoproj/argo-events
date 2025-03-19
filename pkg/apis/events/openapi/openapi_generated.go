@@ -3981,7 +3981,7 @@ func schema_pkg_apis_events_v1alpha1_GitlabEventSource(ref common.ReferenceCallb
 					},
 					"projects": {
 						SchemaProps: spec.SchemaProps{
-							Description: "List of project IDs or project namespace paths like \"whynowy/test\". Projects and groups cannot be empty at the same time.",
+							Description: "List of project IDs or project namespace paths like \"whynowy/test\". If neither a project nor a group is defined, the EventSource will not manage webhooks.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
