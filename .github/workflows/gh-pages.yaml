@@ -11,7 +11,7 @@ permissions:
 jobs:
   deploy:
     permissions:
-      contents: write  # for peaceiris/actions-gh-pages to push pages branch
+      contents: write # for peaceiris/actions-gh-pages to push pages branch
     if: github.repository == 'argoproj/argo-events'
     runs-on: ubuntu-latest
     steps:
@@ -23,7 +23,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: "1.24"
       - name: build
         run: make docs
       - name: deploy

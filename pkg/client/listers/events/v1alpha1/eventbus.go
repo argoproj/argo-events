@@ -19,10 +19,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	eventsv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // EventBusLister helps list EventBus.
@@ -30,7 +30,7 @@ import (
 type EventBusLister interface {
 	// List lists all EventBus in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.EventBus, err error)
+	List(selector labels.Selector) (ret []*eventsv1alpha1.EventBus, err error)
 	// EventBus returns an object that can list and get EventBus.
 	EventBus(namespace string) EventBusNamespaceLister
 	EventBusListerExpansion
@@ -38,25 +38,17 @@ type EventBusLister interface {
 
 // eventBusLister implements the EventBusLister interface.
 type eventBusLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*eventsv1alpha1.EventBus]
 }
 
 // NewEventBusLister returns a new EventBusLister.
 func NewEventBusLister(indexer cache.Indexer) EventBusLister {
-	return &eventBusLister{indexer: indexer}
-}
-
-// List lists all EventBus in the indexer.
-func (s *eventBusLister) List(selector labels.Selector) (ret []*v1alpha1.EventBus, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.EventBus))
-	})
-	return ret, err
+	return &eventBusLister{listers.New[*eventsv1alpha1.EventBus](indexer, eventsv1alpha1.Resource("eventbus"))}
 }
 
 // EventBus returns an object that can list and get EventBus.
 func (s *eventBusLister) EventBus(namespace string) EventBusNamespaceLister {
-	return eventBusNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return eventBusNamespaceLister{listers.NewNamespaced[*eventsv1alpha1.EventBus](s.ResourceIndexer, namespace)}
 }
 
 // EventBusNamespaceLister helps list and get EventBus.
@@ -64,36 +56,15 @@ func (s *eventBusLister) EventBus(namespace string) EventBusNamespaceLister {
 type EventBusNamespaceLister interface {
 	// List lists all EventBus in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.EventBus, err error)
+	List(selector labels.Selector) (ret []*eventsv1alpha1.EventBus, err error)
 	// Get retrieves the EventBus from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1alpha1.EventBus, error)
+	Get(name string) (*eventsv1alpha1.EventBus, error)
 	EventBusNamespaceListerExpansion
 }
 
 // eventBusNamespaceLister implements the EventBusNamespaceLister
 // interface.
 type eventBusNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all EventBus in the indexer for a given namespace.
-func (s eventBusNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.EventBus, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.EventBus))
-	})
-	return ret, err
-}
-
-// Get retrieves the EventBus from the indexer for a given namespace and name.
-func (s eventBusNamespaceLister) Get(name string) (*v1alpha1.EventBus, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("eventbus"), name)
-	}
-	return obj.(*v1alpha1.EventBus), nil
+	listers.ResourceIndexer[*eventsv1alpha1.EventBus]
 }

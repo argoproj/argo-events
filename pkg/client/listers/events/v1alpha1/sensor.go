@@ -19,10 +19,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	eventsv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // SensorLister helps list Sensors.
@@ -30,7 +30,7 @@ import (
 type SensorLister interface {
 	// List lists all Sensors in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.Sensor, err error)
+	List(selector labels.Selector) (ret []*eventsv1alpha1.Sensor, err error)
 	// Sensors returns an object that can list and get Sensors.
 	Sensors(namespace string) SensorNamespaceLister
 	SensorListerExpansion
@@ -38,25 +38,17 @@ type SensorLister interface {
 
 // sensorLister implements the SensorLister interface.
 type sensorLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*eventsv1alpha1.Sensor]
 }
 
 // NewSensorLister returns a new SensorLister.
 func NewSensorLister(indexer cache.Indexer) SensorLister {
-	return &sensorLister{indexer: indexer}
-}
-
-// List lists all Sensors in the indexer.
-func (s *sensorLister) List(selector labels.Selector) (ret []*v1alpha1.Sensor, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.Sensor))
-	})
-	return ret, err
+	return &sensorLister{listers.New[*eventsv1alpha1.Sensor](indexer, eventsv1alpha1.Resource("sensor"))}
 }
 
 // Sensors returns an object that can list and get Sensors.
 func (s *sensorLister) Sensors(namespace string) SensorNamespaceLister {
-	return sensorNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return sensorNamespaceLister{listers.NewNamespaced[*eventsv1alpha1.Sensor](s.ResourceIndexer, namespace)}
 }
 
 // SensorNamespaceLister helps list and get Sensors.
@@ -64,36 +56,15 @@ func (s *sensorLister) Sensors(namespace string) SensorNamespaceLister {
 type SensorNamespaceLister interface {
 	// List lists all Sensors in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.Sensor, err error)
+	List(selector labels.Selector) (ret []*eventsv1alpha1.Sensor, err error)
 	// Get retrieves the Sensor from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1alpha1.Sensor, error)
+	Get(name string) (*eventsv1alpha1.Sensor, error)
 	SensorNamespaceListerExpansion
 }
 
 // sensorNamespaceLister implements the SensorNamespaceLister
 // interface.
 type sensorNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all Sensors in the indexer for a given namespace.
-func (s sensorNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.Sensor, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.Sensor))
-	})
-	return ret, err
-}
-
-// Get retrieves the Sensor from the indexer for a given namespace and name.
-func (s sensorNamespaceLister) Get(name string) (*v1alpha1.Sensor, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("sensor"), name)
-	}
-	return obj.(*v1alpha1.Sensor), nil
+	listers.ResourceIndexer[*eventsv1alpha1.Sensor]
 }

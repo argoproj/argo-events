@@ -8,28 +8,29 @@ source $(dirname $0)/library.sh
 header "running codegen"
 
 ensure_vendor
-make_fake_paths
 
-export GOPATH="${FAKE_GOPATH}"
-export GO111MODULE="off"
+CODEGEN_PKG=${CODEGEN_PKG:-$(cd "${REPO_ROOT}"; ls -d -1 ./vendor/k8s.io/code-generator 2>/dev/null || echo ../code-generator)}
 
-cd "${FAKE_REPOPATH}"
+source "${CODEGEN_PKG}/kube_codegen.sh"
 
-CODEGEN_PKG=${CODEGEN_PKG:-$(cd "${FAKE_REPOPATH}"; ls -d -1 ./vendor/k8s.io/code-generator 2>/dev/null || echo ../code-generator)}
+THIS_PKG="github.com/argoproj/argo-events"
 
-chmod +x ${CODEGEN_PKG}/*.sh
+subheader "running deepcopy gen"
 
-subheader "running codegen"
-bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy" \
-  github.com/argoproj/argo-events/pkg/client github.com/argoproj/argo-events/pkg/apis \
-  "events:v1alpha1" \
-  --go-header-file hack/custom-boilerplate.go.txt
+kube::codegen::gen_helpers \
+    --boilerplate "${REPO_ROOT}/hack/custom-boilerplate.go.txt" \
+    "${REPO_ROOT}/pkg/apis"
 
-bash -x ${CODEGEN_PKG}/generate-groups.sh "client,informer,lister" \
-  github.com/argoproj/argo-events/pkg/client github.com/argoproj/argo-events/pkg/apis \
-  "events:v1alpha1" \
-  --plural-exceptions="EventBus:EventBus" \
-  --go-header-file hack/custom-boilerplate.go.txt
+subheader "running clients gen"
+
+kube::codegen::gen_client \
+    --with-watch \
+    --output-dir "${REPO_ROOT}/pkg/client" \
+    --output-pkg "${THIS_PKG}/pkg/client" \
+    --boilerplate "${REPO_ROOT}/hack/custom-boilerplate.go.txt" \
+    --plural-exceptions "EventBus:EventBus" \
+    --one-input-api "events/v1alpha1" \
+    "${REPO_ROOT}/pkg/apis"
 
 # gofmt the tree
 subheader "running gofmt"

@@ -18,3 +18,4 @@ argo-events
 # ignore temp vi files
 *.swo
 *.swp
+.qodo
