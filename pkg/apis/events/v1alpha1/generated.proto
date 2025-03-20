@@ -721,7 +721,13 @@ message Container {
   optional .k8s.io.api.core.v1.SecurityContext securityContext = 3;
 
   // +optional
-  repeated .k8s.io.api.core.v1.VolumeMount volumeMounts = 6;
+  repeated .k8s.io.api.core.v1.VolumeMount volumeMounts = 4;
+
+  // +optional
+  repeated .k8s.io.api.core.v1.EnvVar env = 5;
+
+  // +optional
+  repeated .k8s.io.api.core.v1.EnvFromSource envFrom = 6;
 }
 
 // ContainerTemplate defines customized spec for a container

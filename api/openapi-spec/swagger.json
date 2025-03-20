@@ -890,6 +890,18 @@
       "description": "Container defines customized spec for a container",
       "type": "object",
       "properties": {
+        "env": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar"
+          }
+        },
+        "envFrom": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.EnvFromSource"
+          }
+        },
         "imagePullPolicy": {
           "type": "string"
         },

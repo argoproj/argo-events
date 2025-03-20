@@ -885,6 +885,18 @@
     "io.argoproj.events.v1alpha1.Container": {
       "description": "Container defines customized spec for a container",
       "properties": {
+        "env": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar"
+          },
+          "type": "array"
+        },
+        "envFrom": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.EnvFromSource"
+          },
+          "type": "array"
+        },
         "imagePullPolicy": {
           "type": "string"
         },
