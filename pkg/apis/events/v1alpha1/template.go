@@ -82,7 +82,9 @@ type Container struct {
 // ApplyToContainer updates the Container with the values from the customized container
 func (c *Container) ApplyToContainer(cc *corev1.Container) {
 	_ = mergo.Merge(&cc.Resources, c.Resources, mergo.WithOverride)
-	cc.SecurityContext = c.SecurityContext
+	if cc.SecurityContext == nil {
+		cc.SecurityContext = c.SecurityContext
+	}
 	if cc.ImagePullPolicy == "" {
 		cc.ImagePullPolicy = c.ImagePullPolicy
 	}
