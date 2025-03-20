@@ -103,32 +103,32 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	}
 
 	// Watch EventBus and enqueue EventBus object key
-	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &aev1.EventBus{}), &handler.EnqueueRequestForObject{},
+	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &aev1.EventBus{}, &handler.TypedEnqueueRequestForObject[*aev1.EventBus]{},
 		predicate.Or(
-			predicate.GenerationChangedPredicate{},
-			predicate.LabelChangedPredicate{},
-		)); err != nil {
+			predicate.TypedGenerationChangedPredicate[*aev1.EventBus]{},
+			predicate.TypedLabelChangedPredicate[*aev1.EventBus]{},
+		))); err != nil {
 		logger.Fatalw("Unable to watch EventBus", zap.Error(err))
 	}
 
 	// Watch ConfigMaps and enqueue owning EventBus key
-	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &corev1.ConfigMap{}),
-		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventBus{}, handler.OnlyControllerOwner()),
-		predicate.GenerationChangedPredicate{}); err != nil {
+	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &corev1.ConfigMap{},
+		handler.TypedEnqueueRequestForOwner[*corev1.ConfigMap](mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventBus{}, handler.OnlyControllerOwner()),
+		predicate.TypedGenerationChangedPredicate[*corev1.ConfigMap]{})); err != nil {
 		logger.Fatalw("Unable to watch ConfigMaps", zap.Error(err))
 	}
 
 	// Watch StatefulSets and enqueue owning EventBus key
-	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &appv1.StatefulSet{}),
-		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventBus{}, handler.OnlyControllerOwner()),
-		predicate.GenerationChangedPredicate{}); err != nil {
+	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &appv1.StatefulSet{},
+		handler.TypedEnqueueRequestForOwner[*appv1.StatefulSet](mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventBus{}, handler.OnlyControllerOwner()),
+		predicate.TypedGenerationChangedPredicate[*appv1.StatefulSet]{})); err != nil {
 		logger.Fatalw("Unable to watch StatefulSets", zap.Error(err))
 	}
 
 	// Watch Services and enqueue owning EventBus key
-	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &corev1.Service{}),
-		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventBus{}, handler.OnlyControllerOwner()),
-		predicate.GenerationChangedPredicate{}); err != nil {
+	if err := eventBusController.Watch(source.Kind(mgr.GetCache(), &corev1.Service{},
+		handler.TypedEnqueueRequestForOwner[*corev1.Service](mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventBus{}, handler.OnlyControllerOwner()),
+		predicate.TypedGenerationChangedPredicate[*corev1.Service]{})); err != nil {
 		logger.Fatalw("Unable to watch Services", zap.Error(err))
 	}
 
@@ -141,25 +141,25 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	}
 
 	// Watch EventSource and enqueue EventSource object key
-	if err := eventSourceController.Watch(source.Kind(mgr.GetCache(), &aev1.EventSource{}), &handler.EnqueueRequestForObject{},
+	if err := eventSourceController.Watch(source.Kind(mgr.GetCache(), &aev1.EventSource{}, &handler.TypedEnqueueRequestForObject[*aev1.EventSource]{},
 		predicate.Or(
-			predicate.GenerationChangedPredicate{},
-			predicate.LabelChangedPredicate{},
-		)); err != nil {
+			predicate.TypedGenerationChangedPredicate[*aev1.EventSource]{},
+			predicate.TypedLabelChangedPredicate[*aev1.EventSource]{},
+		))); err != nil {
 		logger.Fatalw("Unable to watch EventSources", zap.Error(err))
 	}
 
 	// Watch Deployments and enqueue owning EventSource key
-	if err := eventSourceController.Watch(source.Kind(mgr.GetCache(), &appv1.Deployment{}),
-		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventSource{}, handler.OnlyControllerOwner()),
-		predicate.GenerationChangedPredicate{}); err != nil {
+	if err := eventSourceController.Watch(source.Kind(mgr.GetCache(), &appv1.Deployment{},
+		handler.TypedEnqueueRequestForOwner[*appv1.Deployment](mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventSource{}, handler.OnlyControllerOwner()),
+		predicate.TypedGenerationChangedPredicate[*appv1.Deployment]{})); err != nil {
 		logger.Fatalw("Unable to watch Deployments", zap.Error(err))
 	}
 
 	// Watch Services and enqueue owning EventSource key
-	if err := eventSourceController.Watch(source.Kind(mgr.GetCache(), &corev1.Service{}),
-		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventSource{}, handler.OnlyControllerOwner()),
-		predicate.GenerationChangedPredicate{}); err != nil {
+	if err := eventSourceController.Watch(source.Kind(mgr.GetCache(), &corev1.Service{},
+		handler.TypedEnqueueRequestForOwner[*corev1.Service](mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.EventSource{}, handler.OnlyControllerOwner()),
+		predicate.TypedGenerationChangedPredicate[*corev1.Service]{})); err != nil {
 		logger.Fatalw("Unable to watch Services", zap.Error(err))
 	}
 
@@ -172,18 +172,18 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	}
 
 	// Watch Sensor and enqueue Sensor object key
-	if err := sensorController.Watch(source.Kind(mgr.GetCache(), &aev1.Sensor{}), &handler.EnqueueRequestForObject{},
+	if err := sensorController.Watch(source.Kind(mgr.GetCache(), &aev1.Sensor{}, &handler.TypedEnqueueRequestForObject[*aev1.Sensor]{},
 		predicate.Or(
-			predicate.GenerationChangedPredicate{},
-			predicate.LabelChangedPredicate{},
-		)); err != nil {
+			predicate.TypedGenerationChangedPredicate[*aev1.Sensor]{},
+			predicate.TypedLabelChangedPredicate[*aev1.Sensor]{},
+		))); err != nil {
 		logger.Fatalw("Unable to watch Sensors", zap.Error(err))
 	}
 
 	// Watch Deployments and enqueue owning Sensor key
-	if err := sensorController.Watch(source.Kind(mgr.GetCache(), &appv1.Deployment{}),
-		handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.Sensor{}, handler.OnlyControllerOwner()),
-		predicate.GenerationChangedPredicate{}); err != nil {
+	if err := sensorController.Watch(source.Kind(mgr.GetCache(), &appv1.Deployment{},
+		handler.TypedEnqueueRequestForOwner[*appv1.Deployment](mgr.GetScheme(), mgr.GetRESTMapper(), &aev1.Sensor{}, handler.OnlyControllerOwner()),
+		predicate.TypedGenerationChangedPredicate[*appv1.Deployment]{})); err != nil {
 		logger.Fatalw("Unable to watch Deployments", zap.Error(err))
 	}
 

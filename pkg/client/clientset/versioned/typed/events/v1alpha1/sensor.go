@@ -19,15 +19,14 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"context"
-	"time"
+	context "context"
 
-	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	eventsv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	scheme "github.com/argoproj/argo-events/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
-	rest "k8s.io/client-go/rest"
+	gentype "k8s.io/client-go/gentype"
 )
 
 // SensorsGetter has a method to return a SensorInterface.
@@ -38,141 +37,32 @@ type SensorsGetter interface {
 
 // SensorInterface has methods to work with Sensor resources.
 type SensorInterface interface {
-	Create(ctx context.Context, sensor *v1alpha1.Sensor, opts v1.CreateOptions) (*v1alpha1.Sensor, error)
-	Update(ctx context.Context, sensor *v1alpha1.Sensor, opts v1.UpdateOptions) (*v1alpha1.Sensor, error)
+	Create(ctx context.Context, sensor *eventsv1alpha1.Sensor, opts v1.CreateOptions) (*eventsv1alpha1.Sensor, error)
+	Update(ctx context.Context, sensor *eventsv1alpha1.Sensor, opts v1.UpdateOptions) (*eventsv1alpha1.Sensor, error)
 	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
-	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.Sensor, error)
-	List(ctx context.Context, opts v1.ListOptions) (*v1alpha1.SensorList, error)
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*eventsv1alpha1.Sensor, error)
+	List(ctx context.Context, opts v1.ListOptions) (*eventsv1alpha1.SensorList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
-	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.Sensor, err error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *eventsv1alpha1.Sensor, err error)
 	SensorExpansion
 }
 
 // sensors implements SensorInterface
 type sensors struct {
-	client rest.Interface
-	ns     string
+	*gentype.ClientWithList[*eventsv1alpha1.Sensor, *eventsv1alpha1.SensorList]
 }
 
 // newSensors returns a Sensors
 func newSensors(c *ArgoprojV1alpha1Client, namespace string) *sensors {
 	return &sensors{
-		client: c.RESTClient(),
-		ns:     namespace,
+		gentype.NewClientWithList[*eventsv1alpha1.Sensor, *eventsv1alpha1.SensorList](
+			"sensors",
+			c.RESTClient(),
+			scheme.ParameterCodec,
+			namespace,
+			func() *eventsv1alpha1.Sensor { return &eventsv1alpha1.Sensor{} },
+			func() *eventsv1alpha1.SensorList { return &eventsv1alpha1.SensorList{} },
+		),
 	}
-}
-
-// Get takes name of the sensor, and returns the corresponding sensor object, and an error if there is any.
-func (c *sensors) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.Sensor, err error) {
-	result = &v1alpha1.Sensor{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("sensors").
-		Name(name).
-		VersionedParams(&options, scheme.ParameterCodec).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// List takes label and field selectors, and returns the list of Sensors that match those selectors.
-func (c *sensors) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.SensorList, err error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	result = &v1alpha1.SensorList{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("sensors").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Watch returns a watch.Interface that watches the requested sensors.
-func (c *sensors) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	opts.Watch = true
-	return c.client.Get().
-		Namespace(c.ns).
-		Resource("sensors").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Watch(ctx)
-}
-
-// Create takes the representation of a sensor and creates it.  Returns the server's representation of the sensor, and an error, if there is any.
-func (c *sensors) Create(ctx context.Context, sensor *v1alpha1.Sensor, opts v1.CreateOptions) (result *v1alpha1.Sensor, err error) {
-	result = &v1alpha1.Sensor{}
-	err = c.client.Post().
-		Namespace(c.ns).
-		Resource("sensors").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(sensor).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Update takes the representation of a sensor and updates it. Returns the server's representation of the sensor, and an error, if there is any.
-func (c *sensors) Update(ctx context.Context, sensor *v1alpha1.Sensor, opts v1.UpdateOptions) (result *v1alpha1.Sensor, err error) {
-	result = &v1alpha1.Sensor{}
-	err = c.client.Put().
-		Namespace(c.ns).
-		Resource("sensors").
-		Name(sensor.Name).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(sensor).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Delete takes name of the sensor and deletes it. Returns an error if one occurs.
-func (c *sensors) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	return c.client.Delete().
-		Namespace(c.ns).
-		Resource("sensors").
-		Name(name).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *sensors) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	var timeout time.Duration
-	if listOpts.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
-	}
-	return c.client.Delete().
-		Namespace(c.ns).
-		Resource("sensors").
-		VersionedParams(&listOpts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// Patch applies the patch and returns the patched sensor.
-func (c *sensors) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.Sensor, err error) {
-	result = &v1alpha1.Sensor{}
-	err = c.client.Patch(pt).
-		Namespace(c.ns).
-		Resource("sensors").
-		Name(name).
-		SubResource(subresources...).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
 }

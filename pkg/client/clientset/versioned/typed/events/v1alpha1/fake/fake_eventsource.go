@@ -19,123 +19,34 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-
 	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	eventsv1alpha1 "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeEventSources implements EventSourceInterface
-type FakeEventSources struct {
+// fakeEventSources implements EventSourceInterface
+type fakeEventSources struct {
+	*gentype.FakeClientWithList[*v1alpha1.EventSource, *v1alpha1.EventSourceList]
 	Fake *FakeArgoprojV1alpha1
-	ns   string
 }
 
-var eventsourcesResource = v1alpha1.SchemeGroupVersion.WithResource("eventsources")
-
-var eventsourcesKind = v1alpha1.SchemeGroupVersion.WithKind("EventSource")
-
-// Get takes name of the eventSource, and returns the corresponding eventSource object, and an error if there is any.
-func (c *FakeEventSources) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.EventSource, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(eventsourcesResource, c.ns, name), &v1alpha1.EventSource{})
-
-	if obj == nil {
-		return nil, err
+func newFakeEventSources(fake *FakeArgoprojV1alpha1, namespace string) eventsv1alpha1.EventSourceInterface {
+	return &fakeEventSources{
+		gentype.NewFakeClientWithList[*v1alpha1.EventSource, *v1alpha1.EventSourceList](
+			fake.Fake,
+			namespace,
+			v1alpha1.SchemeGroupVersion.WithResource("eventsources"),
+			v1alpha1.SchemeGroupVersion.WithKind("EventSource"),
+			func() *v1alpha1.EventSource { return &v1alpha1.EventSource{} },
+			func() *v1alpha1.EventSourceList { return &v1alpha1.EventSourceList{} },
+			func(dst, src *v1alpha1.EventSourceList) { dst.ListMeta = src.ListMeta },
+			func(list *v1alpha1.EventSourceList) []*v1alpha1.EventSource {
+				return gentype.ToPointerSlice(list.Items)
+			},
+			func(list *v1alpha1.EventSourceList, items []*v1alpha1.EventSource) {
+				list.Items = gentype.FromPointerSlice(items)
+			},
+		),
+		fake,
 	}
-	return obj.(*v1alpha1.EventSource), err
-}
-
-// List takes label and field selectors, and returns the list of EventSources that match those selectors.
-func (c *FakeEventSources) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.EventSourceList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(eventsourcesResource, eventsourcesKind, c.ns, opts), &v1alpha1.EventSourceList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1alpha1.EventSourceList{ListMeta: obj.(*v1alpha1.EventSourceList).ListMeta}
-	for _, item := range obj.(*v1alpha1.EventSourceList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested eventSources.
-func (c *FakeEventSources) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(eventsourcesResource, c.ns, opts))
-
-}
-
-// Create takes the representation of a eventSource and creates it.  Returns the server's representation of the eventSource, and an error, if there is any.
-func (c *FakeEventSources) Create(ctx context.Context, eventSource *v1alpha1.EventSource, opts v1.CreateOptions) (result *v1alpha1.EventSource, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(eventsourcesResource, c.ns, eventSource), &v1alpha1.EventSource{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.EventSource), err
-}
-
-// Update takes the representation of a eventSource and updates it. Returns the server's representation of the eventSource, and an error, if there is any.
-func (c *FakeEventSources) Update(ctx context.Context, eventSource *v1alpha1.EventSource, opts v1.UpdateOptions) (result *v1alpha1.EventSource, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(eventsourcesResource, c.ns, eventSource), &v1alpha1.EventSource{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.EventSource), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeEventSources) UpdateStatus(ctx context.Context, eventSource *v1alpha1.EventSource, opts v1.UpdateOptions) (*v1alpha1.EventSource, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(eventsourcesResource, "status", c.ns, eventSource), &v1alpha1.EventSource{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.EventSource), err
-}
-
-// Delete takes name of the eventSource and deletes it. Returns an error if one occurs.
-func (c *FakeEventSources) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(eventsourcesResource, c.ns, name, opts), &v1alpha1.EventSource{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeEventSources) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(eventsourcesResource, c.ns, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1alpha1.EventSourceList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched eventSource.
-func (c *FakeEventSources) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.EventSource, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(eventsourcesResource, c.ns, name, pt, data, subresources...), &v1alpha1.EventSource{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.EventSource), err
 }
