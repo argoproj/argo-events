@@ -81,6 +81,9 @@ type Container struct {
 
 // ApplyToContainer updates the Container with the values from the customized container
 func (c *Container) ApplyToContainer(cc *corev1.Container) {
+	if c == nil {
+		return
+	}
 	_ = mergo.Merge(&cc.Resources, c.Resources, mergo.WithOverride)
 	if cc.SecurityContext == nil {
 		cc.SecurityContext = c.SecurityContext

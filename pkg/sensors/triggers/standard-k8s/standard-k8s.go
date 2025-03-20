@@ -22,7 +22,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/imdario/mergo"
+	"dario.cat/mergo"
 	"go.uber.org/zap"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
