@@ -4469,6 +4469,116 @@ CreateIfNotExist will create configmap if it doesn’t exists
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Container">
+
+Container
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Template">Template</a>)
+</p>
+
+<p>
+
+<p>
+
+Container defines customized spec for a container
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+</th>
+
+<th>
+
+Description
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>resources</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core">
+Kubernetes core/v1.ResourceRequirements </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>imagePullPolicy</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#pullpolicy-v1-core">
+Kubernetes core/v1.PullPolicy </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>securityContext</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#securitycontext-v1-core">
+Kubernetes core/v1.SecurityContext </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>volumeMounts</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#volumemount-v1-core">
+\[\]Kubernetes core/v1.VolumeMount </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.ContainerTemplate">
 
 ContainerTemplate
@@ -4523,6 +4633,7 @@ Kubernetes core/v1.ResourceRequirements </a> </em>
 
 <td>
 
+<em>(Optional)</em>
 </td>
 
 </tr>
@@ -4538,6 +4649,7 @@ Kubernetes core/v1.PullPolicy </a> </em>
 
 <td>
 
+<em>(Optional)</em>
 </td>
 
 </tr>
@@ -4553,6 +4665,7 @@ Kubernetes core/v1.SecurityContext </a> </em>
 
 <td>
 
+<em>(Optional)</em>
 </td>
 
 </tr>
@@ -20080,8 +20193,7 @@ sensor pod. More info:
 <td>
 
 <code>container</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#container-v1-core">
-Kubernetes core/v1.Container </a> </em>
+<a href="#argoproj.io/v1alpha1.Container"> Container </a> </em>
 </td>
 
 <td>

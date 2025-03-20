@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/imdario/mergo"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -317,10 +316,8 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 			{Name: "metrics", ContainerPort: v1alpha1.SensorMetricsPort},
 		},
 	}
-	if args.Sensor.Spec.Template != nil && args.Sensor.Spec.Template.Container != nil {
-		if err := mergo.Merge(&sensorContainer, args.Sensor.Spec.Template.Container, mergo.WithOverride); err != nil {
-			return nil, err
-		}
+	if x := args.Sensor.Spec.Template; x != nil && x.Container != nil {
+		x.Container.ApplyToContainer(&sensorContainer)
 	}
 	sensorContainer.Name = "main"
 	podTemplateLabels := make(map[string]string)

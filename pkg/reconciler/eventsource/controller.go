@@ -13,7 +13,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
 )
 
@@ -38,7 +37,7 @@ func NewReconciler(client client.Client, scheme *runtime.Scheme, eventSourceImag
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	eventSource := &aev1.EventSource{}
+	eventSource := &v1alpha1.EventSource{}
 	if err := r.client.Get(ctx, req.NamespacedName, eventSource); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.logger.Warnw("WARNING: eventsource not found", "request", req)
@@ -67,7 +66,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // reconcile does the real logic
-func (r *reconciler) reconcile(ctx context.Context, eventSource *aev1.EventSource) error {
+func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventSource) error {
 	log := logging.FromContext(ctx)
 	if !eventSource.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventsource")
@@ -96,7 +95,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *aev1.EventSourc
 	return Reconcile(r.client, args, log)
 }
 
-func (r *reconciler) needsUpdate(old, new *aev1.EventSource) bool {
+func (r *reconciler) needsUpdate(old, new *v1alpha1.EventSource) bool {
 	if old == nil {
 		return true
 	}

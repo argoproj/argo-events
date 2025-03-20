@@ -58,6 +58,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ConditionsResetByTime":        schema_pkg_apis_events_v1alpha1_ConditionsResetByTime(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ConditionsResetCriteria":      schema_pkg_apis_events_v1alpha1_ConditionsResetCriteria(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ConfigMapPersistence":         schema_pkg_apis_events_v1alpha1_ConfigMapPersistence(ref),
+		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Container":                    schema_pkg_apis_events_v1alpha1_Container(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ContainerTemplate":            schema_pkg_apis_events_v1alpha1_ContainerTemplate(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.CustomTrigger":                schema_pkg_apis_events_v1alpha1_CustomTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.DataFilter":                   schema_pkg_apis_events_v1alpha1_DataFilter(ref),
@@ -1757,6 +1758,51 @@ func schema_pkg_apis_events_v1alpha1_ConfigMapPersistence(ref common.ReferenceCa
 				},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_events_v1alpha1_Container(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Container defines customized spec for a container",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"resources": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/api/core/v1.ResourceRequirements"),
+						},
+					},
+					"imagePullPolicy": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"securityContext": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/api/core/v1.SecurityContext"),
+						},
+					},
+					"volumeMounts": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.VolumeMount"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.ResourceRequirements", "k8s.io/api/core/v1.SecurityContext", "k8s.io/api/core/v1.VolumeMount"},
 	}
 }
 
@@ -7905,7 +7951,7 @@ func schema_pkg_apis_events_v1alpha1_Template(ref common.ReferenceCallback) comm
 					"container": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Container is the main container image to run in the sensor pod",
-							Ref:         ref("k8s.io/api/core/v1.Container"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Container"),
 						},
 					},
 					"volumes": {
@@ -8008,7 +8054,7 @@ func schema_pkg_apis_events_v1alpha1_Template(ref common.ReferenceCallback) comm
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Metadata", "k8s.io/api/core/v1.Affinity", "k8s.io/api/core/v1.Container", "k8s.io/api/core/v1.LocalObjectReference", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.Toleration", "k8s.io/api/core/v1.Volume"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Container", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Metadata", "k8s.io/api/core/v1.Affinity", "k8s.io/api/core/v1.LocalObjectReference", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.Toleration", "k8s.io/api/core/v1.Volume"},
 	}
 }
 

@@ -1,6 +1,9 @@
 package v1alpha1
 
-import corev1 "k8s.io/api/core/v1"
+import (
+	"dario.cat/mergo"
+	corev1 "k8s.io/api/core/v1"
+)
 
 // Template holds the information of a deployment template
 type Template struct {
@@ -12,7 +15,7 @@ type Template struct {
 	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,2,opt,name=serviceAccountName"`
 	// Container is the main container image to run in the sensor pod
 	// +optional
-	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,3,opt,name=container"`
+	Container *Container `json:"container,omitempty" protobuf:"bytes,3,opt,name=container"`
 	// Volumes is a list of volumes that can be mounted by containers in a workflow.
 	// +patchStrategy=merge
 	// +patchMergeKey=name
@@ -58,4 +61,38 @@ type Template struct {
 	// If specified, the pod's scheduling constraints
 	// +optional
 	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,11,opt,name=affinity"`
+}
+
+// Container defines customized spec for a container
+type Container struct {
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty" protobuf:"bytes,1,opt,name=resources"`
+	// +optional
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,2,opt,name=imagePullPolicy,casttype=PullPolicy"`
+	// +optional
+	SecurityContext *corev1.SecurityContext `json:"securityContext,omitempty" protobuf:"bytes,3,opt,name=securityContext"`
+	// +optional
+	VolumeMounts []corev1.VolumeMount `json:"volumeMounts,omitempty" protobuf:"bytes,4,rep,name=volumeMounts"`
+	// +optional
+	Env []corev1.EnvVar `json:"env,omitempty" protobuf:"bytes,5,rep,name=env"`
+	// +optional
+	EnvFrom []corev1.EnvFromSource `json:"envFrom,omitempty" protobuf:"bytes,6,rep,name=envFrom"`
+}
+
+// ApplyToContainer updates the Container with the values from the customized container
+func (c *Container) ApplyToContainer(cc *corev1.Container) {
+	_ = mergo.Merge(&cc.Resources, c.Resources, mergo.WithOverride)
+	cc.SecurityContext = c.SecurityContext
+	if cc.ImagePullPolicy == "" {
+		cc.ImagePullPolicy = c.ImagePullPolicy
+	}
+	if len(c.Env) > 0 {
+		cc.Env = append(cc.Env, c.Env...)
+	}
+	if len(c.EnvFrom) > 0 {
+		cc.EnvFrom = append(cc.EnvFrom, c.EnvFrom...)
+	}
+	if len(c.VolumeMounts) > 0 {
+		cc.VolumeMounts = append(cc.VolumeMounts, c.VolumeMounts...)
+	}
 }

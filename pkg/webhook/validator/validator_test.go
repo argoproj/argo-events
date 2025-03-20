@@ -94,7 +94,7 @@ func fakeSensor() *aev1.Sensor {
 						Name: "test",
 					},
 				},
-				Container: &corev1.Container{
+				Container: &aev1.Container{
 					VolumeMounts: []corev1.VolumeMount{
 						{
 							MountPath: "/test-data",

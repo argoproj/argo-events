@@ -52,7 +52,7 @@ var (
 						Name: "test",
 					},
 				},
-				Container: &corev1.Container{
+				Container: &v1alpha1.Container{
 					VolumeMounts: []corev1.VolumeMount{
 						{
 							MountPath: "/test-data",
