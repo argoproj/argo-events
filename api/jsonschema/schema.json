@@ -882,6 +882,39 @@
       },
       "type": "object"
     },
+    "io.argoproj.events.v1alpha1.Container": {
+      "description": "Container defines customized spec for a container",
+      "properties": {
+        "env": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.EnvVar"
+          },
+          "type": "array"
+        },
+        "envFrom": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.EnvFromSource"
+          },
+          "type": "array"
+        },
+        "imagePullPolicy": {
+          "type": "string"
+        },
+        "resources": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements"
+        },
+        "securityContext": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext"
+        },
+        "volumeMounts": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.VolumeMount"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
     "io.argoproj.events.v1alpha1.ContainerTemplate": {
       "description": "ContainerTemplate defines customized spec for a container",
       "properties": {
@@ -4236,7 +4269,7 @@
           "description": "If specified, the pod's scheduling constraints"
         },
         "container": {
-          "$ref": "#/definitions/io.k8s.api.core.v1.Container",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.Container",
           "description": "Container is the main container image to run in the sensor pod"
         },
         "imagePullSecrets": {
