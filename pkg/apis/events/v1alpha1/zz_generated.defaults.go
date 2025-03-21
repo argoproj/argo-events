@@ -39,38 +39,6 @@ func RegisterDefaults(scheme *runtime.Scheme) error {
 
 func SetObjectDefaults_EventSource(in *EventSource) {
 	if in.Spec.Template != nil {
-		if in.Spec.Template.Container != nil {
-			for i := range in.Spec.Template.Container.Ports {
-				a := &in.Spec.Template.Container.Ports[i]
-				if a.Protocol == "" {
-					a.Protocol = "TCP"
-				}
-			}
-			if in.Spec.Template.Container.LivenessProbe != nil {
-				if in.Spec.Template.Container.LivenessProbe.ProbeHandler.GRPC != nil {
-					if in.Spec.Template.Container.LivenessProbe.ProbeHandler.GRPC.Service == nil {
-						var ptrVar1 string = ""
-						in.Spec.Template.Container.LivenessProbe.ProbeHandler.GRPC.Service = &ptrVar1
-					}
-				}
-			}
-			if in.Spec.Template.Container.ReadinessProbe != nil {
-				if in.Spec.Template.Container.ReadinessProbe.ProbeHandler.GRPC != nil {
-					if in.Spec.Template.Container.ReadinessProbe.ProbeHandler.GRPC.Service == nil {
-						var ptrVar1 string = ""
-						in.Spec.Template.Container.ReadinessProbe.ProbeHandler.GRPC.Service = &ptrVar1
-					}
-				}
-			}
-			if in.Spec.Template.Container.StartupProbe != nil {
-				if in.Spec.Template.Container.StartupProbe.ProbeHandler.GRPC != nil {
-					if in.Spec.Template.Container.StartupProbe.ProbeHandler.GRPC.Service == nil {
-						var ptrVar1 string = ""
-						in.Spec.Template.Container.StartupProbe.ProbeHandler.GRPC.Service = &ptrVar1
-					}
-				}
-			}
-		}
 		for i := range in.Spec.Template.Volumes {
 			a := &in.Spec.Template.Volumes[i]
 			if a.VolumeSource.ISCSI != nil {
@@ -136,38 +104,6 @@ func SetObjectDefaults_EventSourceList(in *EventSourceList) {
 
 func SetObjectDefaults_Sensor(in *Sensor) {
 	if in.Spec.Template != nil {
-		if in.Spec.Template.Container != nil {
-			for i := range in.Spec.Template.Container.Ports {
-				a := &in.Spec.Template.Container.Ports[i]
-				if a.Protocol == "" {
-					a.Protocol = "TCP"
-				}
-			}
-			if in.Spec.Template.Container.LivenessProbe != nil {
-				if in.Spec.Template.Container.LivenessProbe.ProbeHandler.GRPC != nil {
-					if in.Spec.Template.Container.LivenessProbe.ProbeHandler.GRPC.Service == nil {
-						var ptrVar1 string = ""
-						in.Spec.Template.Container.LivenessProbe.ProbeHandler.GRPC.Service = &ptrVar1
-					}
-				}
-			}
-			if in.Spec.Template.Container.ReadinessProbe != nil {
-				if in.Spec.Template.Container.ReadinessProbe.ProbeHandler.GRPC != nil {
-					if in.Spec.Template.Container.ReadinessProbe.ProbeHandler.GRPC.Service == nil {
-						var ptrVar1 string = ""
-						in.Spec.Template.Container.ReadinessProbe.ProbeHandler.GRPC.Service = &ptrVar1
-					}
-				}
-			}
-			if in.Spec.Template.Container.StartupProbe != nil {
-				if in.Spec.Template.Container.StartupProbe.ProbeHandler.GRPC != nil {
-					if in.Spec.Template.Container.StartupProbe.ProbeHandler.GRPC.Service == nil {
-						var ptrVar1 string = ""
-						in.Spec.Template.Container.StartupProbe.ProbeHandler.GRPC.Service = &ptrVar1
-					}
-				}
-			}
-		}
 		for i := range in.Spec.Template.Volumes {
 			a := &in.Spec.Template.Volumes[i]
 			if a.VolumeSource.ISCSI != nil {
