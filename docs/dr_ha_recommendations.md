@@ -105,7 +105,7 @@ EventBus service is essential to EventSource and Sensor Pods, it would be better
 If your EventBus has a name other than `default`, change it accordingly in the yaml.
 
 ```yaml
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: eventbus-default-pdb
