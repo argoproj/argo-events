@@ -2362,7 +2362,7 @@ could reduce the chance of PODs being evicted.</p>
 <h3 id="pdb">PDB<a class="headerlink" href="#pdb" title="Permanent link">&para;</a></h3>
 <p>EventBus service is essential to EventSource and Sensor Pods, it would be better to have a <code>PodDisruptionBudget</code> to prevent it from <a href="https://kubernetes.io/docs/concepts/workloads/pods/disruptions/">Pod Disruptions</a>. The following PDB object states <code>maxUnavailable</code> is 1, which is suitable for a 3 replica EventBus object.</p>
 <p>If your EventBus has a name other than <code>default</code>, change it accordingly in the yaml.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">policy/v1beta1</span>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">policy/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PodDisruptionBudget</span>
 <span class="nt">metadata</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eventbus-default-pdb</span>
