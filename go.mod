@@ -26,7 +26,7 @@ require (
 	github.com/apache/pulsar-client-go v0.12.0
 	github.com/argoproj/notifications-engine v0.4.1-0.20250309174002-87bf0576a872
 	github.com/aws/aws-sdk-go v1.47.11
-	github.com/blushft/go-diagrams v0.0.0-20250322201119-d91ac4ca5de4
+	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/bradleyfalzon/ghinstallation/v2 v2.14.0
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
