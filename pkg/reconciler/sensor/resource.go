@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/imdario/mergo"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -30,7 +31,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	controllerClient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	controllerscommon "github.com/argoproj/argo-events/pkg/reconciler/common"
@@ -45,7 +46,7 @@ type AdaptorArgs struct {
 }
 
 // Reconcile does the real logic
-func Reconcile(client client.Client, eventBus *v1alpha1.EventBus, args *AdaptorArgs, logger *zap.SugaredLogger) error {
+func Reconcile(client controllerClient.Client, eventBus *v1alpha1.EventBus, args *AdaptorArgs, logger *zap.SugaredLogger) error {
 	ctx := context.Background()
 	sensor := args.Sensor
 
@@ -78,17 +79,28 @@ func Reconcile(client client.Client, eventBus *v1alpha1.EventBus, args *AdaptorA
 		return err
 	}
 	if deploy != nil {
-		if deploy.Annotations != nil && deploy.Annotations[v1alpha1.AnnotationResourceSpecHash] != expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash] {
-			deploy.Spec = expectedDeploy.Spec
-			deploy.SetLabels(expectedDeploy.Labels)
-			deploy.Annotations[v1alpha1.AnnotationResourceSpecHash] = expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash]
-			err = client.Update(ctx, deploy)
-			if err != nil {
-				sensor.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
-				logger.Errorw("error updating existing deployment", "error", err)
-				return err
-			}
-			logger.Infow("deployment is updated", "deploymentName", deploy.Name)
+
+		patch := &appv1.Deployment{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Deployment",
+				APIVersion: "apps/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:          deploy.Name,
+				Namespace:     deploy.Namespace,
+				Labels:        expectedDeploy.Labels,
+				ManagedFields: nil,
+				Annotations: map[string]string{
+					v1alpha1.AnnotationResourceSpecHash: expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash],
+				},
+			},
+			Spec: expectedDeploy.Spec,
+		}
+		err = client.Patch(ctx, patch, controllerClient.Apply, controllerClient.ForceOwnership, controllerClient.FieldOwner("argo-events"))
+		if err != nil {
+			sensor.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
+			logger.Errorw("error updating existing deployment", "error", err)
+			return err
 		}
 	} else {
 		err = client.Create(ctx, expectedDeploy)
@@ -103,9 +115,9 @@ func Reconcile(client client.Client, eventBus *v1alpha1.EventBus, args *AdaptorA
 	return nil
 }
 
-func getDeployment(ctx context.Context, cl client.Client, args *AdaptorArgs) (*appv1.Deployment, error) {
+func getDeployment(ctx context.Context, cl controllerClient.Client, args *AdaptorArgs) (*appv1.Deployment, error) {
 	dl := &appv1.DeploymentList{}
-	err := cl.List(ctx, dl, &client.ListOptions{
+	err := cl.List(ctx, dl, &controllerClient.ListOptions{
 		Namespace:     args.Sensor.Namespace,
 		LabelSelector: labelSelector(args.Labels),
 	})
@@ -316,8 +328,10 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 			{Name: "metrics", ContainerPort: v1alpha1.SensorMetricsPort},
 		},
 	}
-	if x := args.Sensor.Spec.Template; x != nil && x.Container != nil {
-		x.Container.ApplyToContainer(&sensorContainer)
+	if args.Sensor.Spec.Template != nil && args.Sensor.Spec.Template.Container != nil {
+		if err := mergo.Merge(&sensorContainer, args.Sensor.Spec.Template.Container, mergo.WithOverride); err != nil {
+			return nil, err
+		}
 	}
 	sensorContainer.Name = "main"
 	podTemplateLabels := make(map[string]string)

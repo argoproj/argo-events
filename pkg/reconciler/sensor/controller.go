@@ -21,17 +21,17 @@ import (
 	"fmt"
 
 	"go.uber.org/zap"
-	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	controllerClient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -42,7 +42,7 @@ const (
 )
 
 type reconciler struct {
-	client client.Client
+	client controllerClient.Client
 	scheme *runtime.Scheme
 
 	sensorImage string
@@ -50,12 +50,12 @@ type reconciler struct {
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, sensorImage string, logger *zap.SugaredLogger) reconcile.Reconciler {
+func NewReconciler(client controllerClient.Client, scheme *runtime.Scheme, sensorImage string, logger *zap.SugaredLogger) reconcile.Reconciler {
 	return &reconciler{client: client, scheme: scheme, sensorImage: sensorImage, logger: logger}
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	sensor := &v1alpha1.Sensor{}
+	sensor := &aev1.Sensor{}
 	if err := r.client.Get(ctx, req.NamespacedName, sensor); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.logger.Warnw("WARNING: sensor not found", "request", req)
@@ -71,20 +71,60 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
 	}
-	if r.needsUpdate(sensor, sensorCopy) {
-		// Use a DeepCopy to update, because it will be mutated afterwards, with empty Status.
-		if err := r.client.Update(ctx, sensorCopy.DeepCopy()); err != nil {
-			return reconcile.Result{}, err
-		}
+
+	// Update the finalizers
+	// We need to always do this to ensure that the field ownership is set correctly,
+	// during the migration from client-side to server-side apply. Otherewise, users
+	// may end up in a state where the finalizer cannot be removed automatically.
+	patch := &aev1.Sensor{
+		Status: sensorCopy.Status,
+		ObjectMeta: metav1.ObjectMeta{
+			Name:          sensor.Name,
+			Namespace:     sensor.Namespace,
+			Finalizers:    sensorCopy.Finalizers,
+			ManagedFields: nil,
+		},
+		TypeMeta: sensor.TypeMeta,
+		Spec:     sensorCopy.Spec, // This is a bit inefficient, but we need to do it as the CRD is not configured properly to enable efficient merge
 	}
-	if err := r.client.Status().Update(ctx, sensorCopy); err != nil {
+	if len(patch.Finalizers) == 0 {
+		patch.Finalizers = nil
+	}
+	if err := r.client.Patch(
+		ctx,
+		patch,
+		controllerClient.Apply,
+		controllerClient.ForceOwnership,
+		controllerClient.FieldOwner("argo-events"),
+	); err != nil {
 		return reconcile.Result{}, err
 	}
+
+	// Update the status
+	statusPatch := &aev1.Sensor{
+		Status: sensorCopy.Status,
+		ObjectMeta: metav1.ObjectMeta{
+			Name:          sensor.Name,
+			Namespace:     sensor.Namespace,
+			ManagedFields: nil,
+		},
+		TypeMeta: sensor.TypeMeta,
+	}
+	if err := r.client.Status().Patch(
+		ctx,
+		statusPatch,
+		controllerClient.Apply,
+		controllerClient.ForceOwnership,
+		controllerClient.FieldOwner("argo-events"),
+	); err != nil {
+		return reconcile.Result{}, err
+	}
+
 	return ctrl.Result{}, reconcileErr
 }
 
 // reconcile does the real logic
-func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) error {
+func (r *reconciler) reconcile(ctx context.Context, sensor *aev1.Sensor) error {
 	log := logging.FromContext(ctx)
 	if !sensor.DeletionTimestamp.IsZero() {
 		log.Info("deleting sensor")
@@ -98,8 +138,8 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 
 	sensor.Status.InitConditions()
 
-	eventBus := &v1alpha1.EventBus{}
-	eventBusName := v1alpha1.DefaultEventBusName
+	eventBus := &aev1.EventBus{}
+	eventBusName := aev1.DefaultEventBusName
 	if len(sensor.Spec.EventBusName) > 0 {
 		eventBusName = sensor.Spec.EventBusName
 	}
@@ -123,20 +163,10 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 		Image:  r.sensorImage,
 		Sensor: sensor,
 		Labels: map[string]string{
-			"controller":             "sensor-controller",
-			v1alpha1.LabelSensorName: sensor.Name,
-			v1alpha1.LabelOwnerName:  sensor.Name,
+			"controller":         "sensor-controller",
+			aev1.LabelSensorName: sensor.Name,
+			aev1.LabelOwnerName:  sensor.Name,
 		},
 	}
 	return Reconcile(r.client, eventBus, args, log)
-}
-
-func (r *reconciler) needsUpdate(old, new *v1alpha1.Sensor) bool {
-	if old == nil {
-		return true
-	}
-	if !equality.Semantic.DeepEqual(old.Finalizers, new.Finalizers) {
-		return true
-	}
-	return false
 }

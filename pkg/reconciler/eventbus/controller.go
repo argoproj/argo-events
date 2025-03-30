@@ -4,19 +4,19 @@ import (
 	"context"
 
 	"go.uber.org/zap"
-	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	controllerClient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/reconciler"
 	"github.com/argoproj/argo-events/pkg/reconciler/eventbus/installer"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -27,7 +27,7 @@ const (
 )
 
 type eventBusReconciler struct {
-	client     client.Client
+	client     controllerClient.Client
 	kubeClient kubernetes.Interface
 	scheme     *runtime.Scheme
 
@@ -36,12 +36,12 @@ type eventBusReconciler struct {
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, kubeClient kubernetes.Interface, scheme *runtime.Scheme, config *reconciler.GlobalConfig, logger *zap.SugaredLogger) reconcile.Reconciler {
+func NewReconciler(client controllerClient.Client, kubeClient kubernetes.Interface, scheme *runtime.Scheme, config *reconciler.GlobalConfig, logger *zap.SugaredLogger) reconcile.Reconciler {
 	return &eventBusReconciler{client: client, scheme: scheme, config: config, kubeClient: kubeClient, logger: logger}
 }
 
 func (r *eventBusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	eventBus := &v1alpha1.EventBus{}
+	eventBus := &aev1.EventBus{}
 	if err := r.client.Get(ctx, req.NamespacedName, eventBus); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.logger.Warnw("WARNING: eventbus not found", "request", req)
@@ -57,20 +57,59 @@ func (r *eventBusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
 	}
-	if r.needsUpdate(eventBus, busCopy) {
-		// Use a DeepCopy to update, because it will be mutated afterwards, with empty Status.
-		if err := r.client.Update(ctx, busCopy.DeepCopy()); err != nil {
-			return reconcile.Result{}, err
-		}
+
+	// Update the finalizers
+	// We need to always do this to ensure that the field ownership is set correctly,
+	// during the migration from client-side to server-side apply. Otherewise, users
+	// may end up in a state where the finalizer cannot be removed automatically.
+	patch := &aev1.EventBus{
+		Status: busCopy.Status,
+		ObjectMeta: metav1.ObjectMeta{
+			Name:          eventBus.Name,
+			Namespace:     eventBus.Namespace,
+			Finalizers:    busCopy.Finalizers,
+			ManagedFields: nil,
+		},
+		TypeMeta: eventBus.TypeMeta,
 	}
-	if err := r.client.Status().Update(ctx, busCopy); err != nil {
+	if len(patch.Finalizers) == 0 {
+		patch.Finalizers = nil
+	}
+	if err := r.client.Patch(
+		ctx,
+		patch,
+		controllerClient.Apply,
+		controllerClient.ForceOwnership,
+		controllerClient.FieldOwner("argo-events"),
+	); err != nil {
 		return reconcile.Result{}, err
 	}
+
+	// Update the status
+	statusPatch := &aev1.EventBus{
+		Status: busCopy.Status,
+		ObjectMeta: metav1.ObjectMeta{
+			Name:          eventBus.Name,
+			Namespace:     eventBus.Namespace,
+			ManagedFields: nil,
+		},
+		TypeMeta: eventBus.TypeMeta,
+	}
+	if err := r.client.Status().Patch(
+		ctx,
+		statusPatch,
+		controllerClient.Apply,
+		controllerClient.ForceOwnership,
+		controllerClient.FieldOwner("argo-events"),
+	); err != nil {
+		return reconcile.Result{}, err
+	}
+
 	return ctrl.Result{}, reconcileErr
 }
 
 // reconcile does the real logic
-func (r *eventBusReconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus) error {
+func (r *eventBusReconciler) reconcile(ctx context.Context, eventBus *aev1.EventBus) error {
 	log := logging.FromContext(ctx)
 	if !eventBus.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventbus")
@@ -95,14 +134,4 @@ func (r *eventBusReconciler) reconcile(ctx context.Context, eventBus *v1alpha1.E
 		eventBus.Status.MarkConfigured()
 	}
 	return installer.Install(ctx, eventBus, r.client, r.kubeClient, r.config, log)
-}
-
-func (r *eventBusReconciler) needsUpdate(old, new *v1alpha1.EventBus) bool {
-	if old == nil {
-		return true
-	}
-	if !equality.Semantic.DeepEqual(old.Finalizers, new.Finalizers) {
-		return true
-	}
-	return false
 }

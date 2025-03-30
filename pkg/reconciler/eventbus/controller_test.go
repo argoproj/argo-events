@@ -13,7 +13,6 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/reconciler"
@@ -140,36 +139,4 @@ func TestReconcileExotic(t *testing.T) {
 		assert.NotNil(t, testBus.Status.Config.NATS)
 		assert.Equal(t, testURL, testBus.Status.Config.NATS.URL)
 	})
-}
-
-func TestNeedsUpdate(t *testing.T) {
-	t.Run("needs update", func(t *testing.T) {
-		testBus := nativeBus.DeepCopy()
-		cl := fake.NewClientBuilder().Build()
-		r := &eventBusReconciler{
-			client:     cl,
-			kubeClient: k8sfake.NewSimpleClientset(),
-			scheme:     scheme.Scheme,
-			config:     fakeConfig,
-			logger:     zaptest.NewLogger(t).Sugar(),
-		}
-		assert.False(t, r.needsUpdate(nativeBus, testBus))
-		controllerutil.AddFinalizer(testBus, finalizerName)
-		assert.True(t, contains(testBus.Finalizers, finalizerName))
-		assert.True(t, r.needsUpdate(nativeBus, testBus))
-		controllerutil.RemoveFinalizer(testBus, finalizerName)
-		assert.False(t, contains(testBus.Finalizers, finalizerName))
-		assert.False(t, r.needsUpdate(nativeBus, testBus))
-		testBus.Status.MarkConfigured()
-		assert.False(t, r.needsUpdate(nativeBus, testBus))
-	})
-}
-
-func contains(arr []string, str string) bool {
-	for _, a := range arr {
-		if a == str {
-			return true
-		}
-	}
-	return false
 }

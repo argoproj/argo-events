@@ -8,8 +8,10 @@ import (
 	"sort"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	controllerscommon "github.com/argoproj/argo-events/pkg/reconciler/common"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
+	"github.com/imdario/mergo"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -19,20 +21,21 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	controllerClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // AdaptorArgs are the args needed to create a sensor deployment
 type AdaptorArgs struct {
 	Image       string
-	EventSource *v1alpha1.EventSource
+	EventSource *aev1.EventSource
 	Labels      map[string]string
 }
 
 // Reconcile does the real logic
-func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogger) error {
+func Reconcile(client controllerClient.Client, args *AdaptorArgs, logger *zap.SugaredLogger) error {
 	ctx := context.Background()
 	eventSource := args.EventSource
-	eventBus := &v1alpha1.EventBus{}
+	eventBus := &aev1.EventBus{}
 	eventBusName := v1alpha1.DefaultEventBusName
 	if len(eventSource.Spec.EventBusName) > 0 {
 		eventBusName = eventSource.Spec.EventBusName
@@ -68,18 +71,29 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 		return err
 	}
 	if deploy != nil {
-		if deploy.Annotations != nil && deploy.Annotations[v1alpha1.AnnotationResourceSpecHash] != expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash] {
-			deploy.Spec = expectedDeploy.Spec
-			deploy.SetLabels(expectedDeploy.Labels)
-			deploy.Annotations[v1alpha1.AnnotationResourceSpecHash] = expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash]
-			err = client.Update(ctx, deploy)
-			if err != nil {
-				eventSource.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
-				logger.Errorw("error updating existing deployment", "error", err)
-				return err
-			}
-			logger.Infow("deployment is updated", "deploymentName", deploy.Name)
+		patch := &appv1.Deployment{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Deployment",
+				APIVersion: "apps/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:          deploy.Name,
+				Namespace:     deploy.Namespace,
+				Labels:        expectedDeploy.Labels,
+				ManagedFields: nil,
+				Annotations: map[string]string{
+					v1alpha1.AnnotationResourceSpecHash: expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash],
+				},
+			},
+			Spec: expectedDeploy.Spec,
 		}
+		err = client.Patch(ctx, patch, controllerClient.Apply, controllerClient.ForceOwnership, controllerClient.FieldOwner("argo-events"))
+		if err != nil {
+			eventSource.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
+			logger.Errorw("error updating existing deployment", "error", err)
+			return err
+		}
+		logger.Infow("deployment is updated", "deploymentName", deploy.Name)
 	} else {
 		err = client.Create(ctx, expectedDeploy)
 		if err != nil {
@@ -159,12 +173,12 @@ func getDeployment(ctx context.Context, cl client.Client, args *AdaptorArgs) (*a
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
-func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Deployment, error) {
+func buildDeployment(args *AdaptorArgs, eventBus *aev1.EventBus) (*appv1.Deployment, error) {
 	deploymentSpec, err := buildDeploymentSpec(args)
 	if err != nil {
 		return nil, err
 	}
-	eventSourceCopy := &v1alpha1.EventSource{
+	eventSourceCopy := &aev1.EventSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: args.EventSource.Namespace,
 			Name:      args.EventSource.Name,
@@ -338,7 +352,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 		},
 		Spec: *deploymentSpec,
 	}
-	if err := controllerscommon.SetObjectMeta(args.EventSource, deployment, v1alpha1.EventSourceGroupVersionKind); err != nil {
+	if err := controllerscommon.SetObjectMeta(args.EventSource, deployment, aev1.EventSourceGroupVersionKind); err != nil {
 		return nil, err
 	}
 
@@ -354,8 +368,10 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 			{Name: "metrics", ContainerPort: v1alpha1.EventSourceMetricsPort},
 		},
 	}
-	if x := args.EventSource.Spec.Template; x != nil && x.Container != nil {
-		x.Container.ApplyToContainer(&eventSourceContainer)
+	if args.EventSource.Spec.Template != nil && args.EventSource.Spec.Template.Container != nil {
+		if err := mergo.Merge(&eventSourceContainer, args.EventSource.Spec.Template.Container, mergo.WithOverride); err != nil {
+			return nil, err
+		}
 	}
 	eventSourceContainer.Name = "main"
 	podTemplateLabels := make(map[string]string)

@@ -1,25 +1,32 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	"sigs.k8s.io/controller-runtime/pkg/log"
+	controllerZap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	argoevents "github.com/argoproj/argo-events"
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/reconciler"
+	"github.com/argoproj/argo-events/pkg/reconciler/common"
 	"github.com/argoproj/argo-events/pkg/reconciler/eventbus"
 	"github.com/argoproj/argo-events/pkg/reconciler/eventsource"
 	"github.com/argoproj/argo-events/pkg/reconciler/sensor"
@@ -40,7 +47,9 @@ type ArgoEventsControllerOpts struct {
 }
 
 func Start(eventsOpts ArgoEventsControllerOpts) {
+
 	logger := logging.NewArgoEventsLogger().Named(eventbus.ControllerName)
+	log.SetLogger(controllerZap.New(controllerZap.UseDevMode(false)))
 	config, err := reconciler.LoadConfig(func(err error) {
 		logger.Errorw("Failed to reload global configuration file", zap.Error(err))
 	})
@@ -147,6 +156,34 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 			predicate.TypedLabelChangedPredicate[*aev1.EventSource]{},
 		))); err != nil {
 		logger.Fatalw("Unable to watch EventSources", zap.Error(err))
+	}
+
+	// Watch for EventBus configuration updates and enqueue related EventSources
+	// We do this because the EventBus status contains the stream configuration which is actually set up
+	// by the EventSource. This controller provides the EventBus config via an env var which is why we need
+	// to reconcile the EventSource when the EventBus status.config updates.
+	if err := eventSourceController.Watch(
+		source.Kind(mgr.GetCache(), &aev1.EventBus{},			
+		handler.TypedEnqueueRequestsFromMapFunc[*aev1.EventBus](func(ctx context.Context, eventBus *aev1.EventBus) []reconcile.Request {
+			var eventSourceList aev1.EventSourceList
+			if err := mgr.GetClient().List(ctx, &eventSourceList, client.InNamespace(eventBus.Namespace)); err != nil {
+				logger.Errorw("Failed to list EventSources", zap.Error(err))
+				return nil
+			}
+			var requests []reconcile.Request
+			for _, es := range eventSourceList.Items {
+				requests = append(requests, reconcile.Request{
+					NamespacedName: types.NamespacedName{
+						Name:      es.Name,
+						Namespace: es.Namespace,
+					},
+				})
+			}
+			return requests
+		}),
+		common.EventBusConfigStatusChangedPredicate{},
+	)); err != nil {
+		logger.Fatalw("Unable to watch EventBus for EventSource updates", zap.Error(err))
 	}
 
 	// Watch Deployments and enqueue owning EventSource key
