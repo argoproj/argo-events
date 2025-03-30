@@ -11,7 +11,6 @@ import (
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	controllerscommon "github.com/argoproj/argo-events/pkg/reconciler/common"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
-	"github.com/imdario/mergo"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -368,10 +367,8 @@ func buildDeploymentSpec(args *AdaptorArgs) (*appv1.DeploymentSpec, error) {
 			{Name: "metrics", ContainerPort: v1alpha1.EventSourceMetricsPort},
 		},
 	}
-	if args.EventSource.Spec.Template != nil && args.EventSource.Spec.Template.Container != nil {
-		if err := mergo.Merge(&eventSourceContainer, args.EventSource.Spec.Template.Container, mergo.WithOverride); err != nil {
-			return nil, err
-		}
+	if x := args.EventSource.Spec.Template; x != nil && x.Container != nil {
+		x.Container.ApplyToContainer(&eventSourceContainer)
 	}
 	eventSourceContainer.Name = "main"
 	podTemplateLabels := make(map[string]string)
