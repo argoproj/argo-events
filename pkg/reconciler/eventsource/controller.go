@@ -12,7 +12,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
-	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -38,7 +37,7 @@ func NewReconciler(client controllerClient.Client, scheme *runtime.Scheme, event
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	eventSource := &aev1.EventSource{}
+	eventSource := &v1alpha1.EventSource{}
 	if err := r.client.Get(ctx, req.NamespacedName, eventSource); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.logger.Warnw("WARNING: eventsource not found", "request", req)
@@ -59,7 +58,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// We need to always do this to ensure that the field ownership is set correctly,
 	// during the migration from client-side to server-side apply. Otherewise, users
 	// may end up in a state where the finalizer cannot be removed automatically.
-	patch := &aev1.EventSource{
+	patch := &v1alpha1.EventSource{
 		Status: esCopy.Status,
 		ObjectMeta: metav1.ObjectMeta{
 			Name:          eventSource.Name,
@@ -83,7 +82,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// Update the status
-	statusPatch := &aev1.EventSource{
+	statusPatch := &v1alpha1.EventSource{
 		Status: esCopy.Status,
 		ObjectMeta: metav1.ObjectMeta{
 			Name:          eventSource.Name,
@@ -105,7 +104,7 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // reconcile does the real logic
-func (r *reconciler) reconcile(ctx context.Context, eventSource *aev1.EventSource) error {
+func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventSource) error {
 	log := logging.FromContext(ctx)
 	if !eventSource.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventsource")

@@ -12,7 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/reconciler"
 	"github.com/argoproj/argo-events/pkg/reconciler/eventbus/installer"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
@@ -41,7 +41,7 @@ func NewReconciler(client controllerClient.Client, kubeClient kubernetes.Interfa
 }
 
 func (r *eventBusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	eventBus := &aev1.EventBus{}
+	eventBus := &v1alpha1.EventBus{}
 	if err := r.client.Get(ctx, req.NamespacedName, eventBus); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.logger.Warnw("WARNING: eventbus not found", "request", req)
@@ -62,7 +62,7 @@ func (r *eventBusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	// We need to always do this to ensure that the field ownership is set correctly,
 	// during the migration from client-side to server-side apply. Otherewise, users
 	// may end up in a state where the finalizer cannot be removed automatically.
-	patch := &aev1.EventBus{
+	patch := &v1alpha1.EventBus{
 		Status: busCopy.Status,
 		ObjectMeta: metav1.ObjectMeta{
 			Name:          eventBus.Name,
@@ -86,7 +86,7 @@ func (r *eventBusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	// Update the status
-	statusPatch := &aev1.EventBus{
+	statusPatch := &v1alpha1.EventBus{
 		Status: busCopy.Status,
 		ObjectMeta: metav1.ObjectMeta{
 			Name:          eventBus.Name,
@@ -109,7 +109,7 @@ func (r *eventBusReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 }
 
 // reconcile does the real logic
-func (r *eventBusReconciler) reconcile(ctx context.Context, eventBus *aev1.EventBus) error {
+func (r *eventBusReconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus) error {
 	log := logging.FromContext(ctx)
 	if !eventBus.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventbus")
