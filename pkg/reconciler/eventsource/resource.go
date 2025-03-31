@@ -171,12 +171,12 @@ func getDeployment(ctx context.Context, cl client.Client, args *AdaptorArgs) (*a
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
-func buildDeployment(args *AdaptorArgs, eventBus *aev1.EventBus) (*appv1.Deployment, error) {
+func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Deployment, error) {
 	deploymentSpec, err := buildDeploymentSpec(args)
 	if err != nil {
 		return nil, err
 	}
-	eventSourceCopy := &aev1.EventSource{
+	eventSourceCopy := &v1alpha1.EventSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: args.EventSource.Namespace,
 			Name:      args.EventSource.Name,

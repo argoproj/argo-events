@@ -163,26 +163,26 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	// by the EventSource. This controller provides the EventBus config via an env var which is why we need
 	// to reconcile the EventSource when the EventBus status.config updates.
 	if err := eventSourceController.Watch(
-		source.Kind(mgr.GetCache(), &aev1.EventBus{},			
-		handler.TypedEnqueueRequestsFromMapFunc[*aev1.EventBus](func(ctx context.Context, eventBus *aev1.EventBus) []reconcile.Request {
-			var eventSourceList aev1.EventSourceList
-			if err := mgr.GetClient().List(ctx, &eventSourceList, client.InNamespace(eventBus.Namespace)); err != nil {
-				logger.Errorw("Failed to list EventSources", zap.Error(err))
-				return nil
-			}
-			var requests []reconcile.Request
-			for _, es := range eventSourceList.Items {
-				requests = append(requests, reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Name:      es.Name,
-						Namespace: es.Namespace,
-					},
-				})
-			}
-			return requests
-		}),
-		common.EventBusConfigStatusChangedPredicate{},
-	)); err != nil {
+		source.Kind(mgr.GetCache(), &aev1.EventBus{},
+			handler.TypedEnqueueRequestsFromMapFunc[*aev1.EventBus](func(ctx context.Context, eventBus *aev1.EventBus) []reconcile.Request {
+				var eventSourceList aev1.EventSourceList
+				if err := mgr.GetClient().List(ctx, &eventSourceList, client.InNamespace(eventBus.Namespace)); err != nil {
+					logger.Errorw("Failed to list EventSources", zap.Error(err))
+					return nil
+				}
+				var requests []reconcile.Request
+				for _, es := range eventSourceList.Items {
+					requests = append(requests, reconcile.Request{
+						NamespacedName: types.NamespacedName{
+							Name:      es.Name,
+							Namespace: es.Namespace,
+						},
+					})
+				}
+				return requests
+			}),
+			common.EventBusConfigStatusChangedPredicate{},
+		)); err != nil {
 		logger.Fatalw("Unable to watch EventBus for EventSource updates", zap.Error(err))
 	}
 
