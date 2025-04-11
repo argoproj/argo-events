@@ -39,5 +39,5 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
-                dataKey: body.messsage
+                dataKey: body.message
               dest: spec.arguments.parameters.0.value
