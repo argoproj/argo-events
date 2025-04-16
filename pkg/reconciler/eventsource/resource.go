@@ -19,6 +19,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	controllerClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // AdaptorArgs are the args needed to create a sensor deployment
@@ -29,7 +30,7 @@ type AdaptorArgs struct {
 }
 
 // Reconcile does the real logic
-func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogger) error {
+func Reconcile(client controllerClient.Client, args *AdaptorArgs, logger *zap.SugaredLogger) error {
 	ctx := context.Background()
 	eventSource := args.EventSource
 	eventBus := &v1alpha1.EventBus{}
@@ -68,18 +69,29 @@ func Reconcile(client client.Client, args *AdaptorArgs, logger *zap.SugaredLogge
 		return err
 	}
 	if deploy != nil {
-		if deploy.Annotations != nil && deploy.Annotations[v1alpha1.AnnotationResourceSpecHash] != expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash] {
-			deploy.Spec = expectedDeploy.Spec
-			deploy.SetLabels(expectedDeploy.Labels)
-			deploy.Annotations[v1alpha1.AnnotationResourceSpecHash] = expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash]
-			err = client.Update(ctx, deploy)
-			if err != nil {
-				eventSource.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
-				logger.Errorw("error updating existing deployment", "error", err)
-				return err
-			}
-			logger.Infow("deployment is updated", "deploymentName", deploy.Name)
+		patch := &appv1.Deployment{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Deployment",
+				APIVersion: "apps/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:          deploy.Name,
+				Namespace:     deploy.Namespace,
+				Labels:        expectedDeploy.Labels,
+				ManagedFields: nil,
+				Annotations: map[string]string{
+					v1alpha1.AnnotationResourceSpecHash: expectedDeploy.Annotations[v1alpha1.AnnotationResourceSpecHash],
+				},
+			},
+			Spec: expectedDeploy.Spec,
 		}
+		err = client.Patch(ctx, patch, controllerClient.Apply, controllerClient.ForceOwnership, controllerClient.FieldOwner("argo-events"))
+		if err != nil {
+			eventSource.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
+			logger.Errorw("error updating existing deployment", "error", err)
+			return err
+		}
+		logger.Infow("deployment is updated", "deploymentName", deploy.Name)
 	} else {
 		err = client.Create(ctx, expectedDeploy)
 		if err != nil {
