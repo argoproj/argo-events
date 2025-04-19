@@ -1557,6 +1557,13 @@
             "$ref": "#/definitions/io.argoproj.events.v1alpha1.S3Artifact"
           }
         },
+        "mns": {
+          "description": "MNS event sources",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.MNSEventSource"
+          }
+        },
         "mqtt": {
           "description": "MQTT event sources",
           "type": "object",
@@ -2620,6 +2627,38 @@
           "description": "Only print messages every interval. Useful to prevent logging too much data for busy events.",
           "type": "integer",
           "format": "int64"
+        }
+      }
+    },
+    "io.argoproj.events.v1alpha1.MNSEventSource": {
+      "description": "MNSEventSource refers to event-source for AlibabaCloud MNS related events",
+      "type": "object",
+      "required": [
+        "queue"
+      ],
+      "properties": {
+        "accessKey": {
+          "description": "AccessKey refers K8s secret containing AlibabaCloud access key",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "endpoint": {
+          "description": "Endpoint configures connection to a specific AlibabaCloud MNS endpoint",
+          "type": "string"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.EventSourceFilter"
+        },
+        "jsonBody": {
+          "type": "boolean"
+        },
+        "queue": {
+          "description": "Queue is AlibabaCloud MNS queue to listen to for messages",
+          "type": "string"
+        },
+        "secretKey": {
+          "description": "SecretKey refers K8s secret containing AlibabaCloud secret key",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
     },

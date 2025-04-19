@@ -106,6 +106,8 @@ type EventSourceSpec struct {
 	SFTP map[string]SFTPEventSource `json:"sftp,omitempty" protobuf:"bytes,34,rep,name=sftp"`
 	// Gerrit event source
 	Gerrit map[string]GerritEventSource `json:"gerrit,omitempty" protobuf:"bytes,35,rep,name=gerrit"`
+	// MNS event sources
+	MNS map[string]MNSEventSource `json:"mns,omitempty" protobuf:"bytes,36,rep,name=mns"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
@@ -1465,6 +1467,24 @@ type PulsarEventSource struct {
 	// AuthAthenzSecret must be set if AuthAthenzParams is used.
 	// +optional
 	AuthAthenzSecret *corev1.SecretKeySelector `json:"authAthenzSecret,omitempty" protobuf:"bytes,14,opt,name=authAthenzSecret"`
+}
+
+// MNSEventSource refers to event-source for AlibabaCloud MNS related events
+type MNSEventSource struct {
+	// AccessKey refers K8s secret containing AlibabaCloud access key
+	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,1,opt,name=accessKey"`
+	// SecretKey refers K8s secret containing AlibabaCloud secret key
+	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,2,opt,name=secretKey"`
+	// Queue is AlibabaCloud MNS queue to listen to for messages
+	Queue string `json:"queue" protobuf:"bytes,3,opt,name=queue"`
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,4,opt,name=jsonBody"`
+	// Endpoint configures connection to a specific AlibabaCloud MNS endpoint
+	// +optional
+	Endpoint string `json:"endpoint" protobuf:"bytes,5,opt,name=endpoint"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,6,opt,name=filter"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.

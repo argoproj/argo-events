@@ -12,6 +12,7 @@ type EventSourceType string
 
 // possible event source types
 var (
+	MNSEvent             EventSourceType = "mns"
 	MinioEvent           EventSourceType = "minio"
 	CalendarEvent        EventSourceType = "calendar"
 	FileEvent            EventSourceType = "file"

@@ -7463,6 +7463,27 @@ Gerrit event source
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>mns</code></br> <em>
+<a href="#argoproj.io/v1alpha1.MNSEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSource
+</a> </em>
+</td>
+
+<td>
+
+<p>
+
+MNS event sources
+</p>
+
+</td>
+
+</tr>
+
 </table>
 
 </td>
@@ -7512,6 +7533,7 @@ EventSourceFilter
 <a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,
 <a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>,
+<a href="#argoproj.io/v1alpha1.MNSEventSource">MNSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>,
 <a href="#argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource</a>,
 <a href="#argoproj.io/v1alpha1.NSQEventSource">NSQEventSource</a>,
@@ -8332,6 +8354,27 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GerritEven
 <p>
 
 Gerrit event source
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>mns</code></br> <em>
+<a href="#argoproj.io/v1alpha1.MNSEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSource
+</a> </em>
+</td>
+
+<td>
+
+<p>
+
+MNS event sources
 </p>
 
 </td>
@@ -12687,6 +12730,165 @@ LogicalOperator (<code>string</code> alias)
 <p>
 
 </p>
+
+<h3 id="argoproj.io/v1alpha1.MNSEventSource">
+
+MNSEventSource
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+
+<p>
+
+<p>
+
+MNSEventSource refers to event-source for AlibabaCloud MNS related
+events
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+</th>
+
+<th>
+
+Description
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>accessKey</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+
+<td>
+
+<p>
+
+AccessKey refers K8s secret containing AlibabaCloud access key
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>secretKey</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+
+<td>
+
+<p>
+
+SecretKey refers K8s secret containing AlibabaCloud secret key
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>queue</code></br> <em> string </em>
+</td>
+
+<td>
+
+<p>
+
+Queue is AlibabaCloud MNS queue to listen to for messages
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>endpoint</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Endpoint configures connection to a specific AlibabaCloud MNS endpoint
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Filter
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 <h3 id="argoproj.io/v1alpha1.MQTTEventSource">
 

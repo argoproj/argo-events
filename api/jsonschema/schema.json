@@ -1570,6 +1570,13 @@
           "description": "Minio event sources",
           "type": "object"
         },
+        "mns": {
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.MNSEventSource"
+          },
+          "description": "MNS event sources",
+          "type": "object"
+        },
         "mqtt": {
           "additionalProperties": {
             "$ref": "#/definitions/io.argoproj.events.v1alpha1.MQTTEventSource"
@@ -2638,6 +2645,38 @@
           "type": "integer"
         }
       },
+      "type": "object"
+    },
+    "io.argoproj.events.v1alpha1.MNSEventSource": {
+      "description": "MNSEventSource refers to event-source for AlibabaCloud MNS related events",
+      "properties": {
+        "accessKey": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "AccessKey refers K8s secret containing AlibabaCloud access key"
+        },
+        "endpoint": {
+          "description": "Endpoint configures connection to a specific AlibabaCloud MNS endpoint",
+          "type": "string"
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.EventSourceFilter",
+          "description": "Filter"
+        },
+        "jsonBody": {
+          "type": "boolean"
+        },
+        "queue": {
+          "description": "Queue is AlibabaCloud MNS queue to listen to for messages",
+          "type": "string"
+        },
+        "secretKey": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "SecretKey refers K8s secret containing AlibabaCloud secret key"
+        }
+      },
+      "required": [
+        "queue"
+      ],
       "type": "object"
     },
     "io.argoproj.events.v1alpha1.MQTTEventSource": {
