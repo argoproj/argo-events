@@ -52,51 +52,61 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	respChan := make(chan ali_mns.MessageReceiveResponse)
 	errChan := make(chan error)
-	received := make(chan struct{})
-	for {
-		// goroutine for mns client queue to block wait
-		go func() {
-			queue.ReceiveMessage(respChan, errChan, 30)
-			received <- struct{}{}
-		}()
 
-		// goroutine to wait/handle response channel data
-		go func() {
+	// goroutine for mns client queue to block wait
+	go func() {
+		for {
 			select {
-			case resp := <-respChan:
-				{
-					log.Infof("response: %v \n", resp)
-					eventData := &events.MNSEventData{
-						MessageId: resp.MessageId,
-						Body:      resp.MessageBody,
-					}
-					eventBytes, err := json.Marshal(eventData)
-					if err != nil {
-						log.Errorf("failed to marshal the event data, rejecting the event, %w", err)
-						return
-					}
-					log.Info("dispatching the event on data channel...")
-					if err = dispatch(eventBytes); err != nil {
-						log.Errorf("failed to dispatch ali mns event, %w", err)
-						return
-					}
-					if e := queue.DeleteMessage(resp.ReceiptHandle); e != nil {
-						log.Errorf("delete err: %v\n", e.Error())
-					}
-				}
-			case err := <-errChan:
-				{
-					log.Errorf("receive err: %v\n", err)
-				}
+			case <-ctx.Done():
+				// quit goroutine
+				close(respChan)
+				close(errChan)
+				return
+			default:
+				// block wait with timeout 1 second, so it's faster
+				// for ctx.Done() to be selected
+				queue.ReceiveMessage(respChan, errChan, 1)
 			}
-		}()
+		}
+	}()
 
+	for {
+		// wait/handle response channel data
 		select {
-		case <-ctx.Done():
-			log.Info("exiting MNS event listener...")
-			return nil
-		case <-received:
-			// next
+		case resp, ok := <-respChan:
+			if !ok {
+				log.Debug("mns listening quit")
+				return nil
+			}
+
+			log.Infof("response: %v \n", resp)
+			eventData := &events.MNSEventData{
+				MessageId: resp.MessageId,
+				Body:      resp.MessageBody,
+			}
+			eventBytes, err := json.Marshal(eventData)
+			if err != nil {
+				log.Errorf("failed to marshal the event data, rejecting the event, %w", err)
+			}
+			log.Info("dispatching the event on data channel...")
+			if err = dispatch(eventBytes); err != nil {
+				log.Errorf("failed to dispatch ali mns event, %w", err)
+			}
+			if e := queue.DeleteMessage(resp.ReceiptHandle); e != nil {
+				log.Errorf("delete err: %v\n", e.Error())
+			}
+
+		case err, ok := <-errChan:
+			if !ok {
+				log.Debug("mns listening quit")
+				return nil
+			}
+
+			// this error happens every time queue.ReceiveMessage() expired
+			// now it's set to 1 second, so no need to log it
+			if !ali_mns.ERR_MNS_MESSAGE_NOT_EXIST.IsEqual(err) {
+				log.Errorf("receive err: %v\n", err)
+			}
 		}
 	}
 }
