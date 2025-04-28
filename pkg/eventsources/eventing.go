@@ -18,6 +18,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/eventbus"
 	eventbuscommon "github.com/argoproj/argo-events/pkg/eventbus/common"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
+	"github.com/argoproj/argo-events/pkg/eventsources/sources/alibabacloudmns"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/amqp"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/awssns"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/awssqs"
@@ -373,6 +374,16 @@ func GetEventingServers(eventSource *aev1.EventSource, metrics *eventsourcemetri
 			servers = append(servers, &generic.EventListener{EventSourceName: eventSource.Name, EventName: k, GenericEventSource: v, Metrics: metrics})
 		}
 		result[aev1.GenericEvent] = servers
+	}
+	if len(eventSource.Spec.MNS) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.MNS {
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &alibabacloudmns.EventListener{EventSourceName: eventSource.Name, EventName: k, MNSEventSource: v, Metrics: metrics})
+		}
+		result[aev1.MNSEvent] = servers
 	}
 	return result, filters
 }
