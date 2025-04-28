@@ -1168,6 +1168,9 @@ message EventSourceSpec {
 
   // Gerrit event source
   map<string, GerritEventSource> gerrit = 35;
+
+  // MNS event sources
+  map<string, MNSEventSource> mns = 36;
 }
 
 // EventSourceStatus holds the status of the event-source resource
@@ -1872,6 +1875,29 @@ message LogTrigger {
   // Only print messages every interval. Useful to prevent logging too much data for busy events.
   // +optional
   optional uint64 intervalSeconds = 1;
+}
+
+// MNSEventSource refers to event-source for AlibabaCloud MNS related events
+message MNSEventSource {
+  // AccessKey refers K8s secret containing AlibabaCloud access key
+  optional .k8s.io.api.core.v1.SecretKeySelector accessKey = 1;
+
+  // SecretKey refers K8s secret containing AlibabaCloud secret key
+  optional .k8s.io.api.core.v1.SecretKeySelector secretKey = 2;
+
+  // Queue is AlibabaCloud MNS queue to listen to for messages
+  optional string queue = 3;
+
+  // +optional
+  optional bool jsonBody = 4;
+
+  // Endpoint configures connection to a specific AlibabaCloud MNS endpoint
+  // +optional
+  optional string endpoint = 5;
+
+  // Filter
+  // +optional
+  optional EventSourceFilter filter = 6;
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
