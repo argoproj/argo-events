@@ -569,9 +569,10 @@ type SchemaRegistryConfig struct {
 	// Schema Registry URL.
 	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
 	// Schema ID
-	SchemaID int32 `json:"schemaId" protobuf:"varint,2,name=schemaId"`
 	// +optional
+	SchemaID int32 `json:"schemaId" protobuf:"varint,2,name=schemaId"`
 	// SchemaRegistry - basic authentication
+	// +optional
 	Auth BasicAuth `json:"auth,omitempty" protobuf:"bytes,3,opt,name=auth"`
 }
 

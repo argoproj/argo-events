@@ -495,6 +495,9 @@ type KafkaEventSource struct {
 	//
 	// +optional
 	Config string `json:"config,omitempty" protobuf:"bytes,13,opt,name=config"`
+	// Schema Registry configuration for consumer message with Avro format
+	// +optional
+	SchemaRegistry *SchemaRegistryConfig `json:"schemaRegistry,omitempty" protobuf:"bytes,14,opt,name=schemaRegistry"`
 }
 
 type KafkaConsumerGroup struct {
