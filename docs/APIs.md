@@ -20335,6 +20335,26 @@ TLSConfig. (Defaults to false)
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>enabled</code></br> <em> bool </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Enabled indicates if TLS is enabled. Added for compatibility proposes
+for Brokers that needs TLS without key authentication
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>

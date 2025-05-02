@@ -8018,6 +8018,13 @@ func schema_pkg_apis_events_v1alpha1_TLSConfig(ref common.ReferenceCallback) com
 							Format:      "",
 						},
 					},
+					"enabled": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Enabled indicates if TLS is enabled. Added for compatibility proposes for Brokers that needs TLS without key authentication",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},

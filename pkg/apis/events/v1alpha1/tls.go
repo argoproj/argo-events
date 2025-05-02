@@ -4,9 +4,6 @@ import corev1 "k8s.io/api/core/v1"
 
 // TLSConfig refers to TLS configuration for a client.
 type TLSConfig struct {
-	// Enabled indicates if TLS is enabled. Added for compatibility proposes for Brokers that needs TLS without key authentication
-	// +optional
-	Enabled bool `json:"enabled,omitempty" protobuf:"varint,1,opt,name=enabled"`
 	// CACertSecret refers to the secret that contains the CA cert
 	CACertSecret *corev1.SecretKeySelector `json:"caCertSecret,omitempty" protobuf:"bytes,1,opt,name=caCertSecret"`
 	// ClientCertSecret refers to the secret that contains the client cert
@@ -16,4 +13,7 @@ type TLSConfig struct {
 	// If true, skips creation of TLSConfig with certs and creates an empty TLSConfig. (Defaults to false)
 	// +optional
 	InsecureSkipVerify bool `json:"insecureSkipVerify,omitempty" protobuf:"varint,4,opt,name=insecureSkipVerify"`
+	// Enabled indicates if TLS is enabled. Added for compatibility proposes for Brokers that needs TLS without key authentication
+	// +optional
+	Enabled bool `json:"enabled,omitempty" protobuf:"varint,5,opt,name=enabled"`
 }
