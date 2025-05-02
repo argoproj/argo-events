@@ -8,10 +8,12 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func fakeTLSConfig(t *testing.T, insecureSkipVerify bool) *TLSConfig {
+func fakeTLSConfig(t *testing.T, insecureSkipVerify bool, enableTls bool) *TLSConfig {
 	t.Helper()
 	if insecureSkipVerify == true {
 		return &TLSConfig{InsecureSkipVerify: true}
+	} else if enableTls == true {
+		return &TLSConfig{Enabled: true}
 	} else {
 		return &TLSConfig{
 			CACertSecret: &corev1.SecretKeySelector{
@@ -64,6 +66,17 @@ func TestValidateTLSConfig(t *testing.T) {
 		assert.True(t, strings.Contains(err.Error(), "please configure either caCertSecret, or clientCertSecret and clientKeySecret, or both"))
 	})
 
+	t.Run("test nil", func(t *testing.T) {
+		err := ValidateTLSConfig(nil)
+		assert.Nil(t, err)
+	})
+
+	t.Run("test tls enabled", func(t *testing.T) {
+		c := &TLSConfig{Enabled: true}
+		err := ValidateTLSConfig(c)
+		assert.Nil(t, err)
+	})
+
 	t.Run("test insecureSkipVerify true", func(t *testing.T) {
 		c := &TLSConfig{InsecureSkipVerify: true}
 		err := ValidateTLSConfig(c)
@@ -71,7 +84,7 @@ func TestValidateTLSConfig(t *testing.T) {
 	})
 
 	t.Run("test clientKeySecret is set, clientCertSecret is empty", func(t *testing.T) {
-		c := fakeTLSConfig(t, false)
+		c := fakeTLSConfig(t, false, false)
 		c.CACertSecret = nil
 		c.ClientCertSecret = nil
 		err := ValidateTLSConfig(c)
@@ -80,7 +93,7 @@ func TestValidateTLSConfig(t *testing.T) {
 	})
 
 	t.Run("test only caCertSecret is set", func(t *testing.T) {
-		c := fakeTLSConfig(t, false)
+		c := fakeTLSConfig(t, false, false)
 		c.ClientCertSecret = nil
 		c.ClientKeySecret = nil
 		err := ValidateTLSConfig(c)
@@ -88,14 +101,14 @@ func TestValidateTLSConfig(t *testing.T) {
 	})
 
 	t.Run("test clientCertSecret and clientKeySecret are set", func(t *testing.T) {
-		c := fakeTLSConfig(t, false)
+		c := fakeTLSConfig(t, false, false)
 		c.CACertSecret = nil
 		err := ValidateTLSConfig(c)
 		assert.Nil(t, err)
 	})
 
 	t.Run("test all of 3 are set", func(t *testing.T) {
-		c := fakeTLSConfig(t, false)
+		c := fakeTLSConfig(t, false, true)
 		err := ValidateTLSConfig(c)
 		assert.Nil(t, err)
 	})
