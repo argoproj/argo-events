@@ -10,11 +10,12 @@ import (
 
 func fakeTLSConfig(t *testing.T, insecureSkipVerify bool, enableTls bool) *TLSConfig {
 	t.Helper()
-	if insecureSkipVerify == true {
+	switch {
+	case insecureSkipVerify == true:
 		return &TLSConfig{InsecureSkipVerify: true}
-	} else if enableTls == true {
+	case enableTls == true:
 		return &TLSConfig{Enabled: true}
-	} else {
+	default:
 		return &TLSConfig{
 			CACertSecret: &corev1.SecretKeySelector{
 				Key: "fake-key1",
