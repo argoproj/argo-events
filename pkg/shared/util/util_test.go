@@ -196,6 +196,21 @@ func TestGetTLSConfig(t *testing.T) {
 		assert.True(t, strings.Contains(err.Error(), "neither of caCertSecret, clientCertSecret and clientKeySecret is configured"))
 	})
 
+	t.Run("test enabled", func(t *testing.T) {
+		c := &aev1.TLSConfig{Enabled: true}
+		_, err := GetTLSConfig(c)
+		assert.Nil(t, err)
+	})
+
+	t.Run("test enabled clientKeySecret is set, clientCertSecret is empty", func(t *testing.T) {
+		c := fakeTLSConfig(t, false)
+		c.Enabled = true
+		c.CACertSecret = nil
+		c.ClientCertSecret = nil
+		_, err := GetTLSConfig(c)
+		assert.Nil(t, err)
+	})
+
 	t.Run("test clientKeySecret is set, clientCertSecret is empty", func(t *testing.T) {
 		c := fakeTLSConfig(t, false)
 		c.CACertSecret = nil
@@ -205,8 +220,27 @@ func TestGetTLSConfig(t *testing.T) {
 		assert.True(t, strings.Contains(err.Error(), "both of clientCertSecret and clientKeySecret need to be configured"))
 	})
 
+	t.Run("test enabled clientKeySecret is set, clientCertSecret is empty", func(t *testing.T) {
+		c := fakeTLSConfig(t, false)
+		c.Enabled = true
+		c.CACertSecret = nil
+		c.ClientCertSecret = nil
+		_, err := GetTLSConfig(c)
+		assert.Nil(t, err)
+	})
+
 	t.Run("test only caCertSecret is set", func(t *testing.T) {
 		c := fakeTLSConfig(t, false)
+		c.ClientCertSecret = nil
+		c.ClientKeySecret = nil
+		_, err := GetTLSConfig(c)
+		assert.NotNil(t, err)
+		assert.True(t, strings.Contains(err.Error(), "failed to read ca cert file"))
+	})
+
+	t.Run("test enabled only caCertSecret is set", func(t *testing.T) {
+		c := fakeTLSConfig(t, false)
+		c.Enabled = true
 		c.ClientCertSecret = nil
 		c.ClientKeySecret = nil
 		_, err := GetTLSConfig(c)
@@ -222,8 +256,25 @@ func TestGetTLSConfig(t *testing.T) {
 		assert.True(t, strings.Contains(err.Error(), "failed to load client cert key pair"))
 	})
 
+	t.Run("test enabled clientCertSecret and clientKeySecret are set", func(t *testing.T) {
+		c := fakeTLSConfig(t, false)
+		c.Enabled = true
+		c.CACertSecret = nil
+		_, err := GetTLSConfig(c)
+		assert.NotNil(t, err)
+		assert.True(t, strings.Contains(err.Error(), "failed to load client cert key pair"))
+	})
+
 	t.Run("test all of 3 are set", func(t *testing.T) {
 		c := fakeTLSConfig(t, false)
+		_, err := GetTLSConfig(c)
+		assert.NotNil(t, err)
+		assert.True(t, strings.Contains(err.Error(), "failed to read ca cert file"))
+	})
+
+	t.Run("test enabled all of 3 are set", func(t *testing.T) {
+		c := fakeTLSConfig(t, false)
+		c.Enabled = true
 		_, err := GetTLSConfig(c)
 		assert.NotNil(t, err)
 		assert.True(t, strings.Contains(err.Error(), "failed to read ca cert file"))

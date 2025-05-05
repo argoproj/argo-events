@@ -4293,6 +4293,10 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
           "description": "ClientKeySecret refers to the secret that contains the client key"
         },
+        "enabled": {
+          "description": "Enabled indicates if TLS is enabled. Added for compatibility proposes for Brokers that needs TLS without key authentication",
+          "type": "boolean"
+        },
         "insecureSkipVerify": {
           "description": "If true, skips creation of TLSConfig with certs and creates an empty TLSConfig. (Defaults to false)",
           "type": "boolean"
