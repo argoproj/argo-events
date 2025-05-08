@@ -75,15 +75,15 @@ func TestEmailTrigger_FetchResource(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
-	ot, ok := resource.(*v1alpha1.EmailTrigger)
+	trigger, ok := resource.(*v1alpha1.EmailTrigger)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "fake-host", ot.Host)
-	assert.Equal(t, int32(468), ot.Port)
-	assert.Equal(t, "fake-username", ot.Username)
-	assert.Equal(t, []string{"fake1@email.com", "fake2@email.com"}, ot.To)
-	assert.Equal(t, "fake-email", ot.From)
-	assert.Equal(t, "fake-subject", ot.Subject)
-	assert.Equal(t, "fake-body", ot.Body)
+	assert.Equal(t, "fake-host", trigger.Host)
+	assert.Equal(t, int32(468), trigger.Port)
+	assert.Equal(t, "fake-username", trigger.Username)
+	assert.Equal(t, []string{"fake1@email.com", "fake2@email.com"}, trigger.To)
+	assert.Equal(t, "fake-email", trigger.From)
+	assert.Equal(t, "fake-subject", trigger.Subject)
+	assert.Equal(t, "fake-body", trigger.Body)
 }
 
 func TestEmailTrigger_ApplyResourceParameters(t *testing.T) {
@@ -125,15 +125,15 @@ func TestEmailTrigger_ApplyResourceParameters(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
-	ot, ok := resource.(*v1alpha1.EmailTrigger)
+	trigger, ok := resource.(*v1alpha1.EmailTrigger)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "fake-host", ot.Host)
-	assert.Equal(t, int32(468), ot.Port)
-	assert.Equal(t, "fake-username", ot.Username)
-	assert.Equal(t, []string{"real@email.com", "fake2@email.com"}, ot.To)
-	assert.Equal(t, "fake-email", ot.From)
-	assert.Equal(t, "fake-subject", ot.Subject)
-	assert.Equal(t, "Hi Luke,\n\tHello There.\nThanks,\nObi", ot.Body)
+	assert.Equal(t, "fake-host", trigger.Host)
+	assert.Equal(t, int32(468), trigger.Port)
+	assert.Equal(t, "fake-username", trigger.Username)
+	assert.Equal(t, []string{"real@email.com", "fake2@email.com"}, trigger.To)
+	assert.Equal(t, "fake-email", trigger.From)
+	assert.Equal(t, "fake-subject", trigger.Subject)
+	assert.Equal(t, "Hi Luke,\n\tHello There.\nThanks,\nObi", trigger.Body)
 }
 
 // Mock Notification Service that returns an error on Send

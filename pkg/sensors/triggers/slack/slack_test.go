@@ -69,10 +69,10 @@ func TestSlackTrigger_FetchResource(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
-	ot, ok := resource.(*v1alpha1.SlackTrigger)
+	trigger, ok := resource.(*v1alpha1.SlackTrigger)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "fake-channel", ot.Channel)
-	assert.Equal(t, "fake-message", ot.Message)
+	assert.Equal(t, "fake-channel", trigger.Channel)
+	assert.Equal(t, "fake-message", trigger.Message)
 }
 
 func TestSlackTrigger_ApplyResourceParameters(t *testing.T) {
@@ -113,8 +113,8 @@ func TestSlackTrigger_ApplyResourceParameters(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
-	ot, ok := resource.(*v1alpha1.SlackTrigger)
+	trigger, ok := resource.(*v1alpha1.SlackTrigger)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "real-channel", ot.Channel)
-	assert.Equal(t, "real-message", ot.Message)
+	assert.Equal(t, "real-channel", trigger.Channel)
+	assert.Equal(t, "real-message", trigger.Message)
 }
