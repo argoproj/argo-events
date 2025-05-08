@@ -372,7 +372,7 @@ func (mh *eventSourceMessageHolder) getLastResetTime() time.Time {
 
 func (mh *eventSourceMessageHolder) setLastResetTime(t time.Time) {
 	{
-		mh.lock.Lock() // since this can be called asynchronously as part of a ConditionReset, we neeed to lock this code
+		mh.lock.Lock() // since this can be called asynchronously as part of a ConditionReset, we need to lock this code
 		defer mh.lock.Unlock()
 		mh.lastResetTime = t
 	}
@@ -380,7 +380,7 @@ func (mh *eventSourceMessageHolder) setLastResetTime(t time.Time) {
 }
 
 func (mh *eventSourceMessageHolder) setResetTimeout(t int64) {
-	mh.timeoutLock.Lock() // since this can be called asynchronously as part of a ConditionReset, we neeed to lock this code
+	mh.timeoutLock.Lock() // since this can be called asynchronously as part of a ConditionReset, we need to lock this code
 	defer mh.timeoutLock.Unlock()
 	mh.resetTimeout = t
 }

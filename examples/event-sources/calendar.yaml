@@ -35,7 +35,7 @@ spec:
 #    schedule-in-specific-timezone:
 #      # creates an event every 20 seconds
 #      interval: "20s"
-#      # metadata containes key-value pairs that will be send to the sensor with each event payload
+#      # metadata contains key-value pairs that will be send to the sensor with each event payload
 #      # whatever you put here is blindly delivered to sensor.
 #      # access in resourceParameters or templateParameters via the path metadata.hello
 #      metadata:

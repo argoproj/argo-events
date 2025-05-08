@@ -114,7 +114,7 @@ func (i *natsInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, error
 	return busConfig, nil
 }
 
-// Uninstall deletes those objects not handeled by cascade deletion.
+// Uninstall deletes those objects not handled by cascade deletion.
 func (i *natsInstaller) Uninstall(ctx context.Context) error {
 	return i.uninstallPVCs(ctx)
 }

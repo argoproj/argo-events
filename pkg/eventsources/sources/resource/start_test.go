@@ -206,7 +206,7 @@ func TestLabelSelector(t *testing.T) {
 			t.Errorf("matched %v", invalidL)
 		}
 	})
-	// Test doesnot exist operator
+	// Test does not exist operator
 	t.Run("Test operator !", func(t *testing.T) {
 		r, err := LabelSelector([]v1alpha1.Selector{{
 			Key:       "key",

@@ -12,7 +12,7 @@ The Email trigger is used to send a custom email to a desired set of email addre
 
         kubectl create secret generic smtp-secret --from-literal=password=$SMTP_PASSWORD
 
-    **Note**: If your SMTP server doesnot require authentication this step can be skipped.
+    **Note**: If your SMTP server does not require authentication this step can be skipped.
 
 4.  Create a webhook event-source.
 
@@ -44,7 +44,7 @@ where the name has to be substituted with the receiver name from the event.
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/email-trigger.yaml
 
     **Note**: Please update `email.port`, `email.host` and `email.username` to that of your SMTP server.
-    If your SMTP server doesnot require authentication, the `email.username` and `email.smtpPassword` should be omitted.
+    If your SMTP server does not require authentication, the `email.username` and `email.smtpPassword` should be omitted.
 
 2.  Send a http request to the event-source-pod to fire the Email trigger.
 
