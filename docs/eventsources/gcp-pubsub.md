@@ -10,10 +10,10 @@ combination.
 | ----------------------- | ------------------------ | --------------------------------------------------------------------- |
 | Yes/Yes                 | Yes/Yes                  | Validate if given topic matches subscription's topic                  |
 | Yes/Yes                 | Yes/No                   | Create a subscription with given ID                                   |
-| Yes/Yes                 | No/-                     | Create or re-use subscription with auto generated subID               |
+| Yes/Yes                 | No/-                     | Create or reuse subscription with auto generated subID               |
 | Yes/No                  | Yes/No                   | Create a topic and a subscription with given subID                    |
 | Yes/No                  | Yes/Yes                  | Invalid                                                               |
-| Yes/No                  | No/-                     | Create a topic, create or re-use subscription w/ auto generated subID |
+| Yes/No                  | No/-                     | Create a topic, create or reuse subscription w/ auto generated subID |
 | No/-                    | Yes/Yes                  | OK                                                                    |
 | No/-                    | Yes/No                   | Invalid                                                               |
 

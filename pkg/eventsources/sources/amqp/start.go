@@ -196,7 +196,7 @@ func (el *EventListener) handleOne(amqpEventSource *aev1.AMQPEventSource, msg am
 }
 
 // setDefaults sets the default values in case the user hasn't defined them
-// helps also to keep retro-compatibility with current dpeloyments
+// helps also to keep retro-compatibility with current deployments
 func setDefaults(eventSource *aev1.AMQPEventSource) {
 	if eventSource.ExchangeDeclare == nil {
 		eventSource.ExchangeDeclare = &aev1.AMQPExchangeDeclareConfig{

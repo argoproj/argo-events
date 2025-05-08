@@ -439,7 +439,7 @@ func (s *FunctionalSuite) TestAtLeastOnce() {
 
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
 	w2.Then().ExpectSensorPodLogContains("Making a http request...")
-	time.Sleep(5 * time.Second) // make sure we defintely attempt to trigger
+	time.Sleep(5 * time.Second) // make sure we definitely attempt to trigger
 
 	w2.DeleteSensor()
 	time.Sleep(10 * time.Second)
@@ -487,7 +487,7 @@ func (s *FunctionalSuite) TestAtMostOnce() {
 
 	w1.Then().ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(1))
 	w2.Then().ExpectSensorPodLogContains("Making a http request...")
-	time.Sleep(5 * time.Second) // make sure we defintely attempt to trigger
+	time.Sleep(5 * time.Second) // make sure we definitely attempt to trigger
 
 	w2.DeleteSensor()
 	time.Sleep(10 * time.Second)

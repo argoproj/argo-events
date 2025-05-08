@@ -5213,7 +5213,7 @@ func schema_pkg_apis_events_v1alpha1_NATSAuth(ref common.ReferenceCallback) comm
 				Properties: map[string]spec.Schema{
 					"basic": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Baisc auth with username and password",
+							Description: "Basic auth with username and password",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BasicAuth"),
 						},
 					},
@@ -6607,7 +6607,7 @@ func schema_pkg_apis_events_v1alpha1_ResourceFilter(ref common.ReferenceCallback
 					},
 					"fields": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Fields provide field filters similar to K8s field selector (see https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/). Unlike K8s field selector, it supports arbitrary fileds like \"spec.serviceAccountName\", and the value could be a string or a regex. Same as K8s field selector, operator \"=\", \"==\" and \"!=\" are supported.",
+							Description: "Fields provide field filters similar to K8s field selector (see https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/). Unlike K8s field selector, it supports arbitrary fields like \"spec.serviceAccountName\", and the value could be a string or a regex. Same as K8s field selector, operator \"=\", \"==\" and \"!=\" are supported.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -8476,7 +8476,7 @@ func schema_pkg_apis_events_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 					},
 					"conditionsReset": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Criteria to reset the conditons",
+							Description: "Criteria to reset the conditions",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{

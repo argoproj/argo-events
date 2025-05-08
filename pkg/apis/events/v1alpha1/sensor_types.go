@@ -327,7 +327,7 @@ type TriggerTemplate struct {
 	// Pulsar refers to the trigger designed to place messages on Pulsar topic.
 	// +optional
 	Pulsar *PulsarTrigger `json:"pulsar,omitempty" protobuf:"bytes,14,opt,name=pulsar"`
-	// Criteria to reset the conditons
+	// Criteria to reset the conditions
 	// +optional
 	ConditionsReset []ConditionsResetCriteria `json:"conditionsReset,omitempty" protobuf:"bytes,15,rep,name=conditionsReset"`
 	// AzureServiceBus refers to the trigger designed to place messages on Azure Service Bus

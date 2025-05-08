@@ -65,7 +65,7 @@ func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, config 
 	}
 }
 
-// Install creats a StatefulSet and a Service for NATS
+// Install creates a StatefulSet and a Service for NATS
 func (i *natsInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, error) {
 	natsObj := i.eventBus.Spec.NATS
 	if natsObj == nil || natsObj.Native == nil {
@@ -546,7 +546,7 @@ streaming {
 }
 
 // buildServerAuthSecret builds a secret for NATS auth config
-// Parameter - authStrategy: will be added to annoations
+// Parameter - authStrategy: will be added to annotations
 // Parameter - secret
 // Example:
 //

@@ -101,7 +101,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return nil
 		default:
 		}
-		log.Info("dequeing messages....")
+		log.Info("dequeuing messages....")
 		messages, err := queueClient.DequeueMessages(ctx, &azqueue.DequeueMessagesOptions{
 			NumberOfMessages:  &numMessages,
 			VisibilityTimeout: &visibilityTimeout,

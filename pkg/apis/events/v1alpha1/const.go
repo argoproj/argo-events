@@ -211,7 +211,7 @@ const (
 	MediaTypeYAML string = "application/yaml"
 )
 
-// Metrics releated
+// Metrics related
 const (
 	EventSourceMetricsPort = 7777
 	SensorMetricsPort      = 7777

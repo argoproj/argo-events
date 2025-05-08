@@ -33,7 +33,7 @@ func (n *STAN) MakeConnection(clientID string) (*STANConnection, error) {
 	log := n.logger.With("clientID", clientID)
 	conn := &STANConnection{ClientID: clientID, Logger: n.logger}
 	opts := []nats.Option{
-		// Do not reconnect here but handle reconnction outside
+		// Do not reconnect here but handle reconnection outside
 		nats.NoReconnect(),
 		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
 			conn.NATSConnected = false

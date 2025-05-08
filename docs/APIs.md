@@ -1533,7 +1533,7 @@ AuthStrategy (<code>string</code> alias)
 
 <p>
 
-AuthStrategy is the auth strategy of native nats installaion
+AuthStrategy is the auth strategy of native nats installation
 </p>
 
 </p>
@@ -13241,7 +13241,7 @@ BasicAuth </a> </em>
 <em>(Optional)</em>
 <p>
 
-Baisc auth with username and password
+Basic auth with username and password
 </p>
 
 </td>
@@ -16779,7 +16779,7 @@ value1,value2. Same as K8s label selector, operator “=”, “==”, “!=”,
 
 Fields provide field filters similar to K8s field selector (see
 <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/</a>).
-Unlike K8s field selector, it supports arbitrary fileds like
+Unlike K8s field selector, it supports arbitrary fields like
 “spec.serviceAccountName”, and the value could be a string or a regex.
 Same as K8s field selector, operator “=”, “==” and “!=” are supported.
 </p>
@@ -21697,7 +21697,7 @@ Pulsar refers to the trigger designed to place messages on Pulsar topic.
 <em>(Optional)</em>
 <p>
 
-Criteria to reset the conditons
+Criteria to reset the conditions
 </p>
 
 </td>

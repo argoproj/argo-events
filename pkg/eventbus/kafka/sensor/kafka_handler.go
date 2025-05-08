@@ -137,7 +137,7 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 		return fmt.Errorf("unrecognized topic %s or partition %d", claim.Topic(), claim.Partition())
 	}
 
-	// Batch messsages from the claim message channel. A message will
+	// Batch messages from the claim message channel. A message will
 	// be produced to the batched channel if the max batch size is
 	// reached or the time limit has elapsed, whichever happens
 	// first. Batching helps optimize kafka transactions.

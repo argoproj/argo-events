@@ -39,7 +39,7 @@ spec:
       # Deprecated, legacy approach
       # credentialsFile: ""
 # ----------------------------------------------------------------------------------------------------------------------
-# followings are example for using Workload Identity
+# following are example for using Workload Identity
 
 #   template:
 #     serviceAccountName: my-sa

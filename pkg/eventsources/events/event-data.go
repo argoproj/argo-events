@@ -54,7 +54,7 @@ type AMQPEventData struct {
 	Exchange string `json:"exchange"`
 	// RoutingKey is basic.publish routing key
 	RoutingKey string `json:"routingKey"`
-	// Body represents the messsage body
+	// Body represents the message body
 	Body interface{} `json:"body"`
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	Metadata map[string]string `json:"metadata,omitempty"`

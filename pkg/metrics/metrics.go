@@ -120,7 +120,7 @@ func NewMetrics(namespace string) *Metrics {
 		actionDuration: prometheus.NewSummaryVec(prometheus.SummaryOpts{
 			Namespace: prefix,
 			Name:      "action_duration_milliseconds",
-			Help:      "Summary of durations of trigging actions. https://argoproj.github.io/argo-events/metrics/#argo_events_action_duration_milliseconds",
+			Help:      "Summary of durations of triggering actions. https://argoproj.github.io/argo-events/metrics/#argo_events_action_duration_milliseconds",
 			ConstLabels: prometheus.Labels{
 				labelNamespace: namespace,
 			},

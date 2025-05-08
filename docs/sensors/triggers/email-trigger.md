@@ -25,7 +25,7 @@ The Email trigger is used to send a custom email to a desired set of email addre
 
 ## Email Trigger
 
-Lets say we want to send an email to a dynamic recepient using a custom email body template.
+Lets say we want to send an email to a dynamic recipient using a custom email body template.
 
 The custom email body template we are going to use is the following:
 
@@ -44,7 +44,7 @@ where the name has to be substituted with the receiver name from the event.
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/email-trigger.yaml
 
     **Note**: Please update `email.port`, `email.host` and `email.username` to that of your SMTP server.
-    If your SMTP server doesnot require authentication, the `email.username` and `email.smtpPassword` should be ommitted.
+    If your SMTP server doesnot require authentication, the `email.username` and `email.smtpPassword` should be omitted.
 
 2.  Send a http request to the event-source-pod to fire the Email trigger.
 
@@ -94,7 +94,7 @@ The email trigger parameters have the following structure,
             dataKey: body.emailBody
           dest: email.body
 
-- `email.to.index` can be used to overwite an email address already specified in the trigger at the provided index. (where index is an integer)
+- `email.to.index` can be used to overwrite an email address already specified in the trigger at the provided index. (where index is an integer)
 - `email.to.-1` can be used to append a new email address to the addresses to which an email will be sent.
 - `email.from` can be used to specify the from address of the email sent.
 - `email.body` can be used to specify the body of the email which will be sent.

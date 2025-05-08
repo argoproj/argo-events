@@ -39,7 +39,7 @@ spec:
 
 #        # fields provide listing options to K8s API to watch objects
 #        fields:
-#            # It's an extention of https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/.
+#            # It's an extension of https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/.
 #            # Unlike k8s field selector, any arbitrary field like "spec.serviceAccountName" is supported.
 #          - key: metadata.name
 #            # Supported operations like =, ==, !=.

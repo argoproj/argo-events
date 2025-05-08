@@ -291,7 +291,7 @@ type ResourceFilter struct {
 	Labels []Selector `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
 	// Fields provide field filters similar to K8s field selector
 	// (see https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/).
-	// Unlike K8s field selector, it supports arbitrary fileds like "spec.serviceAccountName",
+	// Unlike K8s field selector, it supports arbitrary fields like "spec.serviceAccountName",
 	// and the value could be a string or a regex.
 	// Same as K8s field selector, operator "=", "==" and "!=" are supported.
 	// +optional
@@ -568,7 +568,7 @@ type NATSEventsSource struct {
 
 // NATSAuth refers to the auth info for NATS EventSource
 type NATSAuth struct {
-	// Baisc auth with username and password
+	// Basic auth with username and password
 	// +optional
 	Basic *BasicAuth `json:"basic,omitempty" protobuf:"bytes,1,opt,name=basic"`
 	// Token used to connect

@@ -136,7 +136,7 @@ func (s *Status) MarkTrueWithReason(t ConditionType, reason, message string) {
 	s.markTypeStatus(t, corev1.ConditionTrue, reason, message)
 }
 
-// MarkFalse sets the status of t to fasle
+// MarkFalse sets the status of t to false
 func (s *Status) MarkFalse(t ConditionType, reason, message string) {
 	s.markTypeStatus(t, corev1.ConditionFalse, reason, message)
 }
@@ -146,7 +146,7 @@ func (s *Status) MarkUnknown(t ConditionType, reason, message string) {
 	s.markTypeStatus(t, corev1.ConditionUnknown, reason, message)
 }
 
-// GetCondition returns the condition of a condtion type
+// GetCondition returns the condition of a condition type
 func (s *Status) GetCondition(t ConditionType) *Condition {
 	for _, c := range s.Conditions {
 		if c.Type == t {
