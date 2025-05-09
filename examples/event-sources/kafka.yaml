@@ -33,6 +33,10 @@ spec:
 #      limitEventsPerSecond: 1
 #      version: "2.5.0"
 
+##    Use schema-registry in combination with jsonBody true to convert avro to json
+#     schemaRegistry:
+#      url: http://localhost:8081
+
 ##    Enable TLS authentication ( not to be used with SASL)
 #      tls:
 #        caCertSecret:
