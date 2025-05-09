@@ -12282,6 +12282,27 @@ consumer: fetch: min: 1 net: MaxOpenRequests: 5
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>schemaRegistry</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SchemaRegistryConfig">
+SchemaRegistryConfig </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Schema Registry configuration for consumer message with Avro format
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -18056,6 +18077,7 @@ SchemaRegistryConfig
 <p>
 
 (<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>,
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>)
 </p>
 
@@ -18117,6 +18139,7 @@ Schema Registry URL.
 
 <td>
 
+<em>(Optional)</em>
 <p>
 
 Schema ID

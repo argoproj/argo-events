@@ -1805,6 +1805,10 @@ message KafkaEventSource {
   //
   // +optional
   optional string config = 13;
+
+  // Schema Registry configuration for consumer message with Avro format
+  // +optional
+  optional SchemaRegistryConfig schemaRegistry = 14;
 }
 
 // KafkaTrigger refers to the specification of the Kafka trigger.
@@ -2753,10 +2757,11 @@ message SchemaRegistryConfig {
   optional string url = 1;
 
   // Schema ID
+  // +optional
   optional int32 schemaId = 2;
 
-  // +optional
   // SchemaRegistry - basic authentication
+  // +optional
   optional BasicAuth auth = 3;
 }
 

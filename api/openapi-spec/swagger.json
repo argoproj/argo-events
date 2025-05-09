@@ -2516,6 +2516,10 @@
           "description": "SASL configuration for the kafka client",
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.SASLConfig"
         },
+        "schemaRegistry": {
+          "description": "Schema Registry configuration for consumer message with Avro format",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.SchemaRegistryConfig"
+        },
         "tls": {
           "description": "TLS configuration for the kafka client.",
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.TLSConfig"
@@ -3791,8 +3795,7 @@
       "description": "SchemaRegistryConfig refers to configuration for a client",
       "type": "object",
       "required": [
-        "url",
-        "schemaId"
+        "url"
       ],
       "properties": {
         "auth": {

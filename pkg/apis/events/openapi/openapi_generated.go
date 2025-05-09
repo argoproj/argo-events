@@ -4840,12 +4840,18 @@ func schema_pkg_apis_events_v1alpha1_KafkaEventSource(ref common.ReferenceCallba
 							Format:      "",
 						},
 					},
+					"schemaRegistry": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Schema Registry configuration for consumer message with Avro format",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SchemaRegistryConfig"),
+						},
+					},
 				},
 				Required: []string{"url", "topic"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Backoff", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaConsumerGroup", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Backoff", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaConsumerGroup", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SchemaRegistryConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"},
 	}
 }
 
@@ -7144,7 +7150,7 @@ func schema_pkg_apis_events_v1alpha1_SchemaRegistryConfig(ref common.ReferenceCa
 						},
 					},
 				},
-				Required: []string{"url", "schemaId"},
+				Required: []string{"url"},
 			},
 		},
 		Dependencies: []string{

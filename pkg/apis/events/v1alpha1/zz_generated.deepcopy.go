@@ -2482,6 +2482,11 @@ func (in *KafkaEventSource) DeepCopyInto(out *KafkaEventSource) {
 		*out = new(EventSourceFilter)
 		**out = **in
 	}
+	if in.SchemaRegistry != nil {
+		in, out := &in.SchemaRegistry, &out.SchemaRegistry
+		*out = new(SchemaRegistryConfig)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 
