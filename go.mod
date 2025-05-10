@@ -90,16 +90,16 @@ require (
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
-	k8s.io/api v0.32.2
-	k8s.io/apimachinery v0.32.2
-	k8s.io/client-go v0.32.2
-	k8s.io/code-generator v0.32.2
+	k8s.io/api v0.33.0
+	k8s.io/apimachinery v0.33.0
+	k8s.io/client-go v0.33.0
+	k8s.io/code-generator v0.33.0
 	k8s.io/gengo v0.0.0-20250207200755-1244d31929d7
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/kube-openapi v0.0.0-20250318190949-c8a335a9a2ff
 	k8s.io/utils v0.0.0-20241210054802-24370beab758
 	sigs.k8s.io/controller-runtime v0.19.0
-	sigs.k8s.io/controller-tools v0.17.3
+	sigs.k8s.io/controller-tools v0.18.0
 	sigs.k8s.io/yaml v1.4.0
 )
 
@@ -212,13 +212,12 @@ require (
 	github.com/google/go-github/v69 v69.2.0 // indirect
 	github.com/google/go-github/v71 v71.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
 	github.com/gorilla/handlers v1.5.2 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
 	github.com/gregdel/pushover v1.3.1 // indirect
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -353,8 +352,8 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.32.2 // indirect
-	k8s.io/gengo/v2 v2.0.0-20240911193312-2b36238f13e9 // indirect
+	k8s.io/apiextensions-apiserver v0.33.0 // indirect
+	k8s.io/gengo/v2 v2.0.0-20250207200755-1244d31929d7 // indirect
 	k8s.io/klog v1.0.0 // indirect
 	moul.io/http2curl/v2 v2.3.0 // indirect
 	sigs.k8s.io/json v0.0.0-20241010143419-9aa6b5e7a4b3 // indirect
