@@ -82,6 +82,7 @@ nav:
               - "eventsources/setup/resource.md"
               - "eventsources/setup/webhook.md"
               - "eventsources/setup/pulsar.md"
+              - "eventsources/setup/alibabacloud-mns.md"
           - "eventsources/multiple-events.md"
           - "eventsources/naming.md"
           - "eventsources/services.md"
