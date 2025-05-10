@@ -14,7 +14,7 @@ require (
 	github.com/Azure/azure-event-hubs-go/v3 v3.6.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.9.0
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azeventhubs v1.3.2
-	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.8.1
+	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.9.0
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue v1.0.1
 	github.com/IBM/sarama v1.43.0
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
