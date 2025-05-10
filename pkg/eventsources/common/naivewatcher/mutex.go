@@ -38,7 +38,7 @@ func (m *Mutex) TryLock() bool {
 	return true
 }
 
-// IsLocked returs whether the mutex is locked
+// IsLocked returns whether the mutex is locked
 func (m *Mutex) IsLocked() bool {
 	m.in.RLock()
 	defer m.in.RUnlock()

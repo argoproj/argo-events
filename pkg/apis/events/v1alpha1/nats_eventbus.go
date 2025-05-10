@@ -12,7 +12,7 @@ type NATSBus struct {
 	Exotic *NATSConfig `json:"exotic,omitempty" protobuf:"bytes,2,opt,name=exotic"`
 }
 
-// AuthStrategy is the auth strategy of native nats installaion
+// AuthStrategy is the auth strategy of native nats installation
 type AuthStrategy string
 
 // possible auth strategies

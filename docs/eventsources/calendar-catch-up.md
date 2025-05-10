@@ -1,6 +1,6 @@
-# Calender EventSource Catch Up
+# Calendar EventSource Catch Up
 
-Catch-up feature allow Calender eventsources to execute the missed schedules
+Catch-up feature allow Calendar eventsources to execute the missed schedules
 from last run.
 
 ## Enable Catch-up for Calendar EventSource
@@ -28,7 +28,7 @@ spec:
           name: test-configmap
 ```
 
-Last calender event persisted in configured configmap. Same configmap can be
+Last calendar event persisted in configured configmap. Same configmap can be
 used by multiple events configuration.
 
 ```yaml

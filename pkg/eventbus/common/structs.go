@@ -4,7 +4,7 @@ import (
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
-// Auth contains the auth infor for event bus
+// Auth contains the auth info for event bus
 type Auth struct {
 	Strategy   eventbusv1alpha1.AuthStrategy
 	Credential *AuthCredential
