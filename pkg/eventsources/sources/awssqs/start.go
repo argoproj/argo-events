@@ -23,8 +23,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/aws/awserr"
-	"github.com/aws/aws-sdk-go-v2/aws/session"
 	sqslib "github.com/aws/aws-sdk-go-v2/service/sqs"
 	"go.uber.org/zap"
 

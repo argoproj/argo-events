@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"go.uber.org/zap"
 
@@ -35,7 +36,7 @@ import (
 // AWSLambdaTrigger refers to trigger that invokes AWS Lambda functions
 type AWSLambdaTrigger struct {
 	// LambdaClient is AWS Lambda client
-	LambdaClient *lambda.Lambda
+	LambdaClient *lambda.Client
 	// Sensor object
 	Sensor *v1alpha1.Sensor
 	// Trigger definition
@@ -45,18 +46,22 @@ type AWSLambdaTrigger struct {
 }
 
 // NewAWSLambdaTrigger returns a new AWS Lambda context
-func NewAWSLambdaTrigger(lambdaClients sharedutil.StringKeyedMap[*lambda.Lambda], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
+func NewAWSLambdaTrigger(lambdaClients sharedutil.StringKeyedMap[*lambda.Client], sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *zap.SugaredLogger) (*AWSLambdaTrigger, error) {
 	lambdatrigger := trigger.Template.AWSLambda
 
 	lambdaClient, ok := lambdaClients.Load(trigger.Template.Name)
-	if !ok {
-		awsSession, err := commonaws.CreateAWSSessionWithCredsInVolume(lambdatrigger.Region, lambdatrigger.RoleARN, lambdatrigger.AccessKey, lambdatrigger.SecretKey, nil)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create a AWS session, %w", err)
-		}
-		lambdaClient = lambda.New(awsSession, &aws.Config{Region: &lambdatrigger.Region})
-		lambdaClients.Store(trigger.Template.Name, lambdaClient)
-	}
+    if !ok {
+        // Load AWS configuration using the default provider.
+        cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(lambdatrigger.Region))
+        if err != nil {
+            return nil, fmt.Errorf("failed to load AWS config: %w", err)
+        }
+        // Create a new Lambda client using the loaded configuration.
+        lambdaClient = lambda.NewFromConfig(cfg)
+
+        // Store the newly created client for reuse.
+        lambdaClients.Store(trigger.Template.Name, lambdaClient)
+    }
 
 	return &AWSLambdaTrigger{
 		LambdaClient: lambdaClient,
