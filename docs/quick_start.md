@@ -5,7 +5,7 @@ We are going to set up a sensor and event-source for webhook. The goal is to tri
 Note: You will need to have [Argo Workflows](https://argoproj.github.io/argo-workflows/) installed to make this work.
 The Argo Workflow controller will need to be configured to listen for Workflow objects created in `argo-events` namespace.
   (See [this](https://github.com/argoproj/argo-workflows/blob/master/docs/managed-namespace.md) link.)
-  The Workflow Controller will need to be installed either in a cluster-scope configuration (i.e. no "--namespaced" argument) so that it has visiblity to all namespaces, or with "--managed-namespace" set to define "argo-events" as a namespace it has visibility to. To deploy Argo Workflows with a cluster-scope configuration you can use this installation yaml file, setting `ARGO_WORKFLOWS_VERSION` with your desired version. A list of versions can be found by viewing [these](https://github.com/argoproj/argo-workflows/tags) project tags in the Argo Workflow GitHub repository.
+  The Workflow Controller will need to be installed either in a cluster-scope configuration (i.e. no "--namespaced" argument) so that it has visibility to all namespaces, or with "--managed-namespace" set to define "argo-events" as a namespace it has visibility to. To deploy Argo Workflows with a cluster-scope configuration you can use this installation yaml file, setting `ARGO_WORKFLOWS_VERSION` with your desired version. A list of versions can be found by viewing [these](https://github.com/argoproj/argo-workflows/tags) project tags in the Argo Workflow GitHub repository.
 
         export ARGO_WORKFLOWS_VERSION=3.5.4
         kubectl create namespace argo

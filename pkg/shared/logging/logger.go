@@ -64,7 +64,7 @@ func FromContext(ctx context.Context) *zap.SugaredLogger {
 	return NewArgoEventsLogger()
 }
 
-// Returns logger conifg depending on the log level
+// Returns logger config depending on the log level
 func ConfigureLogLevelLogger(logLevel string) zap.Config {
 	logConfig := zap.NewProductionConfig()
 	switch logLevel {

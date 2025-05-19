@@ -310,7 +310,7 @@ func (stream *SensorJetstream) getTriggerList() (TriggerValue, error) {
 	triggerList := TriggerValue{}
 	err = json.Unmarshal(triggerListJson.Value(), &triggerList)
 	if err != nil {
-		return nil, fmt.Errorf("errror unmarshalling value %s of key %s: %w", string(triggerListJson.Value()), TriggersKey, err)
+		return nil, fmt.Errorf("error unmarshalling value %s of key %s: %w", string(triggerListJson.Value()), TriggersKey, err)
 	}
 
 	return triggerList, nil
@@ -347,7 +347,7 @@ func (stream *SensorJetstream) storeTriggerExpression(triggerName string, condit
 	key := getTriggerExpressionKey(triggerName)
 	_, err := stream.keyValueStore.PutString(key, conditionExpression)
 	if err != nil {
-		return fmt.Errorf("errror storing %s under key %s: %w", conditionExpression, key, err)
+		return fmt.Errorf("error storing %s under key %s: %w", conditionExpression, key, err)
 	}
 	stream.Logger.Debugf("successfully stored trigger expression under key %s: %s", key, conditionExpression)
 	return nil

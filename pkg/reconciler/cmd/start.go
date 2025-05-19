@@ -80,7 +80,7 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	}
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
 
-	// Readyness probe
+	// Readiness probe
 	if err := mgr.AddReadyzCheck("readiness", healthz.Ping); err != nil {
 		logger.Fatalw("Unable add a readiness check", zap.Error(err))
 	}
