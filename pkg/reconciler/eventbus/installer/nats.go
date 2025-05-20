@@ -270,8 +270,8 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 			return nil, nil, err
 		}
 		if sSecret != nil {
-			sSecret.ObjectMeta.Labels = expectedSSecret.Labels
-			sSecret.ObjectMeta.Annotations = expectedSSecret.Annotations
+			sSecret.Labels = expectedSSecret.Labels
+			sSecret.Annotations = expectedSSecret.Annotations
 			sSecret.Data = expectedSSecret.Data
 			err = i.client.Update(ctx, sSecret)
 			if err != nil {

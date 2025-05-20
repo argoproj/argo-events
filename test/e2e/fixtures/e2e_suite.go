@@ -170,10 +170,12 @@ func (s *E2ESuite) Given() *Given {
 
 func GetBusDriverSpec() string {
 	x := strings.ToUpper(os.Getenv("EventBusDriver"))
-	if x == "JETSTREAM" {
+	switch x {
+	case "JETSTREAM":
 		return E2EEventBusJetstream
-	} else if x == "KAFKA" {
+	case "KAFKA":
 		return E2EEventBusKafka
+	default:
+		return E2EEventBusSTAN
 	}
-	return E2EEventBusSTAN
 }

@@ -241,7 +241,7 @@ func (el *EventListener) listenEventsPolling(ctx context.Context, dispatch func(
 	}()
 	log.Info("Starting watcher...")
 	if err = watcher.Start(time.Millisecond * 100); err != nil {
-		return fmt.Errorf("Failed to start watcher for %s, %w", el.GetEventName(), err)
+		return fmt.Errorf("failed to start watcher for %s, %w", el.GetEventName(), err)
 	}
 	return nil
 }

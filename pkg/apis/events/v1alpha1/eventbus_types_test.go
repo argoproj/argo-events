@@ -156,7 +156,7 @@ func TestEventBusStatusGetCondition(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := test.s.Status.GetCondition(test.qCondition)
+			got := test.s.GetCondition(test.qCondition)
 			ignoreFields := cmpopts.IgnoreFields(Condition{},
 				"LastTransitionTime")
 			if diff := cmp.Diff(test.expect, got, ignoreFields); diff != "" {

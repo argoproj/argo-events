@@ -191,7 +191,7 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 
 	sensorObj.Spec.Triggers[0].Template.K8s.Operation = v1alpha1.Delete
 
-	client.Fake.PrependReactor("delete", "deployments", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	client.PrependReactor("delete", "deployments", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		deleteAction := action.(k8stesting.DeleteAction)
 		if deleteAction.GetName() == deployment.GetName() && deleteAction.GetNamespace() == deployment.GetNamespace() {
 			deleted = true

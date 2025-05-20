@@ -155,5 +155,5 @@ func createKrbClient(krbOptions *KrbOptions) (*krb.Client, error) {
 		return &client, nil
 	}
 
-	return nil, fmt.Errorf("Failed to get a Kerberos client")
+	return nil, fmt.Errorf("failed to get a Kerberos client")
 }

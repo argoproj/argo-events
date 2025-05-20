@@ -231,7 +231,7 @@ func (o *options) createSensor(ctx context.Context) (*v1alpha1.Sensor, error) {
 		return nil, fmt.Errorf("expected to see sensor pod contains something: %w", err)
 	}
 	if !contains {
-		return nil, fmt.Errorf("Sensor Pod does look good, it might have started failed")
+		return nil, fmt.Errorf("sensor Pod does look good, it might have started failed")
 	}
 	return result, nil
 }
