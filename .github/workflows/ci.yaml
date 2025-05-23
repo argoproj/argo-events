@@ -2,10 +2,10 @@ name: test
 on:
   push:
     branches:
-      - "master"
       - "release-*"
   pull_request:
-    branches: [ master ]
+    branches:
+      - "release-*"
 
 permissions:
   contents: read
@@ -13,7 +13,7 @@ permissions:
 jobs:
   codegen:
     name: Codegen
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 5
     steps:
       - name: Checkout code
@@ -62,7 +62,7 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
       - name: Checkout code
@@ -87,7 +87,7 @@ jobs:
 
   lint:
     name: lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
     env:
       GOPATH: /home/runner/go
@@ -112,7 +112,7 @@ jobs:
 
   e2e-tests:
     name: E2E Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
       KUBECONFIG: /home/runner/.kubeconfig

@@ -14,8 +14,8 @@ jobs:
     permissions:
       contents: write  # for peter-evans/create-pull-request to create branch
       pull-requests: write  # for peter-evans/create-pull-request to create a PR
-    if: github.repository == 'argoproj/argo-events'
-    runs-on: ubuntu-latest
+    if: github.repository == 'ZSuiteTech/argo-events'
+    runs-on: ubuntu-22.04
     name: Generate changelog
     steps:
       - uses: actions/checkout@v3
