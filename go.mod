@@ -57,7 +57,7 @@ require (
 	github.com/itchyny/gojq v0.12.17
 	github.com/joncalhoun/qson v0.0.0-20200422171543-84433dcd3da0
 	github.com/ktrysmt/go-bitbucket v0.9.85
-	github.com/minio/minio-go/v7 v7.0.90
+	github.com/minio/minio-go/v7 v7.0.92
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/nats-io/graft v0.0.0-20220215174245-93d18541496f
@@ -274,6 +274,7 @@ require (
 	github.com/opsgenie/opsgenie-go-sdk-v2 v1.2.23 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
+	github.com/philhofer/fwd v1.1.3-0.20240916144458-20a13a1f6b7c // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
@@ -303,6 +304,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
+	github.com/tinylib/msgp v1.3.0 // indirect
 	github.com/toqueteos/webbrowser v1.2.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.52.0 // indirect
