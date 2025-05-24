@@ -16,6 +16,8 @@ EXECUTABLES = curl docker gzip go
 #  docker image publishing options
 DOCKER_PUSH?=false
 IMAGE_NAMESPACE?=quay.io/argoproj
+ORIG_REGISTRY:=$(IMAGE_NAMESPACE)/$(BINARY_NAME)
+IMAGE_REGISTRY?=$(ORIG_REGISTRY)
 VERSION?=v1.8.0
 BASE_VERSION:=v1.8.0
 
@@ -27,8 +29,8 @@ override LDFLAGS += \
 
 ifeq (${DOCKER_PUSH},true)
 PUSH_OPTION="--push"
-ifndef IMAGE_NAMESPACE
-$(error IMAGE_NAMESPACE must be set to push images (e.g. IMAGE_NAMESPACE=quay.io/argoproj))
+ifndef IMAGE_REGISTRY
+$(error IMAGE_REGISTRY must be set to push images (e.g. IMAGE_REGISTRY=$(ORIG_REGISTRY)))
 endif
 endif
 
@@ -70,18 +72,18 @@ ifeq ($(shell uname -m),arm64)
 BUILD_DIST = dist/$(BINARY_NAME)-linux-arm64
 endif
 image: clean $(BUILD_DIST)
-	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)  --target $(BINARY_NAME) -f $(DOCKERFILE) .
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION); fi
+	DOCKER_BUILDKIT=1 docker build -t $(IMAGE_REGISTRY):$(VERSION)  --target $(BINARY_NAME) -f $(DOCKERFILE) .
+	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_REGISTRY):$(VERSION); fi
 ifeq ($(K3D),true)
-	k3d image import $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)
+	k3d image import $(IMAGE_REGISTRY):$(VERSION)
 endif
 
 image-linux-%: dist/$(BINARY_NAME)-linux-%
-	DOCKER_BUILDKIT=1 docker build --build-arg "ARCH=$*" -t $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$* --platform "linux/$*" --target $(BINARY_NAME) -f $(DOCKERFILE) .
-	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)-linux-$*; fi
+	DOCKER_BUILDKIT=1 docker build --build-arg "ARCH=$*" -t $(IMAGE_REGISTRY):$(VERSION)-linux-$* --platform "linux/$*" --target $(BINARY_NAME) -f $(DOCKERFILE) .
+	@if [ "$(DOCKER_PUSH)" = "true" ]; then docker push $(IMAGE_REGISTRY):$(VERSION)-linux-$*; fi
 
 image-multi: set-qemu dist/$(BINARY_NAME)-linux-arm64.gz dist/$(BINARY_NAME)-linux-amd64.gz
-	docker buildx build --sbom=false --provenance=false --tag $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION) --target $(BINARY_NAME) --platform linux/amd64,linux/arm64 --file ./Dockerfile ${PUSH_OPTION} .
+	docker buildx build --sbom=false --provenance=false --tag $(IMAGE_REGISTRY):$(VERSION) --target $(BINARY_NAME) --platform linux/amd64,linux/arm64 --file ./Dockerfile ${PUSH_OPTION} .
 
 set-qemu:
 	docker pull tonistiigi/binfmt:latest
@@ -151,7 +153,7 @@ docs/assets/diagram.png: go-diagrams/diagram.dot
 .PHONY: start
 start: image
 	kubectl apply -f test/manifests/argo-events-ns.yaml
-	kubectl kustomize test/manifests | sed 's@quay.io/argoproj/@$(IMAGE_NAMESPACE)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune=false --force -f -
+	kubectl kustomize test/manifests | sed 's@$(ORIG_REGISTRY)@$(IMAGE_REGISTRY)/@' | sed 's/:$(BASE_VERSION)/:$(VERSION)/' | kubectl -n argo-events apply -l app.kubernetes.io/part-of=argo-events --prune=false --force -f -
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
@@ -186,13 +188,13 @@ check-version-warning:
 	@if [[ ! "$(VERSION)" =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$  ]]; then echo -n "It looks like you're not using a version format like 'v1.2.3', or 'v1.2.3-rc2', that version format is required for our releases. Do you wish to continue anyway? [y/N]" && read ans && [ $${ans:-N} = y ]; fi
 
 .PHONY: update-manifests-version
+update-manifests-version : REPLACEMENTS = \
+	's@\($(ORIG_REGISTRY)\):.*@\1:$(VERSION)@; \
+	s@$(ORIG_REGISTRY)@$(IMAGE_REGISTRY)@; \
+    s/\(newTag:\) .*/\1 $(VERSION)/'
 update-manifests-version:
-	cat manifests/base/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' | sed 's@value: quay.io/argoproj/argo-events:.*@value: $(IMAGE_NAMESPACE)/$(BINARY_NAME):$(VERSION)@' > /tmp/base_kustomization.yaml
-	mv /tmp/base_kustomization.yaml manifests/base/kustomization.yaml
-	cat manifests/extensions/validating-webhook/kustomization.yaml | sed 's/newTag: .*/newTag: $(VERSION)/' > /tmp/wh_kustomization.yaml
-	mv /tmp/wh_kustomization.yaml manifests/extensions/validating-webhook/kustomization.yaml
-	cat Makefile | sed 's/^VERSION?=.*/VERSION?=$(VERSION)/' | sed 's/^BASE_VERSION:=.*/BASE_VERSION:=$(VERSION)/' > /tmp/ae_makefile
-	mv /tmp/ae_makefile Makefile
+	find manifests -iname '*.yaml' -exec sed -i -e $(REPLACEMENTS) '{}' '+'
+	sed -i -e 's/^\(BASE_VERSION:|VERSION?\)=.*/\1=$(VERSION)/' Makefile
 
 .PHONY: checksums
 checksums:

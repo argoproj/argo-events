@@ -16,13 +16,11 @@ permissions:
   contents: read
 
 env:
-  _GHA_GITHUB_REPO: ZSuiteTech/argo-events
-  _GHA_CONTAINER_REGISTRY: zsuitetech/argo-events
+  CONTAINER_REGISTRY: ${{ vars.CONTAINER_REGISTRY }}
 
 jobs:
   build-binaries:
     runs-on: ubuntu-20.04
-    if: github.repository == env._GHA_GITHUB_REPO
     name: Build binaries
     steps:
       - name: Checkout
@@ -49,7 +47,6 @@ jobs:
     name: Build & push linux/amd64 and linux/arm64
     needs: [ build-binaries ]
     runs-on: ubuntu-20.04
-    if: github.repository == env._GHA_GITHUB_REPO
     strategy:
       matrix:
         target: [ argo-events ]
@@ -68,8 +65,8 @@ jobs:
       - name: Registry Login
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          username: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
+          password: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
       - name: set Version
         id: version
@@ -86,7 +83,6 @@ jobs:
 
   bom:
     runs-on: ubuntu-22.04
-    if: github.repository == env._GHA_GITHUB_REPO
     needs: [ build-push-linux-multi ]
     steps:
       # https://stackoverflow.com/questions/58033366/how-to-get-current-branch-within-github-actions
@@ -104,7 +100,7 @@ jobs:
       - run: go install github.com/spdx/spdx-sbom-generator/cmd/generator@v0.0.13
       - run: mkdir -p dist
       - run: generator -o /tmp -p .
-      - run: bom generate --image $_GHA_CONTAINER_REGISTRY:$VERSION -o /tmp/argo-events.spdx
+      - run: bom generate --image $CONTAINER_REGISTRY:$VERSION -o /tmp/argo-events.spdx
       # pack the boms into one file to make it easy to download
       - run: cd /tmp && tar -zcf sbom.tar.gz *.spdx
       - uses: actions/upload-artifact@v3
@@ -117,7 +113,6 @@ jobs:
       contents: write  # for softprops/action-gh-release to create GitHub release
       id-token: write  # for cosign
     runs-on: ubuntu-22.04
-    if: github.repository == env._GHA_GITHUB_REPO
     needs: [ build-push-linux-multi, bom ]
     steps:
       - name: Checkout
@@ -145,8 +140,8 @@ jobs:
       - name: Registry Login
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          username: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
+          password: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
       - name: Install cosign
         uses: sigstore/cosign-installer@204a51a57a74d190b284a0ce69b44bc37201f343 # v3.0.3
@@ -158,11 +153,11 @@ jobs:
 
       - name: Get digests of container images
         run: |
-          echo "IMAGE_DIGEST=$(crane digest $_GHA_CONTAINER_REGISTRY:$VERSION)" >> $GITHUB_ENV
+          echo "IMAGE_DIGEST=$(crane digest $CONTAINER_REGISTRY:$VERSION)" >> $GITHUB_ENV
 
       - name: Sign Argo Events container images and assets
         run: |
-          cosign sign --yes $_GHA_CONTAINER_REGISTRY@${{ env.IMAGE_DIGEST }}
+          cosign sign --yes "$CONTAINER_REGISTRY@$IMAGE_DIGEST"
           cosign sign-blob --yes ./dist/argo-events-checksums.txt > ./dist/argo-events-checksums.sig
           cosign sign-blob --yes /tmp/sbom.tar.gz > /tmp/sbom.tar.gz.sig
           # Retrieves the public key to release as an asset
