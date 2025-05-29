@@ -227,3 +227,7 @@ update-manifests-version:
 .PHONY: checksums
 checksums:
 	sha256sum ./dist/$(BINARY_NAME)-*.gz | awk -F './dist/' '{print $$1 $$2}' > ./dist/$(BINARY_NAME)-checksums.txt
+
+.PHONY: codespell
+codespell:
+	codespell

@@ -1,6 +1,6 @@
 # Azure Service Bus
 
-Service Bus event-source allows you to consume messages from queus and topics in Azure Service Bus and helps sensor trigger workflows.
+Service Bus event-source allows you to consume messages from queues and topics in Azure Service Bus and helps sensor trigger workflows.
 
 ## Event Structure
 

@@ -5,7 +5,7 @@ set -o nounset
 set -o pipefail
 
 source $(dirname $0)/library.sh
-header "updaing mocks"
+header "updating mocks"
 
 ensure_mockery
 

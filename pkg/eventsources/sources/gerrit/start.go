@@ -208,7 +208,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 		}
 
-		// Mitigate race condtions - it might create multiple hooks with same config when replicas > 1
+		// Mitigate race conditions - it might create multiple hooks with same config when replicas > 1
 		randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(2000)))
 		time.Sleep(time.Duration(randomNum.Int64()) * time.Millisecond)
 		f()
@@ -219,7 +219,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		go func() {
 			// Another kind of race conditions might happen when pods do rolling upgrade - new pod starts
 			// and old pod terminates, if DeleteHookOnFinish is true, the hook will be deleted from gerrit.
-			// This is a workround to mitigate the race conditions.
+			// This is a workaround to mitigate the race conditions.
 			logger.Info("starting gerrit hooks manager daemon")
 			ticker := time.NewTicker(60 * time.Second)
 			defer ticker.Stop()

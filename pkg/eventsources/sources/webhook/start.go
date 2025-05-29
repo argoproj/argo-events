@@ -96,7 +96,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	logger.Info("a request received, processing it...")
 
 	if !route.Active {
-		logger.Info("endpoint is not active, wont't process the request")
+		logger.Info("endpoint is not active, won't process the request")
 		sharedutil.SendErrorResponse(writer, "endpoint is inactive")
 		return
 	}
