@@ -47,6 +47,5 @@ func FuzzEventbusReconciler(f *testing.F) {
 		}
 		ctx := context.Background()
 		_ = r.reconcile(ctx, nativeBus)
-		_ = r.needsUpdate(nativeBus, nativeBus)
 	})
 }
