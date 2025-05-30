@@ -199,7 +199,7 @@ func (ac *AdmissionController) register(
 		if !reflect.DeepEqual(configuredWebhook.Webhooks, webhook.Webhooks) {
 			ac.Logger.Info("Updating webhook")
 			// Set the ResourceVersion as required by update.
-			webhook.ObjectMeta.ResourceVersion = configuredWebhook.ObjectMeta.ResourceVersion
+			webhook.ResourceVersion = configuredWebhook.ResourceVersion
 			if _, err := client.Update(ctx, webhook, metav1.UpdateOptions{}); err != nil {
 				return fmt.Errorf("failed to update webhook, %w", err)
 			}
@@ -293,7 +293,7 @@ func (ac *AdmissionController) generateSecret(ctx context.Context) (*corev1.Secr
 	}
 	deployment, err := ac.Client.AppsV1().Deployments(ac.Options.Namespace).Get(ctx, ac.Options.DeploymentName, metav1.GetOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("Failed to fetch webhook deployment, %w", err)
+		return nil, fmt.Errorf("failed to fetch webhook deployment, %w", err)
 	}
 	deploymentRef := metav1.NewControllerRef(deployment, appsv1.SchemeGroupVersion.WithKind("Deployment"))
 	secret := &corev1.Secret{
