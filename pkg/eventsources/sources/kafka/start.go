@@ -337,9 +337,10 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 		config.Net.SASL.Enable = true
 
 		config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkaEventSource.SASL.GetMechanism())
-		if config.Net.SASL.Mechanism == "SCRAM-SHA-512" {
+		switch config.Net.SASL.Mechanism {
+		case "SCRAM-SHA-512":
 			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &sharedutil.XDGSCRAMClient{HashGeneratorFcn: sharedutil.SHA512New} }
-		} else if config.Net.SASL.Mechanism == "SCRAM-SHA-256" {
+		case "SCRAM-SHA-256":
 			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &sharedutil.XDGSCRAMClient{HashGeneratorFcn: sharedutil.SHA256New} }
 		}
 

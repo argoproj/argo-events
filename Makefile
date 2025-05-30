@@ -178,12 +178,12 @@ start: image
 	kubectl -n argo-events wait --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.64.8
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v2.1.6
 
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint
 	go mod tidy
-	golangci-lint run --fix --verbose --concurrency 4 --timeout 5m --enable goimports
+	golangci-lint run --fix --verbose --concurrency 4 --timeout 5m
 
 /usr/local/bin/mkdocs:
 	$(PYTHON) -m pip install mkdocs==1.3.0 mkdocs_material==8.3.9 mkdocs-embed-external-markdown==2.3.0

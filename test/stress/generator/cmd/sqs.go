@@ -16,7 +16,7 @@ func NewSqsCommand() *cobra.Command {
 			validateGlobalParameters(cmd, args)
 
 			stressRun(signals.SetupSignalHandler(), func() error {
-				return fmt.Errorf("To be implemented.")
+				return fmt.Errorf("to be implemented")
 			})
 		},
 	}
