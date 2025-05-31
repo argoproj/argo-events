@@ -70,7 +70,7 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/riferrei/srclient v0.7.2
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/slack-go/slack v0.16.0
+	github.com/slack-go/slack v0.17.0
 	github.com/smartystreets/goconvey v1.7.2
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.0
@@ -218,7 +218,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.14.2 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
 	github.com/gorilla/handlers v1.5.2 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/gregdel/pushover v1.3.1 // indirect
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
