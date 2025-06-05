@@ -80,7 +80,7 @@ func (t *AWSLambdaTrigger) FetchResource(ctx context.Context) (interface{}, erro
 func (t *AWSLambdaTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
 	resourceBytes, err := json.Marshal(resource)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal the aws lamda trigger resource, %w", err)
+		return nil, fmt.Errorf("failed to marshal the aws lambda trigger resource, %w", err)
 	}
 	parameters := t.Trigger.Template.AWSLambda.Parameters
 	if parameters != nil {

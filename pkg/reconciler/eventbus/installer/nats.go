@@ -65,7 +65,7 @@ func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, config 
 	}
 }
 
-// Install creats a StatefulSet and a Service for NATS
+// Install creates a StatefulSet and a Service for NATS
 func (i *natsInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, error) {
 	natsObj := i.eventBus.Spec.NATS
 	if natsObj == nil || natsObj.Native == nil {
@@ -114,7 +114,7 @@ func (i *natsInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, error
 	return busConfig, nil
 }
 
-// Uninstall deletes those objects not handeled by cascade deletion.
+// Uninstall deletes those objects not handled by cascade deletion.
 func (i *natsInstaller) Uninstall(ctx context.Context) error {
 	return i.uninstallPVCs(ctx)
 }
@@ -546,7 +546,7 @@ streaming {
 }
 
 // buildServerAuthSecret builds a secret for NATS auth config
-// Parameter - authStrategy: will be added to annoations
+// Parameter - authStrategy: will be added to annotations
 // Parameter - secret
 // Example:
 //
