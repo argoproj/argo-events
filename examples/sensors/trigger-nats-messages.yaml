@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: minio
+  name: trigger-nats-messages
 spec:
   dependencies:
     - name: test-dep

@@ -19,7 +19,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook
+  name: complete-trigger-parameterization
 spec:
   template:
     serviceAccountName: operate-workflow-sa

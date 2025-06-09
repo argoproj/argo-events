@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: azure-events-hub
+  name: azure-event-hubs-sensor
 spec:
   dependencies:
     - name: test-dep

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: minio
+  name: trigger-openwhisk
 spec:
   dependencies:
     - name: test-dep

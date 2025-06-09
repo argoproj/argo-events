@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook
+  name: context-filter-webhook
 spec:
   template:
     serviceAccountName: operate-workflow-sa
