@@ -19,7 +19,7 @@ package awssns
 import (
 	"time"
 
-	snslib "github.com/aws/aws-sdk-go/service/sns"
+	snslib "github.com/aws/aws-sdk-go-v2/service/sns"
 
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
