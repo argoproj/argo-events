@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook
+  name: trigger-standard-k8s-resource-shortened
 spec:
   template:
     serviceAccountName: operate-workflow-sa
