@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: kafka
+  name: kafka-ttl
 spec:
   template:
     serviceAccountName: operate-workflow-sa
