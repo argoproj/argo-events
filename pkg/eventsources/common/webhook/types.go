@@ -66,7 +66,7 @@ type Route struct {
 	EventSourceName string
 	// EventName refers to event name
 	EventName string
-	// active determines whether the route is active and ready to process incoming requets
+	// active determines whether the route is active and ready to process incoming requests
 	// or it is an inactive route
 	Active bool
 	// data channel to receive data on this endpoint
