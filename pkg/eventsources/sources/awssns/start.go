@@ -31,8 +31,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	snslib "github.com/aws/aws-sdk-go/service/sns"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	snslib "github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/ghodss/yaml"
 	"go.uber.org/zap"
 
