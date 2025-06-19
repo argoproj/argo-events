@@ -33,6 +33,9 @@ func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionRespo
 	if len(s.newSensor.Spec.EventBusName) > 0 {
 		eventBusName = s.newSensor.Spec.EventBusName
 	}
+	if s.eventBusClient == nil {
+		return DeniedResponse("invalid EventBus: eventBusClient is nil")
+	}
 	eventBus, err := s.eventBusClient.Get(ctx, eventBusName, metav1.GetOptions{})
 	if err != nil {
 		return DeniedResponse("failed to get EventBus eventBusName=%s; err=%v", eventBusName, err)
@@ -46,7 +49,7 @@ func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionRespo
 
 func (s *sensor) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionResponse {
 	if s.oldSensor.Generation == s.newSensor.Generation {
-		AllowedResponse()
+		return AllowedResponse()
 	}
 	return s.ValidateCreate(ctx)
 }
