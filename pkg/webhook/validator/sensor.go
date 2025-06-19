@@ -46,7 +46,7 @@ func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionRespo
 
 func (s *sensor) ValidateUpdate(ctx context.Context) *admissionv1.AdmissionResponse {
 	if s.oldSensor.Generation == s.newSensor.Generation {
-		AllowedResponse()
+		return AllowedResponse()
 	}
 	return s.ValidateCreate(ctx)
 }
