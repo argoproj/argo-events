@@ -46,6 +46,42 @@ var (
 			},
 		},
 	}
+	fakeSensorWithFinalizer = &aev1.Sensor{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: aev1.SchemeGroupVersion.String(),
+			Kind:       "Sensor",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:  testNamespace,
+			Name:       "test-sensor",
+			Generation: 1,
+			Finalizers: []string{"test-finalizer"},
+		},
+		Spec: aev1.SensorSpec{
+			Dependencies: []aev1.EventDependency{
+				{
+					Name:            "test-dep",
+					EventSourceName: "test-source",
+					EventName:       "test-event",
+				},
+			},
+			Triggers: []aev1.Trigger{
+				{
+					Template: &aev1.TriggerTemplate{
+						Name: "test-trigger",
+						K8s: &aev1.StandardK8STrigger{
+							Operation: aev1.Create,
+							Source: &aev1.ArtifactLocation{
+								Resource: &aev1.K8SResource{
+									Value: []byte(`{"apiVersion":"v1","kind":"Pod","metadata":{"name":"test-trigger"}}`),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
 )
 
 func TestValidateSensor(t *testing.T) {
@@ -77,4 +113,16 @@ func TestValidateSensor(t *testing.T) {
 		r = v.ValidateUpdate(contextWithLogger(t))
 		assert.True(t, r.Allowed)
 	}
+}
+
+func TestValidateSensorUpdateSameGeneration(t *testing.T) {
+	// Test that ValidateUpdate allows metadata-only changes, such as finalizer removal
+	testSensor := fakeSensorWithFinalizer.DeepCopy()
+	testSensor.Finalizers = []string{}
+	testSensor.Generation = fakeSensorWithFinalizer.Generation
+
+	v := NewSensorValidator(fakeK8sClient, fakeEventsClient.EventBus(testNamespace), fakeEventsClient.EventSources(testNamespace), fakeEventsClient.Sensors(testNamespace), fakeSensorWithFinalizer, testSensor)
+	r := v.ValidateUpdate(contextWithLogger(t))
+
+	assert.True(t, r.Allowed, "ValidateUpdate should allow metadata-only changes when generation is unchanged")
 }
