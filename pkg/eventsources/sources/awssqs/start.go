@@ -22,10 +22,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
-	sqslib "github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	sqslib "github.com/aws/aws-sdk-go-v2/service/sqs"
 	"go.uber.org/zap"
 
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
