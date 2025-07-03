@@ -424,6 +424,9 @@ type HTTPTrigger struct {
 	// Secure Headers stored in Kubernetes Secrets for the HTTP requests.
 	// +optional
 	SecureHeaders []*SecureHeader `json:"secureHeaders,omitempty" protobuf:"bytes,9,rep,name=secureHeaders"`
+	// Dynamic Headers for the request, sourced from the event. Same spec as Parameters.
+	// +optional
+	DynamicHeaders []TriggerParameter `json:"dynamicHeaders,omitempty" protobuf:"bytes,10,rep,name=dynamicHeaders"`
 }
 
 // SecureHeader refers to HTTP Headers with auth tokens as values
