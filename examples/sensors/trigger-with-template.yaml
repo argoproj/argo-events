@@ -21,20 +21,20 @@ spec:
               metadata:
                 generateName: webhook-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 arguments:
                   parameters:
                   - name: message
                   - name: subject
                 templates:
-                - name: whalesay
+                - name: print-message
                   inputs:
                     parameters:
                     - name: message
                     - name: subject
                   container:
-                    image: docker/whalesay:latest
-                    command: [cowsay]
+                    image: busybox
+                    command: [echo]
                     args: ["{{inputs.parameters.message}} from {{inputs.parameters.subject}}"]
           parameters:
             # Retrieve the 'message' key from the payload
