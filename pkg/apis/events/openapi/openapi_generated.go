@@ -4350,6 +4350,20 @@ func schema_pkg_apis_events_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 							},
 						},
 					},
+					"dynamicHeaders": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Dynamic Headers for the request, sourced from the event. Same spec as Parameters.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"url", "payload"},
 			},
