@@ -69,21 +69,7 @@ the event-source over the eventbus, lets see how we can use the event context to
 
    You will see the following output,
 
-        _________
-        < webhook >
-        ---------
-           \
-            \
-             \
-                           ##        .
-                     ## ## ##       ==
-                  ## ## ## ##      ===
-              /""""""""""""""""___/ ===
-         ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
-              \______ o          __/
-               \    \        __/
-                 \____\______/
-
+        webhook
 We have successfully extracted the `type` key within the event context and parameterized
 the workflow to print the value of the `type`.
 
@@ -152,20 +138,9 @@ important when the `key` you defined in the parameter doesn't exist in the event
 
    You will see the following output,
 
-        _______________________
-        < wow! a default value. >
-        -----------------------
-           \
-            \
-             \
-                           ##        .
-                     ## ## ##       ==
-                  ## ## ## ##      ===
-              /""""""""""""""""___/ ===
-         ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
-              \______ o          __/
-               \    \        __/
-                 \____\______/
+        
+        wow! a default value.
+
 
 <br/>
 
@@ -272,20 +247,9 @@ a parameter comes handy.
 
    You will see the following output,
 
-         __________________
-        < hey!!hello world >
-         ------------------
-            \
-             \
-              \
-                            ##        .
-                      ## ## ##       ==
-                   ## ## ## ##      ===
-               /""""""""""""""""___/ ===
-          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
-               \______ o          __/
-                \    \        __/
-                  \____\______/
+         
+        hey!!hello world
+
 
 ## Trigger Template Parameterization
 

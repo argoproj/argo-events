@@ -21,20 +21,20 @@ spec:
               metadata:
                 generateName: gitlab-workflow-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 arguments:
                   parameters:
                   - name: message
                     # value will get overridden by the event payload
                     value: hello world
                 templates:
-                - name: whalesay
+                - name: print-message
                   inputs:
                     parameters:
                     - name: message
                   container:
-                    image: docker/whalesay:latest
-                    command: [cowsay]
+                    image: busybox
+                    command: [echo]
                     args: ["{{inputs.parameters.message}}"]
           parameters:
             - src:

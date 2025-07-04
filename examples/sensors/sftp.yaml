@@ -21,16 +21,16 @@ spec:
               metadata:
                 generateName: sftp-watcher-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 templates:
                   -
                     container:
                       args:
                         - "hello" # it will get replaced by the event payload
                       command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
-                    name: whalesay
+                        - echo
+                      image: busybox
+                    name: print-message
           parameters:
             - src:
                 dependencyName: test-dep
