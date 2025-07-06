@@ -28,15 +28,15 @@ spec:
               metadata:
                 generateName: group-1-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 templates:
-                  - name: whalesay
+                  - name: print-message
                     container:
                       args:
                         - "hello world"
                       command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
+                        - echo
+                      image: busybox
           parameters:
             - src:
                 dependencyName: test-dep-webhook
@@ -54,15 +54,15 @@ spec:
               metadata:
                 generateName: group-2-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 templates:
-                  - name: whalesay
+                  - name: print-message
                     container:
                       args:
                         - "hello world"
                       command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
+                        - echo
+                      image: busybox
           parameters:
             - src:
                 dependencyName: test-dep-minio

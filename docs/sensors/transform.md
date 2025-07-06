@@ -47,20 +47,20 @@ spec:
               metadata:
                 generateName: webhook-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 arguments:
                   parameters:
                     - name: message
                       # the value will get overridden by event payload from test-dep
                       value: hello world
                 templates:
-                  - name: whalesay
+                  - name: print-message
                     inputs:
                       parameters:
                         - name: message
                     container:
-                      image: docker/whalesay:latest
-                      command: [cowsay]
+                      image: busybox
+                      command: [echo]
                       args: ["{{inputs.parameters.message}}"]
           parameters:
             - src:
@@ -106,20 +106,20 @@ spec:
               metadata:
                 generateName: webhook-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 arguments:
                   parameters:
                     - name: message
                       # the value will get overridden by event payload from test-dep
                       value: hello world
                 templates:
-                  - name: whalesay
+                  - name: print-message
                     inputs:
                       parameters:
                         - name: message
                     container:
-                      image: docker/whalesay:latest
-                      command: [cowsay]
+                      image: busybox
+                      command: [echo]
                       args: ["{{inputs.parameters.message}}"]
           parameters:
             - src:

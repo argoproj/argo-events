@@ -57,32 +57,20 @@ If the commands are executed successfully, the eventbus, event-source and sensor
 
   Should result in something similar to what is below.
 
-        _________________________________________
-        / {"context":{"type":"webhook","specVersi \
-        | on":"0.3","source":"webhook","e |
-        | ventID":"38376665363064642d343336352d34 |
-        | 3035372d393766662d366234326130656232343 |
-        | 337","time":"2020-01-11T16:55:42.996636 |
-        | Z","dataContentType":"application/json" |
-        | ,"subject":"example"},"data":"eyJoZWFkZ |
-        | XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |
-        | LUxlbmd0aCI6WyIzOCJdLCJDb250ZW50LVR5cGU |
-        | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
-        | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
-        | jp7Im1lc3NhZ2UiOiJ0aGlzIGlzIG15IGZpcnN0 |
-        \ IHdlYmhvb2sifX0="}                      /
-         -----------------------------------------
-            \
-             \
-              \
-                            ##        .
-                      ## ## ##       ==
-                   ## ## ## ##      ===
-               /""""""""""""""""___/ ===
-          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
-               \______ o          __/
-                \    \        __/
-                  \____\______/
+```json
+{
+  "context": {
+    "type": "webhook",
+    "specVersion": "0.3",
+    "source": "webhook",
+    "eventID": "38376665363064642d343336352d343035372d393766662d366234326130656232343337",
+    "time": "2020-01-11T16:55:42.996636Z",
+    "dataContentType": "application/json",
+    "subject": "example"
+  },
+  "data": "eyJoZWFkZXIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50LUxlbmd0aCI6WyIzOCJdLCJDb250ZW50LVR5cGUiOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLUFnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5Ijp7Im1lc3NhZ2UiOiJ0aGlzIGlzIG15IGZpcnN0IHdlYmhvb2sifX0="
+}
+```
 
 <b>Note:</b> You will see the message printed in the workflow logs contains both
 the event context and data, with data being base64 encoded. In later sections,

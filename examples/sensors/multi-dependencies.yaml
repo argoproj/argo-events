@@ -25,7 +25,7 @@ spec:
               metadata:
                 generateName: multi-signal-workflow-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 arguments:
                   parameters:
                   - name: message1
@@ -35,13 +35,13 @@ spec:
                     # the value will get overridden by event payload from dependency test-dependency-calendar
                     value: hello world
                 templates:
-                - name: whalesay
+                - name: print-message
                   inputs:
                     parameters:
                     - name: message
                   container:
-                    image: docker/whalesay:latest
-                    command: [cowsay]
+                    image: busybox
+                    command: [echo]
                     args:
                       - "{{inputs.parameters.message1}}"
                       - "{{inputs.parameters.message2}}"

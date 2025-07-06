@@ -50,12 +50,12 @@ Resource event-source specification is available [here](../../APIs.md#argoproj.i
           labels:
             app: my-workflow
         spec:
-          entrypoint: whalesay
+          entrypoint: print-message
           templates:
-          - name: whalesay
+          - name: print-message
             container:
-              image: docker/whalesay:latest
-              command: [cowsay]
+              image: busybox
+              command: [echo]
               args: ["hello world"]
 
 1.  Once the `my-workflow` is created, the sensor will trigger the workflow. Run `argo list` to list the triggered workflow.

@@ -31,15 +31,15 @@ kind: Workflow
 metadata:
   name: hello-world
 spec:
-  entrypoint: whalesay
+  entrypoint: print-message
   templates:
-  - name: whalesay
+  - name: print-message
     container:
        args:
        - "hello world"	
        command:
-       - cowsay
-       image: "docker/whalesay:latest"`,
+       - echo
+       image: busybox`,
 		},
 	}
 
