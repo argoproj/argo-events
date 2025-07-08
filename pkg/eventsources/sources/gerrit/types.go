@@ -72,19 +72,19 @@ type ProjectHookConfigs struct {
 	Events []string `json:"events,omitempty"`
 	// ConnectionTimeout:
 	// Maximum interval of time in milliseconds the plugin waits for a connection to the target instance.
-	// When not specified, the default value is derrived from global configuration.
+	// When not specified, the default value is derived from global configuration.
 	ConnectionTimeout string `json:"connectionTimeout,omitempty"`
 	// SocketTimeout:
 	// Maximum interval of time in milliseconds the plugin waits for a response from the target instance once the connection has been established.
-	// When not specified, the default value is derrived from global configuration.
+	// When not specified, the default value is derived from global configuration.
 	SocketTimeout string `json:"socketTimeout,omitempty"`
 	// MaxTries:
 	// Maximum number of times the plugin should attempt when posting an event to the target url. Setting this value to 0 will disable retries.
-	// When not specified, the default value is derrived from global configuration.
+	// When not specified, the default value is derived from global configuration.
 	MaxTries string `json:"maxTries,omitempty"`
 	// RetryInterval:
 	// The interval of time in milliseconds between the subsequent auto-retries.
-	// When not specified, the default value is derrived from global configuration.
+	// When not specified, the default value is derived from global configuration.
 	RetryInterval string `json:"retryInterval,omitempty"`
 	// SslVerify:
 	// When 'true' SSL certificate verification of remote url is performed when payload is delivered, the default value is derived from global configuration.
