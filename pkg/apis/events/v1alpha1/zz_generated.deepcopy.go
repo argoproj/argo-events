@@ -2196,6 +2196,13 @@ func (in *HTTPTrigger) DeepCopyInto(out *HTTPTrigger) {
 			}
 		}
 	}
+	if in.DynamicHeaders != nil {
+		in, out := &in.DynamicHeaders, &out.DynamicHeaders
+		*out = make([]TriggerParameter, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
 	return
 }
 

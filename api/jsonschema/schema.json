@@ -2231,6 +2231,13 @@
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.BasicAuth",
           "description": "BasicAuth configuration for the http request."
         },
+        "dynamicHeaders": {
+          "description": "Dynamic Headers for the request, sourced from the event. Same spec as Parameters.",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.TriggerParameter"
+          },
+          "type": "array"
+        },
         "headers": {
           "additionalProperties": {
             "type": "string"

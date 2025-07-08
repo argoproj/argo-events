@@ -1561,6 +1561,10 @@ message HTTPTrigger {
   // Secure Headers stored in Kubernetes Secrets for the HTTP requests.
   // +optional
   repeated SecureHeader secureHeaders = 9;
+
+  // Dynamic Headers for the request, sourced from the event. Same spec as Parameters.
+  // +optional
+  repeated TriggerParameter dynamicHeaders = 10;
 }
 
 message Int64OrString {
