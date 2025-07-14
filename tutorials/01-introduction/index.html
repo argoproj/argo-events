@@ -2198,34 +2198,19 @@ to any type of event-source.</p>
 </li>
 </ul>
 <p>Should result in something similar to what is below.</p>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nx">_________________________________________</span>
-<span class="w">    </span><span class="o">/</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;context&quot;</span><span class="p">:{</span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;webhook&quot;</span><span class="p">,</span><span class="s">&quot;specVersi \</span>
-<span class="s">    | on&quot;</span><span class="p">:</span><span class="s">&quot;0.3&quot;</span><span class="p">,</span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="s">&quot;webhook&quot;</span><span class="p">,</span><span class="s">&quot;e |</span>
-<span class="s">    | ventID&quot;</span><span class="p">:</span><span class="s">&quot;38376665363064642d343336352d34 |</span>
-<span class="s">    | 3035372d393766662d366234326130656232343 |</span>
-<span class="s">    | 337&quot;</span><span class="p">,</span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="s">&quot;2020-01-11T16:55:42.996636 |</span>
-<span class="s">    | Z&quot;</span><span class="p">,</span><span class="s">&quot;dataContentType&quot;</span><span class="p">:</span><span class="s">&quot;application/json&quot;</span><span class="w"> </span><span class="o">|</span>
-<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="p">,</span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="s">&quot;example&quot;</span><span class="p">},</span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="s">&quot;eyJoZWFkZ |</span>
-<span class="s">    | XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |</span>
-<span class="s">    | LUxlbmd0aCI6WyIzOCJdLCJDb250ZW50LVR5cGU |</span>
-<span class="s">    | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |</span>
-<span class="s">    | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |</span>
-<span class="s">    | jp7Im1lc3NhZ2UiOiJ0aGlzIGlzIG15IGZpcnN0 |</span>
-<span class="s">    \ IHdlYmhvb2sifX0=&quot;</span><span class="p">}</span><span class="w">                      </span><span class="o">/</span>
-<span class="w">     </span><span class="o">-----------------------------------------</span>
-<span class="w">        </span>\
-<span class="w">         </span>\
-<span class="w">          </span>\
-<span class="w">                        </span><span class="err">##</span><span class="w">        </span><span class="p">.</span>
-<span class="w">                  </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w">       </span><span class="o">==</span>
-<span class="w">               </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w">      </span><span class="o">==</span><span class="p">=</span>
-<span class="w">           </span><span class="o">/</span><span class="s">&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;</span><span class="nx">___</span><span class="o">/</span><span class="w"> </span><span class="o">==</span><span class="p">=</span>
-<span class="w">      </span><span class="o">~~~</span><span class="w"> </span><span class="p">{</span><span class="o">~~</span><span class="w"> </span><span class="o">~~~~</span><span class="w"> </span><span class="o">~~~</span><span class="w"> </span><span class="o">~~~~</span><span class="w"> </span><span class="o">~~</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="o">/</span><span class="w">  </span><span class="o">==</span><span class="p">=</span><span class="o">-</span><span class="w"> </span><span class="o">~~~</span>
-<span class="w">           </span><span class="err">\</span><span class="nx">______</span><span class="w"> </span><span class="nx">o</span><span class="w">          </span><span class="nx">__</span><span class="o">/</span>
-<span class="w">            </span><span class="err">\</span><span class="w">    </span><span class="err">\</span><span class="w">        </span><span class="nx">__</span><span class="o">/</span>
-<span class="w">              </span><span class="err">\</span><span class="nx">____</span><span class="err">\</span><span class="nx">______</span><span class="o">/</span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;webhook&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;specVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.3&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;webhook&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;eventID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;38376665363064642d343336352d343035372d393766662d366234326130656232343337&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-01-11T16:55:42.996636Z&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dataContentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;example&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJoZWFkZXIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50LUxlbmd0aCI6WyIzOCJdLCJDb250ZW50LVR5cGUiOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLUFnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5Ijp7Im1lc3NhZ2UiOiJ0aGlzIGlzIG15IGZpcnN0IHdlYmhvb2sifX0=&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
-
 <p><b>Note:</b> You will see the message printed in the workflow logs contains both
 the event context and data, with data being base64 encoded. In later sections,
 we will see how to extract particular key-value from event context or data and

@@ -2193,8 +2193,8 @@ set up event-driven pipelines for existing workloads.</p>
 <span class="w">                    </span><span class="n">args</span><span class="o">:</span>
 <span class="w">                      </span><span class="o">-</span><span class="w"> </span><span class="s2">&quot;hello-world&quot;</span>
 <span class="w">                    </span><span class="n">command</span><span class="o">:</span>
-<span class="w">                      </span><span class="o">-</span><span class="w"> </span><span class="n">cowsay</span>
-<span class="w">                    </span><span class="n">image</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;docker/whalesay:latest&quot;</span>
+<span class="w">                      </span><span class="o">-</span><span class="w"> </span><span class="n">echo</span>
+<span class="w">                    </span><span class="n">image</span><span class="o">:</span><span class="w"> </span><span class="n">busybox</span>
 <span class="w">          </span><span class="n">parameters</span><span class="o">:</span>
 <span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="o">:</span>
 <span class="w">                </span><span class="n">dependencyName</span><span class="o">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span>
@@ -2222,31 +2222,18 @@ set up event-driven pipelines for existing workloads.</p>
 </li>
 <li>
 <p>After the pod was completed, inspect the logs of the pod, you will see something similar as below.</p>
-<div class="codehilite"><pre><span></span><code><span class="nx">_________________________________________</span>
-<span class="o">/</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;context&quot;</span><span class="p">:{</span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;webhook&quot;</span><span class="p">,</span><span class="s">&quot;specVersi \</span>
-<span class="s">| on&quot;</span><span class="p">:</span><span class="s">&quot;0.3&quot;</span><span class="p">,</span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="s">&quot;webhook&quot;</span><span class="p">,</span><span class="s">&quot;e |</span>
-<span class="s">| ventID&quot;</span><span class="p">:</span><span class="s">&quot;30306463666539362d346666642d34 |</span>
-<span class="s">| 3336332d383861312d336538363333613564313 |</span>
-<span class="s">| 932&quot;</span><span class="p">,</span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="s">&quot;2020-01-11T21:23:07.682961 |</span>
-<span class="s">| Z&quot;</span><span class="p">,</span><span class="s">&quot;dataContentType&quot;</span><span class="p">:</span><span class="s">&quot;application/json&quot;</span><span class="w"> </span><span class="o">|</span>
-<span class="o">|</span><span class="w"> </span><span class="p">,</span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="s">&quot;example&quot;</span><span class="p">},</span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="s">&quot;eyJoZWFkZ |</span>
-<span class="s">| XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |</span>
-<span class="s">| LUxlbmd0aCI6WyIxOSJdLCJDb250ZW50LVR5cGU |</span>
-<span class="s">| iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |</span>
-<span class="s">| FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |</span>
-<span class="s">\ jp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ==&quot;</span><span class="p">}</span><span class="w">       </span><span class="o">/</span>
-<span class="o">-----------------------------------------</span>
-<span class="w">  </span>\
-<span class="w">   </span>\
-<span class="w">    </span>\
-<span class="w">                  </span><span class="err">##</span><span class="w">        </span><span class="p">.</span>
-<span class="w">            </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w">       </span><span class="o">==</span>
-<span class="w">         </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w"> </span><span class="err">##</span><span class="w">      </span><span class="o">==</span><span class="p">=</span>
-<span class="w">     </span><span class="o">/</span><span class="s">&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;</span><span class="nx">___</span><span class="o">/</span><span class="w"> </span><span class="o">==</span><span class="p">=</span>
-<span class="o">~~~</span><span class="w"> </span><span class="p">{</span><span class="o">~~</span><span class="w"> </span><span class="o">~~~~</span><span class="w"> </span><span class="o">~~~</span><span class="w"> </span><span class="o">~~~~</span><span class="w"> </span><span class="o">~~</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="o">/</span><span class="w">  </span><span class="o">==</span><span class="p">=</span><span class="o">-</span><span class="w"> </span><span class="o">~~~</span>
-<span class="w">     </span><span class="err">\</span><span class="nx">______</span><span class="w"> </span><span class="nx">o</span><span class="w">          </span><span class="nx">__</span><span class="o">/</span>
-<span class="w">      </span><span class="err">\</span><span class="w">    </span><span class="err">\</span><span class="w">        </span><span class="nx">__</span><span class="o">/</span>
-<span class="w">        </span><span class="err">\</span><span class="nx">____</span><span class="err">\</span><span class="nx">______</span><span class="o">/</span>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;webhook&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;specVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0.3&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;webhook&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;eventID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;30306463666539362d346666642d343336332d383861312d336538363333613564313932&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2020-01-11T21:23:07.682961Z&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;dataContentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;application/json&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;eyJoZWFkZXIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50LUxlbmd0aCI6WyIxOSJdLCJDb250ZW50LVR5cGUiOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLUFnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5Ijp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ==&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 
 </li>
