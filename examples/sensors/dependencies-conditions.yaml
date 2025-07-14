@@ -33,15 +33,15 @@ spec:
               metadata:
                 generateName: hello-world-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 templates:
-                  - name: whalesay
+                  - name: print-message
                     container:
                       args:
                         - "hello world"
                       command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
+                        - echo
+                      image: busybox
     - template:
         # Boolean expression contains dependency names to determine whether to execute the trigger or not
         conditions: "test-dep-foo"
@@ -55,12 +55,12 @@ spec:
               metadata:
                 generateName: hello-world-2-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 templates:
-                  - name: whalesay
+                  - name: print-message
                     container:
                       args:
                         - "hello world"
                       command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
+                        - echo
+                      image: busybox

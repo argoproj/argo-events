@@ -21,15 +21,15 @@ spec:
               metadata:
                 generateName: hello-world-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 templates:
-                  - name: whalesay
+                  - name: print-message
                     container:
                       args:
                         - "hello "
                       command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
+                        - echo
+                      image: busybox
           parameters:
             - src:
                 dependencyName: test-dep

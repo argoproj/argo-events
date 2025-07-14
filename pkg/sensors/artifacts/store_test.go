@@ -75,12 +75,12 @@ kind: Workflow
 metadata:
   generateName: hello-world-
 spec:
-  entrypoint: whalesay
+  entrypoint: print-message
   templates:
-  - name: whalesay
+  - name: print-message
     container:
-      image: docker/whalesay:latest
-      command: [cowsay]
+      image: busybox
+      command: [echo]
       args: ["hello world"]
 `
 

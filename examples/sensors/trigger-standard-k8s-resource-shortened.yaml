@@ -26,8 +26,8 @@ spec:
                     args:
                       - "hello-world"
                     command:
-                      - cowsay
-                    image: "docker/whalesay:latest"
+                      - echo
+                    image: busybox
           parameters:
             - src:
                 dependencyName: test-dep
@@ -58,5 +58,5 @@ spec:
 #                        args:
 #                         - "hello world"
 #                        command:
-#                         - cowsay
-#                        image: "docker/whalesay:latest"
+#                         - echo
+#                        image: busybox
