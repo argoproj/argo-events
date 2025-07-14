@@ -94,6 +94,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 			Key: "serviceToken"}},
 	}
 
+	defaultHeader := "application/json"
 	secureHeaders := []*v1alpha1.SecureHeader{}
 	secureHeaders = append(secureHeaders, secureHeader)
 	trigger.Trigger.Template.HTTP.SecureHeaders = secureHeaders
@@ -113,6 +114,24 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 				Value:          &defaultValue,
 			},
 			Dest: "method",
+		},
+	}
+	trigger.Trigger.Template.HTTP.DynamicHeaders = []v1alpha1.TriggerParameter{
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "fake-dependency",
+				DataKey:        "Content-Type",
+				Value:          &defaultHeader,
+			},
+			Dest: "X-Content-Type",
+		},
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "fake-dependency",
+				DataKey:        "X-Github-Event",
+				Value:          &defaultHeader,
+			},
+			Dest: "X-Github-Event",
 		},
 	}
 
