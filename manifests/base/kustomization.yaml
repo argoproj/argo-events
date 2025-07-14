@@ -12,7 +12,7 @@ resources:
 
 images:
 - name: quay.io/argoproj/argo-events
-  newTag: v1.9.6
+  newTag: v1.9.7
 
 patches:
 - patch: |-
@@ -27,4 +27,4 @@ patches:
             - name: controller-manager
               env:
                 - name: ARGO_EVENTS_IMAGE
-                  value: quay.io/argoproj/argo-events:v1.9.6
+                  value: quay.io/argoproj/argo-events:v1.9.7
