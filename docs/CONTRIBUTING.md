@@ -53,4 +53,4 @@ No, we should not add that dependency.
 
 ### Contributor Workshop
 
-We have a [90m video on YouTube](https://youtu.be/zZv0lNCDG9w) show you have to get hands-on contributing.
+We have a [90m video on YouTube](https://youtu.be/zZv0lNCDG9w) to show you how to get some hands-on experience contributing (e.g., running locally, testing, etc...).

@@ -10,11 +10,11 @@ data:
       generateName: hello-world-
       namespace: argo-events
     spec:
-      entrypoint: whalesay
+      entrypoint: print-message
       serviceAccountName: argo-events
       templates:
-      - name: whalesay
+      - name: print-message
         container:
-          image: docker/whalesay:latest
-          command: [cowsay]
+          image: busybox
+          command: [echo]
           args: ["hello world"]
