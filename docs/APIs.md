@@ -4910,10 +4910,7 @@ DataFilter
 
 <p>
 
-DataFilter describes constraints and filters for event data Regular
-Expressions are purposefully not a feature as they are overkill for our
-uses here See Rob Pike’s Post:
-<a href="https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html">https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html</a>
+DataFilter describes constraints and filters for event data.
 </p>
 
 </p>
@@ -4951,7 +4948,7 @@ Description
 
 <p>
 
-Path is the JSONPath of the event’s (JSON decoded) data key Path is a
+Path is the JSONPath of the event’s (JSON decoded) data key. Path is a
 series of keys separated by a dot. A key may contain wildcard characters
 ‘\*’ and ‘?’. To access an array value use the index as the key. The dot
 and wildcard characters can be escaped with ‘&rsquo;. See
@@ -4993,9 +4990,10 @@ Type contains the JSON type of the data
 
 <p>
 
-Value is the allowed string values for this key Booleans are passed
-using strconv.ParseBool() Numbers are parsed using as float64 using
-strconv.ParseFloat() Strings are taken as is Nils this value is ignored
+Value is the allowed string values for this key. Booleans are parsed
+using strconv.ParseBool(), Numbers are parsed as float64 using
+strconv.ParseFloat(), Strings are treated as regular expressions, Nils
+value is ignored.
 </p>
 
 </td>
