@@ -4,16 +4,16 @@ import (
 	"context"
 
 	"go.uber.org/zap"
-	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	controllerClient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -24,7 +24,7 @@ const (
 )
 
 type reconciler struct {
-	client client.Client
+	client controllerClient.Client
 	scheme *runtime.Scheme
 
 	eventSourceImage string
@@ -32,7 +32,7 @@ type reconciler struct {
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, eventSourceImage string, logger *zap.SugaredLogger) reconcile.Reconciler {
+func NewReconciler(client controllerClient.Client, scheme *runtime.Scheme, eventSourceImage string, logger *zap.SugaredLogger) reconcile.Reconciler {
 	return &reconciler{client: client, scheme: scheme, eventSourceImage: eventSourceImage, logger: logger}
 }
 
@@ -53,13 +53,51 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if reconcileErr != nil {
 		log.Errorw("reconcile error", zap.Error(reconcileErr))
 	}
-	if r.needsUpdate(eventSource, esCopy) {
-		// Use a DeepCopy to update, because it will be mutated afterwards, with empty Status.
-		if err := r.client.Update(ctx, esCopy.DeepCopy()); err != nil {
-			return reconcile.Result{}, err
-		}
+
+	// Update the finalizers
+	// We need to always do this to ensure that the field ownership is set correctly,
+	// during the migration from client-side to server-side apply. Otherewise, users
+	// may end up in a state where the finalizer cannot be removed automatically.
+	patch := &v1alpha1.EventSource{
+		Status: esCopy.Status,
+		ObjectMeta: metav1.ObjectMeta{
+			Name:          eventSource.Name,
+			Namespace:     eventSource.Namespace,
+			Finalizers:    esCopy.Finalizers,
+			ManagedFields: nil,
+		},
+		TypeMeta: eventSource.TypeMeta,
 	}
-	if err := r.client.Status().Update(ctx, esCopy); err != nil {
+	if len(patch.Finalizers) == 0 {
+		patch.Finalizers = nil
+	}
+	if err := r.client.Patch(
+		ctx,
+		patch,
+		controllerClient.Apply,
+		controllerClient.ForceOwnership,
+		controllerClient.FieldOwner("argo-events"),
+	); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	// Update the status
+	statusPatch := &v1alpha1.EventSource{
+		Status: esCopy.Status,
+		ObjectMeta: metav1.ObjectMeta{
+			Name:          eventSource.Name,
+			Namespace:     eventSource.Namespace,
+			ManagedFields: nil,
+		},
+		TypeMeta: eventSource.TypeMeta,
+	}
+	if err := r.client.Status().Patch(
+		ctx,
+		statusPatch,
+		controllerClient.Apply,
+		controllerClient.ForceOwnership,
+		controllerClient.FieldOwner("argo-events"),
+	); err != nil {
 		return reconcile.Result{}, err
 	}
 	return ctrl.Result{}, reconcileErr
@@ -93,14 +131,4 @@ func (r *reconciler) reconcile(ctx context.Context, eventSource *v1alpha1.EventS
 		},
 	}
 	return Reconcile(r.client, args, log)
-}
-
-func (r *reconciler) needsUpdate(old, new *v1alpha1.EventSource) bool {
-	if old == nil {
-		return true
-	}
-	if !equality.Semantic.DeepEqual(old.Finalizers, new.Finalizers) {
-		return true
-	}
-	return false
 }
