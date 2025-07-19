@@ -25,7 +25,7 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/apache/openwhisk-client-go/whisk"
 	"github.com/apache/pulsar-client-go/pulsar"
-	"github.com/aws/aws-sdk-go/service/lambda"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	natslib "github.com/nats-io/nats.go"
 	"google.golang.org/grpc"
 	"k8s.io/client-go/dynamic"
