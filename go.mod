@@ -100,7 +100,7 @@ require (
 	k8s.io/utils v0.0.0-20241210054802-24370beab758
 	sigs.k8s.io/controller-runtime v0.19.0
 	sigs.k8s.io/controller-tools v0.17.3
-	sigs.k8s.io/yaml v1.5.0
+	sigs.k8s.io/yaml v1.6.0
 )
 
 require (
