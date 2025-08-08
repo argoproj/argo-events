@@ -4364,6 +4364,14 @@ func schema_pkg_apis_events_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 							},
 						},
 					},
+					"host": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Host refers to the domain name of the server (for virtual hosting).",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"url", "payload"},
 			},
