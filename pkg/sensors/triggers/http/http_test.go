@@ -49,11 +49,42 @@ var sensorObj = &v1alpha1.Sensor{
 	},
 }
 
+var sensorObjHost = &v1alpha1.Sensor{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:      "fake-sensor-host",
+		Namespace: "fake",
+	},
+	Spec: v1alpha1.SensorSpec{
+		Triggers: []v1alpha1.Trigger{
+			{
+				Template: &v1alpha1.TriggerTemplate{
+					Name: "fake-trigger-host",
+					HTTP: &v1alpha1.HTTPTrigger{
+						URL:     "http://fake.com:12000",
+						Method:  "POST",
+						Timeout: 10,
+						Host:    "fake-host.com",
+					},
+				},
+			},
+		},
+	},
+}
+
 func getFakeHTTPTrigger() *HTTPTrigger {
 	return &HTTPTrigger{
 		Client:  nil,
 		Sensor:  sensorObj.DeepCopy(),
 		Trigger: sensorObj.Spec.Triggers[0].DeepCopy(),
+		Logger:  logging.NewArgoEventsLogger(),
+	}
+}
+
+func getFakeHTTPTriggerHost() *HTTPTrigger {
+	return &HTTPTrigger{
+		Client:  nil,
+		Sensor:  sensorObjHost.DeepCopy(),
+		Trigger: sensorObjHost.Spec.Triggers[0].DeepCopy(),
 		Logger:  logging.NewArgoEventsLogger(),
 	}
 }
@@ -66,6 +97,17 @@ func TestHTTPTrigger_FetchResource(t *testing.T) {
 	trigger1, ok := obj.(*v1alpha1.HTTPTrigger)
 	assert.Equal(t, true, ok)
 	assert.Equal(t, trigger.Trigger.Template.HTTP.URL, trigger1.URL)
+}
+
+func TestHTTPTrigger_FetchResourceHost(t *testing.T) {
+	trigger := getFakeHTTPTriggerHost()
+	obj, err := trigger.FetchResource(context.TODO())
+	assert.Nil(t, err)
+	assert.NotNil(t, obj)
+	trigger1, ok := obj.(*v1alpha1.HTTPTrigger)
+	assert.Equal(t, true, ok)
+	assert.Equal(t, trigger.Trigger.Template.HTTP.URL, trigger1.URL)
+	assert.Equal(t, trigger.Trigger.Template.HTTP.Host, trigger1.Host)
 }
 
 func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
