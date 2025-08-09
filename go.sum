@@ -43,8 +43,8 @@ github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2 h1:9iefClla7iYpfYWdzPCRDo
 github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2/go.mod h1:XtLgD3ZD34DAaVIIAyG3objl5DynM3CQ/vMcbBNJZGI=
 github.com/Azure/azure-sdk-for-go/sdk/messaging/azeventhubs v1.4.0 h1:BwmN55GUUfwFPSd44bxBVkFD8yJAp+LLjGRjSnpbeUM=
 github.com/Azure/azure-sdk-for-go/sdk/messaging/azeventhubs v1.4.0/go.mod h1:OowfWwCcXlcn1Nkk6oTxeCuGNRElKtYpzkF1/gZ42Ig=
-github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.9.1 h1:CRZwf68N55u7ZZo3Xx2ynuqEA6k5GZfwsEUkU8qsAPk=
-github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.9.1/go.mod h1:NydgUaroiShkgOcb+X6OUdS3RalWBrvDNtOyFHJtsZY=
+github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.10.0 h1:kE5kpeiSqu4jcCQ/sWuyggMXJ/pT6oQ99+8hwPmyeJ0=
+github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.10.0/go.mod h1:IAN3Z0DMtehoxoQQnfqg1891z1P7GNoDryKtFcAyMBI=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub v1.3.0 h1:4hGvxD72TluuFIXVr8f4XkKZfqAa7Pj61t0jmQ7+kes=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub v1.3.0/go.mod h1:TSH7DcFItwAufy0Lz+Ft2cyopExCpxbOxI5SkH4dRNo=
 github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.1 h1:lhZdRq7TIx0GJQvSyX2Si406vrYsov2FXGp/RnSEtcs=
