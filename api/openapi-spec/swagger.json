@@ -2236,6 +2236,10 @@
             "type": "string"
           }
         },
+        "host": {
+          "description": "Host refers to the domain name of the server (for virtual hosting).",
+          "type": "string"
+        },
         "method": {
           "description": "Method refers to the type of the HTTP request. Refer https://golang.org/src/net/http/method.go for more info. Default value is POST.",
           "type": "string"
