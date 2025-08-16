@@ -15,7 +15,7 @@ jobs:
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/golang@master
         with:
