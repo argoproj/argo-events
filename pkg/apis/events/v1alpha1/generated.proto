@@ -1563,6 +1563,10 @@ message HTTPTrigger {
   // Dynamic Headers for the request, sourced from the event. Same spec as Parameters.
   // +optional
   repeated TriggerParameter dynamicHeaders = 10;
+
+  // Host refers to the domain name of the server (for virtual hosting).
+  // +optional
+  optional string host = 11;
 }
 
 message Int64OrString {
