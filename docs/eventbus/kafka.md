@@ -86,6 +86,10 @@ Defaults to range.
 When starting up a new group do we want to start from the oldest event
 (true) or the newest event (false). Defaults to false
 
+### partitioner
+
+Producer partitioning strategy. Supported values: `random`, `hash`, `roundrobin`, `manual`. Defaults to `random`.
+
 ## Security
 
 You can enable TLS or SASL authentication, see above for configuration
