@@ -1276,6 +1276,10 @@ message GerritEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 10;
+
+  // MaxTries is number of attempts when posting an event to the target url
+  // +optional
+  optional int64 maxTries = 11;
 }
 
 // GitArtifact contains information about an artifact stored in git

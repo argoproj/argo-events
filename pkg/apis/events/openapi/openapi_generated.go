@@ -3622,6 +3622,14 @@ func schema_pkg_apis_events_v1alpha1_GerritEventSource(ref common.ReferenceCallb
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter"),
 						},
 					},
+					"maxTries": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MaxTries is number of attempts when posting an event to the target url",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
 				},
 				Required: []string{"hookName", "events", "gerritBaseURL"},
 			},

@@ -163,6 +163,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			URL:       formattedURL,
 			Events:    router.gerritEventSource.Events,
 			SslVerify: router.gerritEventSource.SslVerify,
+			MaxTries:  router.gerritEventSource.MaxTries,
 		}
 
 		logger.Info("setting up the client to connect to Gerrit...")
