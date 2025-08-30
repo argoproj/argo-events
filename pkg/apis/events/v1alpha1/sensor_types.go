@@ -211,22 +211,20 @@ const (
 	JSONTypeString JSONType = "string"
 )
 
-// DataFilter describes constraints and filters for event data
-// Regular Expressions are purposefully not a feature as they are overkill for our uses here
-// See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html
+// DataFilter describes constraints and filters for event data.
 type DataFilter struct {
-	// Path is the JSONPath of the event's (JSON decoded) data key
+	// Path is the JSONPath of the event's (JSON decoded) data key.
 	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	Path string `json:"path" protobuf:"bytes,1,opt,name=path"`
 	// Type contains the JSON type of the data
 	Type JSONType `json:"type" protobuf:"bytes,2,opt,name=type,casttype=JSONType"`
-	// Value is the allowed string values for this key
-	// Booleans are passed using strconv.ParseBool()
-	// Numbers are parsed using as float64 using strconv.ParseFloat()
-	// Strings are taken as is
-	// Nils this value is ignored
+	// Value is the allowed string values for this key.
+	// Booleans are parsed using strconv.ParseBool(),
+	// Numbers are parsed as float64 using strconv.ParseFloat(),
+	// Strings are treated as regular expressions,
+	// Nils value is ignored.
 	Value []string `json:"value" protobuf:"bytes,3,rep,name=value"`
 	// Comparator compares the event data with a user given value.
 	// Can be ">=", ">", "=", "!=", "<", or "<=".
@@ -424,6 +422,9 @@ type HTTPTrigger struct {
 	// Secure Headers stored in Kubernetes Secrets for the HTTP requests.
 	// +optional
 	SecureHeaders []*SecureHeader `json:"secureHeaders,omitempty" protobuf:"bytes,9,rep,name=secureHeaders"`
+	// Dynamic Headers for the request, sourced from the event. Same spec as Parameters.
+	// +optional
+	DynamicHeaders []TriggerParameter `json:"dynamicHeaders,omitempty" protobuf:"bytes,10,rep,name=dynamicHeaders"`
 }
 
 // SecureHeader refers to HTTP Headers with auth tokens as values
@@ -569,9 +570,10 @@ type SchemaRegistryConfig struct {
 	// Schema Registry URL.
 	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
 	// Schema ID
-	SchemaID int32 `json:"schemaId" protobuf:"varint,2,name=schemaId"`
 	// +optional
+	SchemaID int32 `json:"schemaId" protobuf:"varint,2,name=schemaId"`
 	// SchemaRegistry - basic authentication
+	// +optional
 	Auth BasicAuth `json:"auth,omitempty" protobuf:"bytes,3,opt,name=auth"`
 }
 

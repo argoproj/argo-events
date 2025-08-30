@@ -32,6 +32,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [InsideBoard](https://www.insideboard.com)
 1. [Intuit](https://www.intuit.com/)
 1. [FikaWorks](https://fika.works/)
+1. [Kraken Technologies Ltd.](https://kraken.tech/)
 1. [Loam](https://www.getloam.com/)
 1. [MariaDB](https://mariadb.com/)
 1. [Mobimeo GmbH](https://mobimeo.com/en/home/)
@@ -59,3 +60,4 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Woolworths Group](https://www.woolworthsgroup.com.au/)
 1. [Zillow Group](https://www.zillow.com)
 1. [AlpacaTech](https://www.alpaca-tech.ai)
+1. [SBAB Bank AB](https://www.sbab.se)

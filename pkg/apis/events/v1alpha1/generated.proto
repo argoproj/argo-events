@@ -766,11 +766,9 @@ message CustomTrigger {
   repeated TriggerParameter payload = 7;
 }
 
-// DataFilter describes constraints and filters for event data
-// Regular Expressions are purposefully not a feature as they are overkill for our uses here
-// See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html
+// DataFilter describes constraints and filters for event data.
 message DataFilter {
-  // Path is the JSONPath of the event's (JSON decoded) data key
+  // Path is the JSONPath of the event's (JSON decoded) data key.
   // Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
   // To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
   // See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
@@ -779,11 +777,11 @@ message DataFilter {
   // Type contains the JSON type of the data
   optional string type = 2;
 
-  // Value is the allowed string values for this key
-  // Booleans are passed using strconv.ParseBool()
-  // Numbers are parsed using as float64 using strconv.ParseFloat()
-  // Strings are taken as is
-  // Nils this value is ignored
+  // Value is the allowed string values for this key.
+  // Booleans are parsed using strconv.ParseBool(),
+  // Numbers are parsed as float64 using strconv.ParseFloat(),
+  // Strings are treated as regular expressions,
+  // Nils value is ignored.
   repeated string value = 3;
 
   // Comparator compares the event data with a user given value.
@@ -1168,6 +1166,9 @@ message EventSourceSpec {
 
   // Gerrit event source
   map<string, GerritEventSource> gerrit = 35;
+
+  // MNS event sources
+  map<string, MNSEventSource> mns = 36;
 }
 
 // EventSourceStatus holds the status of the event-source resource
@@ -1275,6 +1276,10 @@ message GerritEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 10;
+
+  // MaxTries is number of attempts when posting an event to the target url
+  // +optional
+  optional int64 maxTries = 11;
 }
 
 // GitArtifact contains information about an artifact stored in git
@@ -1558,6 +1563,10 @@ message HTTPTrigger {
   // Secure Headers stored in Kubernetes Secrets for the HTTP requests.
   // +optional
   repeated SecureHeader secureHeaders = 9;
+
+  // Dynamic Headers for the request, sourced from the event. Same spec as Parameters.
+  // +optional
+  repeated TriggerParameter dynamicHeaders = 10;
 }
 
 message Int64OrString {
@@ -1802,6 +1811,10 @@ message KafkaEventSource {
   //
   // +optional
   optional string config = 13;
+
+  // Schema Registry configuration for consumer message with Avro format
+  // +optional
+  optional SchemaRegistryConfig schemaRegistry = 14;
 }
 
 // KafkaTrigger refers to the specification of the Kafka trigger.
@@ -1872,6 +1885,29 @@ message LogTrigger {
   // Only print messages every interval. Useful to prevent logging too much data for busy events.
   // +optional
   optional uint64 intervalSeconds = 1;
+}
+
+// MNSEventSource refers to event-source for AlibabaCloud MNS related events
+message MNSEventSource {
+  // AccessKey refers K8s secret containing AlibabaCloud access key
+  optional .k8s.io.api.core.v1.SecretKeySelector accessKey = 1;
+
+  // SecretKey refers K8s secret containing AlibabaCloud secret key
+  optional .k8s.io.api.core.v1.SecretKeySelector secretKey = 2;
+
+  // Queue is AlibabaCloud MNS queue to listen to for messages
+  optional string queue = 3;
+
+  // +optional
+  optional bool jsonBody = 4;
+
+  // Endpoint configures connection to a specific AlibabaCloud MNS endpoint
+  // +optional
+  optional string endpoint = 5;
+
+  // Filter
+  // +optional
+  optional EventSourceFilter filter = 6;
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
@@ -2727,10 +2763,11 @@ message SchemaRegistryConfig {
   optional string url = 1;
 
   // Schema ID
+  // +optional
   optional int32 schemaId = 2;
 
-  // +optional
   // SchemaRegistry - basic authentication
+  // +optional
   optional BasicAuth auth = 3;
 }
 

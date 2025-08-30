@@ -102,6 +102,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaEventSource":             schema_pkg_apis_events_v1alpha1_KafkaEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaTrigger":                 schema_pkg_apis_events_v1alpha1_KafkaTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.LogTrigger":                   schema_pkg_apis_events_v1alpha1_LogTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSource":               schema_pkg_apis_events_v1alpha1_MNSEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MQTTEventSource":              schema_pkg_apis_events_v1alpha1_MQTTEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Metadata":                     schema_pkg_apis_events_v1alpha1_Metadata(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSAuth":                     schema_pkg_apis_events_v1alpha1_NATSAuth(ref),
@@ -1957,12 +1958,12 @@ func schema_pkg_apis_events_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "DataFilter describes constraints and filters for event data Regular Expressions are purposefully not a feature as they are overkill for our uses here See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html",
+				Description: "DataFilter describes constraints and filters for event data.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"path": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+							Description: "Path is the JSONPath of the event's (JSON decoded) data key. Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -1978,7 +1979,7 @@ func schema_pkg_apis_events_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 					},
 					"value": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
+							Description: "Value is the allowed string values for this key. Booleans are parsed using strconv.ParseBool(), Numbers are parsed as float64 using strconv.ParseFloat(), Strings are treated as regular expressions, Nils value is ignored.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -3272,11 +3273,26 @@ func schema_pkg_apis_events_v1alpha1_EventSourceSpec(ref common.ReferenceCallbac
 							},
 						},
 					},
+					"mns": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MNS event sources",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSource"),
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureQueueStorageEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureServiceBusEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BitbucketEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BitbucketServerEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GerritEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PulsarEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisStreamEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SFTPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StripeEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebhookEventSource"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureQueueStorageEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureServiceBusEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BitbucketEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BitbucketServerEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GerritEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PulsarEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisStreamEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SFTPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StripeEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebhookEventSource"},
 	}
 }
 
@@ -3604,6 +3620,14 @@ func schema_pkg_apis_events_v1alpha1_GerritEventSource(ref common.ReferenceCallb
 						SchemaProps: spec.SchemaProps{
 							Description: "Filter",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter"),
+						},
+					},
+					"maxTries": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MaxTries is number of attempts when posting an event to the target url",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int64",
 						},
 					},
 				},
@@ -4334,6 +4358,20 @@ func schema_pkg_apis_events_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 							},
 						},
 					},
+					"dynamicHeaders": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Dynamic Headers for the request, sourced from the event. Same spec as Parameters.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"url", "payload"},
 			},
@@ -4824,12 +4862,18 @@ func schema_pkg_apis_events_v1alpha1_KafkaEventSource(ref common.ReferenceCallba
 							Format:      "",
 						},
 					},
+					"schemaRegistry": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Schema Registry configuration for consumer message with Avro format",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SchemaRegistryConfig"),
+						},
+					},
 				},
 				Required: []string{"url", "topic"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Backoff", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaConsumerGroup", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Backoff", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaConsumerGroup", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SchemaRegistryConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"},
 	}
 }
 
@@ -4999,6 +5043,62 @@ func schema_pkg_apis_events_v1alpha1_LogTrigger(ref common.ReferenceCallback) co
 				},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_events_v1alpha1_MNSEventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "MNSEventSource refers to event-source for AlibabaCloud MNS related events",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"accessKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AccessKey refers K8s secret containing AlibabaCloud access key",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"secretKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SecretKey refers K8s secret containing AlibabaCloud secret key",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"queue": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Queue is AlibabaCloud MNS queue to listen to for messages",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"jsonBody": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"boolean"},
+							Format: "",
+						},
+					},
+					"endpoint": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Endpoint configures connection to a specific AlibabaCloud MNS endpoint",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"filter": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Filter",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter"),
+						},
+					},
+				},
+				Required: []string{"queue"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -7072,7 +7172,7 @@ func schema_pkg_apis_events_v1alpha1_SchemaRegistryConfig(ref common.ReferenceCa
 						},
 					},
 				},
-				Required: []string{"url", "schemaId"},
+				Required: []string{"url"},
 			},
 		},
 		Dependencies: []string{

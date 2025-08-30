@@ -151,6 +151,17 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 		}
 	}
 
+	if trigger.DynamicHeaders != nil {
+		for _, dynamic := range trigger.DynamicHeaders {
+			value, _, err := triggers.ResolveParamValue(dynamic.Src, events)
+			if err != nil {
+				return nil, fmt.Errorf("failed to resolve the value for dynamicHeader %s, %w", dynamic.Dest, err)
+			}
+			// N.B - Removed 'if' clause - flagged by linter as not required,
+			request.Header[dynamic.Dest] = []string{*value}
+		}
+	}
+
 	if trigger.SecureHeaders != nil {
 		for _, secure := range trigger.SecureHeaders {
 			var value string

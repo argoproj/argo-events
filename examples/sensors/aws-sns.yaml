@@ -35,9 +35,9 @@ spec:
                         parameters:
                           - name: sns-message
                             value: "{{workflow.parameters.message}}"
-                    - name: whalesay
+                    - name: print-message
                       dependencies: [extract-message]
-                      template: whalesay
+                      template: print-message
                       arguments:
                         parameters:
                         - name: message
@@ -52,13 +52,13 @@ spec:
                     source: |
                       const snsMessage = {{inputs.parameters.sns-message}};
                       console.log(snsMessage.Message);
-                - name: whalesay
+                - name: print-message
                   inputs:
                     parameters:
                     - name: message
                   container:
-                    image: docker/whalesay:latest
-                    command: [cowsay]
+                    image: busybox
+                    command: [echo]
                     args: ["{{inputs.parameters.message}}"]
           parameters:
             - src:

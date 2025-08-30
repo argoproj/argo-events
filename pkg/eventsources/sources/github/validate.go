@@ -41,14 +41,14 @@ func validate(githubEventSource *v1alpha1.GithubEventSource) error {
 	}
 
 	if githubEventSource.ContentType != "" {
-		if !(githubEventSource.ContentType == "json" || githubEventSource.ContentType == "form") {
+		if !(githubEventSource.ContentType == "json" || githubEventSource.ContentType == "form") { //nolint:staticcheck
 			return fmt.Errorf("content type must be \"json\" or \"form\"")
 		}
 	}
 
 	// in order to avoid requests ending accidentally to public GitHub,
 	// make sure that both are set if either one is provided
-	if githubEventSource.GithubBaseURL != "" || githubEventSource.GithubUploadURL != "" {
+	if githubEventSource.GithubBaseURL != "" || githubEventSource.GithubUploadURL != "" { //nolint:staticcheck
 		if githubEventSource.GithubBaseURL == "" {
 			return fmt.Errorf("githubBaseURL is required when githubUploadURL is set")
 		}

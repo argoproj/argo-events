@@ -984,7 +984,7 @@
       }
     },
     "io.argoproj.events.v1alpha1.DataFilter": {
-      "description": "DataFilter describes constraints and filters for event data Regular Expressions are purposefully not a feature as they are overkill for our uses here See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html",
+      "description": "DataFilter describes constraints and filters for event data.",
       "type": "object",
       "required": [
         "path",
@@ -997,7 +997,7 @@
           "type": "string"
         },
         "path": {
-          "description": "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+          "description": "Path is the JSONPath of the event's (JSON decoded) data key. Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
           "type": "string"
         },
         "template": {
@@ -1009,7 +1009,7 @@
           "type": "string"
         },
         "value": {
-          "description": "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
+          "description": "Value is the allowed string values for this key. Booleans are parsed using strconv.ParseBool(), Numbers are parsed as float64 using strconv.ParseFloat(), Strings are treated as regular expressions, Nils value is ignored.",
           "type": "array",
           "items": {
             "type": "string"
@@ -1557,6 +1557,13 @@
             "$ref": "#/definitions/io.argoproj.events.v1alpha1.S3Artifact"
           }
         },
+        "mns": {
+          "description": "MNS event sources",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.MNSEventSource"
+          }
+        },
         "mqtt": {
           "description": "MQTT event sources",
           "type": "object",
@@ -1830,6 +1837,11 @@
         "hookName": {
           "description": "HookName is the name of the webhook",
           "type": "string"
+        },
+        "maxTries": {
+          "description": "MaxTries is number of attempts when posting an event to the target url",
+          "type": "integer",
+          "format": "int64"
         },
         "metadata": {
           "description": "Metadata holds the user defined metadata which will passed along the event payload.",
@@ -2215,6 +2227,13 @@
           "description": "BasicAuth configuration for the http request.",
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.BasicAuth"
         },
+        "dynamicHeaders": {
+          "description": "Dynamic Headers for the request, sourced from the event. Same spec as Parameters.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.TriggerParameter"
+          }
+        },
         "headers": {
           "description": "Headers for the HTTP request.",
           "type": "object",
@@ -2509,6 +2528,10 @@
           "description": "SASL configuration for the kafka client",
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.SASLConfig"
         },
+        "schemaRegistry": {
+          "description": "Schema Registry configuration for consumer message with Avro format",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.SchemaRegistryConfig"
+        },
         "tls": {
           "description": "TLS configuration for the kafka client.",
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.TLSConfig"
@@ -2620,6 +2643,38 @@
           "description": "Only print messages every interval. Useful to prevent logging too much data for busy events.",
           "type": "integer",
           "format": "int64"
+        }
+      }
+    },
+    "io.argoproj.events.v1alpha1.MNSEventSource": {
+      "description": "MNSEventSource refers to event-source for AlibabaCloud MNS related events",
+      "type": "object",
+      "required": [
+        "queue"
+      ],
+      "properties": {
+        "accessKey": {
+          "description": "AccessKey refers K8s secret containing AlibabaCloud access key",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "endpoint": {
+          "description": "Endpoint configures connection to a specific AlibabaCloud MNS endpoint",
+          "type": "string"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.EventSourceFilter"
+        },
+        "jsonBody": {
+          "type": "boolean"
+        },
+        "queue": {
+          "description": "Queue is AlibabaCloud MNS queue to listen to for messages",
+          "type": "string"
+        },
+        "secretKey": {
+          "description": "SecretKey refers K8s secret containing AlibabaCloud secret key",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
     },
@@ -3752,8 +3807,7 @@
       "description": "SchemaRegistryConfig refers to configuration for a client",
       "type": "object",
       "required": [
-        "url",
-        "schemaId"
+        "url"
       ],
       "properties": {
         "auth": {

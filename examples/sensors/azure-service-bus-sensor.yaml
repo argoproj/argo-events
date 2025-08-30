@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: azure-service-bus
+  name: azure-service-bus-sensor
 spec:
   dependencies:
     - name: test-dep

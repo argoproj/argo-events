@@ -4910,10 +4910,7 @@ DataFilter
 
 <p>
 
-DataFilter describes constraints and filters for event data Regular
-Expressions are purposefully not a feature as they are overkill for our
-uses here See Rob Pike’s Post:
-<a href="https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html">https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html</a>
+DataFilter describes constraints and filters for event data.
 </p>
 
 </p>
@@ -4951,7 +4948,7 @@ Description
 
 <p>
 
-Path is the JSONPath of the event’s (JSON decoded) data key Path is a
+Path is the JSONPath of the event’s (JSON decoded) data key. Path is a
 series of keys separated by a dot. A key may contain wildcard characters
 ‘\*’ and ‘?’. To access an array value use the index as the key. The dot
 and wildcard characters can be escaped with ‘&rsquo;. See
@@ -4993,9 +4990,10 @@ Type contains the JSON type of the data
 
 <p>
 
-Value is the allowed string values for this key Booleans are passed
-using strconv.ParseBool() Numbers are parsed using as float64 using
-strconv.ParseFloat() Strings are taken as is Nils this value is ignored
+Value is the allowed string values for this key. Booleans are parsed
+using strconv.ParseBool(), Numbers are parsed as float64 using
+strconv.ParseFloat(), Strings are treated as regular expressions, Nils
+value is ignored.
 </p>
 
 </td>
@@ -7463,6 +7461,27 @@ Gerrit event source
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>mns</code></br> <em>
+<a href="#argoproj.io/v1alpha1.MNSEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSource
+</a> </em>
+</td>
+
+<td>
+
+<p>
+
+MNS event sources
+</p>
+
+</td>
+
+</tr>
+
 </table>
 
 </td>
@@ -7512,6 +7531,7 @@ EventSourceFilter
 <a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,
 <a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>,
+<a href="#argoproj.io/v1alpha1.MNSEventSource">MNSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>,
 <a href="#argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource</a>,
 <a href="#argoproj.io/v1alpha1.NSQEventSource">NSQEventSource</a>,
@@ -8338,6 +8358,27 @@ Gerrit event source
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>mns</code></br> <em>
+<a href="#argoproj.io/v1alpha1.MNSEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSource
+</a> </em>
+</td>
+
+<td>
+
+<p>
+
+MNS event sources
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -9120,6 +9161,25 @@ SslVerify to enable ssl verification
 <p>
 
 Filter
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>maxTries</code></br> <em> int64 </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+MaxTries is number of attempts when posting an event to the target url
 </p>
 
 </td>
@@ -10833,6 +10893,28 @@ Secure Headers stored in Kubernetes Secrets for the HTTP requests.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>dynamicHeaders</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Dynamic Headers for the request, sourced from the event. Same spec as
+Parameters.
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -12239,6 +12321,27 @@ consumer: fetch: min: 1 net: MaxOpenRequests: 5
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>schemaRegistry</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SchemaRegistryConfig">
+SchemaRegistryConfig </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Schema Registry configuration for consumer message with Avro format
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -12687,6 +12790,165 @@ LogicalOperator (<code>string</code> alias)
 <p>
 
 </p>
+
+<h3 id="argoproj.io/v1alpha1.MNSEventSource">
+
+MNSEventSource
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+
+<p>
+
+<p>
+
+MNSEventSource refers to event-source for AlibabaCloud MNS related
+events
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+</th>
+
+<th>
+
+Description
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>accessKey</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+
+<td>
+
+<p>
+
+AccessKey refers K8s secret containing AlibabaCloud access key
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>secretKey</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+
+<td>
+
+<p>
+
+SecretKey refers K8s secret containing AlibabaCloud secret key
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>queue</code></br> <em> string </em>
+</td>
+
+<td>
+
+<p>
+
+Queue is AlibabaCloud MNS queue to listen to for messages
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>endpoint</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Endpoint configures connection to a specific AlibabaCloud MNS endpoint
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Filter
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 <h3 id="argoproj.io/v1alpha1.MQTTEventSource">
 
@@ -17854,6 +18116,7 @@ SchemaRegistryConfig
 <p>
 
 (<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>,
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>)
 </p>
 
@@ -17915,6 +18178,7 @@ Schema Registry URL.
 
 <td>
 
+<em>(Optional)</em>
 <p>
 
 Schema ID

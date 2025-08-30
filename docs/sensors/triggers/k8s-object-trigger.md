@@ -53,8 +53,8 @@ set up event-driven pipelines for existing workloads.
                             args:
                               - "hello-world"
                             command:
-                              - cowsay
-                            image: "docker/whalesay:latest"
+                              - echo
+                            image: busybox
                   parameters:
                     - src:
                         dependencyName: test-dep
@@ -74,31 +74,20 @@ set up event-driven pipelines for existing workloads.
 
 1.  After the pod was completed, inspect the logs of the pod, you will see something similar as below.
 
-        _________________________________________
-        / {"context":{"type":"webhook","specVersi \
-        | on":"0.3","source":"webhook","e |
-        | ventID":"30306463666539362d346666642d34 |
-        | 3336332d383861312d336538363333613564313 |
-        | 932","time":"2020-01-11T21:23:07.682961 |
-        | Z","dataContentType":"application/json" |
-        | ,"subject":"example"},"data":"eyJoZWFkZ |
-        | XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |
-        | LUxlbmd0aCI6WyIxOSJdLCJDb250ZW50LVR5cGU |
-        | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
-        | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
-        \ jp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ=="}       /
-        -----------------------------------------
-          \
-           \
-            \
-                          ##        .
-                    ## ## ##       ==
-                 ## ## ## ##      ===
-             /""""""""""""""""___/ ===
-        ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
-             \______ o          __/
-              \    \        __/
-                \____\______/
+        {
+          "context": {
+            "type": "webhook",
+            "specVersion": "0.3",
+            "source": "webhook",
+            "eventID": "30306463666539362d346666642d343336332d383861312d336538363333613564313932",
+            "time": "2020-01-11T21:23:07.682961Z",
+            "dataContentType": "application/json",
+            "subject": "example"
+          },
+          "data": "eyJoZWFkZXIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50LUxlbmd0aCI6WyIxOSJdLCJDb250ZW50LVR5cGUiOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLUFnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5Ijp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ=="
+        }
+                
+        
 
 ## Operation
 
