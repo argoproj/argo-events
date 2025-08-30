@@ -74,13 +74,13 @@ require (
 	github.com/smartystreets/goconvey v1.7.2
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.0
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	github.com/stripe/stripe-go v70.15.0+incompatible
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.4
 	github.com/xdg-go/scram v1.1.2
 	github.com/yuin/gopher-lua v1.1.1
-	gitlab.com/gitlab-org/api/client-go v0.142.0
+	gitlab.com/gitlab-org/api/client-go v0.142.5
 	go.uber.org/ratelimit v0.3.1
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.41.0
