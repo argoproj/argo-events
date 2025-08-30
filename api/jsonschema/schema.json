@@ -1846,6 +1846,11 @@
           "description": "HookName is the name of the webhook",
           "type": "string"
         },
+        "maxTries": {
+          "description": "MaxTries is number of attempts when posting an event to the target url",
+          "format": "int64",
+          "type": "integer"
+        },
         "metadata": {
           "additionalProperties": {
             "type": "string"
