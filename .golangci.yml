@@ -1,29 +1,41 @@
-run:
-  timeout: 5m
-issues:
-  exclude-dirs:
-    - pkg/client
-    - vendor
-    - "eventsources/common/naivewatcher"
-  exclude-files:
-    - ".*generated.*"
+version: "2"
 linters:
   enable:
-   # - depguard
     - dogsled
     - goconst
     - gocritic
-    - gofmt
-    - goimports
     - goprintffuncname
-    - gosimple
-    - govet
-    - ineffassign
     - misspell
     - nakedret
     - rowserrcheck
-    - staticcheck
-    - typecheck
     - unconvert
-    - unused
     - whitespace
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - .*generated.*
+      - pkg/client
+      - vendor
+      - eventsources/common/naivewatcher
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - .*generated.*
+      - pkg/client
+      - vendor
+      - eventsources/common/naivewatcher
+      - third_party$
+      - builtin$
+      - examples$

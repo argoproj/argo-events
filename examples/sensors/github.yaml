@@ -44,22 +44,22 @@ spec:
               metadata:
                 generateName: github-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 arguments:
                   parameters:
                     - name: pr-title
                     - name: pr-number
                     - name: short-sha
                 templates:
-                  - name: whalesay
+                  - name: print-message
                     inputs:
                       parameters:
                         - name: pr-title
                         - name: pr-number
                         - name: short-sha
                     container:
-                      image: docker/whalesay:latest
-                      command: [cowsay]
+                      image: busybox
+                      command: [echo]
                       args: ["{{inputs.parameters.pr-title}}"]
           parameters:
             - src:

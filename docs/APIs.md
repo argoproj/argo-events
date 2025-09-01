@@ -4910,10 +4910,7 @@ DataFilter
 
 <p>
 
-DataFilter describes constraints and filters for event data Regular
-Expressions are purposefully not a feature as they are overkill for our
-uses here See Rob Pike’s Post:
-<a href="https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html">https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html</a>
+DataFilter describes constraints and filters for event data.
 </p>
 
 </p>
@@ -4951,7 +4948,7 @@ Description
 
 <p>
 
-Path is the JSONPath of the event’s (JSON decoded) data key Path is a
+Path is the JSONPath of the event’s (JSON decoded) data key. Path is a
 series of keys separated by a dot. A key may contain wildcard characters
 ‘\*’ and ‘?’. To access an array value use the index as the key. The dot
 and wildcard characters can be escaped with ‘&rsquo;. See
@@ -4993,9 +4990,10 @@ Type contains the JSON type of the data
 
 <p>
 
-Value is the allowed string values for this key Booleans are passed
-using strconv.ParseBool() Numbers are parsed using as float64 using
-strconv.ParseFloat() Strings are taken as is Nils this value is ignored
+Value is the allowed string values for this key. Booleans are parsed
+using strconv.ParseBool(), Numbers are parsed as float64 using
+strconv.ParseFloat(), Strings are treated as regular expressions, Nils
+value is ignored.
 </p>
 
 </td>
@@ -9169,6 +9167,25 @@ Filter
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>maxTries</code></br> <em> int64 </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+MaxTries is number of attempts when posting an event to the target url
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -10876,6 +10893,28 @@ Secure Headers stored in Kubernetes Secrets for the HTTP requests.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>dynamicHeaders</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Dynamic Headers for the request, sourced from the event. Same spec as
+Parameters.
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -12276,6 +12315,27 @@ e.g.
 <p>
 
 consumer: fetch: min: 1 net: MaxOpenRequests: 5
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>schemaRegistry</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SchemaRegistryConfig">
+SchemaRegistryConfig </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Schema Registry configuration for consumer message with Avro format
 </p>
 
 </td>
@@ -18056,6 +18116,7 @@ SchemaRegistryConfig
 <p>
 
 (<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>,
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>)
 </p>
 
@@ -18117,6 +18178,7 @@ Schema Registry URL.
 
 <td>
 
+<em>(Optional)</em>
 <p>
 
 Schema ID

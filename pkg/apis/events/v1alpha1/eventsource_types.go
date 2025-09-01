@@ -495,6 +495,9 @@ type KafkaEventSource struct {
 	//
 	// +optional
 	Config string `json:"config,omitempty" protobuf:"bytes,13,opt,name=config"`
+	// Schema Registry configuration for consumer message with Avro format
+	// +optional
+	SchemaRegistry *SchemaRegistryConfig `json:"schemaRegistry,omitempty" protobuf:"bytes,14,opt,name=schemaRegistry"`
 }
 
 type KafkaConsumerGroup struct {
@@ -724,6 +727,9 @@ type GerritEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,10,opt,name=filter"`
+	// MaxTries is number of attempts when posting an event to the target url
+	// +optional
+	MaxTries int64 `json:"maxTries" protobuf:"varint,11,opt,name=maxTries"`
 }
 
 func (g GerritEventSource) NeedToCreateHooks() bool {

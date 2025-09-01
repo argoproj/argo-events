@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook
+  name: time-filter-webhook
 spec:
   template:
     serviceAccountName: operate-workflow-sa
@@ -34,13 +34,13 @@ spec:
               metadata:
                 generateName: time-filter-hello-world-
               spec:
-                entrypoint: whalesay
+                entrypoint: print-message
                 templates:
                   -
                     container:
                       args:
                         - "hello world"
                       command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
-                    name: whalesay
+                        - echo
+                      image: busybox
+                    name: print-message

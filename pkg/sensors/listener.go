@@ -508,7 +508,7 @@ func (sensorCtx *SensorContext) getDependencyExpression(ctx context.Context, tri
 
 func eventToString(event *v1alpha1.Event) string {
 	return fmt.Sprintf("ID '%s', Source '%s', Time '%s', Data '%s'",
-		event.Context.ID, event.Context.Source, event.Context.Time.Time.Format(time.RFC3339), string(event.Data))
+		event.Context.ID, event.Context.Source, event.Context.Time.Format(time.RFC3339), string(event.Data))
 }
 
 func convertEvent(event cloudevents.Event) *v1alpha1.Event {

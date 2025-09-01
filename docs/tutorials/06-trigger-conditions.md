@@ -48,40 +48,17 @@ Make sure there are no errors in any of the event-sources.
 5. You will notice an Argo workflow with name `group-1-xxxx` is created with
     following output,
 
-         __________________________
-        < this is my first webhook >
-         --------------------------
-            \
-             \
-              \
-                            ##        .
-                      ## ## ##       ==
-                   ## ## ## ##      ===
-               /""""""""""""""""___/ ===
-          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
-               \______ o          __/
-                \    \        __/
-                  \____\______/
+
+        this is my first webhook
+
 
 6. Now, lets generate a Minio event so that we can run `group-2-xxxx` workflow.
     Drop a file onto `test` bucket. The workflow that will get created will
     print the name of the bucket as follows,
 
-         ______
-        < test >
-         ------
-            \
-             \
-              \
-                            ##        .
-                      ## ## ##       ==
-                   ## ## ## ##      ===
-               /""""""""""""""""___/ ===
-          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
-               \______ o          __/
-                \    \        __/
-                  \____\______/
 
+        test
+         
 5. Great!! You have now learned how to use `conditions`. Lets update the sensor
     with a trigger that waits for both dependencies to resolve. This is the
     normal sensor behavior if `conditions` is not defined.
@@ -91,17 +68,6 @@ Make sure there are no errors in any of the event-sources.
     Send a HTTP request and perform a file drop on Minio bucket as done above.
     You should get the following output.
 
-         _______________________________
-        < this is my first webhook test >
-         -------------------------------
-            \
-             \
-              \
-                            ##        .
-                      ## ## ##       ==
-                   ## ## ## ##      ===
-               /""""""""""""""""___/ ===
-          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
-               \______ o          __/
-                \    \        __/
-                  \____\______/
+        
+        this is my first webhook test
+         

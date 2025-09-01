@@ -124,9 +124,10 @@ func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCall
 	// Will never give up
 	opts.MaxReconnect = -1
 	opts.Url = e.url
-	if e.auth.Strategy == aev1.AuthStrategyToken {
+	switch e.auth.Strategy {
+	case aev1.AuthStrategyToken:
 		opts.Token = e.auth.Credential.Token
-	} else if e.auth.Strategy == aev1.AuthStrategyBasic {
+	case aev1.AuthStrategyBasic:
 		opts.User = e.auth.Credential.Username
 		opts.Password = e.auth.Credential.Password
 	}

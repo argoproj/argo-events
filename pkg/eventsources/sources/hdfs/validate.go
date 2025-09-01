@@ -47,7 +47,7 @@ func validate(eventSource *v1alpha1.HDFSEventSource) error {
 			return fmt.Errorf("failed to parse interval")
 		}
 	}
-	err := eventSource.WatchPathConfig.Validate()
+	err := eventSource.Validate()
 	if err != nil {
 		return err
 	}

@@ -18,15 +18,19 @@ package kafka
 
 import (
 	"context"
+	"crypto/tls"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/IBM/sarama"
+	"github.com/riferrei/srclient"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -45,6 +49,7 @@ type EventListener struct {
 	EventName        string
 	KafkaEventSource v1alpha1.KafkaEventSource
 	Metrics          *metrics.Metrics
+	SchemaRegistry   *srclient.SchemaRegistryClient
 }
 
 // GetEventSourceName returns name of event source
@@ -71,6 +76,27 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 	return false
 }
 
+func (el *EventListener) createSchemaRegistryClient() (*srclient.SchemaRegistryClient, error) {
+	sr := el.KafkaEventSource.SchemaRegistry
+	if sr == nil {
+		return nil, fmt.Errorf("schema registry configuration is not provided")
+	}
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+		Timeout: 5 * time.Second,
+	}
+	schemaRegistryClient := srclient.NewSchemaRegistryClient(sr.URL, srclient.WithClient(httpClient), srclient.WithSemaphoreWeight(16))
+
+	if sr.Auth.Username != nil && sr.Auth.Password != nil {
+		user, _ := sharedutil.GetSecretFromVolume(sr.Auth.Username)
+		password, _ := sharedutil.GetSecretFromVolume(sr.Auth.Password)
+		schemaRegistryClient.SetCredentials(user, password)
+	}
+	return schemaRegistryClient, nil
+}
+
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	log := logging.FromContext(ctx).
@@ -79,6 +105,16 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	log.Info("start kafka event source...")
 	kafkaEventSource := &el.KafkaEventSource
+
+	// Initialize SchemaRegistryClient
+	if kafkaEventSource.SchemaRegistry != nil {
+		log.Info("connecting to schema registry at url ", kafkaEventSource.SchemaRegistry.URL)
+		schemaRegistry, err := el.createSchemaRegistryClient()
+		if err != nil {
+			return fmt.Errorf("failed to create schema registry client for event source %s, %w", el.GetEventName(), err)
+		}
+		el.SchemaRegistry = schemaRegistry
+	}
 
 	if kafkaEventSource.ConsumerGroup == nil {
 		return el.partitionConsumer(ctx, log, kafkaEventSource, dispatch)
@@ -113,6 +149,7 @@ func (el *EventListener) consumerGroupConsumer(ctx context.Context, log *zap.Sug
 		eventSourceName:  el.EventSourceName,
 		eventName:        el.EventName,
 		metrics:          el.Metrics,
+		schemaRegistry:   el.SchemaRegistry,
 	}
 
 	urls := strings.Split(kafkaEventSource.URL, ",")
@@ -232,7 +269,15 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 		eventData.Headers = headers
 
 		if kafkaEventSource.JSONBody {
-			eventData.Body = (*json.RawMessage)(&msg.Value)
+			if el.SchemaRegistry != nil {
+				value, err := toJson(el.SchemaRegistry, msg)
+				if err != nil {
+					return fmt.Errorf("failed to retrieve json value using the schema registry, %w", err)
+				}
+				eventData.Body = (*json.RawMessage)(&value)
+			} else {
+				eventData.Body = (*json.RawMessage)(&msg.Value)
+			}
 		} else {
 			eventData.Body = msg.Value
 		}
@@ -292,9 +337,10 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 		config.Net.SASL.Enable = true
 
 		config.Net.SASL.Mechanism = sarama.SASLMechanism(kafkaEventSource.SASL.GetMechanism())
-		if config.Net.SASL.Mechanism == "SCRAM-SHA-512" {
+		switch config.Net.SASL.Mechanism {
+		case "SCRAM-SHA-512":
 			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &sharedutil.XDGSCRAMClient{HashGeneratorFcn: sharedutil.SHA512New} }
-		} else if config.Net.SASL.Mechanism == "SCRAM-SHA-256" {
+		case "SCRAM-SHA-256":
 			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &sharedutil.XDGSCRAMClient{HashGeneratorFcn: sharedutil.SHA256New} }
 		}
 
@@ -339,6 +385,7 @@ type Consumer struct {
 	eventSourceName  string
 	eventName        string
 	metrics          *metrics.Metrics
+	schemaRegistry   *srclient.SchemaRegistryClient
 }
 
 // Setup is run at the beginning of a new session, before ConsumeClaim
@@ -406,7 +453,15 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 	eventData.Headers = headers
 
 	if consumer.kafkaEventSource.JSONBody {
-		eventData.Body = (*json.RawMessage)(&message.Value)
+		if consumer.schemaRegistry != nil {
+			value, err := toJson(consumer.schemaRegistry, message)
+			if err != nil {
+				return fmt.Errorf("failed to retrieve json value using the schema registry, %w", err)
+			}
+			eventData.Body = (*json.RawMessage)(&value)
+		} else {
+			eventData.Body = (*json.RawMessage)(&message.Value)
+		}
 	} else {
 		eventData.Body = message.Value
 	}
@@ -422,6 +477,20 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 	}
 	session.MarkMessage(message, "")
 	return nil
+}
+
+func toJson(schemaRegistry *srclient.SchemaRegistryClient, message *sarama.ConsumerMessage) ([]byte, error) {
+	schemaID := binary.BigEndian.Uint32(message.Value[1:5])
+	schema, err := schemaRegistry.GetSchema(int(schemaID))
+	if err != nil {
+		return nil, fmt.Errorf("failed getting schema with id '%d', %w", schemaID, err)
+	}
+	payload, _, err := schema.Codec().NativeFromBinary(message.Value[5:])
+	if err != nil {
+		return nil, fmt.Errorf("failed to get native from binary, %w", err)
+	}
+	value, err := schema.Codec().TextualFromNative(nil, payload)
+	return value, err
 }
 
 // Function can be passed as Option to generate unique id for kafka event

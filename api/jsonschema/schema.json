@@ -980,14 +980,14 @@
       "type": "object"
     },
     "io.argoproj.events.v1alpha1.DataFilter": {
-      "description": "DataFilter describes constraints and filters for event data Regular Expressions are purposefully not a feature as they are overkill for our uses here See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html",
+      "description": "DataFilter describes constraints and filters for event data.",
       "properties": {
         "comparator": {
           "description": "Comparator compares the event data with a user given value. Can be \"\u003e=\", \"\u003e\", \"=\", \"!=\", \"\u003c\", or \"\u003c=\". Is optional, and if left blank treated as equality \"=\".",
           "type": "string"
         },
         "path": {
-          "description": "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+          "description": "Path is the JSONPath of the event's (JSON decoded) data key. Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
           "type": "string"
         },
         "template": {
@@ -999,7 +999,7 @@
           "type": "string"
         },
         "value": {
-          "description": "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
+          "description": "Value is the allowed string values for this key. Booleans are parsed using strconv.ParseBool(), Numbers are parsed as float64 using strconv.ParseFloat(), Strings are treated as regular expressions, Nils value is ignored.",
           "items": {
             "type": "string"
           },
@@ -1846,6 +1846,11 @@
           "description": "HookName is the name of the webhook",
           "type": "string"
         },
+        "maxTries": {
+          "description": "MaxTries is number of attempts when posting an event to the target url",
+          "format": "int64",
+          "type": "integer"
+        },
         "metadata": {
           "additionalProperties": {
             "type": "string"
@@ -2231,6 +2236,13 @@
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.BasicAuth",
           "description": "BasicAuth configuration for the http request."
         },
+        "dynamicHeaders": {
+          "description": "Dynamic Headers for the request, sourced from the event. Same spec as Parameters.",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.TriggerParameter"
+          },
+          "type": "array"
+        },
         "headers": {
           "additionalProperties": {
             "type": "string"
@@ -2527,6 +2539,10 @@
         "sasl": {
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.SASLConfig",
           "description": "SASL configuration for the kafka client"
+        },
+        "schemaRegistry": {
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.SchemaRegistryConfig",
+          "description": "Schema Registry configuration for consumer message with Avro format"
         },
         "tls": {
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.TLSConfig",
@@ -3822,8 +3838,7 @@
         }
       },
       "required": [
-        "url",
-        "schemaId"
+        "url"
       ],
       "type": "object"
     },
