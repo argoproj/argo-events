@@ -81,7 +81,7 @@ type ProjectHookConfigs struct {
 	// MaxTries:
 	// Maximum number of times the plugin should attempt when posting an event to the target url. Setting this value to 0 will disable retries.
 	// When not specified, the default value is derrived from global configuration.
-	MaxTries string `json:"maxTries,omitempty"`
+	MaxTries int64 `json:"maxTries,omitempty"`
 	// RetryInterval:
 	// The interval of time in milliseconds between the subsequent auto-retries.
 	// When not specified, the default value is derrived from global configuration.

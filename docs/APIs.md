@@ -9167,6 +9167,25 @@ Filter
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>maxTries</code></br> <em> int64 </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+MaxTries is number of attempts when posting an event to the target url
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -20391,6 +20410,26 @@ ClientKeySecret refers to the secret that contains the client key
 
 If true, skips creation of TLSConfig with certs and creates an empty
 TLSConfig. (Defaults to false)
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>enabled</code></br> <em> bool </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Enabled indicates if TLS is enabled. Added for compatibility proposes
+for Brokers that needs TLS without key authentication
 </p>
 
 </td>

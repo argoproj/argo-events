@@ -4,6 +4,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 
 1. [3Rein](https://www.3rein.com)
 1. [7shifts](https://www.7shifts.com)
+1. [Adeo Services](https://www.adeo.com)
 1. [Adobe](https://adobe.com/)
 1. [Akuity](https://akuity.io/)
 1. [Alibaba Group](https://www.alibabagroup.com/)

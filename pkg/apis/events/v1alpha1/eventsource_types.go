@@ -727,6 +727,9 @@ type GerritEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,10,opt,name=filter"`
+	// MaxTries is number of attempts when posting an event to the target url
+	// +optional
+	MaxTries int64 `json:"maxTries" protobuf:"varint,11,opt,name=maxTries"`
 }
 
 func (g GerritEventSource) NeedToCreateHooks() bool {

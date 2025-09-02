@@ -1838,6 +1838,11 @@
           "description": "HookName is the name of the webhook",
           "type": "string"
         },
+        "maxTries": {
+          "description": "MaxTries is number of attempts when posting an event to the target url",
+          "type": "integer",
+          "format": "int64"
+        },
         "metadata": {
           "description": "Metadata holds the user defined metadata which will passed along the event payload.",
           "type": "object",
@@ -4281,6 +4286,10 @@
         "clientKeySecret": {
           "description": "ClientKeySecret refers to the secret that contains the client key",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "enabled": {
+          "description": "Enabled indicates if TLS is enabled. Added for compatibility proposes for Brokers that needs TLS without key authentication",
+          "type": "boolean"
         },
         "insecureSkipVerify": {
           "description": "If true, skips creation of TLSConfig with certs and creates an empty TLSConfig. (Defaults to false)",

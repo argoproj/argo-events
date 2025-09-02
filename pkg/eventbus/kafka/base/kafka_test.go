@@ -76,6 +76,27 @@ func TestConfig_NoSASL(t *testing.T) {
 	assert.False(t, saramaConfig.Net.SASL.Enable)
 }
 
+func TestConfig_TLS(t *testing.T) {
+	config := &v1alpha1.KafkaBus{
+		URL: "localhost:9092",
+		TLS: &v1alpha1.TLSConfig{
+			Enabled: true,
+		},
+	}
+
+	logger := zap.NewNop().Sugar()
+
+	kafka := NewKafka(config, logger)
+
+	saramaConfig, err := kafka.Config()
+	assert.NoError(t, err)
+	assert.NotNil(t, kafka)
+	assert.NotNil(t, kafka.Logger)
+	assert.NotNil(t, kafka.config)
+	assert.NotNil(t, saramaConfig)
+	assert.True(t, saramaConfig.Net.TLS.Enable)
+}
+
 func TestNewKafka(t *testing.T) {
 	config := &v1alpha1.KafkaBus{
 		URL: "localhost:9092",

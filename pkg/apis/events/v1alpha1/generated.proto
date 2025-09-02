@@ -1276,6 +1276,10 @@ message GerritEventSource {
   // Filter
   // +optional
   optional EventSourceFilter filter = 10;
+
+  // MaxTries is number of attempts when posting an event to the target url
+  // +optional
+  optional int64 maxTries = 11;
 }
 
 // GitArtifact contains information about an artifact stored in git
@@ -3079,6 +3083,10 @@ message TLSConfig {
   // If true, skips creation of TLSConfig with certs and creates an empty TLSConfig. (Defaults to false)
   // +optional
   optional bool insecureSkipVerify = 4;
+
+  // Enabled indicates if TLS is enabled. Added for compatibility proposes for Brokers that needs TLS without key authentication
+  // +optional
+  optional bool enabled = 5;
 }
 
 // Template holds the information of a deployment template

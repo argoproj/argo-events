@@ -13,4 +13,7 @@ type TLSConfig struct {
 	// If true, skips creation of TLSConfig with certs and creates an empty TLSConfig. (Defaults to false)
 	// +optional
 	InsecureSkipVerify bool `json:"insecureSkipVerify,omitempty" protobuf:"varint,4,opt,name=insecureSkipVerify"`
+	// Enabled indicates if TLS is enabled. Added for compatibility proposes for Brokers that needs TLS without key authentication
+	// +optional
+	Enabled bool `json:"enabled,omitempty" protobuf:"varint,5,opt,name=enabled"`
 }
