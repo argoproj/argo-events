@@ -28,7 +28,7 @@ func ValidateTLSConfig(tlsConfig *TLSConfig) error {
 		clientKeySet = true
 	}
 
-	if !caCertSet && !clientCertSet && !clientKeySet {
+	if !caCertSet && !clientCertSet && !clientKeySet && !tlsConfig.Enabled {
 		return fmt.Errorf("invalid tls config, please configure either caCertSecret, or clientCertSecret and clientKeySecret, or both")
 	}
 
