@@ -62,3 +62,4 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Zillow Group](https://www.zillow.com)
 1. [AlpacaTech](https://www.alpaca-tech.ai)
 1. [SBAB Bank AB](https://www.sbab.se)
+1. [Terradue Srl](https://www.terradue.com)
