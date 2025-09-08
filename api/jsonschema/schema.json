@@ -2454,6 +2454,10 @@
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.KafkaConsumerGroup",
           "description": "Consumer group for kafka client"
         },
+        "partitioner": {
+          "description": "Partitioner sets the Kafka producer partitioning strategy. Supported values: random, hash, roundrobin, manual. Defaults to random.",
+          "type": "string"
+        },
         "sasl": {
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.SASLConfig",
           "description": "SASL configuration for the kafka client"
