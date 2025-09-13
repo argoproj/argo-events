@@ -476,8 +476,8 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2 h1:8Tjv8EJ+pM1xP8mK6egEbD1OgnV
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2/go.mod h1:pkJQ2tZHJ0aFOVEEot6oZmaVEZcRme73eIFmhiVuRWs=
 github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c h1:6rhixN/i8ZofjG1Y75iExal34USq5p+wiN1tpie8IrU=
 github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c/go.mod h1:NMPJylDgVpX0MLRlPy15sqSwOFv/U1GZ2m21JhFfek0=
-github.com/hamba/avro/v2 v2.29.0 h1:fkqoWEPxfygZxrkktgSHEpd0j/P7RKTBTDbcEeMdVEY=
-github.com/hamba/avro/v2 v2.29.0/go.mod h1:Pk3T+x74uJoJOFmHrdJ8PRdgSEL/kEKteJ31NytCKxI=
+github.com/hamba/avro/v2 v2.30.0 h1:OaIdh0+dZIJ331FO/+YYBwZZRdGVyyHuRSyHsjZLJoA=
+github.com/hamba/avro/v2 v2.30.0/go.mod h1:X6gDhYv6DQVAT56VqOKuW+PLnQrEQqGB9l1nhlMdAdQ=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
