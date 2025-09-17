@@ -57,6 +57,20 @@ func (k *Kafka) Config() (*sarama.Config, error) {
 	config.Producer.Idempotent = true
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Net.MaxOpenRequests = 1
+	// Partitioner selection
+	switch k.config.Partitioner {
+	case "hash":
+		config.Producer.Partitioner = sarama.NewHashPartitioner
+	case "roundrobin":
+		config.Producer.Partitioner = sarama.NewRoundRobinPartitioner
+	case "manual":
+		config.Producer.Partitioner = sarama.NewManualPartitioner
+	default:
+		// Use random partitioner to distribute messages across partitions even when a key is set.
+		// This improves horizontal scaling by avoiding hot-partitioning on constant keys
+		// such as trigger names or event source/event name pairs.
+		config.Producer.Partitioner = sarama.NewRandomPartitioner
+	}
 
 	// common config
 	if k.config.Version != "" {
