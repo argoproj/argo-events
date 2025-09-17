@@ -19,4 +19,8 @@ type KafkaBus struct {
 	// Consumer group for kafka client
 	// +optional
 	ConsumerGroup *KafkaConsumerGroup `json:"consumerGroup,omitempty" protobuf:"bytes,6,opt,name=consumerGroup"`
+	// Partitioner sets the Kafka producer partitioning strategy.
+	// Supported values: random, hash, roundrobin, manual. Defaults to random.
+	// +optional
+	Partitioner string `json:"partitioner,omitempty" protobuf:"bytes,7,opt,name=partitioner"`
 }
