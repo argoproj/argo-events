@@ -866,6 +866,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#partitioner" class="md-nav__link">
+    partitioner
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2225,6 +2232,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#partitioner" class="md-nav__link">
+    partitioner
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2332,6 +2346,8 @@ Defaults to range.</p>
 <h3 id="consumergroupstartoldest">consumerGroup.startOldest<a class="headerlink" href="#consumergroupstartoldest" title="Permanent link">&para;</a></h3>
 <p>When starting up a new group do we want to start from the oldest event
 (true) or the newest event (false). Defaults to false</p>
+<h3 id="partitioner">partitioner<a class="headerlink" href="#partitioner" title="Permanent link">&para;</a></h3>
+<p>Producer partitioning strategy. Supported values: <code>random</code>, <code>hash</code>, <code>roundrobin</code>, <code>manual</code>. Defaults to <code>random</code>.</p>
 <h2 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h2>
 <p>You can enable TLS or SASL authentication, see above for configuration
 details. You must enable these features in your Kafka Cluster and make
