@@ -45,6 +45,15 @@ func ConstructPayload(events map[string]*v1alpha1.Event, parameters []v1alpha1.T
 		if err != nil {
 			return nil, err
 		}
+
+		// If dest is empty, return the raw value as the entire payload
+		if parameter.Dest == "" {
+			if value != nil {
+				return []byte(*value), nil
+			}
+			continue
+		}
+
 		if typ != stringType && parameter.Src.UseRawData {
 			tmp, err := sjson.SetRawBytes(payload, parameter.Dest, []byte(*value))
 			if err != nil {
@@ -298,6 +307,10 @@ func getValueByKey(value []byte, key string) (string, string, error) {
 	res := gjson.GetBytes(value, key)
 	if res.Exists() {
 		if res.Type.String() == jsonType {
+			return res.Raw, res.Type.String(), nil
+		}
+		// Handle null values properly by returning raw JSON "null"
+		if res.Type == gjson.Null {
 			return res.Raw, res.Type.String(), nil
 		}
 		return res.String(), res.Type.String(), nil
