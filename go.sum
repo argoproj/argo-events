@@ -896,8 +896,8 @@ github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9dec
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/yuin/gopher-lua v1.1.1 h1:kYKnWBjvbNP4XLT3+bPEwAXJx262OhaHDWDVOPjL46M=
 github.com/yuin/gopher-lua v1.1.1/go.mod h1:GBR0iDaNXjAgGg9zfCvksxSRnQx76gclCIb7kdAd1Pw=
-gitlab.com/gitlab-org/api/client-go v0.144.0 h1:np2G+h2vanpxQrqGIM9LGmoKQecyUanj68JlNmNdc3o=
-gitlab.com/gitlab-org/api/client-go v0.144.0/go.mod h1:rw89Kl9AsKmxRhzkfUSfZ+1jpTewwueKvAYwoYmUoQ8=
+gitlab.com/gitlab-org/api/client-go v0.146.0 h1:G8koalztNq+/6O8+YkQ5hqi2KdViaRcqhUHaS/xqoAw=
+gitlab.com/gitlab-org/api/client-go v0.146.0/go.mod h1:eABRp++g3IbUP10ZeBIys+9g59dgJnlQLEk8XgKNB54=
 go.einride.tech/aip v0.68.1 h1:16/AfSxcQISGN5z9C5lM+0mLYXihrHbQ1onvYTr93aQ=
 go.einride.tech/aip v0.68.1/go.mod h1:XaFtaj4HuA3Zwk9xoBtTWgNubZ0ZZXv9BZJCkuKuWbg=
 go.etcd.io/bbolt v1.3.6/go.mod h1:qXsaaIqmgQH0T+OPdb99Bf+PKfBBQVAdyD6TY9G8XM4=
