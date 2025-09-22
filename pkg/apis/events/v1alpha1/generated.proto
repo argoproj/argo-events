@@ -3036,6 +3036,10 @@ message StorageGridEventSource {
   // Metadata holds the user defined metadata which will passed along the event payload.
   // +optional
   map<string, string> metadata = 9;
+
+  // TLS configuration for the service bus client
+  // +optional
+  optional TLSConfig tls = 10;
 }
 
 // StorageGridFilter represents filters to apply to bucket notifications for specifying constraints on objects
