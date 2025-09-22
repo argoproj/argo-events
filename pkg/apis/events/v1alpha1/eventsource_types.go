@@ -1168,6 +1168,9 @@ type StorageGridEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,9,rep,name=metadata"`
+	// TLS configuration for the service bus client
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,10,opt,name=tls"`
 }
 
 // StorageGridFilter represents filters to apply to bucket notifications for specifying constraints on objects
