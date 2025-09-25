@@ -57,8 +57,7 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 	conn := &JetstreamConnection{Logger: stream.Logger}
 
 	opts := []nats.Option{
-		// todo: try out Jetstream's auto-reconnection capability
-		nats.NoReconnect(),
+		nats.RetryOnFailedConnect(true),
 		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
 			conn.NATSConnected = false
 			log.Errorw("NATS connection lost", zap.Error(err))
@@ -119,11 +118,13 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 	}
 	var err error
 
+	var createNewStream bool = true
+
 	// before we add the Stream first let's check to make sure it doesn't already exist
 	streamInfo, err := conn.JSContext.StreamInfo(v1alpha1.JetStreamStreamName)
 	if streamInfo != nil && err == nil {
-		stream.Logger.Infof("No need to create Stream '%s' as it already exists", v1alpha1.JetStreamStreamName)
-		return nil
+		stream.Logger.Infof("No need to create Stream '%s' as it already exists. Updating instead.", v1alpha1.JetStreamStreamName)
+		createNewStream = false
 	}
 	if err != nil && err != nats.ErrStreamNotFound {
 		stream.Logger.Warnf(`Error calling StreamInfo for Stream '%s' (this can happen if another Jetstream client "
@@ -163,21 +164,32 @@ func (stream *Jetstream) CreateStream(conn *JetstreamConnection) error {
 		Replicas:   v.GetInt("replicas"),
 		Duplicates: v.GetDuration("duplicates"),
 	}
-	stream.Logger.Infof("Will use this stream config:\n '%v'", streamConfig)
+	stream.Logger.Infof("Will use this stream config: '%+v'", streamConfig)
 
 	connectErr := sharedutil.DoWithRetry(nil, func() error { // exponential backoff if it fails the first time
-		_, err = conn.JSContext.AddStream(&streamConfig)
-		if err != nil {
-			return fmt.Errorf("failed to add Jetstream stream %q for connection %+v: %w", v1alpha1.JetStreamStreamName, conn, err)
+
+		if createNewStream {
+			_, err = conn.JSContext.AddStream(&streamConfig)
+			if err != nil {
+				return fmt.Errorf("failed to add Jetstream stream %q for connection %+v: %w", v1alpha1.JetStreamStreamName, conn, err)
+			} else {
+				stream.Logger.Infof("Updated Jetstream stream '%s' for connection %+v", v1alpha1.JetStreamStreamName, conn)
+				return nil
+			}
 		} else {
-			return nil
+			_, err = conn.JSContext.UpdateStream(&streamConfig)
+			if err != nil {
+				return fmt.Errorf("failed to update Jetstream stream %q for connection %+v: %w", v1alpha1.JetStreamStreamName, conn, err)
+			} else {
+				stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", v1alpha1.JetStreamStreamName, conn)
+				return nil
+			}
 		}
+
 	})
 	if connectErr != nil {
 		return connectErr
 	}
-
-	stream.Logger.Infof("Created Jetstream stream '%s' for connection %+v", v1alpha1.JetStreamStreamName, conn)
 	return nil
 }
 
