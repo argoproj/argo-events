@@ -29,7 +29,7 @@ require (
 	github.com/aws/aws-sdk-go v1.47.11
 	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/bradleyfalzon/ghinstallation/v2 v2.16.0
-	github.com/cloudevents/sdk-go/v2 v2.16.0
+	github.com/cloudevents/sdk-go/v2 v2.16.2
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
 	github.com/doublerebel/bellows v0.0.0-20160303004610-f177d92a03d3
 	github.com/eclipse/paho.mqtt.golang v1.5.1
