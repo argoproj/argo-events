@@ -4125,6 +4125,11 @@ func (in *StorageGridEventSource) DeepCopyInto(out *StorageGridEventSource) {
 			(*out)[key] = val
 		}
 	}
+	if in.TLS != nil {
+		in, out := &in.TLS, &out.TLS
+		*out = new(TLSConfig)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 
