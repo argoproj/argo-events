@@ -1740,6 +1740,11 @@ message KafkaBus {
   // Consumer group for kafka client
   // +optional
   optional KafkaConsumerGroup consumerGroup = 6;
+
+  // Partitioner sets the Kafka producer partitioning strategy.
+  // Supported values: random, hash, roundrobin, manual. Defaults to random.
+  // +optional
+  optional string partitioner = 7;
 }
 
 message KafkaConsumerGroup {

@@ -11932,6 +11932,26 @@ Consumer group for kafka client
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>partitioner</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Partitioner sets the Kafka producer partitioning strategy. Supported
+values: random, hash, roundrobin, manual. Defaults to random.
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>

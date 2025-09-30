@@ -4720,6 +4720,13 @@ func schema_pkg_apis_events_v1alpha1_KafkaBus(ref common.ReferenceCallback) comm
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaConsumerGroup"),
 						},
 					},
+					"partitioner": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Partitioner sets the Kafka producer partitioning strategy. Supported values: random, hash, roundrobin, manual. Defaults to random.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
