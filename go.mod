@@ -80,7 +80,7 @@ require (
 	github.com/tidwall/sjson v1.2.4
 	github.com/xdg-go/scram v1.1.2
 	github.com/yuin/gopher-lua v1.1.1
-	gitlab.com/gitlab-org/api/client-go v0.148.1
+	gitlab.com/gitlab-org/api/client-go v0.150.0
 	go.uber.org/ratelimit v0.3.1
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.42.0
@@ -88,7 +88,7 @@ require (
 	google.golang.org/api v0.250.0
 	google.golang.org/grpc v1.75.1
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
-	google.golang.org/protobuf v1.36.9
+	google.golang.org/protobuf v1.36.10
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	k8s.io/api v0.32.2
 	k8s.io/apimachinery v0.32.2
@@ -164,7 +164,7 @@ require (
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21 // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
-	github.com/danieljoos/wincred v1.2.2 // indirect
+	github.com/danieljoos/wincred v1.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/devigned/tab v0.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
