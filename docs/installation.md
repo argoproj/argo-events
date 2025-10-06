@@ -31,7 +31,7 @@
 
                 oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:argo-events-sa system:serviceaccount:argo-events:argo-events-webhook-sa
 
-             - Add update permissions for the `deployments/finalizers` and `clusterroles/finalizers` of the argo-events-webhook ClusterRole(this is necessary for the validating admission controller)
+             - Add update permissions for the `deployments/finalizers` and `clusterroles/finalizers` of the argo-events-webhook ClusterRole (this is necessary for the validating admission controller)
 
                 - apiGroups:
                   - rbac.authorization.k8s.io
@@ -71,7 +71,7 @@
 
                 oc adm policy add-scc-to-user anyuid system:serviceaccount:argo-events:default
 
-             - Add update permissions for the `deployments/finalizers` and `clusterroles/finalizers` of the argo-events-webhook ClusterRole(this is necessary for the validating admission controller)
+             - Add update permissions for the `deployments/finalizers` and `clusterroles/finalizers` of the argo-events-webhook ClusterRole (this is necessary for the validating admission controller)
 
                 - apiGroups:
                   - rbac.authorization.k8s.io
@@ -103,7 +103,7 @@ Use either [`cluster-install`](https://github.com/argoproj/argo-events/tree/stab
 
 ### Using Helm Chart
 
-Make sure you have helm client installed. To install helm, follow <a href="https://docs.helm.sh/using_helm/">the link.</a>
+Make sure you have the helm client installed. To install helm, follow <a href="https://docs.helm.sh/using_helm/">the link.</a>
 
 1. Add `argoproj` repository.
 

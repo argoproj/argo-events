@@ -43,7 +43,7 @@ spec:
           method: GET
 ```
 
-`Conditions` is a boolean expression contains dependency names, the trigger
+`Conditions` is a boolean expression containing dependency names, the trigger
 won't be executed until the expression resolves to true. The operators in
 `conditions` include:
 

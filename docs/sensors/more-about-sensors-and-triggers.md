@@ -167,7 +167,7 @@ spec:
 ```
 
 If the trigger fails, it will retry up to the configured number of retries based
-on `retryStrategy`. If the maximum retries are reached and the trigger, the
+on `retryStrategy`. If the maximum retries are reached and the trigger fails, the
 `dlqTrigger` will be invoked if specified.  In order to use the `dlqTrigger`,
 the `atLeastOnce` must be set to true within the trigger and the `dlqTrigger` for
 the Sensor to know about the failure and invoke the `dlqTrigger`.

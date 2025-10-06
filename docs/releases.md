@@ -9,10 +9,10 @@ version, and z is the patch version, following Semantic Versioning terminology.
 
 We maintain release branches for the most recent two minor releases.
 
-Fixes may be backported to release branches, depending on severity, risk, and,
+Fixes may be backported to release branches, depending on severity, risk, and
 feasibility.
 
-If a release contains breaking changes, or CVE fixes, this will documented in
+If a release contains breaking changes or CVE fixes, this will be documented in
 the release notes.
 
 ## Supported Version Skew

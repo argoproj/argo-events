@@ -2,7 +2,7 @@
 
 Some of the EventSources (`webhook`, `github`, `gitlab`, `sns`, `slack`,
 `Storage GRID` and `stripe`) start an HTTP service to receive the events, for
-your convenience, there is a field named `service` within EventSource spec can
+your convenience, there is a field named `service` within the EventSource spec that can
 help you create a `ClusterIP` service for testing.
 
 For example:
@@ -49,5 +49,5 @@ spec:
 
 Then you can expose the service for external access using native K8s objects as mentioned above.
 
-You can refer to [webhook heath check](webhook-health-check.md) if you need a
+You can refer to [webhook health check](webhook-health-check.md) if you need a
 health check endpoint for LB Service or Ingress configuration.

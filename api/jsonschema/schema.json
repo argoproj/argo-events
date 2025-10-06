@@ -4602,7 +4602,7 @@
       "type": "object"
     },
     "io.argoproj.events.v1alpha1.URLArtifact": {
-      "description": "URLArtifact contains information about an artifact at an http endpoint.",
+      "description": "URLArtifact contains information about an artifact at an HTTP endpoint.",
       "properties": {
         "path": {
           "description": "Path is the complete URL",

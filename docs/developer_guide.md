@@ -35,7 +35,7 @@ make build
 
 ### 4. Changing Types
 
-If you're making a change to the `pkg/apis` package, please ensure you re-run
+If you're making a change to the `pkg/apis` package, please ensure you re-run the
 following command for code regeneration.
 
 ```
@@ -85,7 +85,7 @@ You might want to test certain changes on a managed cluster in the cloud. For ex
 
 #### 1. Building images
 
-We can use ephemeral containers for quick testing with images hosted by friends at [ttl.sh](https://ttl.sh/). 
+We can use ephemeral containers for quick testing with images hosted by our friends at [ttl.sh](https://ttl.sh/). 
 
 If you want a fresh build before building the container image, run the following commands to delete any existing binaries.
 

@@ -949,7 +949,7 @@ type FileArtifact struct {
 	Path string `json:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
 }
 
-// URLArtifact contains information about an artifact at an http endpoint.
+// URLArtifact contains information about an artifact at an HTTP endpoint.
 type URLArtifact struct {
 	// Path is the complete URL
 	Path string `json:"path" protobuf:"bytes,1,opt,name=path"`

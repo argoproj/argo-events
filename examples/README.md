@@ -3,7 +3,7 @@
 The examples demonstrate how Argo Events works.
 
 To make the Sensors be able to trigger Workflows, a Service Account with RBAC
-settings as following is required (assume you run the examples in the namespace
+settings as follows is required (assume you run the examples in the namespace
 `argo-events`).
 
 ```yaml
@@ -46,7 +46,7 @@ subjects:
 
 To make the Workflow triggered by the Sensor work, you also need to give a
 Service Account with privileges to the Workflow (the examples use Service
-Account `default`), see the detail
+Account `default`), see the details
 [here](https://github.com/argoproj/argo-workflows/blob/master/docs/service-accounts.md).
 A minimal Role to make Workflow work looks like following (check the
 [origin](https://github.com/argoproj/argo-workflows/blob/master/docs/workflow-rbac.md)):
