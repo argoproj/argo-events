@@ -2,6 +2,7 @@ package common
 
 import (
 	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // Auth contains the auth infor for event bus
@@ -33,4 +34,5 @@ type Dependency struct {
 	Name            string
 	EventSourceName string
 	EventName       string
+	JetStream       *sensorv1alpha1.JetStreamConsumerConfig
 }

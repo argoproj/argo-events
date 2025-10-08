@@ -1088,6 +1088,19 @@ blank treated as and (&&).
 </p>
 </td>
 </tr>
+<tr>
+<td>
+<code>jetStream</code></br> <em>
+<a href="#argoproj.io/v1alpha1.JetStreamConsumerConfig"> JetStreamConsumerConfig </a>
+</em>
+</td>
+<td>
+<p>
+<em>(Optional)</em>
+JetStream configuration for this dependency. Allows configuring the deliver policy for JetStream consumers.
+</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.EventDependencyFilter">
@@ -1560,6 +1573,57 @@ always use the first URL, while push will use all of them.
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.JetStreamConsumerConfig">
+JetStreamConsumerConfig
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventDependency">EventDependency</a>)
+</p>
+<p>
+<p>
+JetStreamConsumerConfig holds the JetStream consumer configuration
+</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Field
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>deliverPolicy</code></br> <em>
+<a href="#argoproj.io/v1alpha1.JetStreamDeliverPolicy"> JetStreamDeliverPolicy </a>
+</em>
+</td>
+<td>
+<p>
+<em>(Optional)</em>
+DeliverPolicy specifies the JetStream deliver policy. Available values: "all" (default - start from earliest available message), "last" (start with last message), "new" (start with messages created after consumer). Defaults to "new".
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.JetStreamDeliverPolicy">
+JetStreamDeliverPolicy
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.JetStreamConsumerConfig">JetStreamConsumerConfig</a>)
+</p>
+<p>
+<p>
+JetStreamDeliverPolicy refers to the JetStream deliver policy
+</p>
+</p>
 <h3 id="argoproj.io/v1alpha1.HTTPTrigger">
 HTTPTrigger
 </h3>

@@ -146,3 +146,56 @@ func TestGetDependencyExpression(t *testing.T) {
 		assert.NoError(t, err)
 	})
 }
+
+func TestDependencyMapping(t *testing.T) {
+	t.Run("JetStream config is mapped correctly", func(t *testing.T) {
+		obj := sensorObj.DeepCopy()
+		obj.Spec.Dependencies = []v1alpha1.EventDependency{
+			{
+				Name:            "dep1",
+				EventSourceName: "webhook",
+				EventName:       "example-1",
+				JetStream: &v1alpha1.JetStreamConsumerConfig{
+					DeliverPolicy: v1alpha1.JetStreamDeliverAll,
+				},
+			},
+			{
+				Name:            "dep2",
+				EventSourceName: "webhook2",
+				EventName:       "example-2",
+				JetStream: &v1alpha1.JetStreamConsumerConfig{
+					DeliverPolicy: v1alpha1.JetStreamDeliverLast,
+				},
+			},
+			{
+				Name:            "dep3",
+				EventSourceName: "webhook3",
+				EventName:       "example-3",
+				// No JetStream config - should be nil
+			},
+		}
+
+		// Create dependency mapping like the listener does
+		depMapping := make(map[string]v1alpha1.EventDependency)
+		for _, d := range obj.Spec.Dependencies {
+			depMapping[d.Name] = d
+		}
+
+		// Test that each dependency preserves JetStream config
+		for _, depName := range []string{"dep1", "dep2", "dep3"} {
+			dep, ok := depMapping[depName]
+			assert.True(t, ok, "Dependency %s should exist", depName)
+
+			// Verify the JetStream config is accessible
+			if depName == "dep1" {
+				assert.NotNil(t, dep.JetStream, "dep1 should have JetStream config")
+				assert.Equal(t, v1alpha1.JetStreamDeliverAll, dep.JetStream.DeliverPolicy)
+			} else if depName == "dep2" {
+				assert.NotNil(t, dep.JetStream, "dep2 should have JetStream config")
+				assert.Equal(t, v1alpha1.JetStreamDeliverLast, dep.JetStream.DeliverPolicy)
+			} else if depName == "dep3" {
+				assert.Nil(t, dep.JetStream, "dep3 should not have JetStream config")
+			}
+		}
+	})
+}

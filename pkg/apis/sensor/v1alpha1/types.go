@@ -208,6 +208,9 @@ type EventDependency struct {
 	// Available values: and (&&), or (||)
 	// Is optional and if left blank treated as and (&&).
 	FiltersLogicalOperator LogicalOperator `json:"filtersLogicalOperator,omitempty" protobuf:"bytes,6,opt,name=filtersLogicalOperator,casttype=LogicalOperator"`
+	// JetStream consumer configuration for this dependency
+	// +optional
+	JetStream *JetStreamConsumerConfig `json:"jetStream,omitempty" protobuf:"bytes,7,opt,name=jetStream"`
 }
 
 // EventDependencyTransformer transforms the event
@@ -1069,4 +1072,23 @@ func (e EventContext) String() string {
 // HasLocation whether or not an artifact has a location defined
 func (a *ArtifactLocation) HasLocation() bool {
 	return a.S3 != nil || a.Inline != nil || a.File != nil || a.URL != nil
+}
+
+// JetStreamDeliverPolicy refers to the JetStream deliver policy
+// Note: Only the deliver policies directly supported by the NATS Go client are included here
+// Advanced policies like DeliverByStartSequence and DeliverByStartTime are not supported
+// by PullSubscribe options and would require consumer configuration
+type JetStreamDeliverPolicy string
+
+const (
+	JetStreamDeliverAll  JetStreamDeliverPolicy = "all"
+	JetStreamDeliverLast JetStreamDeliverPolicy = "last"
+	JetStreamDeliverNew  JetStreamDeliverPolicy = "new"
+)
+
+// JetStreamConsumerConfig holds the JetStream consumer configuration
+type JetStreamConsumerConfig struct {
+	// DeliverPolicy specifies the JetStream deliver policy
+	// +optional
+	DeliverPolicy JetStreamDeliverPolicy `json:"deliverPolicy,omitempty" protobuf:"bytes,1,opt,name=deliverPolicy"`
 }

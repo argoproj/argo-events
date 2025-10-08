@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: jetstream-deliver-policy-example
+spec:
+  dependencies:
+    # Example with DeliverAll policy - starts from earliest available message
+    - name: all-messages-dep
+      eventSourceName: webhook
+      eventName: example
+      jetStream:
+        deliverPolicy: "all"
+    # Example with DeliverLast policy - starts with last message in stream
+    - name: last-message-dep
+      eventSourceName: webhook
+      eventName: example
+      jetStream:
+        deliverPolicy: "last"
+    # Example with DeliverNew policy - starts with messages created after consumer
+    - name: new-messages-dep
+      eventSourceName: webhook
+      eventName: example
+      jetStream:
+        deliverPolicy: "new"
+    # Example without JetStream config - defaults to "new"
+    - name: default-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - template:
+        name: http-trigger
+        http:
+          url: http://http-server.argo-events.svc:8090/hello
+          method: POST
+          payload:
+            - src:
+                dependencyName: all-messages-dep
+                dataKey: body.message
+              dest: allMessage
+            - src:
+                dependencyName: last-message-dep
+                dataKey: body.message
+              dest: lastMessage
+            - src:
+                dependencyName: new-messages-dep
+                dataKey: body.message
+              dest: newMessage
+            - src:
+                dependencyName: default-dep
+                dataKey: body.message
+              dest: defaultMessage

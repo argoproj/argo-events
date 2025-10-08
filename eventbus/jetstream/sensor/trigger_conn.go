@@ -15,6 +15,7 @@ import (
 
 	eventbuscommon "github.com/argoproj/argo-events/eventbus/common"
 	jetstreambase "github.com/argoproj/argo-events/eventbus/jetstream/base"
+	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 type JetstreamTriggerConn struct {
@@ -90,6 +91,53 @@ func (conn *JetstreamTriggerConn) String() string {
 	return fmt.Sprintf("JetstreamTriggerConn{Sensor:%s,Trigger:%s}", conn.sensorName, conn.triggerName)
 }
 
+type jsDeliverConfig struct {
+	policy sensorv1alpha1.JetStreamDeliverPolicy
+}
+
+func (conn *JetstreamTriggerConn) consumerOptionsForDependency(dep eventbuscommon.Dependency) []nats.SubOpt {
+	options := []nats.SubOpt{nats.AckExplicit()}
+	config, warning := conn.resolveJetStreamDeliverConfig(dep)
+	if warning != "" && conn.Logger != nil {
+		conn.Logger.Warn(warning)
+	}
+
+	// Note: The policies included here are the ones directly supported by the NATS Go client
+	// Advanced policies like DeliverByStartSequence and DeliverByStartTime are not supported
+	// by PullSubscribe options and would require consumer configuration
+	switch config.policy {
+	case sensorv1alpha1.JetStreamDeliverAll:
+		return append(options, nats.DeliverAll())
+	case sensorv1alpha1.JetStreamDeliverLast:
+		return append(options, nats.DeliverLast())
+	case sensorv1alpha1.JetStreamDeliverNew:
+		return append(options, nats.DeliverNew())
+	default:
+		return append(options, nats.DeliverNew())
+	}
+}
+
+func (conn *JetstreamTriggerConn) resolveJetStreamDeliverConfig(dep eventbuscommon.Dependency) (jsDeliverConfig, string) {
+	cfg := dep.JetStream
+	if cfg == nil || cfg.DeliverPolicy == "" {
+		return jsDeliverConfig{policy: sensorv1alpha1.JetStreamDeliverNew}, ""
+	}
+
+	// Note: Only the deliver policies directly supported by NATS Go client are handled here
+	// Advanced policies like DeliverByStartSequence and DeliverByStartTime are not supported
+	// and will fall through to the default case
+	switch cfg.DeliverPolicy {
+	case sensorv1alpha1.JetStreamDeliverAll:
+		return jsDeliverConfig{policy: sensorv1alpha1.JetStreamDeliverAll}, ""
+	case sensorv1alpha1.JetStreamDeliverLast:
+		return jsDeliverConfig{policy: sensorv1alpha1.JetStreamDeliverLast}, ""
+	case sensorv1alpha1.JetStreamDeliverNew:
+		return jsDeliverConfig{policy: sensorv1alpha1.JetStreamDeliverNew}, ""
+	default:
+		return jsDeliverConfig{policy: sensorv1alpha1.JetStreamDeliverNew}, fmt.Sprintf("Unrecognized or unsupported JetStream deliver policy %q for dependency %s; defaulting to DeliverNew", cfg.DeliverPolicy, dep.Name)
+	}
+}
+
 func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 	closeCh <-chan struct{},
 	resetConditionsCh <-chan struct{},
@@ -133,7 +181,8 @@ func (conn *JetstreamTriggerConn) Subscribe(ctx context.Context,
 
 		conn.Logger.Debugf("durable name for sensor='%s', trigger='%s', dep='%s': '%s'", conn.sensorName, conn.triggerName, dependency.Name, durableName)
 		log.Infof("Subscribing to subject %s with durable name %s", subject, durableName)
-		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, nats.AckExplicit(), nats.DeliverNew())
+		opts := conn.consumerOptionsForDependency(dependency)
+		subscriptions[subscriptionIndex], err = conn.JSContext.PullSubscribe(subject, durableName, opts...)
 		if err != nil {
 			errorStr := fmt.Sprintf("Failed to subscribe to subject %s using group %s: %v", subject, durableName, err)
 			log.Error(errorStr)

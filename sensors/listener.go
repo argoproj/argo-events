@@ -155,6 +155,7 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 					Name:            dep.Name,
 					EventSourceName: dep.EventSourceName,
 					EventName:       dep.EventName,
+					JetStream:       dep.JetStream,
 				}
 				deps = append(deps, d)
 			}
