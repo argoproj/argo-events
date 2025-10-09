@@ -898,14 +898,6 @@ message Trigger {
   // +kubebuilder:default=false
   // +optional
   optional bool atLeastOnce = 6;
-
-  // If the trigger fails, it will retry up to the configured number of
-  // retries. If the maximum retries are reached and the trigger is set to
-  // execute atLeastOnce, the dead letter queue (DLQ) trigger will be invoked if
-  // specified.  Invoking the dead letter queue trigger helps prevent data
-  // loss.
-  // +optional
-  optional Trigger dlqTrigger = 7;
 }
 
 // TriggerParameter indicates a passed parameter to a service template

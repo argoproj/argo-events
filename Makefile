@@ -46,17 +46,17 @@ K := $(foreach exec,$(EXECUTABLES), $(if $(shell which $(exec)),some string,$(er
 
 # build
 .PHONY: build
-build: dist/$(BINARY_NAME)-linux-amd64.gz #dist/$(BINARY_NAME)-linux-arm64.gz dist/$(BINARY_NAME)-linux-arm.gz dist/$(BINARY_NAME)-linux-ppc64le.gz dist/$(BINARY_NAME)-linux-s390x.gz
+build: dist/$(BINARY_NAME)-linux-amd64.gz dist/$(BINARY_NAME)-linux-arm64.gz dist/$(BINARY_NAME)-linux-arm.gz dist/$(BINARY_NAME)-linux-ppc64le.gz dist/$(BINARY_NAME)-linux-s390x.gz
 
 dist/$(BINARY_NAME)-%.gz: dist/$(BINARY_NAME)-%
 	@[ -e dist/$(BINARY_NAME)-$*.gz ] || gzip -k dist/$(BINARY_NAME)-$*
 
 dist/$(BINARY_NAME): GOARGS = GOOS= GOARCH=
 dist/$(BINARY_NAME)-linux-amd64: GOARGS = GOOS=linux GOARCH=amd64
-# dist/$(BINARY_NAME)-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
-# dist/$(BINARY_NAME)-linux-arm: GOARGS = GOOS=linux GOARCH=arm
-# dist/$(BINARY_NAME)-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
-# dist/$(BINARY_NAME)-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
+dist/$(BINARY_NAME)-linux-arm64: GOARGS = GOOS=linux GOARCH=arm64
+dist/$(BINARY_NAME)-linux-arm: GOARGS = GOOS=linux GOARCH=arm
+dist/$(BINARY_NAME)-linux-ppc64le: GOARGS = GOOS=linux GOARCH=ppc64le
+dist/$(BINARY_NAME)-linux-s390x: GOARGS = GOOS=linux GOARCH=s390x
 
 dist/$(BINARY_NAME):
 	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/$(BINARY_NAME) ./cmd

@@ -3420,8 +3420,7 @@ Trigger
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.SensorSpec">SensorSpec</a>,
-<a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
+<a href="#argoproj.io/v1alpha1.SensorSpec">SensorSpec</a>)
 </p>
 <p>
 <p>
@@ -3512,22 +3511,6 @@ Rate limit, default unit is Second
 AtLeastOnce determines the trigger execution semantics. Defaults to
 false. Trigger execution will use at-most-once semantics. If set to
 true, Trigger execution will switch to at-least-once semantics.
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>dlqTrigger</code></br> <em>
-<a href="#argoproj.io/v1alpha1.Trigger"> Trigger </a> </em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>
-If the trigger fails, it will retry up to the configured number of
-retries. If the maximum retries are reached and the trigger is set to
-execute atLeastOnce, the dead letter queue (DLQ) trigger will be invoked
-if specified. Invoking the dead letter queue trigger helps prevent data
-loss.
 </p>
 </td>
 </tr>

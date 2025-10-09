@@ -64,50 +64,21 @@ func validateTriggers(triggers []v1alpha1.Trigger) error {
 	trigNames := make(map[string]bool)
 
 	for _, trigger := range triggers {
-		if err := validateTrigger(trigger); err != nil {
+		if err := validateTriggerTemplate(trigger.Template); err != nil {
 			return err
 		}
 		if _, ok := trigNames[trigger.Template.Name]; ok {
 			return fmt.Errorf("duplicate trigger name: %s", trigger.Template.Name)
 		}
 		trigNames[trigger.Template.Name] = true
+		if err := validateTriggerPolicy(&trigger); err != nil {
+			return err
+		}
+		if err := validateTriggerTemplateParameters(&trigger); err != nil {
+			return err
+		}
 	}
 	return nil
-}
-
-func validateTrigger(trigger v1alpha1.Trigger) error {
-	if err := validateTriggerTemplate(trigger.Template); err != nil {
-		return err
-	}
-	if err := validateTriggerPolicy(&trigger); err != nil {
-		return err
-	}
-	if err := validateTriggerTemplateParameters(&trigger); err != nil {
-		return err
-	}
-	if err := validateDlqTrigger(&trigger); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// validateDlqTrigger validates trigger.atLeastOnce==true and the trigger.dlqTrigger
-func validateDlqTrigger(trigger *v1alpha1.Trigger) error {
-	if trigger == nil {
-		return fmt.Errorf("trigger can't be nil")
-	}
-	if trigger.DlqTrigger == nil {
-		return nil
-	}
-	if !trigger.AtLeastOnce {
-		return fmt.Errorf("to use dlqTrigger, trigger.atLeastOnce must be set to true")
-	}
-	if !trigger.DlqTrigger.AtLeastOnce {
-		return fmt.Errorf("atLeastOnce must be set to true within the dlqTrigger")
-	}
-
-	return validateTrigger(*trigger.DlqTrigger)
 }
 
 // validateTriggerTemplate validates trigger template
