@@ -2052,7 +2052,7 @@
 <h1 id="eventsource-services">EventSource Services<a class="headerlink" href="#eventsource-services" title="Permanent link">&para;</a></h1>
 <p>Some of the EventSources (<code>webhook</code>, <code>github</code>, <code>gitlab</code>, <code>sns</code>, <code>slack</code>,
 <code>Storage GRID</code> and <code>stripe</code>) start an HTTP service to receive the events, for
-your convenience, there is a field named <code>service</code> within EventSource spec can
+your convenience, there is a field named <code>service</code> within the EventSource spec that can
 help you create a <code>ClusterIP</code> service for testing.</p>
 <p>For example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
@@ -2090,7 +2090,7 @@ to select pods created for the "webhook" event source, like the following:</p>
 <span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NodePort</span>
 </code></pre></div>
 <p>Then you can expose the service for external access using native K8s objects as mentioned above.</p>
-<p>You can refer to <a href="../webhook-health-check/">webhook heath check</a> if you need a
+<p>You can refer to <a href="../webhook-health-check/">webhook health check</a> if you need a
 health check endpoint for LB Service or Ingress configuration.</p>
 
               

@@ -2326,7 +2326,7 @@ any of the <a href="https://argoproj.github.io/argo-events/concepts/trigger/">10
 <span class="w">          </span><span class="nt">steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 </code></pre></div>
 <p>If the trigger fails, it will retry up to the configured number of retries based
-on <code>retryStrategy</code>. If the maximum retries are reached and the trigger, the
+on <code>retryStrategy</code>. If the maximum retries are reached and the trigger fails, the
 <code>dlqTrigger</code> will be invoked if specified.  In order to use the <code>dlqTrigger</code>,
 the <code>atLeastOnce</code> must be set to true within the trigger and the <code>dlqTrigger</code> for
 the Sensor to know about the failure and invoke the <code>dlqTrigger</code>.</p>

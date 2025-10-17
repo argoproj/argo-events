@@ -2374,7 +2374,7 @@ eval $(minikube docker-env)
 <div class="highlight"><pre><span></span><code>make build
 </code></pre></div>
 <h3 id="4-changing-types">4. Changing Types<a class="headerlink" href="#4-changing-types" title="Permanent link">&para;</a></h3>
-<p>If you're making a change to the <code>pkg/apis</code> package, please ensure you re-run
+<p>If you're making a change to the <code>pkg/apis</code> package, please ensure you re-run the
 following command for code regeneration.</p>
 <div class="highlight"><pre><span></span><code>make codegen
 </code></pre></div>
@@ -2402,7 +2402,7 @@ This command will build the images so you don't need to run <code>make image</co
 <h3 id="deploying-and-testing-your-changes-on-managed-clusters-in-the-cloud">Deploying and testing your changes on managed clusters in the cloud<a class="headerlink" href="#deploying-and-testing-your-changes-on-managed-clusters-in-the-cloud" title="Permanent link">&para;</a></h3>
 <p>You might want to test certain changes on a managed cluster in the cloud. For example, testing Microsoft Entra ID Workload Identity on AKS. The following steps will guide you through that process.</p>
 <h4 id="1-building-images_1">1. Building images<a class="headerlink" href="#1-building-images_1" title="Permanent link">&para;</a></h4>
-<p>We can use ephemeral containers for quick testing with images hosted by friends at <a href="https://ttl.sh/">ttl.sh</a>. </p>
+<p>We can use ephemeral containers for quick testing with images hosted by our friends at <a href="https://ttl.sh/">ttl.sh</a>. </p>
 <p>If you want a fresh build before building the container image, run the following commands to delete any existing binaries.</p>
 <div class="highlight"><pre><span></span><code>rm -rf dist
 </code></pre></div>

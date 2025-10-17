@@ -2120,13 +2120,13 @@ command (change the version):</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-n<span class="w"> </span>argo-events<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/argoproj/argo-events/<span class="o">{</span>version<span class="o">}</span>/manifests/install-validating-webhook.yaml
 </code></pre></div>
 <h2 id="benefits">Benefits<a class="headerlink" href="#benefits" title="Permanent link">&para;</a></h2>
-<p>Using the validating webhook has following benefits:</p>
+<p>Using the validating webhook has the following benefits:</p>
 <ul>
 <li>It notifies the error at the time applying the faulty spec, so that you don't
   need to check the CRD object <code>status</code> field to see if there's any condition
   errors later on.</li>
 </ul>
-<p>e.g. Creating an <code>exotic</code> NATS EventBus without <code>ClusterID</code> specified:</p>
+<p>For example, creating an <code>exotic</code> NATS EventBus without <code>ClusterID</code> specified:</p>
 <div class="highlight"><pre><span></span><code>cat<span class="w"> </span><span class="s">&lt;&lt;EOF | kubectl create -f -</span>
 <span class="s">&gt; apiVersion: argoproj.io/v1alpha1</span>
 <span class="s">&gt; kind: EventBus</span>
@@ -2141,12 +2141,12 @@ Error<span class="w"> </span>from<span class="w"> </span>server<span class="w"> 
 <ul>
 <li>Spec updating behavior can be validated.</li>
 </ul>
-<p>Updating existing specs requires more validation, besides checking if the new
-  spec is valid, we also need to check if there's any immutable fields being
-  updated. This can not be done in the controller reconciliation, but we can do
+<p>Updating existing specs requires more validation. Besides checking if the new
+  spec is valid, we also need to check if any immutable fields are being
+  updated. This cannot be done in the controller reconciliation, but we can do
   it by using the validating webhook.</p>
-<p>For example, updating Auth Strategy for a native NATS EventBus is prohibited,
-  a denied response as following will be returned.</p>
+<p>For example, updating the Auth Strategy for a native NATS EventBus is prohibited.
+  A denied response as shown below will be returned.</p>
 <div class="highlight"><pre><span></span><code>Error<span class="w"> </span>from<span class="w"> </span>server<span class="w"> </span><span class="o">(</span>BadRequest<span class="o">)</span>:<span class="w"> </span>error<span class="w"> </span>when<span class="w"> </span>applying<span class="w"> </span>patch:
 <span class="o">{</span><span class="s2">&quot;metadata&quot;</span>:<span class="o">{</span><span class="s2">&quot;annotations&quot;</span>:<span class="o">{</span><span class="s2">&quot;kubectl.kubernetes.io/last-applied-configuration&quot;</span>:<span class="s2">&quot;{\&quot;apiVersion\&quot;:\&quot;argoproj.io/v1alpha1\&quot;,\&quot;kind\&quot;:\&quot;EventBus\&quot;,\&quot;metadata\&quot;:{\&quot;annotations\&quot;:{},\&quot;name\&quot;:\&quot;default\&quot;,\&quot;namespace\&quot;:\&quot;argo-events\&quot;},\&quot;spec\&quot;:{\&quot;nats\&quot;:{\&quot;native\&quot;:{\&quot;replicas\&quot;:3}}}}\n&quot;</span><span class="o">}}</span>,<span class="s2">&quot;spec&quot;</span>:<span class="o">{</span><span class="s2">&quot;nats&quot;</span>:<span class="o">{</span><span class="s2">&quot;native&quot;</span>:<span class="o">{</span><span class="s2">&quot;auth&quot;</span>:null,<span class="s2">&quot;maxAge&quot;</span>:null,<span class="s2">&quot;securityContext&quot;</span>:null<span class="o">}}}}</span>
 to:

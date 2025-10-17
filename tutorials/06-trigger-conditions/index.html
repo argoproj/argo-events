@@ -2147,14 +2147,14 @@ want to trigger an Argo workflow if the sensor receives an event from the
 <li>
 <p>Let's create the sensor. If you take a closer look at the trigger templates,
     you will notice that it contains a field named <code>conditions</code>, which is a
-    boolean expression contains dependency names. So, as soon as the expression
+    boolean expression containing dependency names. So, as soon as the expression
     is resolved as true, the corresponding trigger will be executed.</p>
 <div class="codehilite"><pre><span></span><code> kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-01.yaml
 </code></pre></div>
 
 </li>
 <li>
-<p>Send a HTTP request to Webhook event-source.</p>
+<p>Send an HTTP request to Webhook event-source.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -2181,7 +2181,7 @@ want to trigger an Argo workflow if the sensor receives an event from the
 <div class="codehilite"><pre><span></span><code> kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-02.yaml
 </code></pre></div>
 
-<p>Send a HTTP request and perform a file drop on Minio bucket as done above.
+<p>Send an HTTP request and perform a file drop on Minio bucket as done above.
 You should get the following output.</p>
 <div class="codehilite"><pre><span></span><code>this is my first webhook test
 </code></pre></div>

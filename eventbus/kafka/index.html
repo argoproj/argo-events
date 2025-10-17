@@ -2305,11 +2305,11 @@ below).</p>
 for the full specification.</p>
 <h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h2>
 <h3 id="url">url<a class="headerlink" href="#url" title="Permanent link">&para;</a></h3>
-<p>Comma seperated list of kafka broker urls, the kafka broker must be managed
+<p>Comma separated list of kafka broker urls, the kafka broker must be managed
 independently of Argo Events.</p>
 <h3 id="topic">topic<a class="headerlink" href="#topic" title="Permanent link">&para;</a></h3>
 <p>The topic name, defaults to <code>{namespace-name}-{eventbus-name}</code>. Two additional
-topics per Sensor are also required, see see <a href="#topics">topics</a> below for more
+topics per Sensor are also required, see <a href="#topics">topics</a> below for more
 information.</p>
 <h3 id="version">version<a class="headerlink" href="#version" title="Permanent link">&para;</a></h3>
 <p>Kafka version, we recommend not manually setting this field in most
@@ -2351,7 +2351,7 @@ Defaults to range.</p>
 <h2 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h2>
 <p>You can enable TLS or SASL authentication, see above for configuration
 details. You must enable these features in your Kafka Cluster and make
-the certifactes/credentials available in a Kubernetes secret.</p>
+the certificates/credentials available in a Kubernetes secret.</p>
 <h2 id="topics">Topics<a class="headerlink" href="#topics" title="Permanent link">&para;</a></h2>
 <p>The Kafka EventBus requires one event topic and two additional topics (trigger
 and action) per Sensor. These topics will not be created automatically unless
@@ -2409,7 +2409,7 @@ named as follows.</p>
 </tbody>
 </table>
 <h2 id="horizontal-scaling-and-leader-election">Horizontal Scaling and Leader Election<a class="headerlink" href="#horizontal-scaling-and-leader-election" title="Permanent link">&para;</a></h2>
-<p>Sensors that use a Kafka EventBus can scale horizontally. Specifiying replicas
+<p>Sensors that use a Kafka EventBus can scale horizontally. Specifying replicas
 greater than one will result in all Sensor pods actively processing events.
 However, an EventSource that uses a Kafka EventBus cannot necessarily be
 horizontally scaled in an active-active manner, see <a href="../../eventsources/ha/">EventSource HA</a>

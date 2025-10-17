@@ -2299,7 +2299,7 @@
 
 <h1 id="hadr-recommendations">HA/DR Recommendations<a class="headerlink" href="#hadr-recommendations" title="Permanent link">&para;</a></h1>
 <h2 id="eventbus">EventBus<a class="headerlink" href="#eventbus" title="Permanent link">&para;</a></h2>
-<p>A simple EventBus used for non-prod deployment or testing purpose could be:</p>
+<p>A simple EventBus used for non-prod deployment or testing purposes could be:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventBus</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -2309,13 +2309,13 @@
 <span class="w">    </span><span class="nt">native</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
 </code></pre></div>
-<p>However this is not good enough to run your production deployment, following
-settings are recommended to make it more reliable, and achieve high
+<p>However, this is not good enough to run your production deployment. The following
+settings are recommended to make it more reliable and achieve high
 availability.</p>
 <h3 id="persistent-volumes">Persistent Volumes<a class="headerlink" href="#persistent-volumes" title="Permanent link">&para;</a></h3>
-<p>Even though the EventBus PODs already have data sync mechanism between them,
-persistent volumes are still recommended to be used to avoid any events data
-lost when the PODs crash.</p>
+<p>Even though the EventBus PODs already have a data sync mechanism between them,
+persistent volumes are still recommended to avoid any event data
+loss when the PODs crash.</p>
 <p>An EventBus with persistent volumes looks like below:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">nats</span><span class="p">:</span>
@@ -2374,7 +2374,7 @@ could reduce the chance of PODs being evicted.</p>
 <p>Priority could be set through <code>spec.nats.native.priorityClassName</code> or
 <code>spec.nats.native.priority</code>.</p>
 <h3 id="pdb">PDB<a class="headerlink" href="#pdb" title="Permanent link">&para;</a></h3>
-<p>EventBus service is essential to EventSource and Sensor Pods, it would be better to have a <code>PodDisruptionBudget</code> to prevent it from <a href="https://kubernetes.io/docs/concepts/workloads/pods/disruptions/">Pod Disruptions</a>. The following PDB object states <code>maxUnavailable</code> is 1, which is suitable for a 3 replica EventBus object.</p>
+<p>The EventBus service is essential to EventSource and Sensor Pods. It would be better to have a <code>PodDisruptionBudget</code> to prevent <a href="https://kubernetes.io/docs/concepts/workloads/pods/disruptions/">Pod Disruptions</a>. The following PDB object states that <code>maxUnavailable</code> is 1, which is suitable for a 3-replica EventBus object.</p>
 <p>If your EventBus has a name other than <code>default</code>, change it accordingly in the yaml.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">policy/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PodDisruptionBudget</span>

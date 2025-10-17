@@ -2130,7 +2130,7 @@ the concepts you will learn in this tutorial and subsequent ones can be applied
 to any type of event-source.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Follow the installation guide to set up the Argo Events.</li>
+<li>Follow the installation guide to set up Argo Events.</li>
 <li>
 <p>Make sure to configure Argo Workflow controller to listen to workflow objects created in <code>argo-events</code> namespace.
   (See <a href="https://github.com/argoproj/argo-workflows/blob/master/docs/managed-namespace.md">this</a> link.)
@@ -2140,18 +2140,18 @@ to any type of event-source.</p>
 
 </li>
 <li>
-<p>Make sure to read the concepts behind
-  <a href="https://argoproj.github.io/argo-events/concepts/eventbus/">eventbus</a>.
-  <a href="https://argoproj.github.io/argo-events/concepts/sensor/">sensor</a>.
-  <a href="https://argoproj.github.io/argo-events/concepts/event_source/">event source</a>.</p>
+<p>Make sure to read the concepts behind:</p>
 </li>
-<li>Follow the <a href="https://github.com/argoproj/argo-events/tree/master/examples">instruction</a> to create a Service Account <code>operate-workflow-sa</code> with proper privileges, and make sure the Service Account used by Workflows (here we use <code>default</code> in the tutorials for demonstration purpose) has proper RBAC settings.</li>
+<li><a href="https://argoproj.github.io/argo-events/concepts/eventbus/">eventbus</a></li>
+<li><a href="https://argoproj.github.io/argo-events/concepts/sensor/">sensor</a></li>
+<li><a href="https://argoproj.github.io/argo-events/concepts/event_source/">event source</a></li>
+<li>Follow the <a href="https://github.com/argoproj/argo-events/tree/master/examples">instructions</a> to create a Service Account <code>operate-workflow-sa</code> with proper privileges, and make sure the Service Account used by Workflows (here we use <code>default</code> in the tutorials for demonstration purpose) has proper RBAC settings.</li>
 </ul>
 <h2 id="get-started">Get Started<a class="headerlink" href="#get-started" title="Permanent link">&para;</a></h2>
-<p>We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon an HTTP Post request.</p>
+<p>We are going to set up a sensor and event-source for webhook. The goal is to trigger an Argo workflow upon an HTTP POST request.</p>
 <ul>
 <li>
-<p>Let' set up the eventbus.</p>
+<p>Let's set up the eventbus.</p>
 <div class="codehilite"><pre><span></span><code>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 </code></pre></div>
 

@@ -2189,7 +2189,7 @@
 <p>You can create a <code>native</code> NATS EventBus, or connect to an existing NATS
 Streaming service with <code>exotic</code> NATS EventBus.</p>
 <h3 id="native">Native<a class="headerlink" href="#native" title="Permanent link">&para;</a></h3>
-<p>A simplest <code>native</code> NATS EventBus example:</p>
+<p>The simplest <code>native</code> NATS EventBus example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventBus</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -2211,7 +2211,7 @@ persistent volumes.</p>
 <span class="w">  </span><span class="nt">nats</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">native</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"> </span><span class="c1"># optional, defaults to 3, and requires minimal 3</span>
-<span class="w">      </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span><span class="w"> </span><span class="c1"># optional, default to none</span>
+<span class="w">      </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span><span class="w"> </span><span class="c1"># optional, defaults to none</span>
 <span class="w">      </span><span class="nt">persistence</span><span class="p">:</span><span class="w"> </span><span class="c1"># optional</span>
 <span class="w">        </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard</span>
 <span class="w">        </span><span class="nt">accessMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span>
@@ -2317,7 +2317,7 @@ for the full spec of <code>native</code>.</p>
   <code>spec.nats.native.maxAge</code>, i.e. <code>240h</code>.</p>
 </li>
 <li>
-<p>Max subscription number is defaults to <code>1000</code>, it could be customized by
+<p>Max subscription number defaults to <code>1000</code>, it could be customized by
   setting <code>spec.nats.native.maxSubs</code>.</p>
 </li>
 </ul>

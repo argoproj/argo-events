@@ -2281,7 +2281,7 @@ the event-source over the eventbus, lets see how we can use the event context to
 
 </li>
 <li>
-<p>Send a HTTP request to the event-source pod.</p>
+<p>Send an HTTP request to the event-source pod.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -2311,7 +2311,7 @@ print the message.</p>
 
 </li>
 <li>
-<p>Send a HTTP request to the event-source pod.</p>
+<p>Send an HTTP request to the event-source pod.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -2359,7 +2359,7 @@ important when the <code>key</code> you defined in the parameter doesn't exist i
 
 </li>
 <li>
-<p>Send a HTTP request to the event-source pod.</p>
+<p>Send an HTTP request to the event-source pod.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -2471,7 +2471,7 @@ a parameter comes handy.</p>
 
 </li>
 <li>
-<p>Send a HTTP request to the event-source.</p>
+<p>Send an HTTP request to the event-source.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;hey!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 
@@ -2505,7 +2505,7 @@ applying a parameter at the trigger template level.</p>
 
 </li>
 <li>
-<p>Send a HTTP request to the event-source.</p>
+<p>Send an HTTP request to the event-source.</p>
 <div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;dependencyName&quot;:&quot;test-dep&quot;, &quot;dataKey&quot;: &quot;body.message&quot;, &quot;dest&quot;: &quot;spec.arguments.parameters.0.value&quot;, &quot;message&quot;: &quot;amazing!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </code></pre></div>
 

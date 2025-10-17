@@ -2334,7 +2334,7 @@
 <p>Each of generated EventSource, Sensor and EventBus PODs exposes an HTTP endpoint
 for its metrics, which include things like how many events were generated, how
 many actions were triggered, and so on. To let your Prometheus server discover
-those user metrics, add following to your configuration.</p>
+those user metrics, add the following to your configuration.</p>
 <div class="highlight"><pre><span></span><code>    - job_name: &#39;argo-events&#39;
       kubernetes_sd_configs:
       - role: pod
@@ -2356,9 +2356,9 @@ those user metrics, add following to your configuration.</p>
         action: drop
         regex: (.+):(\d222);eventbus-controller
 </code></pre></div>
-<p>Also please make sure your Prometheus Service Account has the permission to do
-POD discovery. A sample <code>ClusterRole</code> like below needs to be added or merged,
-and grant it to your Service Account.</p>
+<p>Also, please make sure your Prometheus Service Account has the permission to do
+POD discovery. A sample <code>ClusterRole</code> like the one below needs to be added or merged
+and granted to your Service Account.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbac.authorization.k8s.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterRole</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -2377,10 +2377,10 @@ and grant it to your Service Account.</p>
 <h4 id="argo_events_events_sent_failed_total">argo_events_events_sent_failed_total<a class="headerlink" href="#argo_events_events_sent_failed_total" title="Permanent link">&para;</a></h4>
 <p>How many events failed to send to EventBus.</p>
 <h4 id="argo_events_events_processing_failed_total">argo_events_events_processing_failed_total<a class="headerlink" href="#argo_events_events_processing_failed_total" title="Permanent link">&para;</a></h4>
-<p>How many events failed to process due to all the reasons, it includes
+<p>How many events failed to process for any reason. This includes
 <code>argo_events_events_sent_failed_total</code>.</p>
 <h4 id="argo_events_event_processing_duration_milliseconds">argo_events_event_processing_duration_milliseconds<a class="headerlink" href="#argo_events_event_processing_duration_milliseconds" title="Permanent link">&para;</a></h4>
-<p>Event processing duration (from getting the event to send it to EventBus) in
+<p>Event processing duration (from receiving the event to sending it to EventBus) in
 milliseconds.</p>
 <h3 id="sensor">Sensor<a class="headerlink" href="#sensor" title="Permanent link">&para;</a></h3>
 <h4 id="argo_events_action_triggered_total">argo_events_action_triggered_total<a class="headerlink" href="#argo_events_action_triggered_total" title="Permanent link">&para;</a></h4>
@@ -2388,14 +2388,14 @@ milliseconds.</p>
 <h4 id="argo_events_action_failed_total">argo_events_action_failed_total<a class="headerlink" href="#argo_events_action_failed_total" title="Permanent link">&para;</a></h4>
 <p>How many actions failed.</p>
 <h4 id="argo_events_action_retries_failed_total">argo_events_action_retries_failed_total<a class="headerlink" href="#argo_events_action_retries_failed_total" title="Permanent link">&para;</a></h4>
-<p>How many actions failed after the retries have been exhausted.<br />
-This is also incremented if there is no <code>retryStrategy</code> specified.</p>
+<p>How many actions failed after retries have been exhausted.
+This is also incremented if no <code>retryStrategy</code> is specified.</p>
 <h4 id="argo_events_action_duration_milliseconds">argo_events_action_duration_milliseconds<a class="headerlink" href="#argo_events_action_duration_milliseconds" title="Permanent link">&para;</a></h4>
 <p>Action triggering duration.</p>
 <h3 id="eventbus">EventBus<a class="headerlink" href="#eventbus" title="Permanent link">&para;</a></h3>
-<p>For <code>native</code> NATS EventBus, check this
-<a href="https://github.com/nats-io/prometheus-nats-exporter">link</a> for the metrics
-explanation.</p>
+<p>For the <code>native</code> NATS EventBus, check this
+<a href="https://github.com/nats-io/prometheus-nats-exporter">link</a> for metrics
+explanations.</p>
 <h2 id="controller-metrics">Controller Metrics<a class="headerlink" href="#controller-metrics" title="Permanent link">&para;</a></h2>
 <p>If you are interested in Argo Events controller metrics, add following to your
 Prometheus configuration.</p>
@@ -2418,9 +2418,9 @@ Prometheus configuration.</p>
         target_label: &#39;namespace&#39;
 </code></pre></div>
 <h2 id="golden-signals">Golden Signals<a class="headerlink" href="#golden-signals" title="Permanent link">&para;</a></h2>
-<p>Following metrics are considered as
+<p>The following metrics are considered
 <a href="https://sre.google/sre-book/monitoring-distributed-systems/#xref_monitoring_golden-signals">Golden Signals</a>
-of monitoring your applications running with Argo Events.</p>
+for monitoring your applications running with Argo Events.</p>
 <ul>
 <li>
 <p>Latency</p>

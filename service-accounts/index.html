@@ -2178,7 +2178,7 @@
 <h1 id="service-accounts">Service Accounts<a class="headerlink" href="#service-accounts" title="Permanent link">&para;</a></h1>
 <h2 id="service-account-for-eventsources">Service Account for EventSources<a class="headerlink" href="#service-account-for-eventsources" title="Permanent link">&para;</a></h2>
 <p>A <code>Service Account</code> can be specified in the EventSource object with
-<code>spec.template.serviceAccountName</code>, however it is not needed for all the
+<code>spec.template.serviceAccountName</code>. However, it is not needed for all
 EventSource types except <code>resource</code>. For a <code>resource</code> EventSource, you need to
 specify a Service Account and give it <code>list</code> and <code>watch</code> permissions for the
 resource being watched.</p>
@@ -2197,7 +2197,7 @@ resource being watched.</p>
 kubectl -n your-namespace create rolebinding deployments-watcher-role-binding --role=deployments-watcher --serviceaccount=your-namespace:my-sa
 </code></pre></div>
 
-<p>or (if you want to watch cluster scope)</p>
+<p>or (if you want to watch at cluster scope)</p>
 <div class="codehilite"><pre><span></span><code>kubectl create clusterrole deployments-watcher --verb=list,watch --resource=deployments.apps
 
 kubectl create clusterrolebinding deployments-watcher-clusterrole-binding --clusterrole=deployments-watcher --serviceaccount=your-namespace:my-sa
@@ -2206,12 +2206,12 @@ kubectl create clusterrolebinding deployments-watcher-clusterrole-binding --clus
 </li>
 </ol>
 <h2 id="service-account-for-sensors">Service Account for Sensors<a class="headerlink" href="#service-account-for-sensors" title="Permanent link">&para;</a></h2>
-<p>A <code>Service Account</code> also can be specified in a Sensor object via
-<code>spec.template.serviceAccountName</code>, this is only needed when <code>k8s</code> trigger or
+<p>A <code>Service Account</code> can also be specified in a Sensor object via
+<code>spec.template.serviceAccountName</code>. This is only needed when a <code>k8s</code> trigger or
 <code>argoWorkflow</code> trigger is defined in the Sensor object.</p>
-<p>The sensor examples provided by us use <code>operate-workflow-sa</code> service account to
+<p>The sensor examples provided by us use the <code>operate-workflow-sa</code> service account to
 execute the triggers, but it has more permissions than needed, and you may want
-to limit those privileges based on your use-case. It's always a good practice to
+to limit those privileges based on your use case. It's always a good practice to
 create a service account with minimum privileges to execute it.</p>
 <h3 id="argo-workflow-trigger">Argo Workflow Trigger<a class="headerlink" href="#argo-workflow-trigger" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2234,10 +2234,10 @@ Sensor.</p>
 <h2 id="service-account-for-triggered-workflows-or-other-k8s-resources">Service Account for Triggered Workflows (or other K8s resources)<a class="headerlink" href="#service-account-for-triggered-workflows-or-other-k8s-resources" title="Permanent link">&para;</a></h2>
 <p>When the Sensor is used to trigger a Workflow, you might need to configure the
 Service Account used in the Workflow spec (<strong>NOT</strong>
-<code>spec.template.serviceAccountName</code>) following Argo Workflow
+<code>spec.template.serviceAccountName</code>), following Argo Workflows
 <a href="https://github.com/argoproj/argo-workflows/blob/master/docs/service-accounts.md">instructions</a>.</p>
-<p>If it is used to trigger other K8s resources (i.e. a Deployment), make sure to
-follow least privilege principle.</p>
+<p>If it is used to trigger other K8s resources (i.e., a Deployment), make sure to
+follow the least privilege principle.</p>
 
               
             </article>
