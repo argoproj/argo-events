@@ -145,6 +145,10 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 		return nil, fmt.Errorf("failed to construct request for %s, %w", trigger.URL, err)
 	}
 
+	if trigger.Host != "" {
+		request.Host = trigger.Host
+	}
+
 	if trigger.Headers != nil {
 		for name, value := range trigger.Headers {
 			request.Header[name] = []string{value}
