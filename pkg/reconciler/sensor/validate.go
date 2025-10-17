@@ -256,7 +256,7 @@ func validateHTTPTrigger(trigger *v1alpha1.HTTPTrigger) error {
 	}
 	if trigger.Payload != nil {
 		for i, p := range trigger.Payload {
-			if err := validateTriggerParameter(&p); err != nil {
+			if err := validateTriggerParameterForHTTP(&p); err != nil {
 				return fmt.Errorf("payload index: %d. err: %w", i, err)
 			}
 		}
@@ -467,6 +467,28 @@ func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 	if parameter.Dest == "" {
 		return fmt.Errorf("parameter destination can't be empty")
 	}
+
+	switch op := parameter.Operation; op {
+	case v1alpha1.TriggerParameterOpAppend:
+	case v1alpha1.TriggerParameterOpOverwrite:
+	case v1alpha1.TriggerParameterOpPrepend:
+	case v1alpha1.TriggerParameterOpNone:
+	default:
+		return fmt.Errorf("parameter operation %+v is invalid", op)
+	}
+
+	return nil
+}
+
+// validateTriggerParameterForHTTP validates a trigger parameter specifically for HTTP triggers
+func validateTriggerParameterForHTTP(parameter *v1alpha1.TriggerParameter) error {
+	if parameter.Src == nil {
+		return fmt.Errorf("parameter source can't be empty")
+	}
+	if parameter.Src.DependencyName == "" {
+		return fmt.Errorf("parameter dependency name can't be empty")
+	}
+	// For HTTP triggers, allow empty dest to pass the entire payload
 
 	switch op := parameter.Operation; op {
 	case v1alpha1.TriggerParameterOpAppend:

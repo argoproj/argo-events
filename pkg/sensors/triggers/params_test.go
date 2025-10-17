@@ -617,3 +617,62 @@ func TestApplyTemplateParameters(t *testing.T) {
 	err := ApplyTemplateParameters(testEvents, &obj.Spec.Triggers[0])
 	assert.Nil(t, err)
 }
+func TestGetValueByKey_NullValue(t *testing.T) {
+	jsonData := []byte(`{"nullable_key": null, "string_key": "value"}`)
+
+	// Test null value
+	result, typ, err := getValueByKey(jsonData, "nullable_key")
+	assert.NoError(t, err)
+	assert.Equal(t, "null", result)
+	assert.Equal(t, "Null", typ)
+
+	// Test string value for comparison
+	result, typ, err = getValueByKey(jsonData, "string_key")
+	assert.NoError(t, err)
+	assert.Equal(t, "value", result)
+	assert.Equal(t, "String", typ)
+}
+
+func TestConstructPayload_NullValue(t *testing.T) {
+	events := map[string]*v1alpha1.Event{
+		"test-dep": {
+			Data: []byte(`{"nullable_key": null, "other_key": "value"}`),
+			Context: &v1alpha1.EventContext{
+				DataContentType: v1alpha1.MediaTypeJSON,
+			},
+		},
+	}
+
+	parameters := []v1alpha1.TriggerParameter{
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "test-dep",
+				DataKey:        "nullable_key",
+				UseRawData:     true,
+			},
+			Dest: "nullable_key",
+		},
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "test-dep",
+				DataKey:        "other_key",
+			},
+			Dest: "other_key",
+		},
+	}
+
+	payload, err := ConstructPayload(events, parameters)
+	assert.NoError(t, err)
+
+	// Verify the payload is valid JSON
+	var result map[string]interface{}
+	err = json.Unmarshal(payload, &result)
+	assert.NoError(t, err)
+
+	// Verify null value is preserved
+	assert.Nil(t, result["nullable_key"])
+	assert.Equal(t, "value", result["other_key"])
+
+	// Verify the raw JSON contains "null" not empty
+	assert.Contains(t, string(payload), `"nullable_key":null`)
+}
