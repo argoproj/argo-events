@@ -5,11 +5,11 @@ It listens to events on the eventbus and acts as an event dependency manager to 
 
 ## Event dependency
 
-A dependency is an event the sensor is waiting to happen.
+A dependency is an event the sensor is waiting for.
 
 ## Specification
 
-Complete specification is available [here](../APIs.md#argoproj.io/v1alpha1.Sensor).
+The complete specification is available [here](../APIs.md#argoproj.io/v1alpha1.Sensor).
 
 ## Examples
 

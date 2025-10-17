@@ -59,7 +59,7 @@ the event-source over the eventbus, lets see how we can use the event context to
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-01.yaml
 
-2. Send a HTTP request to the event-source pod.
+2. Send an HTTP request to the event-source pod.
 
         curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
@@ -83,7 +83,7 @@ print the message.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-02.yaml
 
-2. Send a HTTP request to the event-source pod.
+2. Send an HTTP request to the event-source pod.
 
         curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
@@ -128,7 +128,7 @@ important when the `key` you defined in the parameter doesn't exist in the event
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-03.yaml
 
-2. Send a HTTP request to the event-source pod.
+2. Send an HTTP request to the event-source pod.
 
         curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
@@ -237,7 +237,7 @@ a parameter comes handy.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-04.yaml
 
-2. Send a HTTP request to the event-source.
+2. Send an HTTP request to the event-source.
 
         curl -d '{"message":"hey!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
@@ -269,7 +269,7 @@ applying a parameter at the trigger template level.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-05.yaml
 
-2. Send a HTTP request to the event-source.
+2. Send an HTTP request to the event-source.
 
         curl -d '{"dependencyName":"test-dep", "dataKey": "body.message", "dest": "spec.arguments.parameters.0.value", "message": "amazing!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 

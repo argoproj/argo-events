@@ -9,7 +9,7 @@
 Each of generated EventSource, Sensor and EventBus PODs exposes an HTTP endpoint
 for its metrics, which include things like how many events were generated, how
 many actions were triggered, and so on. To let your Prometheus server discover
-those user metrics, add following to your configuration.
+those user metrics, add the following to your configuration.
 
 ```txt
     - job_name: 'argo-events'
@@ -34,9 +34,9 @@ those user metrics, add following to your configuration.
         regex: (.+):(\d222);eventbus-controller
 ```
 
-Also please make sure your Prometheus Service Account has the permission to do
-POD discovery. A sample `ClusterRole` like below needs to be added or merged,
-and grant it to your Service Account.
+Also, please make sure your Prometheus Service Account has the permission to do
+POD discovery. A sample `ClusterRole` like the one below needs to be added or merged
+and granted to your Service Account.
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -66,12 +66,12 @@ How many events failed to send to EventBus.
 
 #### argo_events_events_processing_failed_total
 
-How many events failed to process due to all the reasons, it includes
+How many events failed to process for any reason. This includes
 `argo_events_events_sent_failed_total`.
 
 #### argo_events_event_processing_duration_milliseconds
 
-Event processing duration (from getting the event to send it to EventBus) in
+Event processing duration (from receiving the event to sending it to EventBus) in
 milliseconds.
 
 ### Sensor
@@ -86,8 +86,8 @@ How many actions failed.
 
 #### argo_events_action_retries_failed_total
 
-How many actions failed after the retries have been exhausted.  
-This is also incremented if there is no `retryStrategy` specified.
+How many actions failed after retries have been exhausted.
+This is also incremented if no `retryStrategy` is specified.
 
 #### argo_events_action_duration_milliseconds
 
@@ -95,9 +95,9 @@ Action triggering duration.
 
 ### EventBus
 
-For `native` NATS EventBus, check this
-[link](https://github.com/nats-io/prometheus-nats-exporter) for the metrics
-explanation.
+For the `native` NATS EventBus, check this
+[link](https://github.com/nats-io/prometheus-nats-exporter) for metrics
+explanations.
 
 ## Controller Metrics
 
@@ -126,9 +126,9 @@ Prometheus configuration.
 
 ## Golden Signals
 
-Following metrics are considered as
+The following metrics are considered
 [Golden Signals](https://sre.google/sre-book/monitoring-distributed-systems/#xref_monitoring_golden-signals)
-of monitoring your applications running with Argo Events.
+for monitoring your applications running with Argo Events.
 
 - Latency
 

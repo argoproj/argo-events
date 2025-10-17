@@ -5,7 +5,7 @@ Streaming service with `exotic` NATS EventBus.
 
 ### Native
 
-A simplest `native` NATS EventBus example:
+The simplest `native` NATS EventBus example:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -33,7 +33,7 @@ spec:
   nats:
     native:
       replicas: 3 # optional, defaults to 3, and requires minimal 3
-      auth: token # optional, default to none
+      auth: token # optional, defaults to none
       persistence: # optional
         storageClassName: standard
         accessMode: ReadWriteOnce
@@ -118,7 +118,7 @@ for the full spec of `native`.
   deleted automatically. It can be customized by setting
   `spec.nats.native.maxAge`, i.e. `240h`.
 
-- Max subscription number is defaults to `1000`, it could be customized by
+- Max subscription number defaults to `1000`, it could be customized by
   setting `spec.nats.native.maxSubs`.
 
 ### Exotic

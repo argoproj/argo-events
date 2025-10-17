@@ -8563,7 +8563,7 @@ func schema_pkg_apis_events_v1alpha1_URLArtifact(ref common.ReferenceCallback) c
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "URLArtifact contains information about an artifact at an http endpoint.",
+				Description: "URLArtifact contains information about an artifact at an HTTP endpoint.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"path": {

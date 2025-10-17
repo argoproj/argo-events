@@ -36,12 +36,12 @@ Make sure there are no errors in any of the event-sources.
 
 3. Let's create the sensor. If you take a closer look at the trigger templates,
     you will notice that it contains a field named `conditions`, which is a
-    boolean expression contains dependency names. So, as soon as the expression
+    boolean expression containing dependency names. So, as soon as the expression
     is resolved as true, the corresponding trigger will be executed.
 
          kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-01.yaml
 
-4. Send a HTTP request to Webhook event-source.
+4. Send an HTTP request to Webhook event-source.
 
         curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
@@ -65,7 +65,7 @@ Make sure there are no errors in any of the event-sources.
 
          kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-trigger-conditions/sensor-02.yaml
 
-    Send a HTTP request and perform a file drop on Minio bucket as done above.
+    Send an HTTP request and perform a file drop on Minio bucket as done above.
     You should get the following output.
 
         

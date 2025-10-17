@@ -84,7 +84,7 @@ We will set up a basic go http server and connect it with the Minio events.
 In order to construct a request payload based on the event data, sensor offers
 `payload` field as a part of the HTTP trigger.
 
-Let's examine a HTTP trigger,
+Let's examine an HTTP trigger,
 
         http:
           url: http://http-server.argo-events.svc:8090/hello
