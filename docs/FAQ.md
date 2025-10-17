@@ -13,7 +13,7 @@
 **A**. Yes. If you want to deploy the event-source in a different namespace than `argo-events`, please update the event-source definition
 with the desired namespace and service account. Make sure to grant the service account the [necessary roles](https://github.com/argoproj/argo-events/blob/master/manifests/namespace-install.yaml).
 
-**Q. How to debug Argo-Events.**
+**Q. How to debug Argo Events?**
 
 **A**.
 

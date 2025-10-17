@@ -26,13 +26,13 @@ for the full specification.
 
 ### url
 
-Comma seperated list of kafka broker urls, the kafka broker must be managed
+Comma separated list of kafka broker urls, the kafka broker must be managed
 independently of Argo Events.
 
 ### topic
 
 The topic name, defaults to `{namespace-name}-{eventbus-name}`. Two additional
-topics per Sensor are also required, see see [topics](#topics) below for more
+topics per Sensor are also required, see [topics](#topics) below for more
 information.
 
 ### version
@@ -94,7 +94,7 @@ Producer partitioning strategy. Supported values: `random`, `hash`, `roundrobin`
 
 You can enable TLS or SASL authentication, see above for configuration
 details. You must enable these features in your Kafka Cluster and make
-the certifactes/credentials available in a Kubernetes secret.
+the certificates/credentials available in a Kubernetes secret.
 
 ## Topics
 
@@ -127,7 +127,7 @@ named as follows.
 
 ## Horizontal Scaling and Leader Election
 
-Sensors that use a Kafka EventBus can scale horizontally. Specifiying replicas
+Sensors that use a Kafka EventBus can scale horizontally. Specifying replicas
 greater than one will result in all Sensor pods actively processing events.
 However, an EventSource that uses a Kafka EventBus cannot necessarily be
 horizontally scaled in an active-active manner, see [EventSource HA](../eventsources/ha.md)

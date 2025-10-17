@@ -32,7 +32,7 @@ To run Argo Events locally for development: [developer guide](developer_guide.md
 
 Dependencies increase the risk of security issues and have on-going maintenance costs.
 
-The dependency must pass these test:
+The dependency must pass these tests:
 
 - A strong use case.
 - It has an acceptable license (e.g. MIT).
@@ -53,4 +53,4 @@ No, we should not add that dependency.
 
 ### Contributor Workshop
 
-We have a [90m video on YouTube](https://youtu.be/zZv0lNCDG9w) to show you how to get some hands-on experience contributing (e.g., running locally, testing, etc...).
+We have a [90m video on YouTube](https://youtu.be/zZv0lNCDG9w) to show you how to gain hands-on experience in contributing (e.g., running locally, testing, etc...).

@@ -3,7 +3,7 @@
 ## Service Account for EventSources
 
 A `Service Account` can be specified in the EventSource object with
-`spec.template.serviceAccountName`, however it is not needed for all the
+`spec.template.serviceAccountName`. However, it is not needed for all
 EventSource types except `resource`. For a `resource` EventSource, you need to
 specify a Service Account and give it `list` and `watch` permissions for the
 resource being watched.
@@ -20,7 +20,7 @@ For example, if you want to watch actions on `Deployment` objects, you need to:
 
         kubectl -n your-namespace create rolebinding deployments-watcher-role-binding --role=deployments-watcher --serviceaccount=your-namespace:my-sa
 
-    or (if you want to watch cluster scope)
+    or (if you want to watch at cluster scope)
 
         kubectl create clusterrole deployments-watcher --verb=list,watch --resource=deployments.apps
 
@@ -28,13 +28,13 @@ For example, if you want to watch actions on `Deployment` objects, you need to:
 
 ## Service Account for Sensors
 
-A `Service Account` also can be specified in a Sensor object via
-`spec.template.serviceAccountName`, this is only needed when `k8s` trigger or
+A `Service Account` can also be specified in a Sensor object via
+`spec.template.serviceAccountName`. This is only needed when a `k8s` trigger or
 `argoWorkflow` trigger is defined in the Sensor object.
 
-The sensor examples provided by us use `operate-workflow-sa` service account to
+The sensor examples provided by us use the `operate-workflow-sa` service account to
 execute the triggers, but it has more permissions than needed, and you may want
-to limit those privileges based on your use-case. It's always a good practice to
+to limit those privileges based on your use case. It's always a good practice to
 create a service account with minimum privileges to execute it.
 
 ### Argo Workflow Trigger
@@ -60,8 +60,8 @@ Sensor.
 
 When the Sensor is used to trigger a Workflow, you might need to configure the
 Service Account used in the Workflow spec (**NOT**
-`spec.template.serviceAccountName`) following Argo Workflow
+`spec.template.serviceAccountName`), following Argo Workflows
 [instructions](https://github.com/argoproj/argo-workflows/blob/master/docs/service-accounts.md).
 
-If it is used to trigger other K8s resources (i.e. a Deployment), make sure to
-follow least privilege principle.
+If it is used to trigger other K8s resources (i.e., a Deployment), make sure to
+follow the least privilege principle.

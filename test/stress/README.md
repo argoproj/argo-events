@@ -10,7 +10,7 @@ Argo Events provides a set of simple tools to do stress testing:
 
 - Set up Prometheus metrics monitoring.
 
-  Follow the [instruction](https://argoproj.github.io/argo-events/metrics/) to
+  Follow the [instructions](https://argoproj.github.io/argo-events/metrics/) to
   set up Prometheus to grab metrics, also make sure the basic Kubernetes metrics
   like Pod CPU/memory usage are captured. Display the metrics using tools like
   [Grafana](https://grafana.com/).

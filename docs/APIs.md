@@ -21924,7 +21924,7 @@ URLArtifact
 
 <p>
 
-URLArtifact contains information about an artifact at an http endpoint.
+URLArtifact contains information about an artifact at an HTTP endpoint.
 </p>
 
 </p>
