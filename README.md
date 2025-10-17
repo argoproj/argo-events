@@ -38,7 +38,7 @@ Follow these [instructions](https://argoproj.github.io/argo-events/installation/
 
 ## User Interface/API
 
-The Argo Workflows has an API and user interface support Argo Events.
+Argo Workflows has an API and user interface that support Argo Events.
 
 ## Documentation
 
@@ -54,7 +54,7 @@ The Argo Workflows has an API and user interface support Argo Events.
 * [Argo Events - Event-Based Dependency Manager for Kubernetes](https://youtu.be/sUPkGChvD54)
 * [Argo Events Deep-dive](https://youtu.be/U4tCYcCK20w)
 * [Automating Research Workflows at BlackRock](https://www.youtube.com/watch?v=ZK510prml8o)
-* [Designing A Complete CI/CD Pipeline CI/CD Pipeline Using Argo Events, Workflows, and CD](https://www.slideshare.net/JulianMazzitelli/designing-a-complete-ci-cd-pipeline-using-argo-events-workflow-and-cd-products-228452500)
+* [Designing A Complete CI/CD Pipeline Using Argo Events, Workflows, and CD](https://www.slideshare.net/JulianMazzitelli/designing-a-complete-ci-cd-pipeline-using-argo-events-workflow-and-cd-products-228452500)
 * TGI Kubernetes with Joe
   Beda: [CloudEvents and Argo Events](https://www.youtube.com/watch?v=LQbBgQnUs_k&list=PL7bmigfV0EqQzxcNpmcdTJ9eFRPBe-iZa&index=2&t=0s)
 

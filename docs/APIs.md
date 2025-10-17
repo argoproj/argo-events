@@ -10915,6 +10915,25 @@ Parameters.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>host</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Host refers to the domain name of the server (for virtual hosting).
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -21926,7 +21945,7 @@ URLArtifact
 
 <p>
 
-URLArtifact contains information about an artifact at an http endpoint.
+URLArtifact contains information about an artifact at an HTTP endpoint.
 </p>
 
 </p>

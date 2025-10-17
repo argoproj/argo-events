@@ -2,7 +2,7 @@
 
 ## EventBus
 
-A simple EventBus used for non-prod deployment or testing purpose could be:
+A simple EventBus used for non-prod deployment or testing purposes could be:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -15,15 +15,15 @@ spec:
       auth: token
 ```
 
-However this is not good enough to run your production deployment, following
-settings are recommended to make it more reliable, and achieve high
+However, this is not good enough to run your production deployment. The following
+settings are recommended to make it more reliable and achieve high
 availability.
 
 ### Persistent Volumes
 
-Even though the EventBus PODs already have data sync mechanism between them,
-persistent volumes are still recommended to be used to avoid any events data
-lost when the PODs crash.
+Even though the EventBus PODs already have a data sync mechanism between them,
+persistent volumes are still recommended to avoid any event data
+loss when the PODs crash.
 
 An EventBus with persistent volumes looks like below:
 
@@ -100,7 +100,7 @@ Priority could be set through `spec.nats.native.priorityClassName` or
 
 ### PDB
 
-EventBus service is essential to EventSource and Sensor Pods, it would be better to have a `PodDisruptionBudget` to prevent it from [Pod Disruptions](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/). The following PDB object states `maxUnavailable` is 1, which is suitable for a 3 replica EventBus object.
+The EventBus service is essential to EventSource and Sensor Pods. It would be better to have a `PodDisruptionBudget` to prevent [Pod Disruptions](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/). The following PDB object states that `maxUnavailable` is 1, which is suitable for a 3-replica EventBus object.
 
 If your EventBus has a name other than `default`, change it accordingly in the yaml.
 

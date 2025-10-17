@@ -425,6 +425,9 @@ type HTTPTrigger struct {
 	// Dynamic Headers for the request, sourced from the event. Same spec as Parameters.
 	// +optional
 	DynamicHeaders []TriggerParameter `json:"dynamicHeaders,omitempty" protobuf:"bytes,10,rep,name=dynamicHeaders"`
+	// Host refers to the domain name of the server (for virtual hosting).
+	// +optional
+	Host string `json:"host" protobuf:"bytes,11,opt,name=host"`
 }
 
 // SecureHeader refers to HTTP Headers with auth tokens as values
@@ -946,7 +949,7 @@ type FileArtifact struct {
 	Path string `json:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
 }
 
-// URLArtifact contains information about an artifact at an http endpoint.
+// URLArtifact contains information about an artifact at an HTTP endpoint.
 type URLArtifact struct {
 	// Path is the complete URL
 	Path string `json:"path" protobuf:"bytes,1,opt,name=path"`

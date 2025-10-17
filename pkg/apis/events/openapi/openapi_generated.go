@@ -4372,6 +4372,14 @@ func schema_pkg_apis_events_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 							},
 						},
 					},
+					"host": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Host refers to the domain name of the server (for virtual hosting).",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"url", "payload"},
 			},
@@ -8561,7 +8569,7 @@ func schema_pkg_apis_events_v1alpha1_URLArtifact(ref common.ReferenceCallback) c
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "URLArtifact contains information about an artifact at an http endpoint.",
+				Description: "URLArtifact contains information about an artifact at an HTTP endpoint.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"path": {
