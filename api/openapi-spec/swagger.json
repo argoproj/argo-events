@@ -4217,6 +4217,10 @@
           "description": "S3 region. Defaults to us-east-1",
           "type": "string"
         },
+        "tls": {
+          "description": "TLS configuration for the service bus client",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.TLSConfig"
+        },
         "topicArn": {
           "description": "TopicArn",
           "type": "string"

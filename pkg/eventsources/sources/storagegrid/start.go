@@ -218,7 +218,19 @@ func (router *Router) PostActivate() error {
 
 	registrationURL := sharedutil.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint)
 
-	client := resty.New()
+	httpClient := &http.Client{}
+
+	if eventSource.TLS != nil {
+		tlsConfig, err := sharedutil.GetTLSConfig(eventSource.TLS)
+		if err != nil {
+			return fmt.Errorf("failed to get the tls configuration, %w", err)
+		}
+		httpClient.Transport = &http.Transport{
+			TLSClientConfig: tlsConfig,
+		}
+	}
+
+	client := resty.NewWithClient(httpClient)
 
 	logger := route.Logger.With(
 		"registration-url", registrationURL,
