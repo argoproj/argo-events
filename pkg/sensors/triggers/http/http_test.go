@@ -17,6 +17,7 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -205,4 +206,46 @@ func TestHTTPTrigger_ApplyPolicy(t *testing.T) {
 	}
 	err = trigger.ApplyPolicy(context.TODO(), response)
 	assert.NotNil(t, err)
+}
+
+// roundTripperMarker implements http.RoundTripper and marks called if invoked
+type roundTripperMarker struct{ called bool }
+
+func (r *roundTripperMarker) RoundTrip(req *http.Request) (*http.Response, error) {
+	r.called = true
+	return nil, fmt.Errorf("RoundTrip should not be called")
+}
+
+func TestHTTPTrigger_Execute_BasicAuthPasswordError(t *testing.T) {
+	transport := &roundTripperMarker{}
+	client := &http.Client{
+		Transport: transport,
+	}
+	logger := logging.NewArgoEventsLogger()
+
+	trig := &v1alpha1.HTTPTrigger{
+		URL:    "http://example.invalid",
+		Method: http.MethodGet,
+		BasicAuth: &v1alpha1.BasicAuth{
+			// Intentionally reference a non-existent secret to force GetSecretFromVolume error
+			Password: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{Name: "missing"},
+				Key:                  "pwd",
+			},
+		},
+	}
+
+	trigger := &HTTPTrigger{
+		Client:  client,
+		Sensor:  sensorObj.DeepCopy(),
+		Trigger: (&v1alpha1.Trigger{Template: &v1alpha1.TriggerTemplate{Name: "basic-auth", HTTP: trig}}).DeepCopy(),
+		Logger:  logger,
+	}
+
+	res, err := trigger.Execute(context.TODO(), map[string]*v1alpha1.Event{}, trig)
+	assert.Nil(t, res)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "failed to retrieve the password")
+	// Ensure the HTTP client was not used
+	assert.False(t, transport.called)
 }
