@@ -146,9 +146,9 @@ jobs:
           password: ${{ secrets.QUAYIO_PASSWORD }}
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+        uses: sigstore/cosign-installer@v4.0.0
         with:
-          cosign-release: "v3.0.2"
+          cosign-release: 'v3.0.2'
 
       - name: Install crane to get digest of image
         uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e # v0.4
