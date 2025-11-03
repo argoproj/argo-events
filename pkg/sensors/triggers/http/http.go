@@ -197,7 +197,7 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 
 		if basicAuth.Password != nil {
 			password, err = sharedutil.GetSecretFromVolume(basicAuth.Password)
-			if !ok {
+			if err != nil {
 				return nil, fmt.Errorf("failed to retrieve the password, %w", err)
 			}
 		}
