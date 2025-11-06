@@ -1,6 +1,7 @@
 package dependencies
 
 import (
+	"encoding/json"
 	"testing"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -56,6 +57,33 @@ func TestApplyJQTransform(t *testing.T) {
 }
 
 func TestApplyScriptTransform(t *testing.T) {
+	// Test for empty array output from Lua
+	t.Run("empty array from lua", func(t *testing.T) {
+		event := &cloudevents.Event{
+			Context: &cloudevents.EventContextV1{
+				ID:              "123",
+				Source:          types.URIRef{},
+				DataContentType: strptr(cloudevents.ApplicationJSON),
+				Subject:         strptr("hello"),
+				Time:            &types.Timestamp{},
+			},
+			DataEncoded: []byte(`{"env": 123}`),
+		}
+		// Lua script sets env to an empty array using metatable
+		script := `
+event.env = setmetatable({}, { __is_array = true })
+return event
+`
+		result, err := applyScriptTransform(event, script)
+		assert.Nil(t, err)
+		// Should produce {"env":[]}
+		expected := []byte(`{"env":[]}`)
+		// Only check the env field
+		var got, want map[string]interface{}
+		_ = json.Unmarshal(result.Data(), &got)
+		_ = json.Unmarshal(expected, &want)
+		assert.Equal(t, want["env"], got["env"])
+	})
 	tests := []struct {
 		event    *cloudevents.Event
 		result   *cloudevents.Event
