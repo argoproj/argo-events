@@ -12,9 +12,10 @@ type Auth struct {
 
 // AuthCredential host the credential info
 type AuthCredential struct {
-	Token    string
-	Username string
-	Password string
+	Token          string
+	Username       string
+	Password       string
+	CredentialFile string
 }
 
 type MsgHeader struct {

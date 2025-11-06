@@ -1696,6 +1696,10 @@ message JetStreamConfig {
   // SSL/TLS settings for the NATS client
   // +optional
   optional TLSConfig tls = 4;
+
+  // Auth strategy, default to AuthStrategyNone
+  // +optional
+  optional string auth = 5;
 }
 
 // K8SResource represent arbitrary structured data.

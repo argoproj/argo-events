@@ -1525,6 +1525,7 @@ AuthStrategy (<code>string</code> alias)
 <p>
 
 (<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.JetStreamConfig">JetStreamConfig</a>,
 <a href="#argoproj.io/v1alpha1.NATSConfig">NATSConfig</a>,
 <a href="#argoproj.io/v1alpha1.NativeStrategy">NativeStrategy</a>)
 </p>
@@ -11599,6 +11600,26 @@ TLSConfig </a> </em>
 <p>
 
 SSL/TLS settings for the NATS client
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>auth</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AuthStrategy"> AuthStrategy </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Auth strategy, default to AuthStrategyNone
 </p>
 
 </td>

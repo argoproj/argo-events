@@ -89,6 +89,9 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 	case v1alpha1.AuthStrategyBasic:
 		log.Info("NATS auth strategy: Basic")
 		opts = append(opts, nats.UserInfo(stream.auth.Credential.Username, stream.auth.Credential.Password))
+	case v1alpha1.AuthStrategyJWT:
+		log.Info("NATS auth strategy: JWT")
+		opts = append(opts, nats.UserCredentials(stream.auth.Credential.CredentialFile))
 	case v1alpha1.AuthStrategyNone:
 		log.Info("NATS auth strategy: None")
 	default:

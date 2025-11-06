@@ -105,4 +105,7 @@ type JetStreamConfig struct {
 	// SSL/TLS settings for the NATS client
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,4,opt,name=tls"`
+	// Auth strategy, default to AuthStrategyNone
+	// +optional
+	Auth *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,5,opt,name=auth,casttype=AuthStrategy"`
 }
