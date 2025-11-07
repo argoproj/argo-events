@@ -627,54 +627,6 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(0))
 }
 
-func (s *FunctionalSuite) TestDuplicateDependencyWithFilterDoesntTrigger() {
-	// duplicate dependencies only works for kafka and jetstream bus drivers
-	if fixtures.GetBusDriverSpec() == fixtures.E2EEventBusSTAN {
-		return
-	}
-	t1 := s.Given().EventSource("@testdata/es-calendar-metadata.yaml").
-		When().
-		CreateEventSource().
-		WaitForEventSourceReady().
-		Then().
-		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
-
-	defer t1.When().DeleteEventSource()
-
-	t2 := s.Given().Sensor("@testdata/sensor-duplicate-deps-filter.yaml").
-		When().
-		CreateSensor().
-		WaitForSensorReady().
-		Then().
-		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"), util.PodLogCheckOptionWithCount(0))
-
-	defer t2.When().DeleteSensor()
-}
-
-func (s *FunctionalSuite) TestDuplicateDependency() {
-	// duplicate dependencies only works for kafka and jetstream bus drivers
-	if fixtures.GetBusDriverSpec() == fixtures.E2EEventBusSTAN {
-		return
-	}
-	t1 := s.Given().EventSource("@testdata/es-calendar-metadata.yaml").
-		When().
-		CreateEventSource().
-		WaitForEventSourceReady().
-		Then().
-		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
-
-	defer t1.When().DeleteEventSource()
-
-	t2 := s.Given().Sensor("@testdata/sensor-duplicate-deps.yaml").
-		When().
-		CreateSensor().
-		WaitForSensorReady().
-		Then().
-		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
-
-	defer t2.When().DeleteSensor()
-}
-
 func TestFunctionalSuite(t *testing.T) {
 	suite.Run(t, new(FunctionalSuite))
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/Knetic/govaluate"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 
+	"github.com/argoproj/argo-events/pkg/eventbus/common"
 	"github.com/argoproj/argo-events/pkg/eventbus/kafka/base"
 )
 
@@ -18,8 +19,8 @@ type KafkaTriggerConnection struct {
 	sensorName    string
 	triggerName   string
 	depExpression *govaluate.EvaluableExpression
+	dependencies  map[string]common.Dependency
 	atLeastOnce   bool
-	sourceDepMap  map[string][]string
 
 	// functions
 	close     func() error
@@ -38,11 +39,10 @@ type eventWithMetadata struct {
 	partition int32
 	offset    int64
 	timestamp time.Time
-	depName   string
 }
 
 func (e1 *eventWithMetadata) Same(e2 *eventWithMetadata) bool {
-	return e1.Source() == e2.Source() && e1.Subject() == e2.Subject() && e1.depName == e2.depName
+	return e1.Source() == e2.Source() && e1.Subject() == e2.Subject()
 }
 
 func (e *eventWithMetadata) After(t time.Time) bool {
