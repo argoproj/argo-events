@@ -82,6 +82,10 @@ type TriggerWithDepName struct {
 	depName string
 }
 
+const (
+	dependencyNameHeader = "dependencyName"
+)
+
 func (t Triggers) List(event *cloudevents.Event) []*TriggerWithDepName {
 	triggers := []*TriggerWithDepName{}
 
@@ -320,7 +324,7 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 			Key:   sarama.StringEncoder(trigger.Name()),
 			Value: sarama.ByteEncoder(value),
 			Headers: []sarama.RecordHeader{{
-				Key:   []byte("dependencyName"),
+				Key:   []byte(dependencyNameHeader),
 				Value: []byte(trigger.depName),
 			}},
 		})
@@ -342,7 +346,7 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 	var dependencyName string
 	if event != nil && len(msg.Headers) > 0 {
 		for _, header := range msg.Headers {
-			if string(header.Key) == "dependencyName" {
+			if string(header.Key) == dependencyNameHeader {
 				dependencyName = string(header.Value)
 				break
 			}
@@ -374,7 +378,7 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 				Key:   sarama.StringEncoder(trigger.Name()),
 				Value: sarama.ByteEncoder(value),
 				Headers: []sarama.RecordHeader{{
-					Key:   []byte("dependencyName"),
+					Key:   []byte(dependencyNameHeader),
 					Value: []byte(dependencyName),
 				}},
 			})
@@ -401,7 +405,7 @@ func (s *KafkaSensor) Action(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMes
 	var dependencyName string
 	if events != nil && len(msg.Headers) > 0 {
 		for _, header := range msg.Headers {
-			if string(header.Key) == "dependencyName" {
+			if string(header.Key) == dependencyNameHeader {
 				dependencyName = string(header.Value)
 				break
 			}
