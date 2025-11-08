@@ -116,7 +116,7 @@ test:
 test-functional:
 ifeq ($(EventBusDriver),kafka)
 	kubectl -n argo-events apply -k test/manifests/kafka
-	kubectl -n argo-events wait -l statefulset.kubernetes.io/pod-name=kafka-broker-0 --for=condition=ready pod --timeout=60s
+	kubectl -n argo-events wait -l statefulset.kubernetes.io/pod-name=redpanda-0 --for=condition=ready pod --timeout=60s
 endif
 	go test -v -timeout 20m -count 1 --tags functional -p 1 ./test/e2e
 ifeq ($(EventBusDriver),kafka)
