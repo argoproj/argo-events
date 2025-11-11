@@ -223,7 +223,7 @@ func (s *FunctionalSuite) TestResourceEventSource() {
 	defer t2.When().DeleteSensor()
 
 	w1.Exec("kubectl", []string{"-n", fixtures.Namespace, "delete", "pod", "test-pod"}, fixtures.OutputRegexp(`pod "test-pod" deleted`))
-
+	time.Sleep(5 * time.Second)
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
