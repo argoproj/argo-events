@@ -678,6 +678,94 @@ func TestFilterData(t *testing.T) {
 			expectedResult: true,
 			expectErr:      false,
 		},
+		{
+			name: "string filter NotEqualTo with multiple values - value IN array (should FAIL with fix)",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path:       "k",
+						Type:       v1alpha1.JSONTypeString,
+						Value:      []string{"id1", "id2", "id3"},
+						Comparator: "!=",
+					},
+				},
+				operator: v1alpha1.EmptyLogicalOperator,
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": "id1"}`),
+				},
+			},
+			expectedResult: false, // Should FAIL - value IS in array
+			expectErr:      false,
+		},
+		{
+			name: "string filter NotEqualTo with multiple values - value NOT IN array (should PASS)",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path:       "k",
+						Type:       v1alpha1.JSONTypeString,
+						Value:      []string{"id1", "id2", "id3"},
+						Comparator: "!=",
+					},
+				},
+				operator: v1alpha1.EmptyLogicalOperator,
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": "id_other"}`),
+				},
+			},
+			expectedResult: true, // Should PASS - value NOT in array
+			expectErr:      false,
+		},
+		{
+			name: "number filter NotEqualTo with multiple values - value IN array (should FAIL with fix)",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path:       "k",
+						Type:       v1alpha1.JSONTypeNumber,
+						Value:      []string{"1.0", "2.0", "3.0"},
+						Comparator: "!=",
+					},
+				},
+				operator: v1alpha1.EmptyLogicalOperator,
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": 2.0}`),
+				},
+			},
+			expectedResult: false, // Should FAIL - value IS in array
+			expectErr:      false,
+		},
+		{
+			name: "number filter NotEqualTo with multiple values - value NOT IN array (should PASS)",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path:       "k",
+						Type:       v1alpha1.JSONTypeNumber,
+						Value:      []string{"1.0", "2.0", "3.0"},
+						Comparator: "!=",
+					},
+				},
+				operator: v1alpha1.EmptyLogicalOperator,
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte(`{"k": 5.0}`),
+				},
+			},
+			expectedResult: true, // Should PASS - value NOT in array
+			expectErr:      false,
+		},
 	}
 
 	for _, test := range tests {

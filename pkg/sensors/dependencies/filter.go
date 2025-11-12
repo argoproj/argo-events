@@ -304,6 +304,44 @@ filterData:
 			}
 
 		case v1alpha1.JSONTypeNumber:
+			// Special handling for NotEqualTo: check ALL values first
+			if f.Comparator == v1alpha1.NotEqualTo {
+				matchFound := false
+				for _, value := range f.Value {
+					filterVal, err := strconv.ParseFloat(value, 64)
+					eventVal := pathResult.Float()
+					if err != nil {
+						if operator == v1alpha1.OrLogicalOperator {
+							errMessages = append(errMessages, err.Error())
+							continue filterData
+						} else {
+							return false, fmt.Errorf(errMsgTemplate, "data", err.Error())
+						}
+					}
+
+					if eventVal == filterVal {
+						matchFound = true
+						break
+					}
+				}
+
+				// For NotEqualTo: pass only if NO match was found (NOT IN semantics)
+				if !matchFound {
+					if operator == v1alpha1.OrLogicalOperator {
+						return true, nil
+					} else {
+						continue filterData
+					}
+				}
+
+				if operator == v1alpha1.OrLogicalOperator {
+					continue filterData
+				} else {
+					return false, nil
+				}
+			}
+
+			// Standard handling for all other comparators
 			for _, value := range f.Value {
 				filterVal, err := strconv.ParseFloat(value, 64)
 				eventVal := pathResult.Float()
@@ -334,10 +372,6 @@ filterData:
 					if eventVal <= filterVal {
 						compareResult = true
 					}
-				case v1alpha1.NotEqualTo:
-					if eventVal != filterVal {
-						compareResult = true
-					}
 				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
 					if eventVal == filterVal {
 						compareResult = true
@@ -359,6 +393,43 @@ filterData:
 			}
 
 		case v1alpha1.JSONTypeString:
+			// Special handling for NotEqualTo: check ALL values first
+			if f.Comparator == v1alpha1.NotEqualTo {
+				matchFound := false
+				for _, value := range f.Value {
+					exp, err := regexp.Compile(value)
+					if err != nil {
+						if operator == v1alpha1.OrLogicalOperator {
+							errMessages = append(errMessages, err.Error())
+							continue filterData
+						} else {
+							return false, fmt.Errorf(errMsgTemplate, "data", err.Error())
+						}
+					}
+
+					if exp.Match([]byte(pathResult.String())) {
+						matchFound = true
+						break
+					}
+				}
+
+				// For NotEqualTo: pass only if NO match was found (NOT IN semantics)
+				if !matchFound {
+					if operator == v1alpha1.OrLogicalOperator {
+						return true, nil
+					} else {
+						continue filterData
+					}
+				}
+
+				if operator == v1alpha1.OrLogicalOperator {
+					continue filterData
+				} else {
+					return false, nil
+				}
+			}
+
+			// Standard handling for EqualTo comparator
 			for _, value := range f.Value {
 				exp, err := regexp.Compile(value)
 				if err != nil {
@@ -370,20 +441,8 @@ filterData:
 					}
 				}
 
-				matchResult := false
 				match := exp.Match([]byte(pathResult.String()))
-				switch f.Comparator {
-				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
-					if match {
-						matchResult = true
-					}
-				case v1alpha1.NotEqualTo:
-					if !match {
-						matchResult = true
-					}
-				}
-
-				if matchResult {
+				if match {
 					if operator == v1alpha1.OrLogicalOperator {
 						return true, nil
 					} else {
