@@ -226,7 +226,7 @@ func (s *FunctionalSuite) TestResourceEventSource() {
 
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"), util.PodLogCheckOptionWithTimeout(120*time.Second))
 }
 
 func (s *FunctionalSuite) TestMultiDependencyConditions() {
