@@ -17,12 +17,12 @@ type KafkaTriggerHandler interface {
 	Ready() bool
 	Reset()
 	OneAndDone() bool
-	DependsOn(*cloudevents.Event) (string, bool)
+	DependsOn(*cloudevents.Event) ([]string, bool)
 	Transform(string, *cloudevents.Event) (*cloudevents.Event, error)
 	Filter(string, *cloudevents.Event) bool
-	Update(event *cloudevents.Event, partition int32, offset int64, timestamp time.Time) ([]*cloudevents.Event, error)
+	Update(event *cloudevents.Event, partition int32, offset int64, timestamp time.Time, depName string) ([]*cloudevents.Event, error)
 	Offset(int32, int64) int64
-	Action([]*cloudevents.Event) func()
+	Action([]*cloudevents.Event, string) func()
 }
 
 func (c *KafkaTriggerConnection) Name() string {
@@ -35,12 +35,9 @@ func (c *KafkaTriggerConnection) Ready() bool {
 	return c.transform != nil && c.filter != nil && c.action != nil
 }
 
-func (c *KafkaTriggerConnection) DependsOn(event *cloudevents.Event) (string, bool) {
-	if dep, ok := c.dependencies[base.EventKey(event.Source(), event.Subject())]; ok {
-		return dep.Name, true
-	}
-
-	return "", false
+func (c *KafkaTriggerConnection) DependsOn(event *cloudevents.Event) ([]string, bool) {
+	depNames, ok := c.sourceDepMap[base.EventKey(event.Source(), event.Subject())]
+	return depNames, ok
 }
 
 func (c *KafkaTriggerConnection) OneAndDone() bool {
@@ -61,15 +58,16 @@ func (c *KafkaTriggerConnection) Filter(depName string, event *cloudevents.Event
 	return c.filter(depName, *event)
 }
 
-func (c *KafkaTriggerConnection) Update(event *cloudevents.Event, partition int32, offset int64, timestamp time.Time) ([]*cloudevents.Event, error) {
+func (c *KafkaTriggerConnection) Update(event *cloudevents.Event, partition int32, offset int64, timestamp time.Time, depName string) ([]*cloudevents.Event, error) {
 	eventWithMetadata := &eventWithMetadata{
 		Event:     event,
 		partition: partition,
 		offset:    offset,
 		timestamp: timestamp,
+		depName:   depName,
 	}
 
-	// remove previous events with same source and subject and remove
+	// remove previous events with same source, subject and dependency name and remove
 	// all events older than last condition reset time
 	i := 0
 	for _, event := range c.events {
@@ -111,11 +109,18 @@ func (c *KafkaTriggerConnection) Offset(partition int32, offset int64) int64 {
 	return offset
 }
 
-func (c *KafkaTriggerConnection) Action(events []*cloudevents.Event) func() {
+func (c *KafkaTriggerConnection) Action(events []*cloudevents.Event, depName string) func() {
 	eventMap := map[string]cloudevents.Event{}
 	for _, event := range events {
-		if depName, ok := c.DependsOn(event); ok {
-			eventMap[depName] = *event
+		deps, ok := c.DependsOn(event)
+		if !ok {
+			continue
+		}
+		for _, d := range deps {
+			if d == depName {
+				eventMap[depName] = *event
+				break
+			}
 		}
 	}
 
@@ -136,9 +141,7 @@ func (c *KafkaTriggerConnection) Action(events []*cloudevents.Event) func() {
 func (c *KafkaTriggerConnection) satisfied() (interface{}, error) {
 	parameters := Parameters{}
 	for _, event := range c.events {
-		if depName, ok := c.DependsOn(event.Event); ok {
-			parameters[depName] = true
-		}
+		parameters[event.depName] = true
 	}
 
 	c.Logger.Infow("Evaluating", zap.String("expr", c.depExpression.String()), zap.Any("parameters", parameters))
