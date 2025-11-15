@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: bitbucket
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: my-event-source-dep
+      eventSourceName: bitbucket
+      eventName: example
+  triggers:
+    - template:
+        name: argo-workflow-trigger
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: workflow-template-print-message-
+              spec:
+                arguments:
+                  parameters:
+                    - name: message
+                      value: ""
+                workflowTemplateRef:
+                  name: workflow-template-print-message
+          parameters:
+            - src:
+                dependencyName: my-event-source-dep
+                dataKey: body
+              dest: spec.arguments.parameters.0.value
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: workflow-template-print-message
+spec:
+  entrypoint: print-message
+  arguments:
+    parameters:
+      - name: message
+        value: hello world
+  templates:
+    - name: print-message
+      inputs:
+        parameters:
+          - name: message
+      container:
+        image: busybox
+        command: [echo]
+        args: ["{{inputs.parameters.message}}"]
