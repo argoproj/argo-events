@@ -2345,6 +2345,11 @@ func (in *JetStreamConfig) DeepCopyInto(out *JetStreamConfig) {
 		*out = new(TLSConfig)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Auth != nil {
+		in, out := &in.Auth, &out.Auth
+		*out = new(AuthStrategy)
+		**out = **in
+	}
 	return
 }
 

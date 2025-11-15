@@ -2392,6 +2392,10 @@
           "description": "Secret for auth",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
+        "auth": {
+          "description": "Auth strategy, default to AuthStrategyNone",
+          "type": "string"
+        },
         "streamConfig": {
           "type": "string"
         },
