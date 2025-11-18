@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: e2e-calendar-metadata
+spec:
+  replicas: 1
+  template:
+    serviceAccountName: argo-events-sa
+  calendar:
+    example:
+      interval: 5s
+      metadata:
+        baz: "1.0"
+        foo: bar

@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: e2e-duplicate-dep
+spec:
+  replicas: 1
+  template:
+    serviceAccountName: argo-events-sa
+    container:
+      env:
+        - name: DEBUG_LOG
+          value: "true"
+  dependencies:
+    - name: test-dep-1
+      eventSourceName: e2e-calendar-metadata
+      eventName: example
+    - name: test-dep-2
+      eventSourceName: e2e-calendar-metadata
+      eventName: example
+  triggers:
+    - template:
+        name: log-trigger
+        log: {}
+
