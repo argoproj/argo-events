@@ -550,7 +550,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSour
 								return nil
 							}
 							if !proceed {
-								logger.Info("Filter condition not met, skip dispatching")
+								logger.Debug("Filter condition not met, skip dispatching")
 								return nil
 							}
 						}
