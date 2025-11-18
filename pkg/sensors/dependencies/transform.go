@@ -179,7 +179,20 @@ func toGoValue(lv lua.LValue) interface{} {
 		return float64(v)
 	case *lua.LTable:
 		maxn := v.MaxN()
-		if maxn == 0 { // table
+		// Check for __is_array metatable to force array output
+		if mt := v.Metatable; mt != nil {
+			if mtTable, ok := mt.(*lua.LTable); ok {
+				if arrFlag := mtTable.RawGetString("__is_array"); arrFlag != lua.LNil && arrFlag == lua.LTrue {
+					// Always treat as array, even if empty
+					ret := make([]interface{}, 0, maxn)
+					for i := 1; i <= maxn; i++ {
+						ret = append(ret, toGoValue(v.RawGetInt(i)))
+					}
+					return ret
+				}
+			}
+		}
+		if maxn == 0 {
 			ret := make(map[string]interface{})
 			v.ForEach(func(key, value lua.LValue) {
 				keystr := key.String()
