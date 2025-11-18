@@ -82,11 +82,19 @@ type TriggerWithDepName struct {
 	depName string
 }
 
+const (
+	dependencyNameHeader = "dependencyName"
+)
+
 func (t Triggers) List(event *cloudevents.Event) []*TriggerWithDepName {
 	triggers := []*TriggerWithDepName{}
 
 	for _, trigger := range t {
-		if depName, ok := trigger.DependsOn(event); ok {
+		depNames, ok := trigger.DependsOn(event)
+		if !ok {
+			continue
+		}
+		for _, depName := range depNames {
 			triggers = append(triggers, &TriggerWithDepName{trigger, depName})
 		}
 	}
@@ -177,9 +185,14 @@ func (s *KafkaSensor) Connect(ctx context.Context, triggerName string, depExpres
 			return nil, err
 		}
 
-		depMap := map[string]eventbuscommon.Dependency{}
-		for _, dep := range dependencies {
-			depMap[base.EventKey(dep.EventSourceName, dep.EventName)] = dep
+		sourceDepMap := make(map[string][]string)
+		for _, d := range dependencies {
+			key := base.EventKey(d.EventSourceName, d.EventName)
+			_, found := sourceDepMap[key]
+			if !found {
+				sourceDepMap[key] = make([]string, 0)
+			}
+			sourceDepMap[key] = append(sourceDepMap[key], d.Name)
 		}
 
 		s.triggers[triggerName] = &KafkaTriggerConnection{
@@ -187,7 +200,7 @@ func (s *KafkaSensor) Connect(ctx context.Context, triggerName string, depExpres
 			sensorName:      s.sensor.Name,
 			triggerName:     triggerName,
 			depExpression:   expr,
-			dependencies:    depMap,
+			sourceDepMap:    sourceDepMap,
 			atLeastOnce:     atLeastOnce,
 			close:           s.Close,
 			isClosed:        s.IsClosed,
@@ -310,6 +323,10 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 			Topic: topic,
 			Key:   sarama.StringEncoder(trigger.Name()),
 			Value: sarama.ByteEncoder(value),
+			Headers: []sarama.RecordHeader{{
+				Key:   []byte(dependencyNameHeader),
+				Value: []byte(trigger.depName),
+			}},
 		})
 	}
 
@@ -326,12 +343,20 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 
 	messages := []*sarama.ProducerMessage{}
 	offset := msg.Offset + 1
-
+	var dependencyName string
+	if event != nil && len(msg.Headers) > 0 {
+		for _, header := range msg.Headers {
+			if string(header.Key) == dependencyNameHeader {
+				dependencyName = string(header.Value)
+				break
+			}
+		}
+	}
 	// update trigger with new event and add any resulting action to
 	// transaction messages
 	if trigger, ok := s.triggers[string(msg.Key)]; ok && event != nil {
 		func() {
-			events, err := trigger.Update(event, msg.Partition, msg.Offset, msg.Timestamp)
+			events, err := trigger.Update(event, msg.Partition, msg.Offset, msg.Timestamp, dependencyName)
 			if err != nil {
 				s.Logger.Errorw("Failed to update trigger, skipping", zap.Error(err))
 				return
@@ -352,6 +377,10 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 				Topic: s.topics.action,
 				Key:   sarama.StringEncoder(trigger.Name()),
 				Value: sarama.ByteEncoder(value),
+				Headers: []sarama.RecordHeader{{
+					Key:   []byte(dependencyNameHeader),
+					Value: []byte(dependencyName),
+				}},
 			})
 		}()
 	}
@@ -373,9 +402,19 @@ func (s *KafkaSensor) Action(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMes
 		return nil, msg.Offset + 1, nil
 	}
 
+	var dependencyName string
+	if events != nil && len(msg.Headers) > 0 {
+		for _, header := range msg.Headers {
+			if string(header.Key) == dependencyNameHeader {
+				dependencyName = string(header.Value)
+				break
+			}
+		}
+	}
+
 	var f func()
 	if trigger, ok := s.triggers[string(msg.Key)]; ok {
-		f = trigger.Action(events)
+		f = trigger.Action(events, dependencyName)
 	}
 
 	return nil, msg.Offset + 1, f
