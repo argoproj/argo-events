@@ -204,6 +204,14 @@ func (s *FunctionalSuite) TestMetricsWithWebhook() {
 }
 
 func (s *FunctionalSuite) TestResourceEventSource() {
+	t2 := s.Given().Sensor("@testdata/sensor-resource.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady().
+		Then().
+		ExpectSensorPodLogContains(LogSensorStarted)
+	defer t2.When().DeleteSensor()
+
 	w1 := s.Given().EventSource("@testdata/es-resource.yaml").
 		When().
 		CreateEventSource().
@@ -213,14 +221,6 @@ func (s *FunctionalSuite) TestResourceEventSource() {
 	t1 := w1.Then().
 		ExpectEventSourcePodLogContains(LogEventSourceStarted)
 	defer t1.When().DeleteEventSource()
-
-	t2 := s.Given().Sensor("@testdata/sensor-resource.yaml").
-		When().
-		CreateSensor().
-		WaitForSensorReady().
-		Then().
-		ExpectSensorPodLogContains(LogSensorStarted)
-	defer t2.When().DeleteSensor()
 
 	w1.Exec("kubectl", []string{"-n", fixtures.Namespace, "delete", "pod", "test-pod"}, fixtures.OutputRegexp(`pod "test-pod" deleted`))
 
