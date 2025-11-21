@@ -20,6 +20,7 @@ var (
 	AuthStrategyNone  AuthStrategy = "none"
 	AuthStrategyToken AuthStrategy = "token"
 	AuthStrategyBasic AuthStrategy = "basic"
+	AuthStrategyJWT   AuthStrategy = "jwt"
 )
 
 // NativeStrategy indicates to install a native NATS service

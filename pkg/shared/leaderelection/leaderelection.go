@@ -74,11 +74,22 @@ func getEventBusAuth(ctx context.Context, authStrategy *aev1.AuthStrategy) (*eve
 
 	var auth *eventbuscommon.Auth
 
-	if authStrategy == nil || *authStrategy == aev1.AuthStrategyNone {
+	switch {
+	case authStrategy == nil || *authStrategy == aev1.AuthStrategyNone:
 		auth = &eventbuscommon.Auth{
 			Strategy: aev1.AuthStrategyNone,
 		}
-	} else {
+	case *authStrategy == aev1.AuthStrategyJWT:
+		// For JWT auth, we don't parse auth.yaml - just set the credential file path
+		cred := &eventbuscommon.AuthCredential{
+			CredentialFile: fmt.Sprintf("%s/credentials.creds", eventBusAuthFileMountPath),
+		}
+		auth = &eventbuscommon.Auth{
+			Strategy:   aev1.AuthStrategyJWT,
+			Credential: cred,
+		}
+	default:
+		// For Basic and Token auth, parse auth.yaml
 		v := sharedutil.ViperWithLogging()
 		v.SetConfigName("auth")
 		v.SetConfigType("yaml")

@@ -212,17 +212,40 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 	if accessSecret != nil {
 		// Mount the secret as volume instead of using envFrom to gain the ability
 		// for the sensor deployment to auto reload when the secret changes
+
+		// Determine auth strategy to decide how to mount the secret
+		var authStrategy *v1alpha1.AuthStrategy
+		if eventBus.Status.Config.JetStream != nil {
+			authStrategy = eventBus.Status.Config.JetStream.Auth
+		} else if eventBus.Status.Config.NATS != nil {
+			authStrategy = eventBus.Status.Config.NATS.Auth
+		}
+
+		var items []corev1.KeyToPath
+		if authStrategy != nil && *authStrategy == v1alpha1.AuthStrategyJWT {
+			// For JWT auth, mount only the credentials file
+			items = []corev1.KeyToPath{
+				{
+					Key:  accessSecret.Key,
+					Path: "credentials.creds",
+				},
+			}
+		} else {
+			// For Basic/Token auth, mount as auth.yaml
+			items = []corev1.KeyToPath{
+				{
+					Key:  accessSecret.Key,
+					Path: "auth.yaml",
+				},
+			}
+		}
+
 		volumes = append(volumes, corev1.Volume{
 			Name: "auth-volume",
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
 					SecretName: accessSecret.Name,
-					Items: []corev1.KeyToPath{
-						{
-							Key:  accessSecret.Key,
-							Path: "auth.yaml",
-						},
-					},
+					Items:      items,
 				},
 			},
 		})
