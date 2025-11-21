@@ -77,6 +77,63 @@ spec:
 
 4. The type of the `event` variable is Table and the script must return a Table representing a valid JSON object.
 
+### Empty Arrays in Lua
+
+By default, empty Lua tables (`{}`) are serialized as empty JSON objects (`{}`), not arrays (`[]`). To produce an empty JSON array, use a metatable with the `__is_array` flag:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+      transform:
+        script: |-
+          -- Create an empty array using metatable
+          event.env = setmetatable({}, { __is_array = true })
+          return event
+  triggers:
+    - template:
+        name: webhook-workflow-trigger
+        conditions: "test-dep"
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: webhook-
+              spec:
+                entrypoint: print-message
+                arguments:
+                  parameters:
+                    - name: env
+                      value: "[]"
+                templates:
+                  - name: print-message
+                    inputs:
+                      parameters:
+                        - name: env
+                    container:
+                      image: busybox
+                      command: [echo]
+                      args: ["{{inputs.parameters.env}}"]
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: env
+              dest: spec.arguments.parameters.0.value
+```
+
+This ensures that fields requiring arrays (like `env` in Kubernetes specs) receive `[]` instead of `{}`, maintaining compatibility with Kubernetes resource specifications.
+
 ## JQ Command
 
 ```yaml
