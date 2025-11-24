@@ -114,9 +114,13 @@ func GetAuth(ctx context.Context, eventBusConfig v1alpha1.BusConfig) (*eventbusc
 	case eventBusConfig.NATS != nil:
 		eventBusAuth = eventBusConfig.NATS.Auth
 	case eventBusConfig.JetStream != nil:
-		if eventBusConfig.JetStream.AccessSecret != nil {
+		switch {
+		case eventBusConfig.JetStream.Auth != nil:
+			eventBusAuth = eventBusConfig.JetStream.Auth
+		case eventBusConfig.JetStream.AccessSecret != nil:
+			// For backward compatibility, default to Basic auth if AccessSecret is present but Auth is not specified
 			eventBusAuth = &v1alpha1.AuthStrategyBasic
-		} else {
+		default:
 			eventBusAuth = nil
 		}
 	case eventBusConfig.Kafka != nil:
@@ -126,11 +130,21 @@ func GetAuth(ctx context.Context, eventBusConfig v1alpha1.BusConfig) (*eventbusc
 	}
 	var auth *eventbuscommon.Auth
 	cred := &eventbuscommon.AuthCredential{}
-	if eventBusAuth == nil || *eventBusAuth == v1alpha1.AuthStrategyNone {
+
+	switch {
+	case eventBusAuth == nil || *eventBusAuth == v1alpha1.AuthStrategyNone:
 		auth = &eventbuscommon.Auth{
 			Strategy: v1alpha1.AuthStrategyNone,
 		}
-	} else {
+	case *eventBusAuth == v1alpha1.AuthStrategyJWT:
+		// For JWT auth, we don't parse auth.yaml - just set the credential file path
+		cred.CredentialFile = fmt.Sprintf("%s/credentials.creds", v1alpha1.EventBusAuthFileMountPath)
+		auth = &eventbuscommon.Auth{
+			Strategy:   v1alpha1.AuthStrategyJWT,
+			Credential: cred,
+		}
+	default:
+		// For Basic and Token auth, parse auth.yaml
 		v := sharedutil.ViperWithLogging()
 		v.SetConfigName("auth")
 		v.SetConfigType("yaml")
@@ -144,6 +158,7 @@ func GetAuth(ctx context.Context, eventBusConfig v1alpha1.BusConfig) (*eventbusc
 			logger.Errorw("failed to unmarshal auth.yaml", zap.Error(err))
 			return nil, err
 		}
+
 		v.WatchConfig()
 		v.OnConfigChange(func(e fsnotify.Event) {
 			// Auth file changed, let it restart

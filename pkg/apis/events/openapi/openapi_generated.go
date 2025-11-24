@@ -4608,6 +4608,13 @@ func schema_pkg_apis_events_v1alpha1_JetStreamConfig(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"),
 						},
 					},
+					"auth": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Auth strategy, default to AuthStrategyNone",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
