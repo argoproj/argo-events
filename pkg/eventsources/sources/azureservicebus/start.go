@@ -93,9 +93,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 	}
 
-	var receiveMode = servicebus.ReceiveModeReceiveAndDelete
+	var receiverOptions = servicebus.ReceiverOptions{ReceiveMode: servicebus.ReceiveModeReceiveAndDelete}
 	if servicebusEventSource.DeferDelete {
-		receiveMode = servicebus.ReceiveModePeekLock
+		receiverOptions.ReceiveMode = servicebus.ReceiveModePeekLock
 	}
 
 	var receiver *servicebus.Receiver
@@ -105,15 +105,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if servicebusEventSource.QueueName != "" {
 		log.Info("creating a queue receiver...")
 		receiverType = ReceiverTypeQueue
-		receiver, err = client.NewReceiverForQueue(servicebusEventSource.QueueName, &servicebus.ReceiverOptions{
-			ReceiveMode: receiveMode,
-		})
+		receiver, err = client.NewReceiverForQueue(servicebusEventSource.QueueName, &receiverOptions)
 	} else {
 		log.Info("creating a subscription receiver...")
 		receiverType = ReceiverTypeSubscription
-		receiver, err = client.NewReceiverForSubscription(servicebusEventSource.TopicName, servicebusEventSource.SubscriptionName, &servicebus.ReceiverOptions{
-			ReceiveMode: receiveMode,
-		})
+		receiver, err = client.NewReceiverForSubscription(servicebusEventSource.TopicName, servicebusEventSource.SubscriptionName, &receiverOptions)
 	}
 	if err != nil {
 		if receiverType == ReceiverTypeQueue {
