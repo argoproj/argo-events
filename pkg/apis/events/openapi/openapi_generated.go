@@ -970,6 +970,13 @@ func schema_pkg_apis_events_v1alpha1_AzureServiceBusEventSource(ref common.Refer
 							Format:      "",
 						},
 					},
+					"deferDelete": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DeferDelete controls when messages are removed from Azure Service Bus. If false (default), messages are received and deleted immediately before processing. If true, messages are locked and only deleted after successful processing, ensuring they are not lost if processing fails.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"queueName", "topicName", "subscriptionName"},
 			},

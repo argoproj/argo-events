@@ -1234,6 +1234,10 @@ type AzureServiceBusEventSource struct {
 	// access via Azure AD (managed identity) and it is ignored if ConnectionString is set.
 	// +optional
 	FullyQualifiedNamespace string `json:"fullyQualifiedNamespace,omitempty" protobuf:"bytes,9,opt,name=fullyQualifiedNamespace"`
+	// DeferDelete controls when messages are removed from Azure Service Bus.
+	// If false (default), messages are received and deleted immediately before processing.
+	// If true, messages are locked and only deleted after successful processing, ensuring they are not lost if processing fails.
+	DeferDelete bool `json:"deferDelete,omitempty" protobuf:"varint,10,opt,name=deferDelete"`
 }
 
 // AzureQueueStorageEventSource describes the event source for azure queue storage
