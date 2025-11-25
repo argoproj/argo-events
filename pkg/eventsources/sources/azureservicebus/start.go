@@ -93,6 +93,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 	}
 
+	var receiverOptions = servicebus.ReceiverOptions{ReceiveMode: servicebus.ReceiveModeReceiveAndDelete}
+	if servicebusEventSource.DeferDelete {
+		receiverOptions.ReceiveMode = servicebus.ReceiveModePeekLock
+	}
+
 	var receiver *servicebus.Receiver
 	var receiverType ReceiverType
 	var err error
@@ -100,15 +105,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	if servicebusEventSource.QueueName != "" {
 		log.Info("creating a queue receiver...")
 		receiverType = ReceiverTypeQueue
-		receiver, err = client.NewReceiverForQueue(servicebusEventSource.QueueName, &servicebus.ReceiverOptions{
-			ReceiveMode: servicebus.ReceiveModeReceiveAndDelete,
-		})
+		receiver, err = client.NewReceiverForQueue(servicebusEventSource.QueueName, &receiverOptions)
 	} else {
 		log.Info("creating a subscription receiver...")
 		receiverType = ReceiverTypeSubscription
-		receiver, err = client.NewReceiverForSubscription(servicebusEventSource.TopicName, servicebusEventSource.SubscriptionName, &servicebus.ReceiverOptions{
-			ReceiveMode: servicebus.ReceiveModeReceiveAndDelete,
-		})
+		receiver, err = client.NewReceiverForSubscription(servicebusEventSource.TopicName, servicebusEventSource.SubscriptionName, &receiverOptions)
 	}
 	if err != nil {
 		if receiverType == ReceiverTypeQueue {
@@ -148,6 +149,13 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 					}
 					el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 					continue
+				}
+				if servicebusEventSource.DeferDelete {
+					err = receiver.CompleteMessage(ctx, message, nil)
+					if err != nil {
+						log.With("message_id", message.MessageID).Errorw("failed to complete message", zap.Error(err))
+						continue
+					}
 				}
 			}
 		}
