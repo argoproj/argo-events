@@ -1629,6 +1629,19 @@
     Lua Script
   </a>
   
+    <nav class="md-nav" aria-label="Lua Script">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#empty-arrays-in-lua" class="md-nav__link">
+    Empty Arrays in Lua
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2096,6 +2109,19 @@
     Lua Script
   </a>
   
+    <nav class="md-nav" aria-label="Lua Script">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#empty-arrays-in-lua" class="md-nav__link">
+    Empty Arrays in Lua
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2214,6 +2240,58 @@
 <p>The type of the <code>event</code> variable is Table and the script must return a Table representing a valid JSON object.</p>
 </li>
 </ol>
+<h3 id="empty-arrays-in-lua">Empty Arrays in Lua<a class="headerlink" href="#empty-arrays-in-lua" title="Permanent link">&para;</a></h3>
+<p>By default, empty Lua tables (<code>{}</code>) are serialized as empty JSON objects (<code>{}</code>), not arrays (<code>[]</code>). To produce an empty JSON array, use a metatable with the <code>__is_array</code> flag:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sensor</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">operate-workflow-sa</span>
+<span class="w">  </span><span class="nt">dependencies</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-dep</span>
+<span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span>
+<span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span>
+<span class="w">      </span><span class="nt">transform</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|-</span>
+<span class="w">          </span><span class="no">-- Create an empty array using metatable</span>
+<span class="w">          </span><span class="no">event.env = setmetatable({}, { __is_array = true })</span>
+<span class="w">          </span><span class="no">return event</span>
+<span class="w">  </span><span class="nt">triggers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-workflow-trigger</span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;test-dep&quot;</span>
+<span class="w">        </span><span class="nt">k8s</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">operation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">create</span>
+<span class="w">          </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">resource</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="w">              </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Workflow</span>
+<span class="w">              </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">generateName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-</span>
+<span class="w">              </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">entrypoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">print-message</span>
+<span class="w">                </span><span class="nt">arguments</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">env</span>
+<span class="w">                      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[]&quot;</span>
+<span class="w">                </span><span class="nt">templates</span><span class="p">:</span>
+<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">print-message</span>
+<span class="w">                    </span><span class="nt">inputs</span><span class="p">:</span>
+<span class="w">                      </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">env</span>
+<span class="w">                    </span><span class="nt">container</span><span class="p">:</span>
+<span class="w">                      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">busybox</span>
+<span class="w">                      </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">echo</span><span class="p p-Indicator">]</span>
+<span class="w">                      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;{{inputs.parameters.env}}&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-dep</span>
+<span class="w">                </span><span class="nt">dataKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">env</span>
+<span class="w">              </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">spec.arguments.parameters.0.value</span>
+</code></pre></div>
+<p>This ensures that fields requiring arrays (like <code>env</code> in Kubernetes specs) receive <code>[]</code> instead of <code>{}</code>, maintaining compatibility with Kubernetes resource specifications.</p>
 <h2 id="jq-command">JQ Command<a class="headerlink" href="#jq-command" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sensor</span>
