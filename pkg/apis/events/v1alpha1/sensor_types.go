@@ -199,6 +199,11 @@ type TimeFilter struct {
 	// If it is smaller than Start, it is treated as next day of Start
 	// (e.g.: 22:00:00-01:00:00 means 22:00:00-25:00:00).
 	Stop string `json:"stop" protobuf:"bytes,2,opt,name=stop"`
+	// Timezone specifies the timezone for the time window.
+	// If not specified, defaults to UTC.
+	// Format should be a valid IANA timezone name (e.g., "America/New_York", "Europe/London").
+	// +optional
+	Timezone string `json:"timezone,omitempty" protobuf:"bytes,3,opt,name=timezone"`
 }
 
 // JSONType contains the supported JSON types for data filtering
