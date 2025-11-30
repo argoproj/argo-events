@@ -8242,6 +8242,13 @@ func schema_pkg_apis_events_v1alpha1_TimeFilter(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
+					"timezone": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Timezone specifies the timezone for the time window. If not specified, defaults to UTC. Format should be a valid IANA timezone name (e.g., \"America/New_York\", \"Europe/London\").",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"start", "stop"},
 			},

@@ -31,13 +31,16 @@ Time filter has following fields:
 ```yaml
 filters:
   time:
-    start: time_range_start_utc
-    stop: time_range_end_utc
+    start: time_range_start
+    stop: time_range_end
+    timezone: timezone_name  # Optional, defaults to UTC
 ```
 
 ## How it works
 
-Time filter takes a `start` and `stop` time in `HH:MM:SS` format in UTC.
+Time filter takes a `start` and `stop` time in `HH:MM:SS` format. By default, times are interpreted in UTC. You can optionally specify a `timezone` field using IANA timezone names (e.g., `America/New_York`, `Europe/London`, `Asia/Tokyo`) to handle different timezones and automatically adapt to daylight saving time changes.
+
+### Example with UTC (default)
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -55,6 +58,27 @@ spec:
         time:
           start: "02:30:00"
           stop: "04:30:00"
+```
+
+### Example with timezone
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: with-time-filter-tz
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+      filters:
+        time:
+          start: "09:00:00"
+          stop: "17:00:00"
+          timezone: "America/New_York"  # 9 AM to 5 PM Eastern Time
 ```
 
 If `stop` is smaller than `start` (`stop` < `start`), the stop time is treated as next day of `start`.

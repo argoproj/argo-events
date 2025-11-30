@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: filter-with-time-timezone
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+      filters:
+        time:
+          # Only trigger between 9 AM and 5 PM Eastern Time
+          # This automatically handles daylight saving time transitions
+          start: "09:00:00"
+          stop: "17:00:00"
+          timezone: "America/New_York"
+  triggers:
+    - template:
+        name: webhook-workflow-trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: webhook-
+              spec:
+                entrypoint: whalesay
+                arguments:
+                  parameters:
+                    - name: message
+                      # The message is extracted from the event payload
+                      value: "Triggered during business hours in New York!"
+                templates:
+                  - name: whalesay
+                    inputs:
+                      parameters:
+                        - name: message
+                    container:
+                      image: docker/whalesay:latest
+                      command: [cowsay]
+                      args: ["{{inputs.parameters.message}}"]
