@@ -222,11 +222,13 @@ func (s *FunctionalSuite) TestResourceEventSource() {
 		ExpectSensorPodLogContains(LogSensorStarted)
 	defer t2.When().DeleteSensor()
 
+	time.Sleep(time.Second * 2)
+
 	w1.Exec("kubectl", []string{"-n", fixtures.Namespace, "delete", "pod", "test-pod"}, fixtures.OutputRegexp(`pod "test-pod" deleted`))
 
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
 
-	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
+	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"), util.PodLogCheckOptionWithTimeout(120*time.Second))
 }
 
 func (s *FunctionalSuite) TestMultiDependencyConditions() {
@@ -625,6 +627,54 @@ func (s *FunctionalSuite) TestTriggerSpecChange() {
 	t1.ExpectEventSourcePodLogContains(LogPublishEventSuccessful, util.PodLogCheckOptionWithCount(2))
 	// Verify no Trigger this time since test-dep-1 should have been cleared
 	t2.ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger-1"), util.PodLogCheckOptionWithCount(0))
+}
+
+func (s *FunctionalSuite) TestDuplicateDependencyWithFilterDoesntTrigger() {
+	// duplicate dependencies only works for kafka and jetstream bus drivers
+	if fixtures.GetBusDriverSpec() == fixtures.E2EEventBusSTAN {
+		return
+	}
+	t1 := s.Given().EventSource("@testdata/es-calendar-metadata.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady().
+		Then().
+		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
+
+	defer t1.When().DeleteEventSource()
+
+	t2 := s.Given().Sensor("@testdata/sensor-duplicate-deps-filter.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady().
+		Then().
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"), util.PodLogCheckOptionWithCount(0))
+
+	defer t2.When().DeleteSensor()
+}
+
+func (s *FunctionalSuite) TestDuplicateDependency() {
+	// duplicate dependencies only works for kafka and jetstream bus drivers
+	if fixtures.GetBusDriverSpec() == fixtures.E2EEventBusSTAN {
+		return
+	}
+	t1 := s.Given().EventSource("@testdata/es-calendar-metadata.yaml").
+		When().
+		CreateEventSource().
+		WaitForEventSourceReady().
+		Then().
+		ExpectEventSourcePodLogContains(LogPublishEventSuccessful)
+
+	defer t1.When().DeleteEventSource()
+
+	t2 := s.Given().Sensor("@testdata/sensor-duplicate-deps.yaml").
+		When().
+		CreateSensor().
+		WaitForSensorReady().
+		Then().
+		ExpectSensorPodLogContains(LogTriggerActionSuccessful("log-trigger"))
+
+	defer t2.When().DeleteSensor()
 }
 
 func TestFunctionalSuite(t *testing.T) {

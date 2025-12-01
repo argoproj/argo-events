@@ -195,10 +195,15 @@ func TestKafkaTrigger_Execute(t *testing.T) {
 	case kafkaMessage := <-producer.Successes():
 		assert.NotNil(t, kafkaMessage)
 		assert.Equal(t, 2, len(kafkaMessage.Headers))
-		assert.Equal(t, "key1", string(kafkaMessage.Headers[0].Key))
-		assert.Equal(t, "value1", string(kafkaMessage.Headers[0].Value))
-		assert.Equal(t, "key2", string(kafkaMessage.Headers[1].Key))
-		assert.Equal(t, "value2", string(kafkaMessage.Headers[1].Value))
+
+		// Convert to map for order-independent comparison
+		headerMap := make(map[string]string)
+		for _, h := range kafkaMessage.Headers {
+			headerMap[string(h.Key)] = string(h.Value)
+		}
+
+		assert.Equal(t, "value1", headerMap["key1"])
+		assert.Equal(t, "value2", headerMap["key2"])
 	case <-time.After(1 * time.Second):
 		assert.Fail(t, "timed out waiting for message to contain headers")
 	}
