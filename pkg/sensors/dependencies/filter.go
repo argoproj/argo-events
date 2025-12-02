@@ -471,14 +471,30 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 		return true, nil
 	}
 
-	// Parse start and stop
-	startTime, startErr := sharedutil.ParseTime(timeFilter.Start, eventTime)
-	if startErr != nil {
-		return false, fmt.Errorf(errMsgTemplate, "time", startErr.Error())
-	}
-	stopTime, stopErr := sharedutil.ParseTime(timeFilter.Stop, eventTime)
-	if stopErr != nil {
-		return false, fmt.Errorf(errMsgTemplate, "time", stopErr.Error())
+	// Parse start and stop with timezone support
+	var startTime, stopTime time.Time
+	var startErr, stopErr error
+
+	if timeFilter.Timezone != "" {
+		// Use timezone-aware parsing
+		startTime, startErr = sharedutil.ParseTimeInTimezone(timeFilter.Start, eventTime, timeFilter.Timezone)
+		if startErr != nil {
+			return false, fmt.Errorf(errMsgTemplate, "time", startErr.Error())
+		}
+		stopTime, stopErr = sharedutil.ParseTimeInTimezone(timeFilter.Stop, eventTime, timeFilter.Timezone)
+		if stopErr != nil {
+			return false, fmt.Errorf(errMsgTemplate, "time", stopErr.Error())
+		}
+	} else {
+		// Default to UTC (backward compatible)
+		startTime, startErr = sharedutil.ParseTime(timeFilter.Start, eventTime)
+		if startErr != nil {
+			return false, fmt.Errorf(errMsgTemplate, "time", startErr.Error())
+		}
+		stopTime, stopErr = sharedutil.ParseTime(timeFilter.Stop, eventTime)
+		if stopErr != nil {
+			return false, fmt.Errorf(errMsgTemplate, "time", stopErr.Error())
+		}
 	}
 
 	// Filtering logic

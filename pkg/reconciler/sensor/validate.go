@@ -663,14 +663,36 @@ func validateEventCtxFilter(ctxFilter *v1alpha1.EventContext) error {
 func validateEventTimeFilter(timeFilter *v1alpha1.TimeFilter) error {
 	now := time.Now().UTC()
 
-	// Parse start and stop
-	startTime, startErr := sharedutil.ParseTime(timeFilter.Start, now)
-	if startErr != nil {
-		return startErr
+	// Validate timezone if specified
+	if timeFilter.Timezone != "" {
+		_, err := time.LoadLocation(timeFilter.Timezone)
+		if err != nil {
+			return fmt.Errorf("invalid timezone '%s': %w", timeFilter.Timezone, err)
+		}
 	}
-	stopTime, stopErr := sharedutil.ParseTime(timeFilter.Stop, now)
-	if stopErr != nil {
-		return stopErr
+
+	// Parse start and stop
+	var startTime, stopTime time.Time
+	var startErr, stopErr error
+
+	if timeFilter.Timezone != "" {
+		startTime, startErr = sharedutil.ParseTimeInTimezone(timeFilter.Start, now, timeFilter.Timezone)
+		if startErr != nil {
+			return startErr
+		}
+		stopTime, stopErr = sharedutil.ParseTimeInTimezone(timeFilter.Stop, now, timeFilter.Timezone)
+		if stopErr != nil {
+			return stopErr
+		}
+	} else {
+		startTime, startErr = sharedutil.ParseTime(timeFilter.Start, now)
+		if startErr != nil {
+			return startErr
+		}
+		stopTime, stopErr = sharedutil.ParseTime(timeFilter.Stop, now)
+		if stopErr != nil {
+			return stopErr
+		}
 	}
 
 	if stopTime.Equal(startTime) {
