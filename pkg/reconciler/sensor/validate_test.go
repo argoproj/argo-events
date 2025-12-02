@@ -442,6 +442,43 @@ func TestValidateEventTimeFilter(t *testing.T) {
 
 		assert.Error(t, err)
 	})
+
+	t.Run("test with valid timezone", func(t *testing.T) {
+		timeFilter := &v1alpha1.TimeFilter{
+			Start:    "09:00:00",
+			Stop:     "17:00:00",
+			Timezone: "America/New_York",
+		}
+
+		err := validateEventTimeFilter(timeFilter)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("test with invalid timezone", func(t *testing.T) {
+		timeFilter := &v1alpha1.TimeFilter{
+			Start:    "09:00:00",
+			Stop:     "17:00:00",
+			Timezone: "Invalid/Timezone",
+		}
+
+		err := validateEventTimeFilter(timeFilter)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "invalid timezone")
+	})
+
+	t.Run("test with empty timezone (defaults to UTC)", func(t *testing.T) {
+		timeFilter := &v1alpha1.TimeFilter{
+			Start:    "09:00:00",
+			Stop:     "17:00:00",
+			Timezone: "",
+		}
+
+		err := validateEventTimeFilter(timeFilter)
+
+		assert.NoError(t, err)
+	})
 }
 
 func TestValidTriggers(t *testing.T) {
