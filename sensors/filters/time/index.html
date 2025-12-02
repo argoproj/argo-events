@@ -1759,6 +1759,20 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#example-with-utc-default" class="md-nav__link">
+    Example with UTC (default)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-with-timezone" class="md-nav__link">
+    Example with timezone
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#time-filter-behaviour-visually-explained" class="md-nav__link">
     Time filter behaviour visually explained
   </a>
@@ -2122,6 +2136,20 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#example-with-utc-default" class="md-nav__link">
+    Example with UTC (default)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-with-timezone" class="md-nav__link">
+    Example with timezone
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#time-filter-behaviour-visually-explained" class="md-nav__link">
     Time filter behaviour visually explained
   </a>
@@ -2189,11 +2217,13 @@ you need to make sure an event occurs between a certain time-frame.</p>
 <p>Time filter has following fields:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">filters</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">time</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">time_range_start_utc</span>
-<span class="w">    </span><span class="nt">stop</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">time_range_end_utc</span>
+<span class="w">    </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">time_range_start</span>
+<span class="w">    </span><span class="nt">stop</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">time_range_end</span>
+<span class="w">    </span><span class="nt">timezone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">timezone_name</span><span class="w">  </span><span class="c1"># Optional, defaults to UTC</span>
 </code></pre></div>
 <h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
-<p>Time filter takes a <code>start</code> and <code>stop</code> time in <code>HH:MM:SS</code> format in UTC.</p>
+<p>Time filter takes a <code>start</code> and <code>stop</code> time in <code>HH:MM:SS</code> format. By default, times are interpreted in UTC. You can optionally specify a <code>timezone</code> field using IANA timezone names (e.g., <code>America/New_York</code>, <code>Europe/London</code>, <code>Asia/Tokyo</code>) to handle different timezones and automatically adapt to daylight saving time changes.</p>
+<h3 id="example-with-utc-default">Example with UTC (default)<a class="headerlink" href="#example-with-utc-default" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sensor</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -2209,6 +2239,24 @@ you need to make sure an event occurs between a certain time-frame.</p>
 <span class="w">        </span><span class="nt">time</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;02:30:00&quot;</span>
 <span class="w">          </span><span class="nt">stop</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;04:30:00&quot;</span>
+</code></pre></div>
+<h3 id="example-with-timezone">Example with timezone<a class="headerlink" href="#example-with-timezone" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sensor</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">with-time-filter-tz</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">operate-workflow-sa</span>
+<span class="w">  </span><span class="nt">dependencies</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-dep</span>
+<span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span>
+<span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span>
+<span class="w">      </span><span class="nt">filters</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">time</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;09:00:00&quot;</span>
+<span class="w">          </span><span class="nt">stop</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;17:00:00&quot;</span>
+<span class="w">          </span><span class="nt">timezone</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;America/New_York&quot;</span><span class="w">  </span><span class="c1"># 9 AM to 5 PM Eastern Time</span>
 </code></pre></div>
 <p>If <code>stop</code> is smaller than <code>start</code> (<code>stop</code> &lt; <code>start</code>), the stop time is treated as next day of <code>start</code>.</p>
 <p><strong>Note</strong>: <code>start</code> is inclusive while <code>stop</code> is exclusive.</p>
