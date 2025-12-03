@@ -161,9 +161,9 @@ jobs:
         run: |
           cosign sign --yes --key env://COSIGN_PRIVATE_KEY quay.io/argoproj/argo-events@${{ env.IMAGE_DIGEST }}
           cosign sign-blob --yes --key env://COSIGN_PRIVATE_KEY --bundle ./dist/argo-events-checksums.sig ./dist/argo-events-checksums.txt
-          #cosign sign-blob --yes --new-bundle-format=false --key env://COSIGN_PRIVATE_KEY /tmp/sbom.tar.gz > /tmp/sbom.tar.gz.sig
+          cosign sign-blob --yes --key env://COSIGN_PRIVATE_KEY --bundle /tmp/sbom.tar.gz.sig /tmp/sbom.tar.gz
           # Retrieves the public key to release as an asset
-          #cosign public-key --key env://COSIGN_PRIVATE_KEY --outfile ./dist/argo-events-cosign.pub
+          cosign public-key --key env://COSIGN_PRIVATE_KEY --outfile ./dist/argo-events-cosign.pub
         env:
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
           COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
