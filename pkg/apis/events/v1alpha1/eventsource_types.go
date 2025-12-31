@@ -852,6 +852,7 @@ type GitlabEventSource struct {
 	DeprecatedProjectID string `json:"projectID,omitempty" protobuf:"bytes,2,opt,name=projectID"`
 	// Events are gitlab event to listen to.
 	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
+	// Note: EmojiEvents is only supported for group webhooks. Use Groups field for EmojiEvents support.
 	Events []string `json:"events" protobuf:"bytes,3,opt,name=events"`
 	// AccessToken references to k8 secret which holds the gitlab api access information
 	AccessToken *corev1.SecretKeySelector `json:"accessToken,omitempty" protobuf:"bytes,4,opt,name=accessToken"`
