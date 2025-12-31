@@ -1,4 +1,5 @@
 # More info on GitLab project hooks: https://docs.gitlab.com/ce/api/projects.html#add-project-hook
+# More info on GitLab group hooks: https://docs.gitlab.com/ee/api/groups.html#add-group-hook
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
@@ -46,6 +47,32 @@ spec:
       enableSSLVerification: false
       # Gitlab Base url.
       # Change it to your private GitLab instance url if you have one.
+      gitlabBaseURL: https://gitlab.com
+      deleteHookOnFinish: true
+
+    # Example with group webhooks (supports EmojiEvents)
+    group-example:
+      # Group names or IDs
+      # Group webhooks listen to events from all projects in the group
+      groups:
+        - "my-group"
+      webhook:
+        endpoint: /group
+        port: "12000"
+        method: POST
+        url: http://url-that-is-reachable-from-GitLab
+      events:
+        - PushEvents
+        - IssuesEvents
+        - MergeRequestsEvents
+        - EmojiEvents  # Emoji reactions on issues/MRs/comments (group webhooks only)
+      accessToken:
+        key: token
+        name: gitlab-access
+      secretToken:
+        key: token
+        name: gitlab-secret
+      enableSSLVerification: false
       gitlabBaseURL: https://gitlab.com
       deleteHookOnFinish: true
 
