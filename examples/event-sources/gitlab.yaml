@@ -33,6 +33,9 @@ spec:
       events:
         - PushEvents
         - TagPushEvents
+        - IssuesEvents
+        - MergeRequestsEvents
+        - EmojiEvents  # Emoji reactions on issues/MRs/comments
       # accessToken refers to K8s secret that stores the gitlab api token
       accessToken:
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token

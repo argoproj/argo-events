@@ -4025,7 +4025,7 @@ func schema_pkg_apis_events_v1alpha1_GitlabEventSource(ref common.ReferenceCallb
 					},
 					"events": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Events are gitlab event to listen to. Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794. Note: EmojiEvents is only supported for group webhooks. Use Groups field for EmojiEvents support.",
+							Description: "Events are gitlab event to listen to. Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{

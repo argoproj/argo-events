@@ -193,13 +193,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			JobEvents:                &defaultEventValue,
 			PipelineEvents:           &defaultEventValue,
 			WikiPageEvents:           &defaultEventValue,
+			EmojiEvents:              &defaultEventValue,
 		}
 
 		for _, event := range gitlabEventSource.Events {
-			// Skip EmojiEvents - it only exists in GroupHookOptions, not ProjectHookOptions
-			if event == "EmojiEvents" {
-				continue
-			}
 			elem := reflect.ValueOf(opt).Elem().FieldByName(event)
 			if ok := elem.IsValid(); !ok {
 				return fmt.Errorf("unknown event %s", event)
@@ -221,16 +218,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			JobEvents:                opt.JobEvents,
 			PipelineEvents:           opt.PipelineEvents,
 			WikiPageEvents:           opt.WikiPageEvents,
-			EmojiEvents:              &defaultEventValue,
-		}
-
-		// Set EmojiEvents if configured (only supported by group hooks)
-		for _, event := range gitlabEventSource.Events {
-			if event == "EmojiEvents" {
-				trueValue := true
-				groupHookOpt.EmojiEvents = &trueValue
-				break
-			}
+			EmojiEvents:              opt.EmojiEvents,
 		}
 
 		if gitlabEventSource.SecretToken != nil {

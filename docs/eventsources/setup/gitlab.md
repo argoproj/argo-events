@@ -86,22 +86,33 @@ The GitLab event-source supports the following event types:
 
 ### EmojiEvents Support
 
-**Note:** `EmojiEvents` is currently only supported for **group webhooks**. Support for project webhooks is pending an upstream fix in the GitLab Go SDK.
+`EmojiEvents` is supported for both **project** and **group** webhooks. The event is triggered when users add emoji reactions to issues, merge requests, snippets, or comments.
 
-To use EmojiEvents:
-1. Use `groups` instead of `projects` in your event-source configuration:
-   ```yaml
-   gitlab:
-     example:
-       groups:
-         - "my-group-name"
-       events:
-         - IssuesEvents
-         - MergeRequestsEvents
-         - EmojiEvents
-   ```
-2. Group webhooks will receive emoji events from all projects within the group
-3. The event is triggered when users add emoji reactions to issues, merge requests, snippets, or comments
+**Project webhook example:**
+```yaml
+gitlab:
+  example:
+    projects:
+      - "my-project"
+    events:
+      - IssuesEvents
+      - MergeRequestsEvents
+      - EmojiEvents
+```
+
+**Group webhook example:**
+```yaml
+gitlab:
+  example:
+    groups:
+      - "my-group-name"
+    events:
+      - IssuesEvents
+      - MergeRequestsEvents
+      - EmojiEvents
+```
+
+**Note:** Group webhooks receive emoji events from all projects within the group
 
 For more details, see [GitLab Webhooks Documentation](https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#emoji-events).
 
