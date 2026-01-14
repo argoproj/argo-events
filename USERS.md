@@ -50,6 +50,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Rookout](https://www.rookout.com/)
 1. [RTL Nederland](https://www.rtl.nl)
 1. [Salesforce](https://salesforce.com)
+1. [ReadyOn AI](https://www.readyon.ai)
 1. [SAP Concur](https://www.concur.com/)
 1. [Softonic](https://www.softonic.com)
 1. [SternumIOT](https://sternumiot.com/)
