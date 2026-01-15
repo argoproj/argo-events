@@ -67,12 +67,25 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 			return nil
 		case <-ticker.C:
+			var eventStream Eventing_StartEventSourceClient
 			if el.conn == nil || el.conn.GetState() == connectivity.Shutdown || el.conn.GetState() == connectivity.TransientFailure {
 				logger.Info("dialing eventsource server...")
-				eventStream, err := el.connect()
+				var err error
+				eventStream, err = el.connect(logger)
 				if err != nil {
 					logger.Errorw("failed to connect eventsource server, reconnecting in 5 seconds...", zap.Error(err))
 					continue
+				}
+			}
+			if el.conn.GetState() == connectivity.Ready || el.conn.GetState() == connectivity.Idle {
+				if eventStream == nil {
+					var err error
+					eventStream, err = el.buildEventStream()
+					if err != nil {
+						logger.Errorw("failed to build stream, retrying in 5 seconds...", zap.Error(err),
+							zap.String("ess-connection-state", el.conn.GetState().String()))
+						continue
+					}
 				}
 				logger.Info("connected to eventsource server successfully, started event stream...")
 				for {
@@ -88,6 +101,9 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 						el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 					}
 				}
+			} else {
+				logger.Warnw("eventsource server connection in an incorrect state, retrying in 5 seconds...",
+					zap.String("ess-connection-state", el.conn.GetState().String()))
 			}
 		}
 	}
@@ -118,16 +134,21 @@ func (el *EventListener) handleOne(event *Event, dispatch func([]byte, ...events
 	return nil
 }
 
-func (el *EventListener) connect() (Eventing_StartEventSourceClient, error) {
+func (el *EventListener) connect(logger *zap.SugaredLogger) (Eventing_StartEventSourceClient, error) {
 	var opt []grpc.DialOption
 	if el.GenericEventSource.Insecure {
 		opt = append(opt, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 	conn, err := grpc.NewClient(el.GenericEventSource.URL, opt...)
 	if err != nil {
+		logger.Errorw("failed to inititalise gRPC stream to eventsource server", zap.Error(err))
 		return nil, err
 	}
 	el.conn = conn
+	return el.buildEventStream()
+}
+
+func (el *EventListener) buildEventStream() (Eventing_StartEventSourceClient, error) {
 	client := NewEventingClient(el.conn)
 	ctx := context.Background()
 	if el.GenericEventSource.AuthSecret != nil {
