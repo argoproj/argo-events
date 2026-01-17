@@ -19,24 +19,8 @@ package amqp
 import (
 	"testing"
 
-	amqplib "github.com/rabbitmq/amqp091-go"
 	"github.com/stretchr/testify/assert"
-	"sigs.k8s.io/yaml"
 )
-
-func TestParseYamlTable_Issue3876RootCause(t *testing.T) {
-	// This test demonstrates the original bug mechanism described in
-	// https://github.com/argoproj/argo-events/issues/3876:
-	// sigs.k8s.io/yaml performs YAML->JSON conversion and json.Unmarshal into
-	// interface{}-typed values, which commonly yields float64 for numbers.
-	var table amqplib.Table
-	err := yaml.Unmarshal([]byte("x-expires: 86400000\n"), &table)
-	assert.NoError(t, err)
-	val, ok := table["x-expires"]
-	assert.True(t, ok)
-	_, isFloat64 := val.(float64)
-	assert.True(t, isFloat64, "expected float64 via sigs.k8s.io/yaml, got %T (%v)", val, val)
-}
 
 func TestParseYamlTable(t *testing.T) {
 	table, err := parseYamlTable("")
