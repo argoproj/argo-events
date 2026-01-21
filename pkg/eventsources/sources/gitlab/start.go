@@ -165,8 +165,8 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	router := &Router{
 		route:             route,
 		gitlabEventSource: gitlabEventSource,
-		projectHookIDs:    make(map[string]int),
-		groupHookIDs:      make(map[string]int),
+		projectHookIDs:    make(map[string]int64),
+		groupHookIDs:      make(map[string]int64),
 	}
 
 	if gitlabEventSource.NeedToCreateHooks() {
