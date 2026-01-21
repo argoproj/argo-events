@@ -33,6 +33,21 @@ func TestParseYamlTable(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, table)
 	assert.True(t, len(table) == 1)
+	table, err = parseYamlTable("x-expires: 86400000")
+	assert.Nil(t, err)
+	assert.NotNil(t, table)
+	val, ok := table["x-expires"]
+	assert.True(t, ok)
+	switch n := val.(type) {
+	case int:
+		assert.Equal(t, int(86400000), n)
+	case int64:
+		assert.Equal(t, int64(86400000), n)
+	case uint64:
+		assert.Equal(t, uint64(86400000), n)
+	default:
+		assert.Failf(t, "expected integer YAML scalar", "got %T (%v)", val, val)
+	}
 	table, err = parseYamlTable("key-one: thing1\nkey-two: thing2")
 	assert.Nil(t, err)
 	assert.NotNil(t, table)
