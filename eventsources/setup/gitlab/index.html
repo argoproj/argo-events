@@ -1050,6 +1050,26 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#event-types" class="md-nav__link">
+    Event Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Event Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#emojievents-support" class="md-nav__link">
+    EmojiEvents Support
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#troubleshoot" class="md-nav__link">
     Troubleshoot
   </a>
@@ -2115,6 +2135,26 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#event-types" class="md-nav__link">
+    Event Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Event Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#emojievents-support" class="md-nav__link">
+    EmojiEvents Support
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#troubleshoot" class="md-nav__link">
     Troubleshoot
   </a>
@@ -2221,6 +2261,43 @@ Example event-source yaml file is <a href="https://github.com/argoproj/argo-even
 <p>Run <code>argo list</code> to find the workflow.</p>
 </li>
 </ol>
+<h2 id="event-types">Event Types<a class="headerlink" href="#event-types" title="Permanent link">&para;</a></h2>
+<p>The GitLab event-source supports the following event types:
+- <code>PushEvents</code> - Push events
+- <code>TagPushEvents</code> - Tag push events
+- <code>IssuesEvents</code> - Issue events (create, update, close, reopen)
+- <code>ConfidentialIssuesEvents</code> - Confidential issue events
+- <code>MergeRequestsEvents</code> - Merge request events
+- <code>ConfidentialNoteEvents</code> - Confidential comment events
+- <code>NoteEvents</code> - Comment events
+- <code>JobEvents</code> - Pipeline job events
+- <code>PipelineEvents</code> - Pipeline events
+- <code>WikiPageEvents</code> - Wiki page events
+- <code>EmojiEvents</code> - Emoji reaction events on issues, merge requests, snippets, and comments</p>
+<h3 id="emojievents-support">EmojiEvents Support<a class="headerlink" href="#emojievents-support" title="Permanent link">&para;</a></h3>
+<p><code>EmojiEvents</code> is supported for both <strong>project</strong> and <strong>group</strong> webhooks. The event is triggered when users add emoji reactions to issues, merge requests, snippets, or comments.</p>
+<p><strong>Project webhook example:</strong>
+<div class="highlight"><pre><span></span><code><span class="nt">gitlab</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">example</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">projects</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;my-project&quot;</span>
+<span class="w">    </span><span class="nt">events</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IssuesEvents</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MergeRequestsEvents</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EmojiEvents</span>
+</code></pre></div></p>
+<p><strong>Group webhook example:</strong>
+<div class="highlight"><pre><span></span><code><span class="nt">gitlab</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">example</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;my-group-name&quot;</span>
+<span class="w">    </span><span class="nt">events</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IssuesEvents</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MergeRequestsEvents</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EmojiEvents</span>
+</code></pre></div></p>
+<p><strong>Note:</strong> Group webhooks receive emoji events from all projects within the group</p>
+<p>For more details, see <a href="https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#emoji-events">GitLab Webhooks Documentation</a>.</p>
 <h2 id="troubleshoot">Troubleshoot<a class="headerlink" href="#troubleshoot" title="Permanent link">&para;</a></h2>
 <p>Please read the <a href="https://argoproj.github.io/argo-events/FAQ/">FAQ</a>.</p>
 
