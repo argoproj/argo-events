@@ -1,5 +1,76 @@
 # Changelog
 
+## v1.9.10 (2026-01-21)
+
+ * [3de38ac2](https://github.com/argoproj/argo-events/commit/3de38ac2501f80427e052a2c0d174366a9c81c8b) Update manifests to v1.9.10
+ * [56f77c8e](https://github.com/argoproj/argo-events/commit/56f77c8ebce5a893f541fabe59eab1df200e97fb) feat: Add EmojiEvents support for GitLab group webhooks (#3871)
+ * [1b67245c](https://github.com/argoproj/argo-events/commit/1b67245cb2820d4f15c550a1abe5cf6f195201b9) Fix: amqp integer queue args (#3884)
+ * [822240f4](https://github.com/argoproj/argo-events/commit/822240f4d435399b57b785ab89dd8e01bab61c03) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.97 to 7.0.98 (#3882)
+ * [251133f5](https://github.com/argoproj/argo-events/commit/251133f542735ca0cd59e784e5a591c4bed7574f) chore(deps): bump golang.org/x/tools from 0.40.0 to 0.41.0 (#3879)
+ * [576b21d0](https://github.com/argoproj/argo-events/commit/576b21d097f79e3efde213dcaf79c4695ec8315a) fix: retry generic event streams forever (#3877)
+ * [8752c54b](https://github.com/argoproj/argo-events/commit/8752c54bf6193e96881a89bc29ac6f45d27f9eae) Add ReadyOn AI to USERS.md (#3878)
+ * [bb0a0dd3](https://github.com/argoproj/argo-events/commit/bb0a0dd381f5fb4b5120bb1dd92d80195bbd4ad5) chore(deps): bump github.com/hamba/avro/v2 from 2.30.0 to 2.31.0 (#3875)
+ * [a3492f10](https://github.com/argoproj/argo-events/commit/a3492f10364c4373384f5474fd33085fedd9b447) chore(deps): bump dependabot/fetch-metadata from 2.4.0 to 2.5.0 (#3872)
+ * [c248392a](https://github.com/argoproj/argo-events/commit/c248392a0d196bedaa73d98a27025118961db2d2) chore(deps): bump github.com/grpc-ecosystem/grpc-gateway/v2 from 2.27.3 to 2.27.4 (#3869)
+ * [f1591183](https://github.com/argoproj/argo-events/commit/f1591183f6eb502bf238df0d22c2d1bdeef9fd74) chore(deps): bump google.golang.org/grpc from 1.77.0 to 1.78.0 (#3870)
+ * [c8628cbf](https://github.com/argoproj/argo-events/commit/c8628cbfd1e4556345c7fd240a03058674ce4c48) chore(deps): bump github.com/nats-io/nats.go from 1.47.0 to 1.48.0 (#3866)
+ * [82b9bb48](https://github.com/argoproj/argo-events/commit/82b9bb4822c02b13ea35dd6afd086d391a16ef6d) chore(deps): bump github.com/go-resty/resty/v2 from 2.17.0 to 2.17.1 (#3863)
+ * [f3ff80e5](https://github.com/argoproj/argo-events/commit/f3ff80e5d8c51bb87e503f33608db9fb746d3587) chore(deps): bump golang.org/x/tools from 0.39.0 to 0.40.0 (#3859)
+ * [6abd2b46](https://github.com/argoproj/argo-events/commit/6abd2b46fa5e060e206a2112a515296c34a3f7ed) chore(deps): bump google.golang.org/protobuf from 1.36.10 to 1.36.11 (#3858)
+ * [a2438955](https://github.com/argoproj/argo-events/commit/a2438955397438676e868c58068516c8349655b7) chore(deps): bump peter-evans/create-pull-request from 6 to 8 (#3855)
+ * [25506a9d](https://github.com/argoproj/argo-events/commit/25506a9d65ab760ab0f8623cb7a7c87cc0d05376) chore(deps): bump actions/cache from 4 to 5 (#3853)
+ * [18421387](https://github.com/argoproj/argo-events/commit/18421387c13136377c17bc6e019bd9887aedacd1) chore(deps): bump actions/download-artifact from 5 to 7 (#3854)
+ * [44abc6bc](https://github.com/argoproj/argo-events/commit/44abc6bc81ce2d6f24e088dc3823dfc679effe33) chore(deps): bump google.golang.org/api from 0.256.0 to 0.257.0 (#3848)
+ * [d870db73](https://github.com/argoproj/argo-events/commit/d870db73d171ac41114c792427abb882de1a2a66) chore(deps): bump github.com/spf13/cobra from 1.10.1 to 1.10.2 (#3847)
+ * [5a661d9b](https://github.com/argoproj/argo-events/commit/5a661d9bfed1702a403a24be687e61016db523e2) chore(deps): bump github.com/go-openapi/inflect from 0.21.3 to 0.21.5 (#3845)
+ * [dae38954](https://github.com/argoproj/argo-events/commit/dae3895410eb7b8f99f0fb6bb1ad9cf55fef3f3b) fix: upgrade NATS JetStream from 2.10.10 to 2.10.29 to address CVEs (#3844)
+
+### Contributors
+
+ * Alan Clucas
+ * Derek Wang
+ * Roshan Daneshvaran
+ * Yugan
+ * dependabot[bot]
+
+## v1.9.9 (2025-12-02)
+
+ * [42d350ca](https://github.com/argoproj/argo-events/commit/42d350caeacd75bd4c87ae83cad458afe6e1a392) Update manifests to v1.9.9
+ * [bdf27278](https://github.com/argoproj/argo-events/commit/bdf27278b023c6ca1cbeddf094d65677965d5507) fix(ci): fix cosign issue (#3843)
+ * [2cc329d4](https://github.com/argoproj/argo-events/commit/2cc329d4b2f622da0dc2a6c29689b412e60a46ee) feat: Add timezone support to TimeFilter (#3837)
+ * [f21bfeb6](https://github.com/argoproj/argo-events/commit/f21bfeb6424f6430ed59c51c4f1557ab92b2f1db) chore(deps): bump google.golang.org/grpc/cmd/protoc-gen-go-grpc from 1.5.1 to 1.6.0 (#3840)
+ * [0c14c0e1](https://github.com/argoproj/argo-events/commit/0c14c0e1ec99f70d782123f955f7d07f7f3458ae) chore(deps): bump github.com/xdg-go/scram from 1.1.2 to 1.2.0 (#3841)
+ * [d3622399](https://github.com/argoproj/argo-events/commit/d3622399bda7aabb35455aba777fc08ecb0033e9) chore(deps): bump github.com/go-git/go-git/v5 from 5.16.1 to 5.16.4 (#3839)
+ * [6c748ea1](https://github.com/argoproj/argo-events/commit/6c748ea1a93ec0bec6861e32b99aad1fbca9112a) chore(deps): bump github.com/go-resty/resty/v2 from 2.16.5 to 2.17.0 (#3838)
+ * [6fc819de](https://github.com/argoproj/argo-events/commit/6fc819de79b2de87d8d7939f99ee97dc2df7509e) feat: add DeferDelete to Azure Service Bus source config (#3820)
+ * [531c417f](https://github.com/argoproj/argo-events/commit/531c417f3b6ab9283f633e33dfa4f7ddc2b7cb7e) chore(deps): bump google.golang.org/grpc from 1.76.0 to 1.77.0 (#3830)
+ * [9f9c5f54](https://github.com/argoproj/argo-events/commit/9f9c5f54a521e85266fbc089f06d159f0d382ae4) chore(deps): bump go.uber.org/zap from 1.27.0 to 1.27.1 (#3829)
+ * [a49963bd](https://github.com/argoproj/argo-events/commit/a49963bdd019a42bdd56148623ea5e6b4b988028) chore(deps): bump gitlab.com/gitlab-org/api/client-go from 0.160.0 to 0.160.1 (#3828)
+ * [bb2379ac](https://github.com/argoproj/argo-events/commit/bb2379ac0a13dc595bc919e3d2e5d75ea3d972dd) chore(deps): bump actions/checkout from 4 to 6 (#3827)
+ * [4f305acb](https://github.com/argoproj/argo-events/commit/4f305acb7c7b8df02fb40a300b864a60c4fd5360) fix: Make Kafka trigger test header assertions order-independent (#3822)
+ * [21badb22](https://github.com/argoproj/argo-events/commit/21badb222aeccd59502cf6767d969e10012dea63) feat: Supports empty Lua arrays via metatable flag (#3796)
+ * [5e10b590](https://github.com/argoproj/argo-events/commit/5e10b5907a6a1db69b407e6bfee8dcaedd97de35) fix: enable kafka on CI and use redpanda for E2E (#3799)
+ * [b401242e](https://github.com/argoproj/argo-events/commit/b401242eaf009ec3fd394e80c2813dbaa349b747) feat: allow duplicate dependencies for kafka (#3797)
+ * [d5a329af](https://github.com/argoproj/argo-events/commit/d5a329affa58e3ce622fd713d52f178214b44b1c) chore(deps): bump golang.org/x/tools from 0.38.0 to 0.39.0 (#3815)
+ * [c1f9f426](https://github.com/argoproj/argo-events/commit/c1f9f426b45980da4ae3f2be44c89a7bab754c05) chore(deps): bump golang.org/x/crypto from 0.43.0 to 0.44.0 (#3818)
+ * [2fa62c05](https://github.com/argoproj/argo-events/commit/2fa62c05402ba7e61c52d7e7d780cc1482f2d31a) chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azidentity from 1.13.0 to 1.13.1 (#3817)
+ * [57acb57e](https://github.com/argoproj/argo-events/commit/57acb57e5fc6f37d1bb401ab8d8537974d8f74c4) chore(deps): bump google.golang.org/api from 0.255.0 to 0.256.0 (#3816)
+ * [b21e31b1](https://github.com/argoproj/argo-events/commit/b21e31b1887d7b99637dfe0e387cc114a4895608) chore(deps): bump gitlab.com/gitlab-org/api/client-go from 0.159.0 to 0.160.0 (#3814)
+ * [a893b7e1](https://github.com/argoproj/argo-events/commit/a893b7e1ece33ad2f9a05ee4aa36a872295e29c4) chore(deps): bump github.com/dvsekhvalnov/jose2go from 1.6.0 to 1.7.0 (#3813)
+ * [7526f4d8](https://github.com/argoproj/argo-events/commit/7526f4d8bb86684e03f43a5b3c441d8d0a4e5ef1) chore(deps): bump google.golang.org/api from 0.254.0 to 0.255.0 (#3803)
+ * [405090b8](https://github.com/argoproj/argo-events/commit/405090b83fbdd8c63292f1ab2305e31a30808f99) chore(deps): bump github.com/minio/minio-go/v7 from 7.0.95 to 7.0.97 (#3804)
+ * [f4d668e7](https://github.com/argoproj/argo-events/commit/f4d668e73813e9be2b732ad7b32a4ced3fad281d) chore(deps): bump gitlab.com/gitlab-org/api/client-go from 0.157.0 to 0.159.0 (#3802)
+ * [b4fc45f1](https://github.com/argoproj/argo-events/commit/b4fc45f17af997fa8d9c9241b53cefb246bf1ad0) chore(deps): bump sigstore/cosign-installer from 2.8.1 to 4.0.0 (#3801)
+
+### Contributors
+
+ * Derek Wang
+ * Eduardo Rodrigues
+ * Elliot Gunton
+ * Yugan
+ * artur
+ * dependabot[bot]
+
 ## v1.9.8 (2025-11-03)
 
  * [d8af2c61](https://github.com/argoproj/argo-events/commit/d8af2c617f05c1224b033edc73dcecad47a9dce3) fix: cosign failure (#3793)
