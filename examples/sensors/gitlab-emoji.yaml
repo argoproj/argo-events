@@ -88,4 +88,3 @@ spec:
                 dependencyName: emoji-event
                 dataKey: body.issue.title
               dest: spec.arguments.parameters.3.value
-              operation: override
