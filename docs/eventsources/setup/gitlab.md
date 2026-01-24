@@ -69,6 +69,53 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 
 1.  Run `argo list` to find the workflow.
 
+## Event Types
+
+The GitLab event-source supports the following event types:
+- `PushEvents` - Push events
+- `TagPushEvents` - Tag push events
+- `IssuesEvents` - Issue events (create, update, close, reopen)
+- `ConfidentialIssuesEvents` - Confidential issue events
+- `MergeRequestsEvents` - Merge request events
+- `ConfidentialNoteEvents` - Confidential comment events
+- `NoteEvents` - Comment events
+- `JobEvents` - Pipeline job events
+- `PipelineEvents` - Pipeline events
+- `WikiPageEvents` - Wiki page events
+- `EmojiEvents` - Emoji reaction events on issues, merge requests, snippets, and comments
+
+### EmojiEvents Support
+
+`EmojiEvents` is supported for both **project** and **group** webhooks. The event is triggered when users add emoji reactions to issues, merge requests, snippets, or comments.
+
+**Project webhook example:**
+```yaml
+gitlab:
+  example:
+    projects:
+      - "my-project"
+    events:
+      - IssuesEvents
+      - MergeRequestsEvents
+      - EmojiEvents
+```
+
+**Group webhook example:**
+```yaml
+gitlab:
+  example:
+    groups:
+      - "my-group-name"
+    events:
+      - IssuesEvents
+      - MergeRequestsEvents
+      - EmojiEvents
+```
+
+**Note:** Group webhooks receive emoji events from all projects within the group
+
+For more details, see [GitLab Webhooks Documentation](https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#emoji-events).
+
 ## Troubleshoot
 
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

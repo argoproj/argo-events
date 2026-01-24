@@ -1,0 +1,90 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: gitlab-emoji
+  namespace: argo-events
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+  dependencies:
+    - name: emoji-event
+      eventSourceName: gitlab
+      eventName: group-example  # Must reference a GitLab group webhook EventSource with EmojiEvents
+      filters:
+        data:
+          # Filter for emoji award events (reactions)
+          - path: body.object_kind
+            type: string
+            value:
+              - "emoji"
+  triggers:
+    - template:
+        name: emoji-notification-trigger
+        log:
+          intervalSeconds: 1
+    - template:
+        name: emoji-workflow-trigger
+        # Trigger an Argo Workflow when emoji reaction is added
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: gitlab-emoji-
+                namespace: argo
+              spec:
+                entrypoint: process-emoji
+                arguments:
+                  parameters:
+                    - name: emoji-name
+                      value: "unknown"
+                    - name: user
+                      value: "unknown"
+                    - name: target-type
+                      value: "unknown"
+                    - name: target-title
+                      value: "unknown"
+                templates:
+                  - name: process-emoji
+                    inputs:
+                      parameters:
+                        - name: emoji-name
+                        - name: user
+                        - name: target-type
+                        - name: target-title
+                    container:
+                      image: alpine:latest
+                      command: [sh, -c]
+                      args:
+                        - |
+                          echo "================================================"
+                          echo "GitLab Emoji Event Received!"
+                          echo "================================================"
+                          echo "Emoji: {{inputs.parameters.emoji-name}}"
+                          echo "User: {{inputs.parameters.user}}"
+                          echo "Target Type: {{inputs.parameters.target-type}}"
+                          echo "Target: {{inputs.parameters.target-title}}"
+                          echo "================================================"
+          parameters:
+            # Extract emoji name
+            - src:
+                dependencyName: emoji-event
+                dataKey: body.object_attributes.name
+              dest: spec.arguments.parameters.0.value
+            # Extract username who added the emoji
+            - src:
+                dependencyName: emoji-event
+                dataKey: body.user.username
+              dest: spec.arguments.parameters.1.value
+            # Extract what the emoji was added to (issue, merge_request, etc)
+            - src:
+                dependencyName: emoji-event
+                dataKey: body.object_attributes.awardable_type
+              dest: spec.arguments.parameters.2.value
+            # Try to extract target title (may differ based on awardable_type)
+            - src:
+                dependencyName: emoji-event
+                dataKey: body.issue.title
+              dest: spec.arguments.parameters.3.value
