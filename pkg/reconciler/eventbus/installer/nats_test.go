@@ -299,3 +299,34 @@ func TestBuildConfigMap(t *testing.T) {
 		}
 	})
 }
+
+func TestBuildStatefulSetProbes(t *testing.T) {
+	t.Run("statefulset has probes configured", func(t *testing.T) {
+		cl := fake.NewClientBuilder().Build()
+		installer := &natsInstaller{
+			client:   cl,
+			eventBus: testNatsEventBus,
+			config:   fakeConfig,
+			labels:   testLabels,
+			logger:   logging.NewArgoEventsLogger(),
+		}
+		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
+		assert.NoError(t, err)
+		stanContainer := ss.Spec.Template.Spec.Containers[0]
+
+		// Verify LivenessProbe
+		assert.NotNil(t, stanContainer.LivenessProbe)
+		assert.NotNil(t, stanContainer.LivenessProbe.HTTPGet)
+		assert.Equal(t, "/", stanContainer.LivenessProbe.HTTPGet.Path)
+		assert.Equal(t, int32(10), stanContainer.LivenessProbe.InitialDelaySeconds)
+		assert.Equal(t, int32(5), stanContainer.LivenessProbe.TimeoutSeconds)
+
+		// Verify ReadinessProbe
+		assert.NotNil(t, stanContainer.ReadinessProbe)
+		assert.NotNil(t, stanContainer.ReadinessProbe.HTTPGet)
+		assert.Equal(t, "/healthz", stanContainer.ReadinessProbe.HTTPGet.Path)
+		assert.Equal(t, int32(10), stanContainer.ReadinessProbe.InitialDelaySeconds)
+		assert.Equal(t, int32(5), stanContainer.ReadinessProbe.PeriodSeconds)
+		assert.Equal(t, int32(5), stanContainer.ReadinessProbe.TimeoutSeconds)
+	})
+}
