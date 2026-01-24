@@ -19,6 +19,7 @@ package sensors
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -42,6 +43,84 @@ import (
 )
 
 var rateLimiters = make(map[string]ratelimit.Limiter)
+
+// TriggerWeightRange represents the weight range for a trigger
+type TriggerWeightRange struct {
+	TriggerName string
+	StartRange  int32
+	EndRange    int32
+}
+
+// hashEventIDs generates a deterministic hash from event IDs for weight-based routing.
+// Using event IDs ensures that all triggers processing the same event get the same hash value,
+// which is essential for correct weight-based distribution.
+func hashEventIDs(events map[string]cloudevents.Event) uint64 {
+	// Create a deterministic string from sorted event IDs
+	var ids []string
+	for _, event := range events {
+		ids = append(ids, event.ID())
+	}
+	// Sort for determinism when there are multiple events
+	sort.Strings(ids)
+
+	// Simple hash function (FNV-1a inspired)
+	var hash uint64 = 14695981039346656037
+	for _, id := range ids {
+		for _, c := range id {
+			hash ^= uint64(c)
+			hash *= 1099511628211
+		}
+	}
+	return hash
+}
+
+// shouldExecuteByWeight determines if a trigger should execute based on its weight configuration.
+// When weight-based routing is enabled (weight > 0), it calculates which trigger should handle
+// the current event based on cumulative weight ranges.
+// The eventHash parameter should be derived from event IDs so all triggers get the same value.
+// Returns true if the trigger should execute, false otherwise.
+// The second return value indicates if weight-based routing is enabled for this trigger.
+func shouldExecuteByWeight(trigger v1alpha1.Trigger, allTriggers []v1alpha1.Trigger, eventHash uint64) (bool, bool) {
+	// If weight is 0 or not set, weight-based routing is disabled for this trigger
+	if trigger.Weight <= 0 {
+		return true, false
+	}
+
+	// Calculate total weight from all triggers that have weights configured
+	var totalWeight int32 = 0
+	var weightedTriggers []TriggerWeightRange
+
+	for _, t := range allTriggers {
+		if t.Weight > 0 {
+			weightedTriggers = append(weightedTriggers, TriggerWeightRange{
+				TriggerName: t.Template.Name,
+				StartRange:  totalWeight,
+				EndRange:    totalWeight + t.Weight,
+			})
+			totalWeight += t.Weight
+		}
+	}
+
+	// If total weight is 0 (no weighted triggers), allow all triggers to execute
+	if totalWeight == 0 {
+		return true, false
+	}
+
+	// Calculate which trigger should handle this event based on the hash
+	position := int32(eventHash % uint64(totalWeight))
+
+	// Find if this trigger's range contains the calculated position
+	for _, wr := range weightedTriggers {
+		if wr.TriggerName == trigger.Template.Name {
+			if position >= wr.StartRange && position < wr.EndRange {
+				return true, true
+			}
+			return false, true
+		}
+	}
+
+	return false, true
+}
 
 func subscribeOnce(subLock *uint32, subscribe func()) {
 	// acquire subLock if not already held
@@ -210,6 +289,14 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 			}
 
 			actionFunc := func(events map[string]cloudevents.Event) {
+				// Check weight-based routing using event hash for deterministic distribution
+				eventHash := hashEventIDs(events)
+				shouldExecute, weightEnabled := shouldExecuteByWeight(trigger, sensor.Spec.Triggers, eventHash)
+				if weightEnabled && !shouldExecute {
+					triggerLogger.Debugf("Skipping trigger due to weight-based routing (eventHash=%d, weight=%d)", eventHash, trigger.Weight)
+					return
+				}
+
 				retryStrategy := trigger.RetryStrategy
 				if retryStrategy == nil {
 					retryStrategy = &v1alpha1.Backoff{Steps: 1}

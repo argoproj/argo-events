@@ -86,7 +86,24 @@ func validateTrigger(trigger v1alpha1.Trigger) error {
 	if err := validateDlqTrigger(&trigger); err != nil {
 		return err
 	}
+	if err := validateTriggerWeight(&trigger); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+// validateTriggerWeight validates the trigger weight is within valid range
+func validateTriggerWeight(trigger *v1alpha1.Trigger) error {
+	if trigger == nil {
+		return fmt.Errorf("trigger can't be nil")
+	}
+	if trigger.Weight < 0 {
+		return fmt.Errorf("trigger weight must be non-negative, got %d", trigger.Weight)
+	}
+	if trigger.Weight > 100 {
+		return fmt.Errorf("trigger weight must not exceed 100, got %d", trigger.Weight)
+	}
 	return nil
 }
 
