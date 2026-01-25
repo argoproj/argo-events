@@ -204,7 +204,7 @@ func lintSensor(filename string, sensor *v1alpha1.Sensor, hasErrors *bool, hasWa
 	// For sensor validation, we need an EventBus, but for linting purposes
 	// we'll create a dummy one or skip EventBus-specific validation
 	// We'll validate as much as we can without an actual EventBus
-	
+
 	// Create a minimal EventBus for validation
 	// We use nil EventBus and check if the validation can proceed
 	// The ValidateSensor function will report if EventBus is needed
