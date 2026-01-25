@@ -156,8 +156,7 @@ func lintFile(filename string, hasErrors *bool, hasWarnings *bool) error {
 			docNum = fmt.Sprintf(" (document %d)", i+1)
 		}
 
-		// Now decode it properly using the scheme
-		decoder = yaml.NewYAMLOrJSONDecoder(strings.NewReader(doc), 4096)
+		// Decode the document using the scheme
 		runtimeObj, _, err := scheme.Codecs.UniversalDeserializer().Decode([]byte(doc), nil, nil)
 		if err != nil {
 			fmt.Printf("✗ %s%s: Failed to decode\n", filename, docNum)
