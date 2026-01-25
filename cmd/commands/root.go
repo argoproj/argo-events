@@ -27,4 +27,5 @@ func init() {
 	rootCmd.AddCommand(NewEventSourceCommand())
 	rootCmd.AddCommand(NewSensorCommand())
 	rootCmd.AddCommand(NewWebhookCommand())
+	rootCmd.AddCommand(NewLintCommand())
 }

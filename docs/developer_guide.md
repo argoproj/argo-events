@@ -42,6 +42,23 @@ following command for code regeneration.
 make codegen
 ```
 
+### 5. Validating Your Changes
+
+Before committing changes to EventSource or Sensor manifests, validate them:
+
+```bash
+# Lint individual files
+argo-events lint examples/event-sources/webhook.yaml
+
+# Lint entire directories
+argo-events lint -R examples/
+
+# Strict mode (fail on warnings)
+argo-events lint --strict examples/sensors/
+```
+
+See the [linting guide](lint.md) for CI/CD integration and advanced usage.
+
 ### Deploying and testing your changes on a local dev cluster
 
 Make sure you have a local dev cluster running and have the current kubeconfig context set to the local cluster as the following steps will use that to load the images and deploy the controller. The local dev cluster can be Minikube, Kind, or K3D.
