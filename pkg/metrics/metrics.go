@@ -152,6 +152,19 @@ func (m *Metrics) Describe(ch chan<- *prometheus.Desc) {
 	m.actionDuration.Describe(ch)
 }
 
+func (m *Metrics) InitSensorMetrics(sensorName string, triggerName string) {
+	m.actionTriggered.WithLabelValues(sensorName, triggerName).Add(0)
+	m.actionFailed.WithLabelValues(sensorName, triggerName).Add(0)
+	m.actionRetriesFailed.WithLabelValues(sensorName, triggerName).Add(0)
+}
+
+func (m *Metrics) InitEventMetrics(eventSourceName string, eventName string) {
+	m.runningEventServices.WithLabelValues(eventSourceName).Set(0)
+	m.eventsSent.WithLabelValues(eventSourceName, eventName).Add(0)
+	m.eventsSentFailed.WithLabelValues(eventSourceName, eventName).Add(0)
+	m.eventsProcessingFailed.WithLabelValues(eventSourceName, eventName).Add(0)
+}
+
 func (m *Metrics) IncRunningServices(eventSourceName string) {
 	m.runningEventServices.WithLabelValues(eventSourceName).Inc()
 }
