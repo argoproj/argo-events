@@ -1,6 +1,6 @@
 module github.com/argoproj/argo-events
 
-go 1.24.1
+go 1.25.5
 
 retract v1.15.1 // Contains retractions only.
 
@@ -39,7 +39,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.16.0
 	github.com/gfleury/go-bitbucket-v1 v0.0.0-20210707202713-7d616f7c18ac
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/go-git/go-git/v5 v5.16.4
+	github.com/go-git/go-git/v5 v5.16.5
 	github.com/go-openapi/inflect v0.21.5
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-resty/resty/v2 v2.17.1
@@ -80,14 +80,14 @@ require (
 	github.com/tidwall/sjson v1.2.4
 	github.com/xdg-go/scram v1.2.0
 	github.com/yuin/gopher-lua v1.1.1
-	gitlab.com/gitlab-org/api/client-go v1.24.0
+	gitlab.com/gitlab-org/api/client-go v1.28.1
 	go.uber.org/ratelimit v0.3.1
 	go.uber.org/zap v1.27.1
 	golang.org/x/crypto v0.47.0
 	golang.org/x/tools v0.41.0
 	google.golang.org/api v0.257.0
 	google.golang.org/grpc v1.78.0
-	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.0
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.1
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	gopkg.in/yaml.v3 v3.0.1
