@@ -124,6 +124,8 @@ func (sensorCtx *SensorContext) listenEvents(ctx context.Context) error {
 
 	wg := &sync.WaitGroup{}
 	for _, t := range sensor.Spec.Triggers {
+		sensorCtx.metrics.InitSensorMetrics(sensorCtx.sensor.Name, t.Template.Name)
+
 		initRateLimiter(t)
 		wg.Add(1)
 		go func(trigger v1alpha1.Trigger) {
