@@ -742,6 +742,17 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 							InitialDelaySeconds: 10,
 							TimeoutSeconds:      5,
 						},
+						ReadinessProbe: &corev1.Probe{
+							ProbeHandler: corev1.ProbeHandler{
+								HTTPGet: &corev1.HTTPGetAction{
+									Path: "/healthz",
+									Port: intstr.FromInt(int(monitorPort)),
+								},
+							},
+							InitialDelaySeconds: 10,
+							PeriodSeconds:       5,
+							TimeoutSeconds:      5,
+						},
 					},
 					{
 						Name:            "metrics",
