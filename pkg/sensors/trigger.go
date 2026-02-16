@@ -28,6 +28,7 @@ import (
 	servicebus "github.com/argoproj/argo-events/pkg/sensors/triggers/azure-service-bus"
 	customtrigger "github.com/argoproj/argo-events/pkg/sensors/triggers/custom-trigger"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers/email"
+	gcpcloudfunctions "github.com/argoproj/argo-events/pkg/sensors/triggers/gcp-cloud-functions"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers/http"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers/kafka"
 	logtrigger "github.com/argoproj/argo-events/pkg/sensors/triggers/log"
@@ -165,6 +166,15 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 		result, err := email.NewEmailTrigger(sensorCtx.sensor, trigger, log)
 		if err != nil {
 			log.Errorw("failed to new a Email trigger", zap.Error(err))
+			return nil
+		}
+		return result
+	}
+
+	if trigger.Template.GCPCloudFunctions != nil {
+		result, err := gcpcloudfunctions.NewGCPCloudFunctionsTrigger(sensorCtx.gcpCloudFunctionsClients, sensorCtx.sensor, trigger, log)
+		if err != nil {
+			log.Errorw("failed to new a GCP Cloud Functions trigger", zap.Error(err))
 			return nil
 		}
 		return result
