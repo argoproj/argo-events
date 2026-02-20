@@ -1772,6 +1772,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../lint/" class="md-nav__link">
+        Linting EventSource and Sensor Resources
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../FAQ/" class="md-nav__link">
         FAQs
       </a>
@@ -2075,8 +2089,20 @@ kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/m
 
 </li>
 <li>
-<p>Set up the event-source for the webhook as follows.</p>
-<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+<p>(Optional) Validate your resources before applying them.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Download the example files first, or use your own</span>
+<span class="n">kubectl</span><span class="w"> </span><span class="n">apply</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="w"> </span><span class="o">-</span><span class="n">f</span><span class="w"> </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">argoproj</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">/</span><span class="n">stable</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">event</span><span class="o">-</span><span class="n">sources</span><span class="o">/</span><span class="n">webhook</span><span class="o">.</span><span class="n">yaml</span><span class="w"> </span><span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span><span class="o">=</span><span class="n">client</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="n">yaml</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">eventsource</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">kubectl</span><span class="w"> </span><span class="n">apply</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="w"> </span><span class="o">-</span><span class="n">f</span><span class="w"> </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">argoproj</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">/</span><span class="n">stable</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">sensors</span><span class="o">/</span><span class="n">webhook</span><span class="o">.</span><span class="n">yaml</span><span class="w"> </span><span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span><span class="o">=</span><span class="n">client</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="n">yaml</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span><span class="o">.</span><span class="n">yaml</span>
+
+<span class="c1"># Validate with argo-events lint</span>
+<span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="w"> </span><span class="n">lint</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">eventsource</span><span class="o">.</span><span class="n">yaml</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span><span class="o">.</span><span class="n">yaml</span>
+</code></pre></div>
+
+</li>
+</ol>
+<p>See the <a href="../lint/">linting guide</a> for more validation options and CI/CD integration.</p>
+<ol>
+<li>Set up the event-source for the webhook as follows.<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 </code></pre></div>
 
 </li>

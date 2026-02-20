@@ -1760,6 +1760,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../lint/" class="md-nav__link">
+        Linting EventSource and Sensor Resources
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../FAQ/" class="md-nav__link">
         FAQs
       </a>
@@ -2018,6 +2032,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#5-validating-your-changes" class="md-nav__link">
+    5. Validating Your Changes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#deploying-and-testing-your-changes-on-a-local-dev-cluster" class="md-nav__link">
     Deploying and testing your changes on a local dev cluster
   </a>
@@ -2254,6 +2275,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#5-validating-your-changes" class="md-nav__link">
+    5. Validating Your Changes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#deploying-and-testing-your-changes-on-a-local-dev-cluster" class="md-nav__link">
     Deploying and testing your changes on a local dev cluster
   </a>
@@ -2378,6 +2406,18 @@ eval $(minikube docker-env)
 following command for code regeneration.</p>
 <div class="highlight"><pre><span></span><code>make codegen
 </code></pre></div>
+<h3 id="5-validating-your-changes">5. Validating Your Changes<a class="headerlink" href="#5-validating-your-changes" title="Permanent link">&para;</a></h3>
+<p>Before committing changes to EventSource or Sensor manifests, validate them:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Lint individual files</span>
+argo-events<span class="w"> </span>lint<span class="w"> </span>examples/event-sources/webhook.yaml
+
+<span class="c1"># Lint entire directories</span>
+argo-events<span class="w"> </span>lint<span class="w"> </span>-R<span class="w"> </span>examples/
+
+<span class="c1"># Strict mode (fail on warnings)</span>
+argo-events<span class="w"> </span>lint<span class="w"> </span>--strict<span class="w"> </span>examples/sensors/
+</code></pre></div>
+<p>See the <a href="../lint/">linting guide</a> for CI/CD integration and advanced usage.</p>
 <h3 id="deploying-and-testing-your-changes-on-a-local-dev-cluster">Deploying and testing your changes on a local dev cluster<a class="headerlink" href="#deploying-and-testing-your-changes-on-a-local-dev-cluster" title="Permanent link">&para;</a></h3>
 <p>Make sure you have a local dev cluster running and have the current kubeconfig context set to the local cluster as the following steps will use that to load the images and deploy the controller. The local dev cluster can be Minikube, Kind, or K3D.</p>
 <h4 id="1-building-images">1. Building images<a class="headerlink" href="#1-building-images" title="Permanent link">&para;</a></h4>

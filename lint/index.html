@@ -13,7 +13,7 @@
     
     
       
-        <title>Installation - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>Linting EventSource and Sensor Resources - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installation" class="md-skip">
+        <a href="#linting-eventsource-and-sensor-resources" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Installation
+              Linting EventSource and Sensor Resources
             
           </span>
         </div>
@@ -224,6 +224,8 @@
         
   
   
+    
+  
 
 
   
@@ -235,7 +237,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../concepts/architecture/" class="md-tabs__link">
+      <a href="../concepts/architecture/" class="md-tabs__link md-tabs__link--active">
         User Guide
       </a>
     </li>
@@ -247,15 +249,13 @@
         
   
   
-    
-  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="./" class="md-tabs__link md-tabs__link--active">
+      <a href="../installation/" class="md-tabs__link">
         Operator Manual
       </a>
     </li>
@@ -563,12 +563,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
       
       
       
@@ -1758,11 +1760,277 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../lint/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Linting EventSource and Sensor Resources
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Linting EventSource and Sensor Resources
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    Basic Usage
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validate-a-single-file" class="md-nav__link">
+    Validate a single file
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-multiple-files" class="md-nav__link">
+    Validate multiple files
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-a-directory" class="md-nav__link">
+    Validate a directory
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-directories-recursively" class="md-nav__link">
+    Validate directories recursively
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flags" class="md-nav__link">
+    Flags
+  </a>
+  
+    <nav class="md-nav" aria-label="Flags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-r-recursive" class="md-nav__link">
+    -R, --recursive
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-strict" class="md-nav__link">
+    --strict
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    Exit Codes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cicd-integration" class="md-nav__link">
+    CI/CD Integration
+  </a>
+  
+    <nav class="md-nav" aria-label="CI/CD Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github-actions" class="md-nav__link">
+    GitHub Actions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gitlab-ci" class="md-nav__link">
+    GitLab CI
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre-commit-hook" class="md-nav__link">
+    Pre-commit Hook
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-multi-document-yaml-files" class="md-nav__link">
+    Validate Multi-Document YAML Files
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-validation-errors" class="md-nav__link">
+    Common Validation Errors
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Validation Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#eventsource-errors" class="md-nav__link">
+    EventSource Errors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sensor-errors" class="md-nav__link">
+    Sensor Errors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eventbus-warnings" class="md-nav__link">
+    EventBus Warnings
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ignored-files" class="md-nav__link">
+    Ignored Files
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    Limitations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-output-produced" class="md-nav__link">
+    No output produced
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-denied" class="md-nav__link">
+    Permission denied
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-commands" class="md-nav__link">
+    Related Commands
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    Contributing
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1794,14 +2062,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
       
       
       
@@ -1822,100 +2088,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Installation
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
         Installation
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    Requirements
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-kubectl" class="md-nav__link">
-    Using kubectl
-  </a>
-  
-    <nav class="md-nav" aria-label="Using kubectl">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#cluster-wide-installation" class="md-nav__link">
-    Cluster-wide Installation
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#namespace-installation" class="md-nav__link">
-    Namespace Installation
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-kustomize" class="md-nav__link">
-    Using Kustomize
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-helm-chart" class="md-nav__link">
-    Using Helm Chart
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#migrate-to-v100" class="md-nav__link">
-    Migrate to v1.0.0
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2131,30 +2308,51 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    Requirements
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-kubectl" class="md-nav__link">
-    Using kubectl
+  <a href="#installation" class="md-nav__link">
+    Installation
   </a>
   
-    <nav class="md-nav" aria-label="Using kubectl">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    Basic Usage
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Usage">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#cluster-wide-installation" class="md-nav__link">
-    Cluster-wide Installation
+  <a href="#validate-a-single-file" class="md-nav__link">
+    Validate a single file
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#namespace-installation" class="md-nav__link">
-    Namespace Installation
+  <a href="#validate-multiple-files" class="md-nav__link">
+    Validate multiple files
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-a-directory" class="md-nav__link">
+    Validate a directory
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-directories-recursively" class="md-nav__link">
+    Validate directories recursively
   </a>
   
 </li>
@@ -2165,22 +2363,178 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-kustomize" class="md-nav__link">
-    Using Kustomize
+  <a href="#flags" class="md-nav__link">
+    Flags
+  </a>
+  
+    <nav class="md-nav" aria-label="Flags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-r-recursive" class="md-nav__link">
+    -R, --recursive
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-strict" class="md-nav__link">
+    --strict
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    Exit Codes
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-helm-chart" class="md-nav__link">
-    Using Helm Chart
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cicd-integration" class="md-nav__link">
+    CI/CD Integration
+  </a>
+  
+    <nav class="md-nav" aria-label="CI/CD Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github-actions" class="md-nav__link">
+    GitHub Actions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gitlab-ci" class="md-nav__link">
+    GitLab CI
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre-commit-hook" class="md-nav__link">
+    Pre-commit Hook
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validate-multi-document-yaml-files" class="md-nav__link">
+    Validate Multi-Document YAML Files
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-validation-errors" class="md-nav__link">
+    Common Validation Errors
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Validation Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#eventsource-errors" class="md-nav__link">
+    EventSource Errors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sensor-errors" class="md-nav__link">
+    Sensor Errors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eventbus-warnings" class="md-nav__link">
+    EventBus Warnings
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ignored-files" class="md-nav__link">
+    Ignored Files
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#migrate-to-v100" class="md-nav__link">
-    Migrate to v1.0.0
+  <a href="#limitations" class="md-nav__link">
+    Limitations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-output-produced" class="md-nav__link">
+    No output produced
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-denied" class="md-nav__link">
+    Permission denied
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-commands" class="md-nav__link">
+    Related Commands
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    Contributing
   </a>
   
 </li>
@@ -2197,152 +2551,219 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/argoproj/argo-events/edit/master/docs/installation.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/argoproj/argo-events/edit/master/docs/lint.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
-<h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
+<h1 id="linting-eventsource-and-sensor-resources">Linting EventSource and Sensor Resources<a class="headerlink" href="#linting-eventsource-and-sensor-resources" title="Permanent link">&para;</a></h1>
+<p>The <code>argo-events lint</code> command validates EventSource and Sensor resource files without deploying them to a cluster. This allows you to catch configuration errors early in your development process and in CI/CD pipelines.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The lint command performs the same validation checks that the Argo Events controllers run when resources are created or updated. This includes:</p>
 <ul>
-<li>Kubernetes cluster &gt;=v1.11</li>
-<li>Installed the <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">kubectl</a> command-line tool &gt;v1.11.0</li>
+<li><strong>EventSource validation</strong>: Validates event source configuration, required fields, and type-specific requirements</li>
+<li><strong>Sensor validation</strong>: Validates sensor dependencies, triggers, and trigger templates</li>
+<li><strong>Schema validation</strong>: Ensures resources conform to the Kubernetes API schema</li>
 </ul>
-<h3 id="using-kubectl">Using kubectl<a class="headerlink" href="#using-kubectl" title="Permanent link">&para;</a></h3>
-<h4 id="cluster-wide-installation">Cluster-wide Installation<a class="headerlink" href="#cluster-wide-installation" title="Permanent link">&para;</a></h4>
-<ol>
-<li>
-<p>Create the namespace.</p>
-<div class="codehilite"><pre><span></span><code>kubectl create namespace argo-events
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<p>The lint command is built into the <code>argo-events</code> binary. After building or installing argo-events, the lint command is available:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Build from source</span>
+make<span class="w"> </span>build
+
+<span class="c1"># Use the binary</span>
+./dist/argo-events<span class="w"> </span>lint<span class="w"> </span>--help
 </code></pre></div>
-
-</li>
-<li>
-<p>Deploy Argo Events SA, ClusterRoles, and Controller for Sensor, EventBus, and EventSource.</p>
-<div class="codehilite"><pre><span></span><code>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
-# Install with a validating admission controller
-kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install-validating-webhook.yaml
+<h2 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h2>
+<h3 id="validate-a-single-file">Validate a single file<a class="headerlink" href="#validate-a-single-file" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>event-source.yaml
 </code></pre></div>
-
-<p>NOTE:</p>
-<div class="codehilite"><pre><span></span><code><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">On</span><span class="w"> </span><span class="n">GKE</span><span class="p">,</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">may</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">grant</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="k">account</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">ability</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">create</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">custom</span><span class="w"> </span><span class="k">resource</span><span class="w"> </span><span class="n">definitions</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">clusterroles</span>
-
-<span class="w">        </span><span class="n">kubectl</span><span class="w"> </span><span class="k">create</span><span class="w"> </span><span class="n">clusterrolebinding</span><span class="w"> </span><span class="n">YOURNAME</span><span class="o">-</span><span class="n">cluster</span><span class="o">-</span><span class="k">admin</span><span class="o">-</span><span class="n">binding</span><span class="w"> </span><span class="o">--</span><span class="n">clusterrole</span><span class="o">=</span><span class="n">cluster</span><span class="o">-</span><span class="k">admin</span><span class="w"> </span><span class="o">--</span><span class="k">user</span><span class="o">=</span><span class="n">YOUREMAIL</span><span class="nv">@gmail.com</span>
-
-<span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">On</span><span class="w"> </span><span class="n">OpenShift</span><span class="o">:</span>
-<span class="w">     </span><span class="o">-</span><span class="w"> </span><span class="n">Make</span><span class="w"> </span><span class="n">sure</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">grant</span><span class="w"> </span><span class="n n-Quoted">`anyuid`</span><span class="w"> </span><span class="n">scc</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="n">accounts</span><span class="p">.</span>
-
-<span class="w">        </span><span class="n">oc</span><span class="w"> </span><span class="n">adm</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="k">add</span><span class="o">-</span><span class="n">scc</span><span class="o">-</span><span class="k">to</span><span class="o">-</span><span class="k">user</span><span class="w"> </span><span class="n">anyuid</span><span class="w"> </span><span class="k">system</span><span class="o">:</span><span class="n">serviceaccount</span><span class="o">:</span><span class="n">argo</span><span class="o">-</span><span class="k">events</span><span class="o">:</span><span class="n">argo</span><span class="o">-</span><span class="k">events</span><span class="o">-</span><span class="n">sa</span><span class="w"> </span><span class="k">system</span><span class="o">:</span><span class="n">serviceaccount</span><span class="o">:</span><span class="n">argo</span><span class="o">-</span><span class="k">events</span><span class="o">:</span><span class="n">argo</span><span class="o">-</span><span class="k">events</span><span class="o">-</span><span class="n">webhook</span><span class="o">-</span><span class="n">sa</span>
-
-<span class="w">     </span><span class="o">-</span><span class="w"> </span><span class="k">Add</span><span class="w"> </span><span class="k">update</span><span class="w"> </span><span class="n">permissions</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n n-Quoted">`deployments/finalizers`</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n n-Quoted">`clusterroles/finalizers`</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="k">events</span><span class="o">-</span><span class="n">webhook</span><span class="w"> </span><span class="n">ClusterRole</span><span class="w"> </span><span class="p">(</span><span class="n">this</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">necessary</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">validating</span><span class="w"> </span><span class="n">admission</span><span class="w"> </span><span class="n">controller</span><span class="p">)</span>
-
-<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">apiGroups</span><span class="o">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">rbac</span><span class="p">.</span><span class="n">authorization</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="k">io</span>
-<span class="w">          </span><span class="n">resources</span><span class="o">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">clusterroles</span><span class="o">/</span><span class="n">finalizers</span>
-<span class="w">          </span><span class="n">verbs</span><span class="o">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="k">update</span>
-<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">apiGroups</span><span class="o">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">apps</span>
-<span class="w">          </span><span class="n">resources</span><span class="o">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">deployments</span><span class="o">/</span><span class="n">finalizers</span>
-<span class="w">          </span><span class="n">verbs</span><span class="o">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="k">update</span>
+<p>Output:
+<div class="highlight"><pre><span></span><code>✓ event-source.yaml: EventSource is valid
+</code></pre></div></p>
+<h3 id="validate-multiple-files">Validate multiple files<a class="headerlink" href="#validate-multiple-files" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>event-source.yaml<span class="w"> </span>sensor.yaml
 </code></pre></div>
-
-</li>
-<li>
-<p>Deploy the eventbus.</p>
-<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+<p>Output:
+<div class="highlight"><pre><span></span><code>✓ event-source.yaml: EventSource is valid
+✓ sensor.yaml: Sensor is valid
+</code></pre></div></p>
+<h3 id="validate-a-directory">Validate a directory<a class="headerlink" href="#validate-a-directory" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>examples/event-sources/
 </code></pre></div>
-
-</li>
-</ol>
-<h4 id="namespace-installation">Namespace Installation<a class="headerlink" href="#namespace-installation" title="Permanent link">&para;</a></h4>
-<ol>
-<li>
-<p>Create the namespace.</p>
-<div class="codehilite"><pre><span></span><code>kubectl create namespace argo-events
+<p>Output:
+<div class="highlight"><pre><span></span><code>✓ examples/event-sources/calendar.yaml: EventSource is valid
+✓ examples/event-sources/webhook.yaml: EventSource is valid
+✓ examples/event-sources/kafka.yaml: EventSource is valid
+...
+</code></pre></div></p>
+<h3 id="validate-directories-recursively">Validate directories recursively<a class="headerlink" href="#validate-directories-recursively" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>-R<span class="w"> </span>examples/
 </code></pre></div>
-
-</li>
-<li>
-<p>Deploy Argo Events SA, ClusterRoles, and Controller for Sensor, EventBus, and EventSource.</p>
-<div class="codehilite"><pre><span></span><code>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
+<p>This will validate all <code>.yaml</code> and <code>.yml</code> files in the <code>examples/</code> directory and all subdirectories.</p>
+<h2 id="flags">Flags<a class="headerlink" href="#flags" title="Permanent link">&para;</a></h2>
+<h3 id="-r-recursive"><code>-R, --recursive</code><a class="headerlink" href="#-r-recursive" title="Permanent link">&para;</a></h3>
+<p>Process directories recursively.</p>
+<div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>-R<span class="w"> </span>examples/
 </code></pre></div>
-
-<p>NOTE:</p>
-<div class="codehilite"><pre><span></span><code><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">On</span><span class="w"> </span><span class="n">GKE</span><span class="p">,</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">may</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">grant</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="k">account</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">ability</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">create</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">custom</span><span class="w"> </span><span class="k">resource</span><span class="w"> </span><span class="n">definitions</span>
-
-<span class="w">        </span><span class="n">kubectl</span><span class="w"> </span><span class="k">create</span><span class="w"> </span><span class="n">clusterrolebinding</span><span class="w"> </span><span class="n">YOURNAME</span><span class="o">-</span><span class="n">cluster</span><span class="o">-</span><span class="k">admin</span><span class="o">-</span><span class="n">binding</span><span class="w"> </span><span class="o">--</span><span class="n">clusterrole</span><span class="o">=</span><span class="n">cluster</span><span class="o">-</span><span class="k">admin</span><span class="w"> </span><span class="o">--</span><span class="k">user</span><span class="o">=</span><span class="n">YOUREMAIL</span><span class="nv">@gmail.com</span>
-
-<span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">On</span><span class="w"> </span><span class="n">OpenShift</span><span class="o">:</span>
-<span class="w">     </span><span class="o">-</span><span class="w"> </span><span class="n">Make</span><span class="w"> </span><span class="n">sure</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">grant</span><span class="w"> </span><span class="n n-Quoted">`anyuid`</span><span class="w"> </span><span class="n">scc</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="k">account</span><span class="p">.</span>
-
-<span class="w">        </span><span class="n">oc</span><span class="w"> </span><span class="n">adm</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="k">add</span><span class="o">-</span><span class="n">scc</span><span class="o">-</span><span class="k">to</span><span class="o">-</span><span class="k">user</span><span class="w"> </span><span class="n">anyuid</span><span class="w"> </span><span class="k">system</span><span class="o">:</span><span class="n">serviceaccount</span><span class="o">:</span><span class="n">argo</span><span class="o">-</span><span class="k">events</span><span class="o">:</span><span class="k">default</span>
-
-<span class="w">     </span><span class="o">-</span><span class="w"> </span><span class="k">Add</span><span class="w"> </span><span class="k">update</span><span class="w"> </span><span class="n">permissions</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n n-Quoted">`deployments/finalizers`</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n n-Quoted">`clusterroles/finalizers`</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="k">events</span><span class="o">-</span><span class="n">webhook</span><span class="w"> </span><span class="n">ClusterRole</span><span class="w"> </span><span class="p">(</span><span class="n">this</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">necessary</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">validating</span><span class="w"> </span><span class="n">admission</span><span class="w"> </span><span class="n">controller</span><span class="p">)</span>
-
-<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">apiGroups</span><span class="o">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">rbac</span><span class="p">.</span><span class="n">authorization</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="k">io</span>
-<span class="w">          </span><span class="n">resources</span><span class="o">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">clusterroles</span><span class="o">/</span><span class="n">finalizers</span>
-<span class="w">          </span><span class="n">verbs</span><span class="o">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="k">update</span>
-<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">apiGroups</span><span class="o">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">apps</span>
-<span class="w">          </span><span class="n">resources</span><span class="o">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">deployments</span><span class="o">/</span><span class="n">finalizers</span>
-<span class="w">          </span><span class="n">verbs</span><span class="o">:</span>
-<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="k">update</span>
+<h3 id="-strict"><code>--strict</code><a class="headerlink" href="#-strict" title="Permanent link">&para;</a></h3>
+<p>Fail on warnings in addition to errors.</p>
+<div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>--strict<span class="w"> </span>sensor.yaml
 </code></pre></div>
+<h2 id="exit-codes">Exit Codes<a class="headerlink" href="#exit-codes" title="Permanent link">&para;</a></h2>
+<p>The lint command uses exit codes to indicate success or failure, making it suitable for use in CI/CD pipelines:</p>
+<ul>
+<li><strong>0</strong>: All resources are valid</li>
+<li><strong>1</strong>: One or more resources have validation errors</li>
+</ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="cicd-integration">CI/CD Integration<a class="headerlink" href="#cicd-integration" title="Permanent link">&para;</a></h3>
+<h4 id="github-actions">GitHub Actions<a class="headerlink" href="#github-actions" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Lint Argo Events Resources</span>
+<span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
 
-</li>
-<li>
-<p>Deploy the eventbus.</p>
-<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">lint</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v3</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Go</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-go@v4</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">go-version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1.20&#39;</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install argo-events</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">git clone https://github.com/argoproj/argo-events.git</span>
+<span class="w">          </span><span class="no">cd argo-events</span>
+<span class="w">          </span><span class="no">make build</span>
+<span class="w">          </span><span class="no">sudo mv dist/argo-events /usr/local/bin/</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Lint EventSources and Sensors</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argo-events lint -R manifests/</span>
 </code></pre></div>
-
-</li>
-</ol>
-<h3 id="using-kustomize">Using Kustomize<a class="headerlink" href="#using-kustomize" title="Permanent link">&para;</a></h3>
-<p>Use either <a href="https://github.com/argoproj/argo-events/tree/stable/manifests/cluster-install"><code>cluster-install</code></a>, or <a href="https://github.com/argoproj/argo-events/tree/stable/manifests/cluster-install-with-extension"><code>cluster-install-with-extension</code></a>, or <a href="https://github.com/argoproj/argo-events/tree/stable/manifests/namespace-install"><code>namespace-install</code></a> folder as your base for Kustomize.</p>
-<p><code>kustomization.yaml</code>:</p>
-<div class="codehilite"><pre><span></span><code>bases:
-  - github.com/argoproj/argo-events/manifests/cluster-install
-  # OR
-  - github.com/argoproj/argo-events/manifests/namespace-install
+<h4 id="gitlab-ci">GitLab CI<a class="headerlink" href="#gitlab-ci" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nt">lint</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">golang:1.20</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git clone https://github.com/argoproj/argo-events.git</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cd argo-events &amp;&amp; make build</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./dist/argo-events lint -R ../manifests/</span>
 </code></pre></div>
+<h4 id="pre-commit-hook">Pre-commit Hook<a class="headerlink" href="#pre-commit-hook" title="Permanent link">&para;</a></h4>
+<p>Create <code>.git/hooks/pre-commit</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># Lint all EventSource and Sensor files before committing</span>
 
-<h3 id="using-helm-chart">Using Helm Chart<a class="headerlink" href="#using-helm-chart" title="Permanent link">&para;</a></h3>
-<p>Make sure you have the helm client installed. To install helm, follow <a href="https://docs.helm.sh/using_helm/">the link.</a></p>
-<ol>
-<li>
-<p>Add <code>argoproj</code> repository.</p>
-<div class="codehilite"><pre><span></span><code>helm repo add argo https://argoproj.github.io/argo-helm
+<span class="nv">FILES</span><span class="o">=</span><span class="k">$(</span>git<span class="w"> </span>diff<span class="w"> </span>--cached<span class="w"> </span>--name-only<span class="w"> </span>--diff-filter<span class="o">=</span>ACM<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;\.(yaml|yml)$&#39;</span><span class="k">)</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$FILES</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nb">exit</span><span class="w"> </span><span class="m">0</span>
+<span class="k">fi</span>
+
+<span class="k">if</span><span class="w"> </span>!<span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>argo-events<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;argo-events not found. Please install it first.&quot;</span>
+<span class="w">  </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Linting Argo Events resources...&quot;</span>
+argo-events<span class="w"> </span>lint<span class="w"> </span><span class="nv">$FILES</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-ne<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Linting failed. Please fix the errors before committing.&quot;</span>
+<span class="w">  </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;All resources are valid!&quot;</span>
+<span class="nb">exit</span><span class="w"> </span><span class="m">0</span>
 </code></pre></div>
-
-</li>
-<li>
-<p>The helm chart for argo-events is maintained solely by the community and hence the image version for controllers can go out of sync.
-   Update the image version in values.yaml to v1.0.0.</p>
-</li>
-<li>
-<p>Install <code>argo-events</code> chart.</p>
-<div class="codehilite"><pre><span></span><code>helm install argo-events argo/argo-events -n argo-events --create-namespace
+<h3 id="validate-multi-document-yaml-files">Validate Multi-Document YAML Files<a class="headerlink" href="#validate-multi-document-yaml-files" title="Permanent link">&para;</a></h3>
+<p>The lint command supports YAML files with multiple documents separated by <code>---</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventSource</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">webhook</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">example</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12000&quot;</span>
+<span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/example</span>
+<span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POST</span>
+<span class="nn">---</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sensor</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">dependencies</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-dep</span>
+<span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span>
+<span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span>
+<span class="w">  </span><span class="nt">triggers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-workflow-trigger</span>
+<span class="w">        </span><span class="nt">k8s</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">operation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">create</span>
+<span class="w">          </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">resource</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="w">              </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
+<span class="w">              </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span>
+<span class="w">              </span><span class="nt">data</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
 </code></pre></div>
-
-</li>
-<li>
-<p>Deploy the eventbus.</p>
-<div class="codehilite"><pre><span></span><code>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+<div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>combined.yaml
 </code></pre></div>
-
-</li>
-</ol>
-<h3 id="migrate-to-v100">Migrate to v1.0.0<a class="headerlink" href="#migrate-to-v100" title="Permanent link">&para;</a></h3>
-<p>If you are looking to migrate Argo Events &lt;0.16.0 to v1.0.0, please read the <a href="https://github.com/argoproj/argo-events/wiki/Migration-path-for-v0.17.0">migration docs</a>.</p>
+<p>Output:
+<div class="highlight"><pre><span></span><code>✓ combined.yaml (document 1): EventSource is valid
+✓ combined.yaml (document 2): Sensor is valid
+</code></pre></div></p>
+<h2 id="common-validation-errors">Common Validation Errors<a class="headerlink" href="#common-validation-errors" title="Permanent link">&para;</a></h2>
+<h3 id="eventsource-errors">EventSource Errors<a class="headerlink" href="#eventsource-errors" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>✗<span class="w"> </span>webhook.yaml:<span class="w"> </span>EventSource<span class="w"> </span>validation<span class="w"> </span>failed
+<span class="w">  </span>Error:<span class="w"> </span>endpoint<span class="w"> </span>can<span class="err">&#39;</span>t<span class="w"> </span>be<span class="w"> </span>empty
+</code></pre></div>
+<p><strong>Solution</strong>: Ensure all required fields are specified in the event source configuration.</p>
+<h3 id="sensor-errors">Sensor Errors<a class="headerlink" href="#sensor-errors" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>✗<span class="w"> </span>sensor.yaml:<span class="w"> </span>Sensor<span class="w"> </span>validation<span class="w"> </span>failed
+<span class="w">  </span>Error:<span class="w"> </span>no<span class="w"> </span>triggers<span class="w"> </span>found
+</code></pre></div>
+<p><strong>Solution</strong>: Add at least one trigger to the sensor spec.</p>
+<h3 id="eventbus-warnings">EventBus Warnings<a class="headerlink" href="#eventbus-warnings" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>!<span class="w"> </span>sensor.yaml:<span class="w"> </span>Sensor<span class="w"> </span>validation<span class="w"> </span>incomplete<span class="w"> </span><span class="o">(</span>EventBus<span class="w"> </span>not<span class="w"> </span>available<span class="o">)</span>
+<span class="w">  </span>Note:<span class="w"> </span>nil<span class="w"> </span>eventbus
+</code></pre></div>
+<p><strong>Note</strong>: When linting sensors without access to a cluster, the EventBus cannot be validated. This is expected behavior for offline linting and results in a warning rather than an error.</p>
+<h2 id="ignored-files">Ignored Files<a class="headerlink" href="#ignored-files" title="Permanent link">&para;</a></h2>
+<p>The lint command only processes:
+- Files with <code>.yaml</code> or <code>.yml</code> extensions
+- Files containing EventSource or Sensor resources (other Kubernetes resources are ignored)</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>EventBus validation</strong>: Sensors require an EventBus to function, but the lint command cannot validate EventBus availability when running offline. A dummy EventBus is used for basic validation.</li>
+<li><strong>External dependencies</strong>: The lint command does not validate external dependencies like service accounts, secrets, or workflow templates referenced in trigger specifications.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="no-output-produced">No output produced<a class="headerlink" href="#no-output-produced" title="Permanent link">&para;</a></h3>
+<p>If lint produces no output, ensure:
+1. The file contains valid YAML
+2. The resources have <code>kind: EventSource</code> or <code>kind: Sensor</code>
+3. The files have <code>.yaml</code> or <code>.yml</code> extensions</p>
+<h3 id="permission-denied">Permission denied<a class="headerlink" href="#permission-denied" title="Permanent link">&para;</a></h3>
+<p>If you get "permission denied" errors:
+<div class="highlight"><pre><span></span><code>chmod<span class="w"> </span>+x<span class="w"> </span>dist/argo-events
+</code></pre></div></p>
+<h2 id="related-commands">Related Commands<a class="headerlink" href="#related-commands" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Argo Workflows lint: <code>argo lint workflow.yaml</code></li>
+<li>Kubernetes dry-run: <code>kubectl apply --dry-run=client -f resource.yaml</code></li>
+<li>Helm lint: <code>helm lint chart/</code></li>
+</ul>
+<h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
+<p>To improve the lint command or report issues, see <a href="../CONTRIBUTING/">CONTRIBUTING.md</a>.</p>
 
               
             </article>
@@ -2363,7 +2784,7 @@ kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/m
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../FAQ/" class="md-footer__link md-footer__link--prev" aria-label="Previous: FAQs" rel="prev">
+        <a href="../service-accounts/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Service Accounts" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -2372,20 +2793,20 @@ kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/m
               <span class="md-footer__direction">
                 Previous
               </span>
-              FAQs
+              Service Accounts
             </div>
           </div>
         </a>
       
       
         
-        <a href="../managed-namespace/" class="md-footer__link md-footer__link--next" aria-label="Next: Managed Namespace" rel="next">
+        <a href="../FAQ/" class="md-footer__link md-footer__link--next" aria-label="Next: FAQs" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Managed Namespace
+              FAQs
             </div>
           </div>
           <div class="md-footer__button md-icon">
