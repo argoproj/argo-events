@@ -46,6 +46,7 @@ Argo Workflows has an API and user interface that support Argo Events.
 - [Argo Events in action](https://argoproj.github.io/argo-events/quick_start/)
 - [Deploy event-sources and sensors](https://argoproj.github.io/argo-events/eventsources/setup/webhook/)
 - [Deep dive into Argo Events](https://argoproj.github.io/argo-events/tutorials/01-introduction/)
+- [Linting EventSource and Sensor resources](https://argoproj.github.io/argo-events/lint/)
 
 ## Blogs and Presentations
 
