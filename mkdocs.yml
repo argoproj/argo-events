@@ -119,6 +119,7 @@ nav:
               - "sensors/filters/time.md"
           - More Information: "sensors/more-about-sensors-and-triggers.md"
       - "service-accounts.md"
+      - "lint.md"
       - "FAQ.md"
   - Operator Manual:
       - "installation.md"

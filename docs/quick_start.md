@@ -23,6 +23,17 @@ The Argo Workflow controller will need to be configured to listen for Workflow o
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
 
+1. (Optional) Validate your resources before applying them.
+
+        # Download the example files first, or use your own
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml --dry-run=client -o yaml > webhook-eventsource.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml --dry-run=client -o yaml > webhook-sensor.yaml
+        
+        # Validate with argo-events lint
+        argo-events lint webhook-eventsource.yaml webhook-sensor.yaml
+
+   See the [linting guide](lint.md) for more validation options and CI/CD integration.
+
 1. Set up the event-source for the webhook as follows.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
