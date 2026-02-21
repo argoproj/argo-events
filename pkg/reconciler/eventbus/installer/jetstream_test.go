@@ -259,6 +259,35 @@ func TestBuildJetStreamStatefulSetSpec(t *testing.T) {
 		assert.Equal(t, js.MetricsContainerTemplate.Resources, containers["metrics"].Resources)
 		assert.Equal(t, js.ReloaderContainerTemplate.Resources, containers["reloader"].Resources)
 	})
+
+	t.Run("with probes", func(t *testing.T) {
+		i.eventBus.Spec.JetStream = &v1alpha1.JetStreamBus{
+			Version: "2.7.3",
+		}
+		s := i.buildStatefulSetSpec(&fakeConfig.EventBus.JetStream.Versions[0])
+		mainContainer := s.Template.Spec.Containers[0]
+
+		// Verify StartupProbe
+		assert.NotNil(t, mainContainer.StartupProbe)
+		assert.NotNil(t, mainContainer.StartupProbe.HTTPGet)
+		assert.Equal(t, "/healthz", mainContainer.StartupProbe.HTTPGet.Path)
+		assert.Equal(t, int32(30), mainContainer.StartupProbe.FailureThreshold)
+
+		// Verify LivenessProbe
+		assert.NotNil(t, mainContainer.LivenessProbe)
+		assert.NotNil(t, mainContainer.LivenessProbe.HTTPGet)
+		assert.Equal(t, "/", mainContainer.LivenessProbe.HTTPGet.Path)
+		assert.Equal(t, int32(10), mainContainer.LivenessProbe.InitialDelaySeconds)
+		assert.Equal(t, int32(30), mainContainer.LivenessProbe.PeriodSeconds)
+
+		// Verify ReadinessProbe
+		assert.NotNil(t, mainContainer.ReadinessProbe)
+		assert.NotNil(t, mainContainer.ReadinessProbe.HTTPGet)
+		assert.Equal(t, "/healthz", mainContainer.ReadinessProbe.HTTPGet.Path)
+		assert.Equal(t, int32(10), mainContainer.ReadinessProbe.InitialDelaySeconds)
+		assert.Equal(t, int32(5), mainContainer.ReadinessProbe.PeriodSeconds)
+		assert.Equal(t, int32(5), mainContainer.ReadinessProbe.TimeoutSeconds)
+	})
 }
 
 func TestJetStreamGetServiceSpec(t *testing.T) {
