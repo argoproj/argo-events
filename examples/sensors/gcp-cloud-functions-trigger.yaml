@@ -1,0 +1,24 @@
+# Workload Identity example, no credentials secret needed.
+# The Sensor Pod's K8s ServiceAccount must be bound to a GCP ServiceAccount
+# with the Cloud Run Invoker role.
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: gcp-cloud-functions
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - template:
+        name: gcp-cloud-functions-trigger
+        gcpCloudFunctions:
+          url: "https://my-function-1234567890.us-central1.run.app"
+          payload:
+            - src:
+                dependencyName: test-dep
+                dataKey: body
+              dest: data

@@ -1,0 +1,23 @@
+# Explicit service account key example.
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: gcp-function-sa-key
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - template:
+        name: invoke-function
+        gcpCloudFunctions:
+          url: "https://my-function-1234567890.us-central1.run.app"
+          credentialSecret:
+            name: gcp-sa-key
+            key: key.json
+          payload:
+            - src:
+                dependencyName: test-dep
+                dataKey: body.message
+              dest: message

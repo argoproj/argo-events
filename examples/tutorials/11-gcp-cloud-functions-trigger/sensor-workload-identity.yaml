@@ -1,0 +1,38 @@
+# Workload Identity example, no credentials secret needed.
+#
+# Prerequisites:
+#   1. Enable Workload Identity on your GKE cluster
+#   2. Create a GCP service account and grant it the Cloud Run Invoker role
+#   3. Bind the K8s SA below to the GCP SA:
+#      gcloud iam service-accounts add-iam-policy-binding \
+#        argo-events-sa@my-project.iam.gserviceaccount.com \
+#        --role roles/iam.workloadIdentityUser \
+#        --member "serviceAccount:my-project.svc.id.goog[argo-events/argo-events-sa]"
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-events-sa
+  annotations:
+    iam.gke.io/gcp-service-account: argo-events-sa@my-project.iam.gserviceaccount.com
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: gcp-function-workload-identity
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - template:
+        name: invoke-function
+        gcpCloudFunctions:
+          url: "https://my-function-1234567890.us-central1.run.app"
+          payload:
+            - src:
+                dependencyName: test-dep
+                dataKey: body.message
+              dest: message

@@ -1220,6 +1220,40 @@ message FileEventSource {
   optional EventSourceFilter filter = 5;
 }
 
+// GCPCloudFunctionsTrigger refers to the specification of the trigger to invoke a GCP Cloud Function.
+message GCPCloudFunctionsTrigger {
+  // URL refers to the URL to invoke the GCP Cloud Function.
+  optional string url = 1;
+
+  // CredentialSecret references to the secret that contains JSON credentials to access GCP.
+  // If it is missing, it implicitly uses Workload Identity to access.
+  // https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+  // +optional
+  optional .k8s.io.api.core.v1.SecretKeySelector credentialSecret = 2;
+
+  // Parameters is the list of key-value extracted from event's payload that are applied to
+  // the trigger resource.
+  // +optional
+  repeated TriggerParameter parameters = 3;
+
+  // Payload is the list of key-value extracted from an event payload to construct the request payload.
+  repeated TriggerParameter payload = 4;
+
+  // Method refers to the type of the HTTP request.
+  // Default value is POST.
+  // +optional
+  optional string method = 5;
+
+  // Headers for the HTTP request.
+  // +optional
+  map<string, string> headers = 6;
+
+  // Timeout refers to the HTTP request timeout in seconds.
+  // Default value is 60 seconds.
+  // +optional
+  optional int64 timeout = 7;
+}
+
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
 message GenericEventSource {
   // URL of the gRPC server that implements the event source.
@@ -3377,6 +3411,10 @@ message TriggerTemplate {
   // Email refers to the trigger designed to send an email notification
   // +optional
   optional EmailTrigger email = 17;
+
+  // GCPCloudFunctions refers to the trigger designed to invoke GCP Cloud Functions.
+  // +optional
+  optional GCPCloudFunctionsTrigger gcpCloudFunctions = 18;
 }
 
 // URLArtifact contains information about an artifact at an HTTP endpoint.

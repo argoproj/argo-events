@@ -82,6 +82,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ExprFilter":                   schema_pkg_apis_events_v1alpha1_ExprFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.FileArtifact":                 schema_pkg_apis_events_v1alpha1_FileArtifact(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.FileEventSource":              schema_pkg_apis_events_v1alpha1_FileEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GCPCloudFunctionsTrigger":     schema_pkg_apis_events_v1alpha1_GCPCloudFunctionsTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GenericEventSource":           schema_pkg_apis_events_v1alpha1_GenericEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GerritEventSource":            schema_pkg_apis_events_v1alpha1_GerritEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitArtifact":                  schema_pkg_apis_events_v1alpha1_GitArtifact(ref),
@@ -3451,6 +3452,94 @@ func schema_pkg_apis_events_v1alpha1_FileEventSource(ref common.ReferenceCallbac
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WatchPathConfig"},
+	}
+}
+
+func schema_pkg_apis_events_v1alpha1_GCPCloudFunctionsTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "GCPCloudFunctionsTrigger refers to the specification of the trigger to invoke a GCP Cloud Function.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Description: "URL refers to the URL to invoke the GCP Cloud Function.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"credentialSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CredentialSecret references to the secret that contains JSON credentials to access GCP. If it is missing, it implicitly uses Workload Identity to access. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"parameters": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+					"payload": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Payload is the list of key-value extracted from an event payload to construct the request payload.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+					"method": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Method refers to the type of the HTTP request. Default value is POST.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"headers": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Headers for the HTTP request.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"timeout": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Timeout refers to the HTTP request timeout in seconds. Default value is 60 seconds.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+				},
+				Required: []string{"url", "payload"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -8570,12 +8659,18 @@ func schema_pkg_apis_events_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EmailTrigger"),
 						},
 					},
+					"gcpCloudFunctions": {
+						SchemaProps: spec.SchemaProps{
+							Description: "GCPCloudFunctions refers to the trigger designed to invoke GCP Cloud Functions.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GCPCloudFunctionsTrigger"),
+						},
+					},
 				},
 				Required: []string{"name"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureEventHubsTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureServiceBusTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ConditionsResetCriteria", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EmailTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.LogTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PulsarTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StandardK8STrigger"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureEventHubsTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureServiceBusTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ConditionsResetCriteria", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EmailTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GCPCloudFunctionsTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.LogTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PulsarTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StandardK8STrigger"},
 	}
 }
 

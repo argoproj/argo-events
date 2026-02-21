@@ -70,7 +70,9 @@ type SensorContext struct {
 	azureEventHubsClients sharedutil.StringKeyedMap[*eventhubs.Hub]
 	// azureServiceBusClients holds the references to active Azure Service Bus clients.
 	azureServiceBusClients sharedutil.StringKeyedMap[*servicebus.Sender]
-	metrics                *sensormetrics.Metrics
+	// gcpCloudFunctionsClients holds the references to active GCP Cloud Functions HTTP clients.
+	gcpCloudFunctionsClients sharedutil.StringKeyedMap[*http.Client]
+	metrics                  *sensormetrics.Metrics
 }
 
 // NewSensorContext returns a new sensor execution context.
@@ -87,13 +89,14 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		slackHTTPClient: &http.Client{
 			Timeout: time.Minute * 5,
 		},
-		kafkaProducers:         sharedutil.NewStringKeyedMap[sarama.AsyncProducer](),
-		pulsarProducers:        sharedutil.NewStringKeyedMap[pulsar.Producer](),
-		natsConnections:        sharedutil.NewStringKeyedMap[*natslib.Conn](),
-		awsLambdaClients:       sharedutil.NewStringKeyedMap[*lambda.Lambda](),
-		openwhiskClients:       sharedutil.NewStringKeyedMap[*whisk.Client](),
-		azureEventHubsClients:  sharedutil.NewStringKeyedMap[*eventhubs.Hub](),
-		azureServiceBusClients: sharedutil.NewStringKeyedMap[*servicebus.Sender](),
-		metrics:                metrics,
+		kafkaProducers:           sharedutil.NewStringKeyedMap[sarama.AsyncProducer](),
+		pulsarProducers:          sharedutil.NewStringKeyedMap[pulsar.Producer](),
+		natsConnections:          sharedutil.NewStringKeyedMap[*natslib.Conn](),
+		awsLambdaClients:         sharedutil.NewStringKeyedMap[*lambda.Lambda](),
+		openwhiskClients:         sharedutil.NewStringKeyedMap[*whisk.Client](),
+		azureEventHubsClients:    sharedutil.NewStringKeyedMap[*eventhubs.Hub](),
+		azureServiceBusClients:   sharedutil.NewStringKeyedMap[*servicebus.Sender](),
+		gcpCloudFunctionsClients: sharedutil.NewStringKeyedMap[*http.Client](),
+		metrics:                  metrics,
 	}
 }

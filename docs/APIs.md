@@ -8789,6 +8789,196 @@ Filter
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.GCPCloudFunctionsTrigger">
+
+GCPCloudFunctionsTrigger
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+</p>
+
+<p>
+
+<p>
+
+GCPCloudFunctionsTrigger refers to the specification of the trigger to
+invoke a GCP Cloud Function.
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+</th>
+
+<th>
+
+Description
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>url</code></br> <em> string </em>
+</td>
+
+<td>
+
+<p>
+
+URL refers to the URL to invoke the GCP Cloud Function.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>credentialSecret</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+CredentialSecret references to the secret that contains JSON credentials
+to access GCP. If it is missing, it implicitly uses Workload Identity to
+access.
+<a href="https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity">https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity</a>
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the trigger resource.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+
+<td>
+
+<p>
+
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>method</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Method refers to the type of the HTTP request. Default value is POST.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>headers</code></br> <em> map\[string\]string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Headers for the HTTP request.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>timeout</code></br> <em> int64 </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Timeout refers to the HTTP request timeout in seconds. Default value is
+60 seconds.
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.GenericEventSource">
 
 GenericEventSource
@@ -21147,6 +21337,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.AzureServiceBusTrigger">AzureServiceBusTrigger</a>,
 <a href="#argoproj.io/v1alpha1.CustomTrigger">CustomTrigger</a>,
 <a href="#argoproj.io/v1alpha1.EmailTrigger">EmailTrigger</a>,
+<a href="#argoproj.io/v1alpha1.GCPCloudFunctionsTrigger">GCPCloudFunctionsTrigger</a>,
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>,
@@ -21961,6 +22152,28 @@ Azure Service Bus
 <p>
 
 Email refers to the trigger designed to send an email notification
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>gcpCloudFunctions</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GCPCloudFunctionsTrigger">
+GCPCloudFunctionsTrigger </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+GCPCloudFunctions refers to the trigger designed to invoke GCP Cloud
+Functions.
 </p>
 
 </td>

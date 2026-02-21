@@ -1779,6 +1779,54 @@
       ],
       "type": "object"
     },
+    "io.argoproj.events.v1alpha1.GCPCloudFunctionsTrigger": {
+      "description": "GCPCloudFunctionsTrigger refers to the specification of the trigger to invoke a GCP Cloud Function.",
+      "properties": {
+        "credentialSecret": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "CredentialSecret references to the secret that contains JSON credentials to access GCP. If it is missing, it implicitly uses Workload Identity to access. https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Headers for the HTTP request.",
+          "type": "object"
+        },
+        "method": {
+          "description": "Method refers to the type of the HTTP request. Default value is POST.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.TriggerParameter"
+          },
+          "type": "array"
+        },
+        "payload": {
+          "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.TriggerParameter"
+          },
+          "type": "array"
+        },
+        "timeout": {
+          "description": "Timeout refers to the HTTP request timeout in seconds. Default value is 60 seconds.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "url": {
+          "description": "URL refers to the URL to invoke the GCP Cloud Function.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "payload"
+      ],
+      "type": "object"
+    },
     "io.argoproj.events.v1alpha1.GenericEventSource": {
       "description": "GenericEventSource refers to a generic event source. It can be used to implement a custom event source.",
       "properties": {
@@ -4570,6 +4618,10 @@
         "email": {
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.EmailTrigger",
           "description": "Email refers to the trigger designed to send an email notification"
+        },
+        "gcpCloudFunctions": {
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.GCPCloudFunctionsTrigger",
+          "description": "GCPCloudFunctions refers to the trigger designed to invoke GCP Cloud Functions."
         },
         "http": {
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.HTTPTrigger",

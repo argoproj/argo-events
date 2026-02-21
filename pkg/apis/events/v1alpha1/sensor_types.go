@@ -339,6 +339,9 @@ type TriggerTemplate struct {
 	// Email refers to the trigger designed to send an email notification
 	// +optional
 	Email *EmailTrigger `json:"email,omitempty" protobuf:"bytes,17,opt,name=email"`
+	// GCPCloudFunctions refers to the trigger designed to invoke GCP Cloud Functions.
+	// +optional
+	GCPCloudFunctions *GCPCloudFunctionsTrigger `json:"gcpCloudFunctions,omitempty" protobuf:"bytes,18,opt,name=gcpCloudFunctions"`
 }
 
 type ConditionsResetCriteria struct {
@@ -695,6 +698,34 @@ type EmailTrigger struct {
 	// Body refers to the body/content of the email send.
 	// +optional
 	Body string `json:"body,omitempty" protobuf:"bytes,9,opt,name=body"`
+}
+
+// GCPCloudFunctionsTrigger refers to the specification of the trigger to invoke a GCP Cloud Function.
+type GCPCloudFunctionsTrigger struct {
+	// URL refers to the URL to invoke the GCP Cloud Function.
+	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+	// CredentialSecret references to the secret that contains JSON credentials to access GCP.
+	// If it is missing, it implicitly uses Workload Identity to access.
+	// https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+	// +optional
+	CredentialSecret *corev1.SecretKeySelector `json:"credentialSecret,omitempty" protobuf:"bytes,2,opt,name=credentialSecret"`
+	// Parameters is the list of key-value extracted from event's payload that are applied to
+	// the trigger resource.
+	// +optional
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,4,rep,name=payload"`
+	// Method refers to the type of the HTTP request.
+	// Default value is POST.
+	// +optional
+	Method string `json:"method,omitempty" protobuf:"bytes,5,opt,name=method"`
+	// Headers for the HTTP request.
+	// +optional
+	Headers map[string]string `json:"headers,omitempty" protobuf:"bytes,6,rep,name=headers"`
+	// Timeout refers to the HTTP request timeout in seconds.
+	// Default value is 60 seconds.
+	// +optional
+	Timeout int64 `json:"timeout,omitempty" protobuf:"varint,7,opt,name=timeout"`
 }
 
 // SlackTrigger refers to the specification of the slack notification trigger.
