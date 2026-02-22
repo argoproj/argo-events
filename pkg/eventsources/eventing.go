@@ -478,6 +478,7 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSour
 		logger.Errorw("failed to connect to eventbus", zap.Error(err))
 		return err
 	}
+
 	defer e.eventBusConn.Close()
 
 	ctx, cancel := context.WithCancel(ctx)
@@ -527,6 +528,9 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSour
 				// Continue starting other event services instead of failing all of them
 				continue
 			}
+
+			e.metrics.InitEventMetrics(server.GetEventSourceName(), server.GetEventName())
+
 			wg.Add(1)
 			go func(s EventingServer) {
 				defer wg.Done()
