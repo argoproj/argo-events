@@ -649,4 +649,84 @@ func TestValidTriggers(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, true, strings.Contains(err.Error(), "invalid timezone"))
 	})
+
+	t.Run("valid trigger weight", func(t *testing.T) {
+		triggers := []v1alpha1.Trigger{
+			{
+				Template: &v1alpha1.TriggerTemplate{
+					Name: "fake-trigger-1",
+					K8s: &v1alpha1.StandardK8STrigger{
+						Operation: "create",
+						Source:    &v1alpha1.ArtifactLocation{},
+					},
+				},
+				Weight: 30,
+			},
+			{
+				Template: &v1alpha1.TriggerTemplate{
+					Name: "fake-trigger-2",
+					K8s: &v1alpha1.StandardK8STrigger{
+						Operation: "create",
+						Source:    &v1alpha1.ArtifactLocation{},
+					},
+				},
+				Weight: 70,
+			},
+		}
+		err := validateTriggers(triggers)
+		assert.Nil(t, err)
+	})
+
+	t.Run("negative trigger weight", func(t *testing.T) {
+		triggers := []v1alpha1.Trigger{
+			{
+				Template: &v1alpha1.TriggerTemplate{
+					Name: "fake-trigger",
+					K8s: &v1alpha1.StandardK8STrigger{
+						Operation: "create",
+						Source:    &v1alpha1.ArtifactLocation{},
+					},
+				},
+				Weight: -10,
+			},
+		}
+		err := validateTriggers(triggers)
+		assert.NotNil(t, err)
+		assert.Equal(t, true, strings.Contains(err.Error(), "trigger weight must be non-negative"))
+	})
+
+	t.Run("trigger weight exceeds 100", func(t *testing.T) {
+		triggers := []v1alpha1.Trigger{
+			{
+				Template: &v1alpha1.TriggerTemplate{
+					Name: "fake-trigger",
+					K8s: &v1alpha1.StandardK8STrigger{
+						Operation: "create",
+						Source:    &v1alpha1.ArtifactLocation{},
+					},
+				},
+				Weight: 150,
+			},
+		}
+		err := validateTriggers(triggers)
+		assert.NotNil(t, err)
+		assert.Equal(t, true, strings.Contains(err.Error(), "trigger weight must not exceed 100"))
+	})
+
+	t.Run("zero weight is valid (weight-based routing disabled)", func(t *testing.T) {
+		triggers := []v1alpha1.Trigger{
+			{
+				Template: &v1alpha1.TriggerTemplate{
+					Name: "fake-trigger",
+					K8s: &v1alpha1.StandardK8STrigger{
+						Operation: "create",
+						Source:    &v1alpha1.ArtifactLocation{},
+					},
+				},
+				Weight: 0,
+			},
+		}
+		err := validateTriggers(triggers)
+		assert.Nil(t, err)
+	})
 }

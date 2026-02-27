@@ -270,6 +270,17 @@ type Trigger struct {
 	// loss.
 	// +optional
 	DlqTrigger *Trigger `json:"dlqTrigger,omitempty" protobuf:"bytes,7,opt,name=dlqTrigger"`
+	// Weight defines the relative weight of this trigger compared to other triggers in the same sensor.
+	// When multiple triggers are defined with weights, events will be routed to exactly one weighted
+	// trigger based on a deterministic hash of the event ID. For example, if trigger A has weight 30
+	// and trigger B has weight 70, then 30% of events will route to trigger A and 70% to trigger B.
+	// Weighted triggers are mutually exclusive - only one weighted trigger executes per event.
+	// If not specified or set to 0, the trigger will always execute (weight-based routing is disabled).
+	// Triggers without weights can coexist with weighted triggers - they will always execute.
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Maximum=100
+	// +optional
+	Weight int32 `json:"weight,omitempty" protobuf:"varint,8,opt,name=weight"`
 }
 
 type RateLimiteUnit string

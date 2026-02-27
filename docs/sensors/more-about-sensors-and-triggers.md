@@ -174,3 +174,124 @@ the Sensor to know about the failure and invoke the `dlqTrigger`.
 
 **note:** `dlqTrigger` is only available for the top level trigger and not
 *recursively within the `dlqTrigger` template.
+
+## Trigger Weight (Load Distribution)
+
+Weight-based routing allows you to distribute events across multiple triggers based on configured weights. This is useful for:
+
+- **A/B testing**: Test new trigger implementations with a percentage of traffic
+- **Canary deployments**: Gradually roll out new trigger configurations
+- **Load distribution**: Split workload across different backends or workflows
+
+### How It Works
+
+When you configure weights on triggers, events are routed to exactly one of the weighted triggers based on a deterministic hash of the event ID. This ensures:
+
+1. **Consistent routing**: The same event always routes to the same trigger
+2. **Exact distribution**: Over time, the distribution matches the configured weights precisely
+3. **No shared state issues**: Works correctly with multiple sensor replicas
+
+### Configuration
+
+```yaml
+spec:
+  triggers:
+    # Receives 70% of events
+    - template:
+        name: primary-trigger
+        http:
+          url: https://primary.example.com/
+          method: POST
+      weight: 70
+
+    # Receives 30% of events
+    - template:
+        name: canary-trigger
+        http:
+          url: https://canary.example.com/
+          method: POST
+      weight: 30
+```
+
+### Key Behaviors
+
+| Scenario | Behavior |
+|----------|----------|
+| `weight: 0` or omitted | Trigger always executes (weight-based routing disabled) |
+| All triggers have weights | Exactly one trigger executes per event (mutually exclusive) |
+| Mixed weighted and non-weighted | Non-weighted triggers always execute; weighted triggers are mutually exclusive |
+| Weights don't sum to 100 | Works fine - distribution is proportional (e.g., 3 and 7 = 30% and 70%) |
+
+### Example: Gradual Rollout
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: gradual-rollout-sensor
+spec:
+  dependencies:
+    - name: webhook-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    # Stable workflow - receives 90% of events
+    - template:
+        name: stable-workflow
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: stable-
+      weight: 90
+
+    # New workflow under test - receives 10% of events
+    - template:
+        name: new-workflow
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: new-
+      weight: 10
+```
+
+### Example: Combined with Always-Execute Trigger
+
+```yaml
+spec:
+  triggers:
+    # Logging trigger - ALWAYS executes (no weight = always runs)
+    - template:
+        name: log-all-events
+        log:
+          intervalSeconds: 1
+
+    # Primary processing - 80% of events
+    - template:
+        name: primary-processor
+        http:
+          url: https://primary.example.com/
+      weight: 80
+
+    # Secondary processing - 20% of events
+    - template:
+        name: secondary-processor
+        http:
+          url: https://secondary.example.com/
+      weight: 20
+```
+
+In this example, the log trigger executes for every event, while the processing is split 80/20 between primary and secondary.
+
+### Validation Rules
+
+- Weight must be between 0 and 100
+- Negative weights are not allowed
+- Weights are optional - omitting them disables weight-based routing for that trigger

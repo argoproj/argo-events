@@ -1,0 +1,73 @@
+# This sensor demonstrates weight-based trigger routing.
+# When an event is received, it will be routed to exactly one of the weighted
+# triggers based on a deterministic hash of the event ID. In this example:
+# - trigger-primary receives 70% of events
+# - trigger-secondary receives 30% of events
+#
+# The routing is deterministic: the same event will always route to the same trigger.
+# This is achieved by hashing the event ID, ensuring consistent behavior even
+# with multiple sensor replicas.
+#
+# Weight-based routing is useful for:
+# - A/B testing different trigger implementations
+# - Gradual rollout of new trigger configurations (canary deployments)
+# - Load distribution across different backends
+#
+# Key behaviors:
+# - Weighted triggers are mutually exclusive (exactly one executes per event)
+# - Triggers without weight (or weight: 0) always execute
+# - Weights don't need to sum to 100 (distribution is proportional)
+
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: weighted-trigger-sensor
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    # Primary trigger - receives 70% of events
+    - template:
+        name: trigger-primary
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: primary-workflow-
+              spec:
+                entrypoint: main
+                templates:
+                  - name: main
+                    container:
+                      image: busybox
+                      command: [echo]
+                      args: ["Primary trigger executed"]
+      weight: 70
+
+    # Secondary trigger - receives 30% of events
+    - template:
+        name: trigger-secondary
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: secondary-workflow-
+              spec:
+                entrypoint: main
+                templates:
+                  - name: main
+                    container:
+                      image: busybox
+                      command: [echo]
+                      args: ["Secondary trigger executed"]
+      weight: 30
