@@ -24,7 +24,9 @@ import (
 	"time"
 
 	"cloud.google.com/go/compute/metadata"
-	"cloud.google.com/go/pubsub"
+	iampb "cloud.google.com/go/iam/apiv1/iampb"
+	pubsub "cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 
 	"go.uber.org/zap"
 	"google.golang.org/api/option"
@@ -145,7 +147,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	if pubsubEventSource.DeleteSubscriptionOnFinish {
 		log.Info("deleting PubSub subscription...")
-		if err = subscription.Delete(context.Background()); err != nil {
+		if err = client.SubscriptionAdminClient.DeleteSubscription(context.Background(), &pubsubpb.DeleteSubscriptionRequest{Subscription: subscription.String()}); err != nil {
 			log.Errorw("failed to delete the PubSub subscription", zap.Error(err))
 		}
 	}
@@ -198,7 +200,7 @@ func (el *EventListener) hash() (string, error) {
 	return sharedutil.Hasher(el.GetEventName() + string(body)), nil
 }
 
-func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.SugaredLogger) (*pubsub.Client, *pubsub.Subscription, error) {
+func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.SugaredLogger) (*pubsub.Client, *pubsub.Subscriber, error) {
 	pubsubEventSource := &el.PubSubEventSource
 
 	opts := make([]option.ClientOption, 0, 1)
@@ -218,7 +220,7 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 	}
 	logger.Debug("set up pubsub client")
 
-	subscription := client.Subscription(pubsubEventSource.SubscriptionID)
+	subscription := client.Subscriber(pubsubEventSource.SubscriptionID)
 
 	// Overall logics are as follows:
 	//
@@ -233,17 +235,24 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 	subscExists := false
 	if addr := os.Getenv("PUBSUB_EMULATOR_HOST"); addr != "" {
 		logger.Debug("using pubsub emulator - skipping permissions check")
-		subscExists, err = subscription.Exists(ctx)
-		if err != nil {
-			client.Close()
-			return nil, nil, fmt.Errorf("failed to check if subscription %s exists", subscription)
+		_, getErr := client.SubscriptionAdminClient.GetSubscription(ctx, &pubsubpb.GetSubscriptionRequest{Subscription: subscription.String()})
+		if getErr != nil {
+			if status.Code(getErr) != codes.NotFound {
+				client.Close()
+				return nil, nil, fmt.Errorf("failed to check if subscription %s exists", subscription)
+			}
+		} else {
+			subscExists = true
 		}
 	} else {
 		// trick: you don't need to have get permission to check only whether it exists
-		perms, err := subscription.IAM().TestPermissions(ctx, []string{"pubsub.subscriptions.consume"})
-		subscExists = len(perms) == 1
+		resp, iamErr := client.SubscriptionAdminClient.TestIamPermissions(ctx, &iampb.TestIamPermissionsRequest{
+			Resource:    subscription.String(),
+			Permissions: []string{"pubsub.subscriptions.consume"},
+		})
+		subscExists = iamErr == nil && len(resp.GetPermissions()) == 1
 		if !subscExists {
-			switch status.Code(err) {
+			switch status.Code(iamErr) {
 			case codes.OK:
 				client.Close()
 				return nil, nil, fmt.Errorf("you lack permission to pull from %s", subscription)
@@ -252,7 +261,7 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 				// (it possibly means project itself doesn't exist, but it's ok because we'll see an error later in such case)
 			default:
 				client.Close()
-				return nil, nil, fmt.Errorf("failed to test permission for subscription %s, %w", subscription, err)
+				return nil, nil, fmt.Errorf("failed to test permission for subscription %s, %w", subscription, iamErr)
 			}
 		}
 		logger.Debug("checked if subscription exists and you have right permission")
@@ -274,19 +283,19 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 	// subsc. exists | topic given | topic exists | action                | required permissions
 	// :------------ | :---------- | :----------- | :-------------------- | :-----------------------------------------------------------------------------
 	// yes           | yes         | -            | verify topic          | pubsub.subscriptions.get (subsc.)
-	topic := client.TopicInProject(pubsubEventSource.Topic, pubsubEventSource.TopicProjectID)
+	topicName := fmt.Sprintf("projects/%s/topics/%s", pubsubEventSource.TopicProjectID, pubsubEventSource.Topic)
 
 	if subscExists {
-		subscConfig, err := subscription.Config(ctx)
+		subscConfig, err := client.SubscriptionAdminClient.GetSubscription(ctx, &pubsubpb.GetSubscriptionRequest{Subscription: subscription.String()})
 		if err != nil {
 			client.Close()
 			return nil, nil, fmt.Errorf("failed to get subscription's config for verifying topic, %w", err)
 		}
-		switch actualTopic := subscConfig.Topic.String(); actualTopic {
+		switch actualTopic := subscConfig.Topic; actualTopic {
 		case "_deleted-topic_":
 			client.Close()
 			return nil, nil, fmt.Errorf("the topic for the subscription has been deleted")
-		case topic.String():
+		case topicName:
 			logger.Debug("subscription exists and its topic matches given one, fine")
 			return client, subscription, nil
 		default:
@@ -300,7 +309,10 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 	// no            | yes         | ???          | create subsc.         | pubsub.subscriptions.create (proj.) + pubsub.topics.attachSubscription (topic)
 	//                               ↑ We don't know yet, but just try to create subsc.
 	logger.Debug("subscription doesn't seem to exist")
-	_, err = client.CreateSubscription(ctx, subscription.ID(), pubsub.SubscriptionConfig{Topic: topic})
+	_, err = client.SubscriptionAdminClient.CreateSubscription(ctx, &pubsubpb.Subscription{
+		Name:  subscription.String(),
+		Topic: topicName,
+	})
 	switch status.Code(err) {
 	case codes.OK:
 		logger.Debug("subscription created")
@@ -310,31 +322,26 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 		// (it possibly means project itself doesn't exist, but it's ok because we'll see an error later in such case)
 	default:
 		client.Close()
-		return nil, nil, fmt.Errorf("failed to create %s for %s, %w", subscription, topic, err)
+		return nil, nil, fmt.Errorf("failed to create %s for %s, %w", subscription, topicName, err)
 	}
 
 	// subsc. exists | topic given | topic exists | action                | required permissions
 	// :------------ | :---------- | :----------- | :-------------------- | :-----------------------------------------------------------------------------
 	// no            | yes         | no           | create topic & subsc. | above + pubsub.topics.create (proj. for topic)
 	logger.Debug("topic doesn't seem to exist neither")
-	// NB: you need another client for topic because it might be in different project
-	topicClient, err := pubsub.NewClient(ctx, pubsubEventSource.TopicProjectID, opts...)
+	_, err = client.TopicAdminClient.CreateTopic(ctx, &pubsubpb.Topic{Name: topicName})
 	if err != nil {
 		client.Close()
-		return nil, nil, fmt.Errorf("failed to create client to create %s, %w", topic, err)
-	}
-	defer topicClient.Close()
-
-	_, err = topicClient.CreateTopic(ctx, topic.ID())
-	if err != nil {
-		client.Close()
-		return nil, nil, fmt.Errorf("failed to create %s, %w", topic, err)
+		return nil, nil, fmt.Errorf("failed to create %s, %w", topicName, err)
 	}
 	logger.Debug("topic created")
-	_, err = client.CreateSubscription(ctx, subscription.ID(), pubsub.SubscriptionConfig{Topic: topic})
+	_, err = client.SubscriptionAdminClient.CreateSubscription(ctx, &pubsubpb.Subscription{
+		Name:  subscription.String(),
+		Topic: topicName,
+	})
 	if err != nil {
 		client.Close()
-		return nil, nil, fmt.Errorf("failed to create %s for %s, %w", subscription, topic, err)
+		return nil, nil, fmt.Errorf("failed to create %s for %s, %w", subscription, topicName, err)
 	}
 	logger.Debug("subscription created")
 	return client, subscription, nil
