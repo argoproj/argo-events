@@ -87,7 +87,7 @@ require (
 	golang.org/x/crypto v0.48.0
 	golang.org/x/tools v0.42.0
 	google.golang.org/api v0.259.0
-	google.golang.org/grpc v1.79.1
+	google.golang.org/grpc v1.79.2
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.1
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
