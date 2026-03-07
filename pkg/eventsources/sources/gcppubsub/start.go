@@ -210,7 +210,7 @@ func (el *EventListener) prepareSubscription(ctx context.Context, logger *zap.Su
 		if err != nil {
 			return nil, nil, fmt.Errorf("could not find credentials, %w", err)
 		}
-		opts = append(opts, option.WithCredentialsJSON([]byte(jsonCred)))
+		opts = append(opts, option.WithAuthCredentialsJSON(option.ServiceAccount, []byte(jsonCred)))
 	} else {
 		logger.Debug("using default credentials")
 	}
