@@ -8,7 +8,7 @@ another cluster you can ignore the Minikube specific step 3.
 
 ### Requirements
 
-- Golang 1.20+
+- Golang 1.25.3+
 - Docker
 
 ### Installation & Setup
@@ -41,6 +41,23 @@ following command for code regeneration.
 ```
 make codegen
 ```
+
+### 5. Validating Your Changes
+
+Before committing changes to EventSource or Sensor manifests, validate them:
+
+```bash
+# Lint individual files
+argo-events lint examples/event-sources/webhook.yaml
+
+# Lint entire directories
+argo-events lint -R examples/
+
+# Strict mode (fail on warnings)
+argo-events lint --strict examples/sensors/
+```
+
+See the [linting guide](lint.md) for CI/CD integration and advanced usage.
 
 ### Deploying and testing your changes on a local dev cluster
 
