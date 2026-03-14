@@ -146,7 +146,7 @@ jobs:
           password: ${{ secrets.QUAYIO_PASSWORD }}
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v4.0.0
+        uses: sigstore/cosign-installer@v4.1.0
         with:
           cosign-release: 'v3.0.2'
 
