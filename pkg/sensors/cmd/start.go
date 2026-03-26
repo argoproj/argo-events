@@ -84,7 +84,11 @@ func Start() {
 	if err != nil {
 		logger.Warnw("failed to initialize tracing, continuing without tracing", zap.Error(err))
 	} else {
-		defer shutdown(ctx)
+		defer func() {
+			if err := shutdown(ctx); err != nil {
+				logger.Warnw("failed to shutdown tracer", zap.Error(err))
+			}
+		}()
 	}
 
 	m := metrics.NewMetrics(sensor.Namespace)
