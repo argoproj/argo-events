@@ -36,6 +36,11 @@ import (
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	cronlib "github.com/robfig/cron/v3"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/ratelimit"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -408,8 +413,24 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 		sensorCtx.metrics.ActionDuration(sensor.Name, trigger.Template.Name, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
+	// Extract trace context from event extensions and start a trigger span
+	ctx = extractTraceFromEvents(ctx, eventsMapping)
+	ctx, span := otel.Tracer("argo-events-sensor").Start(ctx, "sensor.trigger",
+		trace.WithAttributes(
+			attribute.String("sensor.name", sensor.Name),
+			attribute.String("trigger.name", trigger.Template.Name),
+			attribute.StringSlice("dependencies", depNames),
+			attribute.StringSlice("event.ids", eventIDs),
+		),
+	)
+	defer func() {
+		span.End()
+	}()
+
 	if err := sensortriggers.ApplyTemplateParameters(eventsMapping, &trigger); err != nil {
 		log.Errorf("failed to apply template parameters, %v", err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "failed to apply template parameters")
 		return err
 	}
 
@@ -418,38 +439,54 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 	logger.Debugw("resolving the trigger implementation")
 	triggerImpl := sensorCtx.GetTrigger(ctx, &trigger)
 	if triggerImpl == nil {
-		return fmt.Errorf("invalid trigger %s, could not find an implementation", trigger.Template.Name)
+		triggerErr := fmt.Errorf("invalid trigger %s, could not find an implementation", trigger.Template.Name)
+		span.RecordError(triggerErr)
+		span.SetStatus(codes.Error, "trigger implementation not found")
+		return triggerErr
 	}
 
 	logger = logger.With(logging.LabelTriggerType, triggerImpl.GetTriggerType())
 	log.Debug("fetching trigger resource if any")
 	obj, err := triggerImpl.FetchResource(ctx)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "failed to fetch trigger resource")
 		return err
 	}
 	if obj == nil {
-		return fmt.Errorf("invalid trigger %s, could not fetch the trigger resource", trigger.Template.Name)
+		fetchErr := fmt.Errorf("invalid trigger %s, could not fetch the trigger resource", trigger.Template.Name)
+		span.RecordError(fetchErr)
+		span.SetStatus(codes.Error, "trigger resource is nil")
+		return fetchErr
 	}
 
 	logger.Debug("applying resource parameters if any")
 	updatedObj, err := triggerImpl.ApplyResourceParameters(eventsMapping, obj)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "failed to apply resource parameters")
 		return err
 	}
 
 	logger.Debug("executing the trigger resource")
 	newObj, err := triggerImpl.Execute(ctx, eventsMapping, updatedObj)
 	if err != nil {
-		return fmt.Errorf("failed to execute trigger, %w", err)
+		execErr := fmt.Errorf("failed to execute trigger, %w", err)
+		span.RecordError(execErr)
+		span.SetStatus(codes.Error, "trigger execution failed")
+		return execErr
 	}
 	logger.Debug("trigger resource successfully executed")
 
 	logger.Debug("applying trigger policy")
 	if err := triggerImpl.ApplyPolicy(ctx, newObj); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "trigger policy failed")
 		return err
 	}
 	logger.Infow(fmt.Sprintf("Successfully processed trigger '%s'", trigger.Template.Name),
 		zap.Any("triggeredBy", depNames), zap.Any("triggeredByEvents", eventIDs))
+	span.SetStatus(codes.Ok, "trigger executed successfully")
 	return nil
 }
 
@@ -514,18 +551,42 @@ func eventToString(event *v1alpha1.Event) string {
 }
 
 func convertEvent(event cloudevents.Event) *v1alpha1.Event {
-	return &v1alpha1.Event{
-		Context: &v1alpha1.EventContext{
-			DataContentType: event.Context.GetDataContentType(),
-			Source:          event.Context.GetSource(),
-			SpecVersion:     event.Context.GetSpecVersion(),
-			Type:            event.Context.GetType(),
-			Time:            metav1.Time{Time: event.Context.GetTime()},
-			ID:              event.Context.GetID(),
-			Subject:         event.Context.GetSubject(),
-		},
-		Data: event.Data(),
+	ctx := &v1alpha1.EventContext{
+		DataContentType: event.Context.GetDataContentType(),
+		Source:          event.Context.GetSource(),
+		SpecVersion:     event.Context.GetSpecVersion(),
+		Type:            event.Context.GetType(),
+		Time:            metav1.Time{Time: event.Context.GetTime()},
+		ID:              event.Context.GetID(),
+		Subject:         event.Context.GetSubject(),
 	}
+	// Preserve CloudEvent extensions (e.g., traceparent, tracestate)
+	if exts := event.Extensions(); len(exts) > 0 {
+		ctx.Extensions = make(map[string]string, len(exts))
+		for k, v := range exts {
+			ctx.Extensions[k] = fmt.Sprintf("%v", v)
+		}
+	}
+	return &v1alpha1.Event{
+		Context: ctx,
+		Data:    event.Data(),
+	}
+}
+
+// extractTraceFromEvents extracts the W3C trace context (traceparent/tracestate) from
+// the first event that contains it and returns a context with the remote span attached.
+func extractTraceFromEvents(ctx context.Context, eventsMapping map[string]*v1alpha1.Event) context.Context {
+	prop := otel.GetTextMapPropagator()
+	for _, ev := range eventsMapping {
+		if ev == nil || ev.Context == nil || len(ev.Context.Extensions) == 0 {
+			continue
+		}
+		if _, ok := ev.Context.Extensions["traceparent"]; ok {
+			carrier := propagation.MapCarrier(ev.Context.Extensions)
+			return prop.Extract(ctx, carrier)
+		}
+	}
+	return ctx
 }
 
 func unique(stringSlice []string) []string {
