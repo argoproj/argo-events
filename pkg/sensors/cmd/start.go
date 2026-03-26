@@ -16,6 +16,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/metrics"
 	"github.com/argoproj/argo-events/pkg/sensors"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
+	"github.com/argoproj/argo-events/pkg/shared/tracing"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
@@ -77,6 +78,15 @@ func Start() {
 	}
 
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
+
+	// Initialize OpenTelemetry tracing (no-op if OTEL_EXPORTER_OTLP_ENDPOINT is not set)
+	shutdown, err := tracing.InitTracer("argo-events-sensor")
+	if err != nil {
+		logger.Warnw("failed to initialize tracing, continuing without tracing", zap.Error(err))
+	} else {
+		defer shutdown(ctx)
+	}
+
 	m := metrics.NewMetrics(sensor.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", v1alpha1.SensorMetricsPort))
 

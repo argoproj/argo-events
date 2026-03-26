@@ -12,6 +12,10 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -54,6 +58,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/shared/expr"
 	"github.com/argoproj/argo-events/pkg/shared/leaderelection"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
+	"github.com/argoproj/argo-events/pkg/shared/tracing"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
@@ -576,13 +581,35 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSour
 						if err != nil {
 							return err
 						}
+
+						// Extract parent trace from CloudEvent extensions (if present)
+						// and start a publish span.
+						spanCtx := tracing.SpanFromCloudEvent(ctx, event)
+						spanCtx, span := otel.Tracer("argo-events-eventsource").Start(spanCtx, "eventsource.publish",
+							trace.WithAttributes(
+								attribute.String("eventsource.name", s.GetEventSourceName()),
+								attribute.String("eventsource.type", string(s.GetEventSourceType())),
+								attribute.String("event.name", s.GetEventName()),
+								attribute.String("event.id", event.ID()),
+							),
+						)
+						// Inject updated trace context back into CloudEvent extensions
+						tracing.InjectTraceIntoCloudEvent(spanCtx, &event)
+
 						eventBody, err := json.Marshal(event)
 						if err != nil {
+							span.RecordError(err)
+							span.SetStatus(codes.Error, "failed to marshal event")
+							span.End()
 							return err
 						}
 
 						if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
-							return eventbuscommon.NewEventBusError(fmt.Errorf("failed to publish event, eventbus connection closed"))
+							publishErr := eventbuscommon.NewEventBusError(fmt.Errorf("failed to publish event, eventbus connection closed"))
+							span.RecordError(publishErr)
+							span.SetStatus(codes.Error, "eventbus connection closed")
+							span.End()
+							return publishErr
 						}
 
 						msg := eventbuscommon.Message{
@@ -600,11 +627,16 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSour
 							logger.Errorw("Failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
+							span.RecordError(err)
+							span.SetStatus(codes.Error, "failed to publish event")
+							span.End()
 							return eventbuscommon.NewEventBusError(err)
 						}
 						logger.Infow("Succeeded to publish an event", zap.String(logging.LabelEventName,
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
+						span.SetStatus(codes.Ok, "event published")
+						span.End()
 						return nil
 					})
 				}); err != nil {
