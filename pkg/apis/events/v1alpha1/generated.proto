@@ -969,6 +969,10 @@ message EventContext {
 
   // Time - A Timestamp when the event happened.
   optional .k8s.io.apimachinery.pkg.apis.meta.v1.Time time = 7;
+
+  // Extensions contains CloudEvent extension attributes such as traceparent, tracestate, etc.
+  // +optional
+  map<string, string> extensions = 8;
 }
 
 // EventDependency describes a dependency

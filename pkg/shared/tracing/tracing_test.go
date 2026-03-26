@@ -90,7 +90,7 @@ func TestInjectTraceIntoCloudEvent(t *testing.T) {
 	tp := sdktrace.NewTracerProvider()
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.TraceContext{})
-	defer tp.Shutdown(context.Background())
+	defer func() { _ = tp.Shutdown(context.Background()) }()
 
 	t.Run("injects trace context into CE extensions", func(t *testing.T) {
 		ctx, span := tp.Tracer("test").Start(context.Background(), "test-span")
@@ -119,7 +119,7 @@ func TestRoundTrip(t *testing.T) {
 	tp := sdktrace.NewTracerProvider()
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.TraceContext{})
-	defer tp.Shutdown(context.Background())
+	defer func() { _ = tp.Shutdown(context.Background()) }()
 
 	// Create a parent span
 	ctx, parentSpan := tp.Tracer("test").Start(context.Background(), "parent")

@@ -1251,6 +1251,13 @@
           "description": "DataContentType - A MIME (RFC2046) string describing the media type of `data`.",
           "type": "string"
         },
+        "extensions": {
+          "description": "Extensions contains CloudEvent extension attributes such as traceparent, tracestate, etc.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "id": {
           "description": "ID of the event; must be non-empty and unique within the scope of the producer.",
           "type": "string"
