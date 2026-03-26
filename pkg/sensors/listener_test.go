@@ -19,7 +19,9 @@ package sensors
 import (
 	"context"
 	"testing"
+	"time"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -144,5 +146,57 @@ func TestGetDependencyExpression(t *testing.T) {
 		trig.Template.Conditions = "dep-1 || dep-1a || dep-3"
 		_, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
 		assert.NoError(t, err)
+	})
+}
+
+func TestConvertEvent(t *testing.T) {
+	t.Run("converts standard attributes", func(t *testing.T) {
+		ce := cloudevents.NewEvent()
+		ce.SetID("test-id")
+		ce.SetSource("test-source")
+		ce.SetType("test-type")
+		ce.SetSubject("test-subject")
+		ce.SetDataContentType("application/json")
+		ts := time.Date(2026, 3, 26, 12, 0, 0, 0, time.UTC)
+		ce.SetTime(ts)
+		_ = ce.SetData(cloudevents.ApplicationJSON, map[string]string{"key": "value"})
+
+		result := convertEvent(ce)
+
+		assert.Equal(t, "test-id", result.Context.ID)
+		assert.Equal(t, "test-source", result.Context.Source)
+		assert.Equal(t, "test-type", result.Context.Type)
+		assert.Equal(t, "test-subject", result.Context.Subject)
+		assert.Equal(t, "application/json", result.Context.DataContentType)
+		assert.Equal(t, ts, result.Context.Time.Time)
+		assert.NotEmpty(t, result.Data)
+	})
+
+	t.Run("preserves extensions", func(t *testing.T) {
+		ce := cloudevents.NewEvent()
+		ce.SetID("test-id")
+		ce.SetSource("test-source")
+		ce.SetType("test-type")
+		ce.SetExtension("traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01")
+		ce.SetExtension("tracestate", "congo=t61rcWkgMzE")
+		ce.SetExtension("customext", "myvalue")
+
+		result := convertEvent(ce)
+
+		assert.NotNil(t, result.Context.Extensions)
+		assert.Equal(t, "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01", result.Context.Extensions["traceparent"])
+		assert.Equal(t, "congo=t61rcWkgMzE", result.Context.Extensions["tracestate"])
+		assert.Equal(t, "myvalue", result.Context.Extensions["customext"])
+	})
+
+	t.Run("no extensions results in nil map", func(t *testing.T) {
+		ce := cloudevents.NewEvent()
+		ce.SetID("test-id")
+		ce.SetSource("test-source")
+		ce.SetType("test-type")
+
+		result := convertEvent(ce)
+
+		assert.Nil(t, result.Context.Extensions)
 	})
 }

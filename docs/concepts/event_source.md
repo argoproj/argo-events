@@ -3,6 +3,8 @@
 An `EventSource` defines the configurations required to consume events from external sources like AWS SNS, SQS, GCP PubSub, Webhooks, etc. It further
 transforms the events into the [cloudevents](https://github.com/cloudevents/spec) and dispatches them over to the eventbus.
 
+When an incoming event is already a valid CloudEvent (e.g., via webhook with `Ce-*` headers), the original CloudEvent attributes and extension attributes (such as `traceparent` for distributed tracing) are preserved rather than being overwritten with generated values.
+
 Available event-sources:
 
 1. AMQP
