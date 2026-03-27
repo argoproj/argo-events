@@ -143,6 +143,9 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	if incomingCE := parseIncomingCloudEvent(request, body); incomingCE != nil {
 		logger.Info("incoming CloudEvent detected, preserving metadata")
 		opts = append(opts, eventsourcecommon.WithCloudEvent(*incomingCE))
+	} else if request.Header.Get("Traceparent") != "" {
+		// For non-CE requests, propagate W3C trace context from HTTP headers
+		opts = append(opts, eventsourcecommon.WithHTTPHeaders(request.Header))
 	}
 
 	webhook.DispatchEvent(route, data, logger, writer, opts...)

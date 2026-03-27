@@ -1,6 +1,7 @@
 package common
 
 import (
+	"net/http"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -82,6 +83,21 @@ func WithCloudEvent(incoming cloudevents.Event) Option {
 		}
 		for k, v := range incoming.Extensions() {
 			e.SetExtension(k, v)
+		}
+		return nil
+	}
+}
+
+// WithHTTPHeaders extracts W3C trace context headers (traceparent/tracestate)
+// from HTTP request headers and sets them as CloudEvent extensions.
+// This enables trace propagation for non-CloudEvent HTTP requests.
+func WithHTTPHeaders(headers http.Header) Option {
+	return func(e *event.Event) error {
+		if tp := headers.Get("Traceparent"); tp != "" {
+			e.SetExtension("traceparent", tp)
+		}
+		if ts := headers.Get("Tracestate"); ts != "" {
+			e.SetExtension("tracestate", ts)
 		}
 		return nil
 	}
