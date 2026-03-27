@@ -23,6 +23,8 @@ import (
 	"net/http"
 	"time"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -140,7 +142,7 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 		}
 	}
 
-	request, err := http.NewRequest(trigger.Method, trigger.URL, bytes.NewReader(payload))
+	request, err := http.NewRequestWithContext(ctx, trigger.Method, trigger.URL, bytes.NewReader(payload))
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct request for %s, %w", trigger.URL, err)
 	}
@@ -204,6 +206,9 @@ func (t *HTTPTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.E
 
 		request.SetBasicAuth(username, password)
 	}
+
+	// Propagate trace context (traceparent/tracestate) into outgoing HTTP headers
+	otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(request.Header))
 
 	t.Logger.Infow("Making a http request...", zap.Any("url", trigger.URL))
 

@@ -42,9 +42,15 @@ func InitTracer(serviceName string) (func(context.Context) error, error) {
 		return noop, fmt.Errorf("failed to create OTLP trace exporter: %w", err)
 	}
 
+	// Use OTEL_SERVICE_NAME env var if set, otherwise fall back to parameter
+	name := serviceName
+	if envName := os.Getenv("OTEL_SERVICE_NAME"); envName != "" {
+		name = envName
+	}
+
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
-			semconv.ServiceNameKey.String(serviceName),
+			semconv.ServiceNameKey.String(name),
 		),
 	)
 	if err != nil {
