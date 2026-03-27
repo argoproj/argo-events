@@ -35,6 +35,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AMQPQueueBindConfig":          schema_pkg_apis_events_v1alpha1_AMQPQueueBindConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AMQPQueueDeclareConfig":       schema_pkg_apis_events_v1alpha1_AMQPQueueDeclareConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AWSLambdaTrigger":             schema_pkg_apis_events_v1alpha1_AWSLambdaTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AWSMSKIAMConfig":              schema_pkg_apis_events_v1alpha1_AWSMSKIAMConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Amount":                       schema_pkg_apis_events_v1alpha1_Amount(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ArgoWorkflowTrigger":          schema_pkg_apis_events_v1alpha1_ArgoWorkflowTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ArtifactLocation":             schema_pkg_apis_events_v1alpha1_ArtifactLocation(ref),
@@ -536,6 +537,28 @@ func schema_pkg_apis_events_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallba
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_pkg_apis_events_v1alpha1_AWSMSKIAMConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "AWSMSKIAMConfig holds configuration for SASL/OAUTHBEARER authentication against Amazon MSK using IAM credentials (includes IRSA / web identity token support).",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"region": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Region is the AWS region of the MSK cluster (e.g. \"us-east-1\").",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"region"},
+			},
+		},
 	}
 }
 
@@ -4890,12 +4913,18 @@ func schema_pkg_apis_events_v1alpha1_KafkaEventSource(ref common.ReferenceCallba
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SchemaRegistryConfig"),
 						},
 					},
+					"awsMskIamAuth": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AWSMSKIAMAuth configures SASL/OAUTHBEARER authentication using AWS IAM credentials, supporting IRSA (pod web-identity token), instance-profile, and static env credentials. When set, TLS is enabled automatically and the SASL config field is ignored.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AWSMSKIAMConfig"),
+						},
+					},
 				},
 				Required: []string{"url", "topic"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Backoff", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaConsumerGroup", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SchemaRegistryConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AWSMSKIAMConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Backoff", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaConsumerGroup", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SchemaRegistryConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"},
 	}
 }
 

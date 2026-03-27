@@ -2,6 +2,13 @@ package v1alpha1
 
 import corev1 "k8s.io/api/core/v1"
 
+// AWSMSKIAMConfig holds configuration for SASL/OAUTHBEARER authentication
+// against Amazon MSK using IAM credentials (includes IRSA / web identity token support).
+type AWSMSKIAMConfig struct {
+	// Region is the AWS region of the MSK cluster (e.g. "us-east-1").
+	Region string `json:"region" protobuf:"bytes,1,opt,name=region"`
+}
+
 // SASLConfig refers to SASL configuration for a client
 type SASLConfig struct {
 	// SASLMechanism is the name of the enabled SASL mechanism.

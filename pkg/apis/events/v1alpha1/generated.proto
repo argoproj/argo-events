@@ -225,6 +225,13 @@ message AWSLambdaTrigger {
   optional string roleARN = 8;
 }
 
+// AWSMSKIAMConfig holds configuration for SASL/OAUTHBEARER authentication
+// against Amazon MSK using IAM credentials (includes IRSA / web identity token support).
+message AWSMSKIAMConfig {
+  // Region is the AWS region of the MSK cluster (e.g. "us-east-1").
+  optional string region = 1;
+}
+
 // Amount represent a numeric amount.
 message Amount {
   optional bytes value = 1;
@@ -1838,6 +1845,12 @@ message KafkaEventSource {
   // Schema Registry configuration for consumer message with Avro format
   // +optional
   optional SchemaRegistryConfig schemaRegistry = 14;
+
+  // AWSMSKIAMAuth configures SASL/OAUTHBEARER authentication using AWS IAM credentials,
+  // supporting IRSA (pod web-identity token), instance-profile, and static env credentials.
+  // When set, TLS is enabled automatically and the SASL config field is ignored.
+  // +optional
+  optional AWSMSKIAMConfig awsMskIamAuth = 15;
 }
 
 // KafkaTrigger refers to the specification of the Kafka trigger.
