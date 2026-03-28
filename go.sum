@@ -8,8 +8,8 @@ cloud.google.com/go/auth/oauth2adapt v0.2.8 h1:keo8NaayQZ6wimpNSmW5OPc283g65QNIi
 cloud.google.com/go/auth/oauth2adapt v0.2.8/go.mod h1:XQ9y31RkqZCcwJWNSx2Xvric3RrU88hAYYbjDWYDL+c=
 cloud.google.com/go/compute/metadata v0.9.0 h1:pDUj4QMoPejqq20dK0Pg2N4yG9zIkYGdBtwLoEkH9Zs=
 cloud.google.com/go/compute/metadata v0.9.0/go.mod h1:E0bWwX5wTnLPedCKqk3pJmVgCBSM6qQI1yTBdEb3C10=
-cloud.google.com/go/iam v1.5.3 h1:+vMINPiDF2ognBJ97ABAYYwRgsaqxPbQDlMnbHMjolc=
-cloud.google.com/go/iam v1.5.3/go.mod h1:MR3v9oLkZCTlaqljW6Eb2d3HGDGK5/bDv93jhfISFvU=
+cloud.google.com/go/iam v1.6.0 h1:JiSIcEi38dWBKhB3BtfKCW+dMvCZJEhBA2BsaGJgoxs=
+cloud.google.com/go/iam v1.6.0/go.mod h1:ZS6zEy7QHmcNO18mjO2viYv/n+wOUkhJqGNkPPGueGU=
 cloud.google.com/go/pubsub/v2 v2.5.0 h1:iBO4L8Iidb12B6DGP1oRxfP82FhYEAD9vLoe5Ps8+oc=
 cloud.google.com/go/pubsub/v2 v2.5.0/go.mod h1:9P6nc3S1f2qzVxJQDDtWghWea8KYWz4pwqpcCuik2FI=
 dario.cat/mergo v1.0.2 h1:85+piFYR1tMbRrLcDwR18y4UKJ3aH1Tbzi24VRW1TK8=
