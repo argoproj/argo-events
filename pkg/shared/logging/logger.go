@@ -45,6 +45,9 @@ func NewArgoEventsLogger() *zap.SugaredLogger {
 
 func SetKlogLevel(level int) {
 	klog.InitFlags(nil)
+	// Opt into fixed stderrthreshold behavior (kubernetes/klog#212).
+	_ = flag.Set("legacy_stderr_threshold_behavior", "false")
+	_ = flag.Set("stderrthreshold", "INFO")
 	_ = flag.Set("v", strconv.Itoa(level))
 }
 
