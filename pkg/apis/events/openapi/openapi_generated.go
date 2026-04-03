@@ -8314,6 +8314,13 @@ func schema_pkg_apis_events_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Trigger"),
 						},
 					},
+					"weight": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Weight defines the relative weight of this trigger compared to other triggers in the same sensor. When multiple triggers are defined with weights, events will be routed to exactly one weighted trigger based on a deterministic hash of the event ID. For example, if trigger A has weight 30 and trigger B has weight 70, then 30% of events will route to trigger A and 70% to trigger B. Weighted triggers are mutually exclusive - only one weighted trigger executes per event. If not specified or set to 0, the trigger will always execute (weight-based routing is disabled). Triggers without weights can coexist with weighted triggers - they will always execute.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
 				},
 			},
 		},
