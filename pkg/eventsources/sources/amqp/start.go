@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 
 	amqplib "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
