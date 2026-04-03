@@ -2201,14 +2201,14 @@
 </li>
 <li>
 <p>Create a K8s secret called <code>gcp-credentials</code> to store the credentials file.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
-<span class="n">data</span><span class="o">:</span>
-<span class="w">  </span><span class="n">key</span><span class="o">.</span><span class="na">json</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">YOUR_CREDENTIALS_STRING_FROM_JSON_FILE</span><span class="o">&gt;</span>
-<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span>
-<span class="n">metadata</span><span class="o">:</span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">gcp</span><span class="o">-</span><span class="n">credentials</span>
-<span class="w">  </span><span class="kd">namespace</span><span class="o">:</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span>
-<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span>
+<div class="codehilite"><pre><span></span><code><span class="nx">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="nx">v1</span>
+<span class="nx">data</span><span class="p">:</span>
+<span class="w">  </span><span class="nx">key</span><span class="p">.</span><span class="nx">json</span><span class="p">:</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">YOUR_CREDENTIALS_STRING_FROM_JSON_FILE</span><span class="p">&gt;</span>
+<span class="nx">kind</span><span class="p">:</span><span class="w"> </span><span class="nx">Secret</span>
+<span class="nx">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">gcp</span><span class="o">-</span><span class="nx">credentials</span>
+<span class="w">  </span><span class="kn">namespace</span><span class="p">:</span><span class="w"> </span><span class="nx">argo</span><span class="o">-</span><span class="nx">events</span>
+<span class="k">type</span><span class="p">:</span><span class="w"> </span><span class="nx">Opaque</span>
 </code></pre></div>
 
 </li>

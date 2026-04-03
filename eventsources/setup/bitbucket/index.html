@@ -2195,14 +2195,14 @@ echo -n &lt;password&gt; | base64
 </li>
 <li>
 <p>Create a secret called <code>bitbucket-access</code> that contains your encoded Bitbucket credentials.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
-<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Secret</span>
-<span class="n">metadata</span><span class="o">:</span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">bitbucket</span><span class="o">-</span><span class="n">access</span>
-<span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">Opaque</span>
-<span class="n">data</span><span class="o">:</span>
-<span class="w">  </span><span class="n">username</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">username</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">previous</span><span class="o">-</span><span class="n">step</span><span class="o">&gt;</span>
-<span class="w">  </span><span class="n">password</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">base64</span><span class="o">-</span><span class="n">encoded</span><span class="o">-</span><span class="n">password</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">previous</span><span class="o">-</span><span class="n">step</span><span class="o">&gt;</span>
+<div class="codehilite"><pre><span></span><code><span class="nx">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="nx">v1</span>
+<span class="nx">kind</span><span class="p">:</span><span class="w"> </span><span class="nx">Secret</span>
+<span class="nx">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">bitbucket</span><span class="o">-</span><span class="nx">access</span>
+<span class="k">type</span><span class="p">:</span><span class="w"> </span><span class="nx">Opaque</span>
+<span class="nx">data</span><span class="p">:</span>
+<span class="w">  </span><span class="nx">username</span><span class="p">:</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">base64</span><span class="o">-</span><span class="nx">encoded</span><span class="o">-</span><span class="nx">username</span><span class="o">-</span><span class="nx">from</span><span class="o">-</span><span class="nx">previous</span><span class="o">-</span><span class="nx">step</span><span class="p">&gt;</span>
+<span class="w">  </span><span class="nx">password</span><span class="p">:</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">base64</span><span class="o">-</span><span class="nx">encoded</span><span class="o">-</span><span class="nx">password</span><span class="o">-</span><span class="nx">from</span><span class="o">-</span><span class="nx">previous</span><span class="o">-</span><span class="nx">step</span><span class="p">&gt;</span>
 </code></pre></div>
 
 </li>

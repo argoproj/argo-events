@@ -2181,53 +2181,53 @@
 <ol>
 <li>
 <p>To test locally, deploy a standalone Pulsar.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
-<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Deployment</span>
-<span class="n">metadata</span><span class="o">:</span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">pulsar</span>
-<span class="w">  </span><span class="n">labels</span><span class="o">:</span>
-<span class="w">    </span><span class="n">app</span><span class="o">:</span><span class="w"> </span><span class="n">pulsar</span>
-<span class="n">spec</span><span class="o">:</span>
-<span class="w">  </span><span class="n">replicas</span><span class="o">:</span><span class="w"> </span><span class="mi">1</span>
-<span class="w">  </span><span class="n">template</span><span class="o">:</span>
-<span class="w">    </span><span class="n">metadata</span><span class="o">:</span>
-<span class="w">      </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">pulsar</span>
-<span class="w">      </span><span class="n">labels</span><span class="o">:</span>
-<span class="w">        </span><span class="n">app</span><span class="o">:</span><span class="w"> </span><span class="n">pulsar</span>
-<span class="w">    </span><span class="n">spec</span><span class="o">:</span>
-<span class="w">      </span><span class="n">containers</span><span class="o">:</span>
-<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">pulsar</span>
-<span class="w">          </span><span class="n">image</span><span class="o">:</span><span class="w"> </span><span class="n">apachepulsar</span><span class="o">/</span><span class="n">pulsar</span><span class="o">:</span><span class="mf">2.4</span><span class="o">.</span><span class="mi">1</span>
-<span class="w">          </span><span class="n">command</span><span class="o">:</span>
-<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">bin</span><span class="o">/</span><span class="n">pulsar</span>
-<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">standalone</span>
-<span class="w">          </span><span class="n">imagePullPolicy</span><span class="o">:</span><span class="w"> </span><span class="n">IfNotPresent</span>
-<span class="w">          </span><span class="n">volumeMounts</span><span class="o">:</span>
-<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">mountPath</span><span class="o">:</span><span class="w"> </span><span class="sr">/pulsar/</span><span class="n">data</span>
-<span class="w">              </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">datadir</span>
-<span class="w">      </span><span class="n">restartPolicy</span><span class="o">:</span><span class="w"> </span><span class="n">Always</span>
-<span class="w">      </span><span class="n">volumes</span><span class="o">:</span>
-<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">datadir</span>
-<span class="w">          </span><span class="n">emptyDir</span><span class="o">:</span><span class="w"> </span><span class="o">{}</span>
-<span class="w">  </span><span class="n">selector</span><span class="o">:</span>
-<span class="w">    </span><span class="n">matchLabels</span><span class="o">:</span>
-<span class="w">      </span><span class="n">app</span><span class="o">:</span><span class="w"> </span><span class="n">pulsar</span>
+<div class="codehilite"><pre><span></span><code><span class="nx">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="nx">apps</span><span class="o">/</span><span class="nx">v1</span>
+<span class="nx">kind</span><span class="p">:</span><span class="w"> </span><span class="nx">Deployment</span>
+<span class="nx">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">pulsar</span>
+<span class="w">  </span><span class="nx">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nx">app</span><span class="p">:</span><span class="w"> </span><span class="nx">pulsar</span>
+<span class="nx">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nx">replicas</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">  </span><span class="nx">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nx">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">pulsar</span>
+<span class="w">      </span><span class="nx">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nx">app</span><span class="p">:</span><span class="w"> </span><span class="nx">pulsar</span>
+<span class="w">    </span><span class="nx">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nx">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">pulsar</span>
+<span class="w">          </span><span class="nx">image</span><span class="p">:</span><span class="w"> </span><span class="nx">apachepulsar</span><span class="o">/</span><span class="nx">pulsar</span><span class="p">:</span><span class="m m-Double">2.4.1</span>
+<span class="w">          </span><span class="nx">command</span><span class="p">:</span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nx">bin</span><span class="o">/</span><span class="nx">pulsar</span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nx">standalone</span>
+<span class="w">          </span><span class="nx">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="nx">IfNotPresent</span>
+<span class="w">          </span><span class="nx">volumeMounts</span><span class="p">:</span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nx">mountPath</span><span class="p">:</span><span class="w"> </span><span class="o">/</span><span class="nx">pulsar</span><span class="o">/</span><span class="nx">data</span>
+<span class="w">              </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">datadir</span>
+<span class="w">      </span><span class="nx">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="nx">Always</span>
+<span class="w">      </span><span class="nx">volumes</span><span class="p">:</span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">datadir</span>
+<span class="w">          </span><span class="nx">emptyDir</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="nx">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nx">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nx">app</span><span class="p">:</span><span class="w"> </span><span class="nx">pulsar</span>
 <span class="o">---</span>
-<span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
-<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Service</span>
-<span class="n">metadata</span><span class="o">:</span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">pulsar</span>
-<span class="n">spec</span><span class="o">:</span>
-<span class="w">  </span><span class="n">selector</span><span class="o">:</span>
-<span class="w">    </span><span class="n">app</span><span class="o">:</span><span class="w"> </span><span class="n">pulsar</span>
-<span class="w">  </span><span class="n">ports</span><span class="o">:</span>
-<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">port</span><span class="o">:</span><span class="w"> </span><span class="mi">8080</span>
-<span class="w">      </span><span class="n">targetPort</span><span class="o">:</span><span class="w"> </span><span class="mi">8080</span>
-<span class="w">      </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">http</span>
-<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">port</span><span class="o">:</span><span class="w"> </span><span class="mi">6650</span>
-<span class="w">      </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">another</span>
-<span class="w">      </span><span class="n">targetPort</span><span class="o">:</span><span class="w"> </span><span class="mi">6650</span>
-<span class="w">  </span><span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="n">LoadBalancer</span>
+<span class="nx">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="nx">v1</span>
+<span class="nx">kind</span><span class="p">:</span><span class="w"> </span><span class="nx">Service</span>
+<span class="nx">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">pulsar</span>
+<span class="nx">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nx">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nx">app</span><span class="p">:</span><span class="w"> </span><span class="nx">pulsar</span>
+<span class="w">  </span><span class="nx">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="nx">port</span><span class="p">:</span><span class="w"> </span><span class="mi">8080</span>
+<span class="w">      </span><span class="nx">targetPort</span><span class="p">:</span><span class="w"> </span><span class="mi">8080</span>
+<span class="w">      </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">http</span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="nx">port</span><span class="p">:</span><span class="w"> </span><span class="mi">6650</span>
+<span class="w">      </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">another</span>
+<span class="w">      </span><span class="nx">targetPort</span><span class="p">:</span><span class="w"> </span><span class="mi">6650</span>
+<span class="w">  </span><span class="k">type</span><span class="p">:</span><span class="w"> </span><span class="nx">LoadBalancer</span>
 </code></pre></div>
 
 </li>

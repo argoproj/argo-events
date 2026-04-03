@@ -2222,23 +2222,23 @@ run a gRPC server that implements the interface that the sensor expects.</p>
 <span class="w">              </span><span class="c1"># spec is map of string-&gt;string and it is sent over to trigger server.</span>
 <span class="w">              </span><span class="c1"># the spec can be anything you want as per your use-case, just make sure the trigger server understands the spec map.</span>
 <span class="w">              </span><span class="n">spec</span><span class="o">:</span>
-<span class="w">                </span><span class="n">url</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://raw.githubusercontent.com/VaibhavPage/tekton-cd-trigger/master/example.yaml&quot;</span>
+<span class="w">                </span><span class="k">url</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://raw.githubusercontent.com/VaibhavPage/tekton-cd-trigger/master/example.yaml&quot;</span>
 <span class="w">              </span><span class="c1"># These parameters are applied on resource fetched and returned by the trigger server.</span>
 <span class="w">              </span><span class="c1"># e.g. consider a trigger server which invokes TektonCD pipeline runs, then</span>
 <span class="w">              </span><span class="c1"># the trigger server can return a TektonCD PipelineRun resource.</span>
 <span class="w">              </span><span class="c1"># The parameters are then applied on that PipelineRun resource.</span>
-<span class="w">              </span><span class="n">parameters</span><span class="o">:</span>
+<span class="w">              </span><span class="k">parameters</span><span class="o">:</span>
 <span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="o">:</span>
 <span class="w">                    </span><span class="n">dependencyName</span><span class="o">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span>
 <span class="w">                    </span><span class="n">dataKey</span><span class="o">:</span><span class="w"> </span><span class="n">body</span><span class="p">.</span><span class="n">namespace</span>
 <span class="w">                  </span><span class="n">dest</span><span class="o">:</span><span class="w"> </span><span class="n">metadata</span><span class="p">.</span><span class="n">namespace</span>
 <span class="w">          </span><span class="c1"># These parameters are applied on entire template body.</span>
 <span class="w">          </span><span class="c1"># So that you can parameterize anything under `custom` key such as `serverURL`, `spec` etc.</span>
-<span class="w">          </span><span class="n">parameters</span><span class="o">:</span>
+<span class="w">          </span><span class="k">parameters</span><span class="o">:</span>
 <span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="o">:</span>
 <span class="w">                </span><span class="n">dependencyName</span><span class="o">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-<span class="w">                </span><span class="n">dataKey</span><span class="o">:</span><span class="w"> </span><span class="n">body</span><span class="p">.</span><span class="n">url</span>
-<span class="w">              </span><span class="n">dest</span><span class="o">:</span><span class="w"> </span><span class="n">custom</span><span class="p">.</span><span class="n">spec</span><span class="p">.</span><span class="n">url</span>
+<span class="w">                </span><span class="n">dataKey</span><span class="o">:</span><span class="w"> </span><span class="n">body</span><span class="p">.</span><span class="k">url</span>
+<span class="w">              </span><span class="n">dest</span><span class="o">:</span><span class="w"> </span><span class="n">custom</span><span class="p">.</span><span class="n">spec</span><span class="p">.</span><span class="k">url</span>
 </code></pre></div>
 
 <p>The sensor definition should look familiar to you. The only difference is the <code>custom</code> key under <code>triggers -&gt; template</code>.
