@@ -1263,6 +1263,13 @@ func (in *EventBusStatus) DeepCopy() *EventBusStatus {
 func (in *EventContext) DeepCopyInto(out *EventContext) {
 	*out = *in
 	in.Time.DeepCopyInto(&out.Time)
+	if in.Extensions != nil {
+		in, out := &in.Extensions, &out.Extensions
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

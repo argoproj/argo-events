@@ -1062,10 +1062,18 @@ type EventContext struct {
 	Subject string `json:"subject" protobuf:"bytes,6,opt,name=subject"`
 	// Time - A Timestamp when the event happened.
 	Time metav1.Time `json:"time" protobuf:"bytes,7,opt,name=time"`
+	// Extensions contains CloudEvent extension attributes such as traceparent, tracestate, etc.
+	// +optional
+	Extensions map[string]string `json:"extensions,omitempty" protobuf:"bytes,8,rep,name=extensions"`
 }
 
 func (e EventContext) String() string {
-	return fmt.Sprintf(`{"id": "%s", "source": "%s", "specversion": "%s", "type": "%s", "datacontenttype": "%s", "subject": "%s", "time": "%s"}`, e.ID, e.Source, e.SpecVersion, e.Type, e.DataContentType, e.Subject, e.Time)
+	s := fmt.Sprintf(`{"id": "%s", "source": "%s", "specversion": "%s", "type": "%s", "datacontenttype": "%s", "subject": "%s", "time": "%s"`, e.ID, e.Source, e.SpecVersion, e.Type, e.DataContentType, e.Subject, e.Time)
+	if len(e.Extensions) > 0 {
+		s += fmt.Sprintf(`, "extensions": %v`, e.Extensions)
+	}
+	s += "}"
+	return s
 }
 
 // HasLocation whether or not an artifact has a location defined

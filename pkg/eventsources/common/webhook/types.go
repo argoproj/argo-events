@@ -24,6 +24,7 @@ import (
 	"go.uber.org/zap"
 
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	metrics "github.com/argoproj/argo-events/pkg/metrics"
 )
 
@@ -52,6 +53,8 @@ type Dispatch struct {
 	Data []byte
 	// SuccessChan contains true iff the dispatch of the Data was successful
 	SuccessChan chan bool
+	// Options contains CloudEvent options to apply when constructing the event
+	Options []eventsourcecommon.Option
 }
 
 // Route contains general information about a route

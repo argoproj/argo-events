@@ -25,6 +25,9 @@ import (
 	"net/http"
 	"time"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	cehttp "github.com/cloudevents/sdk-go/v2/protocol/http"
+
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventsourcecommon "github.com/argoproj/argo-events/pkg/eventsources/common"
 	"github.com/argoproj/argo-events/pkg/eventsources/common/webhook"
@@ -133,7 +136,19 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	webhook.DispatchEvent(route, data, logger, writer)
+	// Detect if the incoming request is a CloudEvent and preserve its metadata.
+	// The request body was already consumed by GetBody, so we reconstruct it
+	// for the CloudEvents SDK parser.
+	var opts []eventsourcecommon.Option
+	if incomingCE := parseIncomingCloudEvent(request, body); incomingCE != nil {
+		logger.Info("incoming CloudEvent detected, preserving metadata")
+		opts = append(opts, eventsourcecommon.WithCloudEvent(*incomingCE))
+	} else if request.Header.Get("Traceparent") != "" {
+		// For non-CE requests, propagate W3C trace context from HTTP headers
+		opts = append(opts, eventsourcecommon.WithHTTPHeaders(request.Header))
+	}
+
+	webhook.DispatchEvent(route, data, logger, writer, opts...)
 }
 
 // PostActivate performs operations once the route is activated and ready to consume requests
@@ -208,4 +223,22 @@ func getRequestBody(request *http.Request) ([]byte, error) {
 		return nil, fmt.Errorf("failed to parse request body, %w", err)
 	}
 	return body, nil
+}
+
+// parseIncomingCloudEvent attempts to parse the HTTP request as a CloudEvent.
+// The original request body has already been consumed, so we reconstruct it
+// from the body parameter. Returns nil if the request is not a CloudEvent.
+func parseIncomingCloudEvent(request *http.Request, body *json.RawMessage) *cloudevents.Event {
+	if body == nil {
+		return nil
+	}
+	// Reconstruct an http.Request with the body restored for the CE SDK parser.
+	reqCopy := request.Clone(request.Context())
+	reqCopy.Body = io.NopCloser(bytes.NewReader(*body))
+	ce, err := cehttp.NewEventFromHTTPRequest(reqCopy)
+	if err != nil {
+		// Not a CloudEvent — this is the normal case for plain HTTP requests.
+		return nil
+	}
+	return ce
 }

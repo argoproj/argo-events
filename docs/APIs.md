@@ -6189,6 +6189,26 @@ Time - A Timestamp when the event happened.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>extensions</code></br> <em> map\[string\]string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Extensions contains CloudEvent extension attributes such as traceparent,
+tracestate, etc.
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
