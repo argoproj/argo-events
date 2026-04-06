@@ -287,6 +287,8 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 	}
 
 	messages := []*sarama.ProducerMessage{}
+	var fns []func()
+
 	for _, trigger := range s.triggers.List(event) {
 		event, err := trigger.Transform(trigger.depName, event)
 		if err != nil {
@@ -299,28 +301,27 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 			continue
 		}
 
-		// if the trigger only requires one message to be invoked we
-		// can skip ahead to the action topic, otherwise produce to
-		// the trigger topic
-
-		var data any
-		var topic string
 		if trigger.OneAndDone() {
-			data = []*cloudevents.Event{event}
-			topic = s.topics.action
-		} else {
-			data = event
-			topic = s.topics.trigger
+			// For single-dependency triggers, invoke action directly
+			// instead of routing through the action topic. This
+			// eliminates one full Kafka hop (produce + batch + consume
+			// + transaction), saving ~2-3s of latency.
+			f := trigger.Action([]*cloudevents.Event{event}, trigger.depName)
+			if f != nil {
+				fns = append(fns, f)
+			}
+			continue
 		}
 
-		value, err := json.Marshal(data)
+		// Multi-dependency: route through trigger topic
+		value, err := json.Marshal(event)
 		if err != nil {
 			s.Logger.Errorw("Failed to serialize cloudevent, skipping", zap.Error(err))
 			continue
 		}
 
 		messages = append(messages, &sarama.ProducerMessage{
-			Topic: topic,
+			Topic: s.topics.trigger,
 			Key:   sarama.StringEncoder(trigger.Name()),
 			Value: sarama.ByteEncoder(value),
 			Headers: []sarama.RecordHeader{{
@@ -330,7 +331,17 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 		})
 	}
 
-	return messages, msg.Offset + 1, nil
+	// Compose all OneAndDone callbacks into a single function
+	var fn func()
+	if len(fns) > 0 {
+		fn = func() {
+			for _, f := range fns {
+				f()
+			}
+		}
+	}
+
+	return messages, msg.Offset + 1, fn
 }
 
 func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()) {

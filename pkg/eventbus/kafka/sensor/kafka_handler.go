@@ -4,12 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/IBM/sarama"
 	"go.uber.org/zap"
-
-	"github.com/argoproj/argo-events/pkg/eventbus/kafka/base"
 )
 
 type KafkaHandler struct {
@@ -137,18 +134,40 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 		return fmt.Errorf("unrecognized topic %s or partition %d", claim.Topic(), claim.Partition())
 	}
 
-	// Batch messsages from the claim message channel. A message will
-	// be produced to the batched channel if the max batch size is
-	// reached or the time limit has elapsed, whichever happens
-	// first. Batching helps optimize kafka transactions.
-	batch := base.Batch(100, 1*time.Second, claim.Messages())
-
 	for {
 		select {
-		case msgs := <-batch:
-			if len(msgs) == 0 {
-				h.Logger.Warn("Kafka batch contains no messages")
+		case msg := <-claim.Messages():
+			if msg == nil {
 				continue
+			}
+
+			key := string(msg.Key)
+
+			h.Logger.Infow("Received message",
+				zap.String("topic", msg.Topic),
+				zap.String("key", key),
+				zap.Int32("partition", msg.Partition),
+				zap.Int64("offset", msg.Offset))
+
+			if checkpoint.Init {
+				// mark offset in order to reconsume from this
+				// offset if a restart occurs
+				session.MarkOffset(msg.Topic, msg.Partition, msg.Offset, "")
+				session.Commit()
+				checkpoint.Init = false
+			}
+
+			if checkpoint.Skip(key, msg.Offset) {
+				h.Logger.Infof("Skipping trigger '%s' (%d<%d)", key, msg.Offset, checkpoint.Offsets[key])
+				continue
+			}
+
+			messages, offset, f := handler(msg)
+			if msg.Topic == h.TriggerTopic && len(messages) > 0 {
+				// when a trigger is invoked (there is a message)
+				// update the checkpoint to ensure the trigger
+				// is not re-invoked in the case of a restart
+				checkpoint.Set(key, msg.Offset+1)
 			}
 
 			transaction := &KafkaTransaction{
@@ -157,50 +176,8 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 				GroupName:     h.GroupName,
 				Topic:         claim.Topic(),
 				Partition:     claim.Partition(),
-				ResetOffset:   msgs[0].Offset,
+				ResetOffset:   msg.Offset,
 				ResetMetadata: checkpoint.Metadata(),
-			}
-
-			var messages []*sarama.ProducerMessage
-			var offset int64
-			var fns []func()
-
-			for _, msg := range msgs {
-				key := string(msg.Key)
-
-				h.Logger.Infow("Received message",
-					zap.String("topic", msg.Topic),
-					zap.String("key", key),
-					zap.Int32("partition", msg.Partition),
-					zap.Int64("offset", msg.Offset))
-
-				if checkpoint.Init {
-					// mark offset in order to reconsume from this
-					// offset if a restart occurs
-					session.MarkOffset(msg.Topic, msg.Partition, msg.Offset, "")
-					session.Commit()
-					checkpoint.Init = false
-				}
-
-				if checkpoint.Skip(key, msg.Offset) {
-					h.Logger.Infof("Skipping trigger '%s' (%d<%d)", key, msg.Offset, checkpoint.Offsets[key])
-					continue
-				}
-
-				m, o, f := handler(msg)
-				if msg.Topic == h.TriggerTopic && len(m) > 0 {
-					// when a trigger is invoked (there is a message)
-					// update the checkpoint to ensure the trigger
-					// is not re-invoked in the case of a restart
-					checkpoint.Set(key, msg.Offset+1)
-				}
-
-				// update transacation information
-				messages = append(messages, m...)
-				offset = o
-				if f != nil {
-					fns = append(fns, f)
-				}
 			}
 
 			func() {
@@ -211,9 +188,8 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 				}
 			}()
 
-			// invoke (action) functions asynchronously
-			for _, fn := range fns {
-				go fn()
+			if f != nil {
+				go f()
 			}
 		case <-session.Context().Done():
 			return nil
