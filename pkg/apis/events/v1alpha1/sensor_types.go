@@ -95,6 +95,12 @@ type SensorSpec struct {
 	// LoggingFields add additional key-value pairs when logging happens
 	// +optional
 	LoggingFields map[string]string `json:"loggingFields" protobuf:"bytes,8,rep,name=loggingFields"`
+	// EventBusConsumerBatchMaxWait overrides the EventBus-level
+	// consumerBatchMaxWait for this sensor. Same format: a Go duration
+	// string (e.g., "1s", "100ms") or "0" to disable batching.
+	// If not set, the EventBus-level value is used.
+	// +optional
+	EventBusConsumerBatchMaxWait string `json:"eventBusConsumerBatchMaxWait,omitempty" protobuf:"bytes,9,opt,name=eventBusConsumerBatchMaxWait"`
 }
 
 func (s SensorSpec) GetReplicas() int32 {

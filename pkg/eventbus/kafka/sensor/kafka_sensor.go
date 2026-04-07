@@ -38,6 +38,10 @@ type KafkaSensor struct {
 	// handles consuming from kafka, offsets, and transactions
 	kafkaHandler *KafkaHandler
 	connected    bool
+
+	// batchMaxWait is the resolved consumer batch max wait duration.
+	// 0 means real-time (no batching). Defaults to 1s.
+	batchMaxWait time.Duration
 }
 
 func NewKafkaSensor(kafkaConfig *v1alpha1.KafkaBus, sensor *v1alpha1.Sensor, hostname string, logger *zap.SugaredLogger) *KafkaSensor {
@@ -54,15 +58,37 @@ func NewKafkaSensor(kafkaConfig *v1alpha1.KafkaBus, sensor *v1alpha1.Sensor, hos
 		groupName = kafkaConfig.ConsumerGroup.GroupName
 	}
 
-	return &KafkaSensor{
-		Kafka:     base.NewKafka(kafkaConfig, logger),
-		Mutex:     &sync.Mutex{},
-		sensor:    sensor,
-		topics:    topics,
-		hostname:  hostname,
-		groupName: groupName,
-		triggers:  Triggers{},
+	// Resolve batch max wait: sensor override > eventbus > default (1s)
+	batchMaxWaitStr := kafkaConfig.ConsumerBatchMaxWait
+	if sensor.Spec.EventBusConsumerBatchMaxWait != "" {
+		batchMaxWaitStr = sensor.Spec.EventBusConsumerBatchMaxWait
 	}
+
+	return &KafkaSensor{
+		Kafka:        base.NewKafka(kafkaConfig, logger),
+		Mutex:        &sync.Mutex{},
+		sensor:       sensor,
+		topics:       topics,
+		hostname:     hostname,
+		groupName:    groupName,
+		triggers:     Triggers{},
+		batchMaxWait: parseBatchMaxWait(batchMaxWaitStr, logger),
+	}
+}
+
+func parseBatchMaxWait(val string, logger *zap.SugaredLogger) time.Duration {
+	if val == "" {
+		return 1 * time.Second
+	}
+	if val == "0" {
+		return 0
+	}
+	d, err := time.ParseDuration(val)
+	if err != nil {
+		logger.Warnf("invalid consumerBatchMaxWait %q, using default 1s: %v", val, err)
+		return 1 * time.Second
+	}
+	return d
 }
 
 type Topics struct {
@@ -156,6 +182,7 @@ func (s *KafkaSensor) Initialize() error {
 		Producer:      producer,
 		OffsetManager: offsetManager,
 		TriggerTopic:  s.topics.trigger,
+		BatchMaxWait:  s.batchMaxWait,
 		Reset:         s.Reset,
 		Handlers: map[string]func(*sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()){
 			s.topics.event:   s.Event,
@@ -287,8 +314,6 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 	}
 
 	messages := []*sarama.ProducerMessage{}
-	var fns []func()
-
 	for _, trigger := range s.triggers.List(event) {
 		event, err := trigger.Transform(trigger.depName, event)
 		if err != nil {
@@ -301,27 +326,28 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 			continue
 		}
 
+		// if the trigger only requires one message to be invoked we
+		// can skip ahead to the action topic, otherwise produce to
+		// the trigger topic
+
+		var data any
+		var topic string
 		if trigger.OneAndDone() {
-			// For single-dependency triggers, invoke action directly
-			// instead of routing through the action topic. This
-			// eliminates one full Kafka hop (produce + batch + consume
-			// + transaction), saving ~2-3s of latency.
-			f := trigger.Action([]*cloudevents.Event{event}, trigger.depName)
-			if f != nil {
-				fns = append(fns, f)
-			}
-			continue
+			data = []*cloudevents.Event{event}
+			topic = s.topics.action
+		} else {
+			data = event
+			topic = s.topics.trigger
 		}
 
-		// Multi-dependency: route through trigger topic
-		value, err := json.Marshal(event)
+		value, err := json.Marshal(data)
 		if err != nil {
 			s.Logger.Errorw("Failed to serialize cloudevent, skipping", zap.Error(err))
 			continue
 		}
 
 		messages = append(messages, &sarama.ProducerMessage{
-			Topic: s.topics.trigger,
+			Topic: topic,
 			Key:   sarama.StringEncoder(trigger.Name()),
 			Value: sarama.ByteEncoder(value),
 			Headers: []sarama.RecordHeader{{
@@ -331,17 +357,7 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 		})
 	}
 
-	// Compose all OneAndDone callbacks into a single function
-	var fn func()
-	if len(fns) > 0 {
-		fn = func() {
-			for _, f := range fns {
-				f()
-			}
-		}
-	}
-
-	return messages, msg.Offset + 1, fn
+	return messages, msg.Offset + 1, nil
 }
 
 func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()) {

@@ -90,6 +90,43 @@ When starting up a new group do we want to start from the oldest event
 
 Producer partitioning strategy. Supported values: `random`, `hash`, `roundrobin`, `manual`. Defaults to `random`.
 
+### consumerBatchMaxWait
+
+Sets the maximum time the sensor consumer will wait to fill a batch of
+messages before processing them. Accepts a Go duration string (e.g.,
+`1s`, `500ms`, `100ms`). Set to `0` to disable batching and process
+messages individually in real-time. Defaults to `1s`.
+
+```yaml
+spec:
+  kafka:
+    url: kafka:9092
+    consumerBatchMaxWait: "100ms"  # or "0" for real-time
+```
+
+**Performance considerations:**
+
+- Higher values improve throughput by amortizing Kafka transaction
+  overhead across more messages, but increase latency.
+- Lower values reduce latency at the cost of more frequent transactions.
+- Setting to `0` provides the lowest latency (real-time processing) but
+  each message incurs its own transaction overhead.
+
+This value can be overridden per Sensor using the
+`eventBusConsumerBatchMaxWait` field in the Sensor spec:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: my-sensor
+spec:
+  eventBusConsumerBatchMaxWait: "0"  # real-time for this sensor only
+```
+
+If both are set, the Sensor-level value takes precedence over the
+EventBus-level value.
+
 ## Security
 
 You can enable TLS or SASL authentication, see above for configuration

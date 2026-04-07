@@ -12010,6 +12010,29 @@ values: random, hash, roundrobin, manual. Defaults to random.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>consumerBatchMaxWait</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+ConsumerBatchMaxWait sets the maximum time the Kafka sensor consumer
+will wait to fill a batch of messages before processing them. Accepts a
+Go duration string (e.g., “1s”, “100ms”, “0” to disable batching). When
+set to “0”, messages are processed individually in real-time without
+batching. Defaults to “1s” if not specified.
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -18708,6 +18731,28 @@ LoggingFields add additional key-value pairs when logging happens
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>eventBusConsumerBatchMaxWait</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+EventBusConsumerBatchMaxWait overrides the EventBus-level
+consumerBatchMaxWait for this sensor. Same format: a Go duration string
+(e.g., “1s”, “100ms”) or “0” to disable batching. If not set, the
+EventBus-level value is used.
+</p>
+
+</td>
+
+</tr>
+
 </table>
 
 </td>
@@ -18925,6 +18970,28 @@ retain
 <p>
 
 LoggingFields add additional key-value pairs when logging happens
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>eventBusConsumerBatchMaxWait</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+EventBusConsumerBatchMaxWait overrides the EventBus-level
+consumerBatchMaxWait for this sensor. Same format: a Go duration string
+(e.g., “1s”, “100ms”) or “0” to disable batching. If not set, the
+EventBus-level value is used.
 </p>
 
 </td>
