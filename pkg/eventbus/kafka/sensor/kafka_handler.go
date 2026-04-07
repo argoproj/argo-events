@@ -255,6 +255,8 @@ func (h *KafkaHandler) consumeClaimBatched(
 					zap.Int64("offset", msg.Offset))
 
 				if checkpoint.Init {
+					// mark offset in order to reconsume from this
+					// offset if a restart occurs
 					session.MarkOffset(msg.Topic, msg.Partition, msg.Offset, "")
 					session.Commit()
 					checkpoint.Init = false
@@ -267,9 +269,13 @@ func (h *KafkaHandler) consumeClaimBatched(
 
 				m, o, f := handler(msg)
 				if msg.Topic == h.TriggerTopic && len(m) > 0 {
+					// when a trigger is invoked (there is a message)
+					// update the checkpoint to ensure the trigger
+					// is not re-invoked in the case of a restart
 					checkpoint.Set(key, msg.Offset+1)
 				}
 
+				// update transacation information
 				messages = append(messages, m...)
 				offset = o
 				if f != nil {
@@ -285,6 +291,7 @@ func (h *KafkaHandler) consumeClaimBatched(
 				}
 			}()
 
+			// invoke (action) functions asynchronously
 			for _, fn := range fns {
 				go fn()
 			}
