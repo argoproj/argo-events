@@ -146,6 +146,13 @@ func (s *KafkaSensor) Initialize() error {
 	// sensor specific config
 	config.Producer.Transaction.ID = s.hostname
 
+	// When real-time mode is active (batchMaxWait == 0), reduce the Kafka
+	// fetch max wait time so the broker returns immediately instead of
+	// holding the FetchRequest for up to 250ms (sarama default).
+	if s.batchMaxWait == 0 {
+		config.Consumer.MaxWaitTime = 10 * time.Millisecond
+	}
+
 	client, err := sarama.NewClient(s.Brokers(), config)
 	if err != nil {
 		return err
