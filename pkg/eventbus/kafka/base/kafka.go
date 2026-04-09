@@ -59,11 +59,16 @@ func (k *Kafka) Config() (*sarama.Config, error) {
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Net.MaxOpenRequests = 1
 
-	// Transaction retry tuning for low-latency processing.
-	// Sarama defaults to 100ms backoff between CONCURRENT_TRANSACTIONS retries,
-	// which accumulates to ~1.5s per transaction on rapid successive commits.
-	// Reducing to 10ms with more retries keeps total retry time under 100ms.
-	config.Producer.Transaction.Retry.Backoff = 10 * time.Millisecond
+	// Transaction retry tuning — configurable via EventBus CRD.
+	// Default 10ms is optimized for single-region deployments where the
+	// Kafka broker resolves CONCURRENT_TRANSACTIONS within milliseconds.
+	txnRetryBackoff := 10 * time.Millisecond
+	if k.config.TransactionRetryBackoff != "" {
+		if d, err := time.ParseDuration(k.config.TransactionRetryBackoff); err == nil && d > 0 {
+			txnRetryBackoff = d
+		}
+	}
+	config.Producer.Transaction.Retry.Backoff = txnRetryBackoff
 	config.Producer.Transaction.Retry.Max = 100
 
 	// Partitioner selection
