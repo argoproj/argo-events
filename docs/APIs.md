@@ -12033,6 +12033,30 @@ batching. Defaults to “1s” if not specified.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>transactionRetryBackoff</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+TransactionRetryBackoff sets the backoff duration between Kafka
+transaction retry attempts when CONCURRENT_TRANSACTIONS errors occur.
+Lower values reduce latency at the cost of slightly higher CPU from more
+frequent retries. Accepts a Go duration string (e.g., “10ms”, “100ms”).
+Defaults to “10ms”. Use “100ms” for cross-region deployments with high
+coordinator latency.
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>

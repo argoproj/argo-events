@@ -2482,6 +2482,10 @@
           "description": "Topic name, defaults to {namespace_name}-{eventbus_name}",
           "type": "string"
         },
+        "transactionRetryBackoff": {
+          "description": "TransactionRetryBackoff sets the backoff duration between Kafka transaction retry attempts when CONCURRENT_TRANSACTIONS errors occur. Lower values reduce latency at the cost of slightly higher CPU from more frequent retries. Accepts a Go duration string (e.g., \"10ms\", \"100ms\"). Defaults to \"10ms\". Use \"100ms\" for cross-region deployments with high coordinator latency.",
+          "type": "string"
+        },
         "url": {
           "description": "URL to kafka cluster, multiple URLs separated by comma",
           "type": "string"

@@ -4741,6 +4741,13 @@ func schema_pkg_apis_events_v1alpha1_KafkaBus(ref common.ReferenceCallback) comm
 							Format:      "",
 						},
 					},
+					"transactionRetryBackoff": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TransactionRetryBackoff sets the backoff duration between Kafka transaction retry attempts when CONCURRENT_TRANSACTIONS errors occur. Lower values reduce latency at the cost of slightly higher CPU from more frequent retries. Accepts a Go duration string (e.g., \"10ms\", \"100ms\"). Defaults to \"10ms\". Use \"100ms\" for cross-region deployments with high coordinator latency.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
