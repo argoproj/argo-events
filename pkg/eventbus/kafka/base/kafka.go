@@ -2,6 +2,7 @@ package base
 
 import (
 	"strings"
+	"time"
 
 	"github.com/IBM/sarama"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -57,6 +58,14 @@ func (k *Kafka) Config() (*sarama.Config, error) {
 	config.Producer.Idempotent = true
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Net.MaxOpenRequests = 1
+
+	// Transaction retry tuning for low-latency processing.
+	// Sarama defaults to 100ms backoff between CONCURRENT_TRANSACTIONS retries,
+	// which accumulates to ~1.5s per transaction on rapid successive commits.
+	// Reducing to 10ms with more retries keeps total retry time under 100ms.
+	config.Producer.Transaction.Retry.Backoff = 10 * time.Millisecond
+	config.Producer.Transaction.Retry.Max = 100
+
 	// Partitioner selection
 	switch k.config.Partitioner {
 	case "hash":
