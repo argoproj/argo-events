@@ -217,6 +217,19 @@
         }
       }
     },
+    "io.argoproj.events.v1alpha1.AWSMSKIAMConfig": {
+      "description": "AWSMSKIAMConfig holds configuration for SASL/OAUTHBEARER authentication against Amazon MSK using IAM credentials (includes IRSA / web identity token support).",
+      "type": "object",
+      "required": [
+        "region"
+      ],
+      "properties": {
+        "region": {
+          "description": "Region is the AWS region of the MSK cluster (e.g. \"us-east-1\").",
+          "type": "string"
+        }
+      }
+    },
     "io.argoproj.events.v1alpha1.Amount": {
       "description": "Amount represent a numeric amount.",
       "type": "number"
@@ -2500,6 +2513,10 @@
         "topic"
       ],
       "properties": {
+        "awsMskIamAuth": {
+          "description": "AWSMSKIAMAuth configures SASL/OAUTHBEARER authentication using AWS IAM credentials, supporting IRSA (pod web-identity token), instance-profile, and static env credentials. When set, TLS is enabled automatically and the SASL config field is ignored.",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.AWSMSKIAMConfig"
+        },
         "config": {
           "description": "Yaml format Sarama config for Kafka connection. It follows the struct of sarama.Config. See https://github.com/IBM/sarama/blob/main/config.go e.g.\n\nconsumer:\n  fetch:\n    min: 1\nnet:\n  MaxOpenRequests: 5",
           "type": "string"

@@ -47,3 +47,74 @@ Kafka event-source specification is available [here](../../APIs.md#argoproj.io/v
 ## Troubleshoot
 
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).
+
+## AWS MSK with IAM Authentication (IRSA)
+
+When connecting to Amazon MSK with IAM access control enabled, use the `awsMskIamAuth` field instead of `sasl` or `tls`.
+TLS is enabled automatically. The AWS credential chain is used, so the simplest way to grant access on EKS is via
+[IRSA (IAM Roles for Service Accounts)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html).
+
+### IAM policy for the role
+
+The IAM role attached to the pod service account needs at minimum:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "kafka-cluster:Connect",
+      "Resource": "arn:aws:kafka:<region>:<account-id>:cluster/<cluster-name>/<cluster-id>"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "kafka-cluster:DescribeTopic",
+        "kafka-cluster:ReadData"
+      ],
+      "Resource": "arn:aws:kafka:<region>:<account-id>:topic/<cluster-name>/<cluster-id>/<topic-name>"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "kafka-cluster:AlterGroup",
+      "Resource": "arn:aws:kafka:<region>:<account-id>:group/<cluster-name>/<cluster-id>/<consumer-group-name>"
+    }
+  ]
+}
+```
+
+### EventSource spec
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: kafka-msk
+spec:
+  kafka:
+    msk-source:
+      # Use port 9098 for IAM authentication (not 9092)
+      url: b-1.my-cluster.abc123.c2.kafka.us-east-1.amazonaws.com:9098
+      topic: my-topic
+      consumerGroup:
+        groupName: my-consumer-group
+      awsMskIamAuth:
+        region: us-east-1
+```
+
+### Annotate the service account
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-events-sa
+  namespace: argo-events
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/<role-name>
+```
+
+The `awsMskIamAuth` block uses the AWS SDK v2 default credential chain, so it also works with EC2 instance profiles
+and static environment credentials (`AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_SESSION_TOKEN`) without
+any additional configuration.
