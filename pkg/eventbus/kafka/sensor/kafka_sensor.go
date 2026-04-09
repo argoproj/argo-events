@@ -354,14 +354,11 @@ func (s *KafkaSensor) Event(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMess
 			continue
 		}
 
-		// Use source message coordinates as key to route all trigger
-		// messages from the same event to the same partition, reducing
-		// AddPartitionsToTxn calls from N to 1 per transaction.
-		partitionKey := fmt.Sprintf("%s-%d-%d", msg.Topic, msg.Partition, msg.Offset)
-
+		// Key must be the trigger name so Trigger() can look it up
+		// via s.triggers[string(msg.Key)].
 		messages = append(messages, &sarama.ProducerMessage{
 			Topic: s.topics.trigger,
-			Key:   sarama.StringEncoder(partitionKey),
+			Key:   sarama.StringEncoder(trigger.Name()),
 			Value: sarama.ByteEncoder(value),
 			Headers: []sarama.RecordHeader{{
 				Key:   []byte(dependencyNameHeader),
