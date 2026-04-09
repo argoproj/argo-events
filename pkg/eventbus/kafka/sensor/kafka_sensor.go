@@ -395,6 +395,9 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 			}
 		}
 	}
+
+	var fns []func()
+
 	// update trigger with new event and add any resulting action to
 	// transaction messages
 	if trigger, ok := s.triggers[string(msg.Key)]; ok && event != nil {
@@ -410,23 +413,15 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 				return
 			}
 
-			value, err := json.Marshal(events)
-			if err != nil {
-				s.Logger.Errorw("Failed to serialize cloudevent, skipping", zap.Error(err))
-				return
+			// Dependencies satisfied — invoke action directly, skip action topic.
+			// This avoids a full Kafka transaction for the trigger→action hop.
+			// At-least-once is preserved: if the sensor crashes before the trigger
+			// topic offset is committed, the message will be reconsumed and
+			// re-evaluated.
+			f := trigger.Action(events, dependencyName)
+			if f != nil {
+				fns = append(fns, f)
 			}
-
-			partitionKey := fmt.Sprintf("%s-%d-%d", msg.Topic, msg.Partition, msg.Offset)
-
-			messages = append(messages, &sarama.ProducerMessage{
-				Topic: s.topics.action,
-				Key:   sarama.StringEncoder(partitionKey),
-				Value: sarama.ByteEncoder(value),
-				Headers: []sarama.RecordHeader{{
-					Key:   []byte(dependencyNameHeader),
-					Value: []byte(dependencyName),
-				}},
-			})
 		}()
 	}
 
@@ -437,7 +432,17 @@ func (s *KafkaSensor) Trigger(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMe
 		offset = trigger.Offset(msg.Partition, offset)
 	}
 
-	return messages, offset, nil
+	// Compose action callbacks
+	var fn func()
+	if len(fns) > 0 {
+		fn = func() {
+			for _, f := range fns {
+				f()
+			}
+		}
+	}
+
+	return messages, offset, fn
 }
 
 func (s *KafkaSensor) Action(msg *sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()) {
