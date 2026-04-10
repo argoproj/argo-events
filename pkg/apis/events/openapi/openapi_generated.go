@@ -2470,6 +2470,22 @@ func schema_pkg_apis_events_v1alpha1_EventContext(ref common.ReferenceCallback) 
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
+					"extensions": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Extensions contains CloudEvent extension attributes such as traceparent, tracestate, etc.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"id", "source", "specversion", "type", "datacontenttype", "subject", "time"},
 			},
