@@ -40,6 +40,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/ratelimit"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -437,13 +438,44 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 		attribute.StringSlice("dependencies", depNames),
 		attribute.StringSlice("event.ids", eventIDs),
 	}
-	if trigger.Template.HTTP != nil {
+	// Add trigger-type-specific attributes
+	switch {
+	case trigger.Template.HTTP != nil:
 		triggerAttrs = append(triggerAttrs,
 			attribute.String("server.address", trigger.Template.HTTP.URL),
 			attribute.String("http.request.method", trigger.Template.HTTP.Method),
 		)
+	case trigger.Template.Kafka != nil:
+		triggerAttrs = append(triggerAttrs,
+			attribute.String("messaging.system", "kafka"),
+			attribute.String("messaging.operation.type", "send"),
+		)
+	case trigger.Template.NATS != nil:
+		triggerAttrs = append(triggerAttrs,
+			attribute.String("messaging.system", "nats"),
+			attribute.String("messaging.operation.type", "send"),
+		)
+	case trigger.Template.Pulsar != nil:
+		triggerAttrs = append(triggerAttrs,
+			attribute.String("messaging.system", "pulsar"),
+			attribute.String("messaging.operation.type", "send"),
+		)
+	case trigger.Template.AzureEventHubs != nil:
+		triggerAttrs = append(triggerAttrs,
+			attribute.String("messaging.system", "azure_event_hubs"),
+			attribute.String("messaging.operation.type", "send"),
+		)
+	case trigger.Template.AzureServiceBus != nil:
+		triggerAttrs = append(triggerAttrs,
+			attribute.String("messaging.system", "azure_service_bus"),
+			attribute.String("messaging.operation.type", "send"),
+		)
 	}
-	ctx, span := tracing.StartClientSpan(ctx, otel.Tracer("argo-events-sensor"), "sensor.trigger", triggerAttrs...)
+	spanKind := tracing.TriggerTypeSpanKind(trigger.Template)
+	ctx, span := otel.Tracer("argo-events-sensor").Start(ctx, "sensor.trigger",
+		trace.WithSpanKind(spanKind),
+		trace.WithAttributes(triggerAttrs...),
+	)
 	defer span.End()
 
 	if err := sensortriggers.ApplyTemplateParameters(eventsMapping, &trigger); err != nil {
