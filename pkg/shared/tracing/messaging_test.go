@@ -11,13 +11,13 @@ import (
 
 func TestMessagingAttributes(t *testing.T) {
 	tests := []struct {
-		name           string
-		busType        string
-		destination    string
-		consumerGroup  string
-		serverAddr     string
-		wantSystem     string
-		wantGroupAttr  bool
+		name          string
+		busType       string
+		destination   string
+		consumerGroup string
+		serverAddr    string
+		wantSystem    string
+		wantGroupAttr bool
 	}{
 		{
 			name:          "kafka preserves system name",

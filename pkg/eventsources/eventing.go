@@ -586,8 +586,8 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSour
 						spanCtx := tracing.SpanFromCloudEvent(ctx, event)
 
 						busType, busAddr := extractBusInfo(e.eventBusConfig)
-						msgAttrs := tracing.MessagingAttributes(busType, e.eventBusSubject, "", busAddr)
-						spanAttrs := append(msgAttrs,
+						spanAttrs := tracing.MessagingAttributes(busType, e.eventBusSubject, "", busAddr)
+						spanAttrs = append(spanAttrs,
 							attribute.String("eventsource.name", s.GetEventSourceName()),
 							attribute.String("eventsource.type", string(s.GetEventSourceType())),
 							attribute.String("event.name", s.GetEventName()),
