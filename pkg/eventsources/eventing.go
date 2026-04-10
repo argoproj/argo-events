@@ -15,7 +15,6 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -583,16 +582,21 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSour
 						}
 
 						// Extract parent trace from CloudEvent extensions (if present)
-						// and start a publish span.
+						// and start a PRODUCER publish span with messaging attributes.
 						spanCtx := tracing.SpanFromCloudEvent(ctx, event)
-						spanCtx, span := otel.Tracer("argo-events-eventsource").Start(spanCtx, "eventsource.publish",
-							trace.WithAttributes(
-								attribute.String("eventsource.name", s.GetEventSourceName()),
-								attribute.String("eventsource.type", string(s.GetEventSourceType())),
-								attribute.String("event.name", s.GetEventName()),
-								attribute.String("event.id", event.ID()),
-							),
+
+						busType, busAddr := extractBusInfo(e.eventBusConfig)
+						msgAttrs := tracing.MessagingAttributes(busType, e.eventBusSubject, "", busAddr)
+						spanAttrs := append(msgAttrs,
+							attribute.String("eventsource.name", s.GetEventSourceName()),
+							attribute.String("eventsource.type", string(s.GetEventSourceType())),
+							attribute.String("event.name", s.GetEventName()),
+							attribute.String("event.id", event.ID()),
+							attribute.String("messaging.operation.type", "send"),
+							attribute.String("messaging.operation.name", "send"),
 						)
+
+						spanCtx, span := tracing.StartProducerSpan(spanCtx, otel.Tracer("argo-events-eventsource"), "eventsource.publish", spanAttrs...)
 						// Inject updated trace context back into CloudEvent extensions
 						tracing.InjectTraceIntoCloudEvent(spanCtx, &event)
 
@@ -675,6 +679,21 @@ func generateClientID(hostname string) string {
 	randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(1000)))
 	clientID := fmt.Sprintf("client-%s-%v", strings.ReplaceAll(hostname, ".", "_"), randomNum.Int64())
 	return clientID
+}
+
+// extractBusInfo reads the EventBus config and returns the bus type and server address.
+// busType is one of "kafka", "jetstream", "stan", or "unknown".
+func extractBusInfo(bc *aev1.BusConfig) (busType, serverAddr string) {
+	switch {
+	case bc != nil && bc.Kafka != nil:
+		return "kafka", bc.Kafka.URL
+	case bc != nil && bc.JetStream != nil:
+		return "jetstream", bc.JetStream.URL
+	case bc != nil && bc.NATS != nil:
+		return "stan", bc.NATS.URL
+	default:
+		return "unknown", ""
+	}
 }
 
 func filterEvent(data []byte, filter *aev1.EventSourceFilter) (bool, error) {
