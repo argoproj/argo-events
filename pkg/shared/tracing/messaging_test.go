@@ -5,6 +5,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/trace"
+
+	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 func TestMessagingAttributes(t *testing.T) {
@@ -133,6 +135,44 @@ func TestSourceTypeSpanKind(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := SourceTypeSpanKind(tt.sourceType)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestTriggerTypeSpanKind(t *testing.T) {
+	tests := []struct {
+		name     string
+		template *v1alpha1.TriggerTemplate
+		want     trace.SpanKind
+	}{
+		// CLIENT triggers (outbound API calls)
+		{"HTTP", &v1alpha1.TriggerTemplate{HTTP: &v1alpha1.HTTPTrigger{}}, trace.SpanKindClient},
+		{"K8s", &v1alpha1.TriggerTemplate{K8s: &v1alpha1.StandardK8STrigger{}}, trace.SpanKindClient},
+		{"ArgoWorkflow", &v1alpha1.TriggerTemplate{ArgoWorkflow: &v1alpha1.ArgoWorkflowTrigger{}}, trace.SpanKindClient},
+		{"AWSLambda", &v1alpha1.TriggerTemplate{AWSLambda: &v1alpha1.AWSLambdaTrigger{}}, trace.SpanKindClient},
+		{"CustomTrigger", &v1alpha1.TriggerTemplate{CustomTrigger: &v1alpha1.CustomTrigger{}}, trace.SpanKindClient},
+		{"Slack", &v1alpha1.TriggerTemplate{Slack: &v1alpha1.SlackTrigger{}}, trace.SpanKindClient},
+		{"OpenWhisk", &v1alpha1.TriggerTemplate{OpenWhisk: &v1alpha1.OpenWhiskTrigger{}}, trace.SpanKindClient},
+		{"Email", &v1alpha1.TriggerTemplate{Email: &v1alpha1.EmailTrigger{}}, trace.SpanKindClient},
+
+		// PRODUCER triggers (messaging)
+		{"Kafka", &v1alpha1.TriggerTemplate{Kafka: &v1alpha1.KafkaTrigger{}}, trace.SpanKindProducer},
+		{"NATS", &v1alpha1.TriggerTemplate{NATS: &v1alpha1.NATSTrigger{}}, trace.SpanKindProducer},
+		{"Pulsar", &v1alpha1.TriggerTemplate{Pulsar: &v1alpha1.PulsarTrigger{}}, trace.SpanKindProducer},
+		{"AzureEventHubs", &v1alpha1.TriggerTemplate{AzureEventHubs: &v1alpha1.AzureEventHubsTrigger{}}, trace.SpanKindProducer},
+		{"AzureServiceBus", &v1alpha1.TriggerTemplate{AzureServiceBus: &v1alpha1.AzureServiceBusTrigger{}}, trace.SpanKindProducer},
+
+		// INTERNAL triggers (local)
+		{"Log", &v1alpha1.TriggerTemplate{Log: &v1alpha1.LogTrigger{}}, trace.SpanKindInternal},
+
+		// Empty template defaults to CLIENT
+		{"empty", &v1alpha1.TriggerTemplate{}, trace.SpanKindClient},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := TriggerTypeSpanKind(tt.template)
 			assert.Equal(t, tt.want, got)
 		})
 	}

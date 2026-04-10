@@ -3,6 +3,8 @@ package tracing
 import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
+
+	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
 // MessagingAttributes returns OTel semantic convention attributes for messaging spans.
@@ -53,5 +55,40 @@ func SourceTypeSpanKind(sourceType string) trace.SpanKind {
 	// Local/scheduled and unknown -> INTERNAL
 	default:
 		return trace.SpanKindInternal
+	}
+}
+
+// TriggerTypeSpanKind determines the correct span kind for a sensor trigger based on
+// the TriggerTemplate. It inspects which trigger field is non-nil to classify the trigger.
+//
+// CLIENT triggers make outbound requests to external services:
+//   - HTTP, K8s, ArgoWorkflow, AWSLambda, CustomTrigger (gRPC), Slack, OpenWhisk, Email
+//
+// PRODUCER triggers publish messages to messaging systems:
+//   - Kafka, NATS, Pulsar, AzureEventHubs, AzureServiceBus
+//
+// INTERNAL triggers perform local operations:
+//   - Log
+func TriggerTypeSpanKind(t *v1alpha1.TriggerTemplate) trace.SpanKind {
+	switch {
+	// Messaging producers
+	case t.Kafka != nil:
+		return trace.SpanKindProducer
+	case t.NATS != nil:
+		return trace.SpanKindProducer
+	case t.Pulsar != nil:
+		return trace.SpanKindProducer
+	case t.AzureEventHubs != nil:
+		return trace.SpanKindProducer
+	case t.AzureServiceBus != nil:
+		return trace.SpanKindProducer
+
+	// Local I/O
+	case t.Log != nil:
+		return trace.SpanKindInternal
+
+	// All other triggers are outbound API/HTTP/gRPC calls -> CLIENT
+	default:
+		return trace.SpanKindClient
 	}
 }
