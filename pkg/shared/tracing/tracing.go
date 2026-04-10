@@ -7,6 +7,7 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -117,4 +118,36 @@ func InjectTraceIntoCloudEvent(ctx context.Context, event *cloudevents.Event) {
 	carrier := &w3cCarrier{event: event}
 	prop := otel.GetTextMapPropagator()
 	prop.Inject(ctx, carrier)
+}
+
+// StartServerSpan starts a new span with SpanKindServer.
+func StartServerSpan(ctx context.Context, tracer trace.Tracer, name string, attrs ...attribute.KeyValue) (context.Context, trace.Span) {
+	return tracer.Start(ctx, name,
+		trace.WithSpanKind(trace.SpanKindServer),
+		trace.WithAttributes(attrs...),
+	)
+}
+
+// StartProducerSpan starts a new span with SpanKindProducer.
+func StartProducerSpan(ctx context.Context, tracer trace.Tracer, name string, attrs ...attribute.KeyValue) (context.Context, trace.Span) {
+	return tracer.Start(ctx, name,
+		trace.WithSpanKind(trace.SpanKindProducer),
+		trace.WithAttributes(attrs...),
+	)
+}
+
+// StartConsumerSpan starts a new span with SpanKindConsumer.
+func StartConsumerSpan(ctx context.Context, tracer trace.Tracer, name string, attrs ...attribute.KeyValue) (context.Context, trace.Span) {
+	return tracer.Start(ctx, name,
+		trace.WithSpanKind(trace.SpanKindConsumer),
+		trace.WithAttributes(attrs...),
+	)
+}
+
+// StartClientSpan starts a new span with SpanKindClient.
+func StartClientSpan(ctx context.Context, tracer trace.Tracer, name string, attrs ...attribute.KeyValue) (context.Context, trace.Span) {
+	return tracer.Start(ctx, name,
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(attrs...),
+	)
 }

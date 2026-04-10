@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -140,4 +141,64 @@ func TestRoundTrip(t *testing.T) {
 	assert.Equal(t, parentSpan.SpanContext().TraceID(), childSpan.SpanContext().TraceID())
 	// But different span IDs
 	assert.NotEqual(t, parentSpan.SpanContext().SpanID(), childSpan.SpanContext().SpanID())
+}
+
+func setupTestTracer(t *testing.T) (trace.Tracer, *tracetest.InMemoryExporter) {
+	t.Helper()
+	exporter := tracetest.NewInMemoryExporter()
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exporter))
+	t.Cleanup(func() { _ = tp.Shutdown(context.Background()) })
+	return tp.Tracer("test-span-kind"), exporter
+}
+
+func TestStartServerSpan(t *testing.T) {
+	tracer, exporter := setupTestTracer(t)
+
+	ctx, span := StartServerSpan(context.Background(), tracer, "server-op")
+	require.NotNil(t, ctx)
+	span.End()
+
+	spans := exporter.GetSpans()
+	require.Len(t, spans, 1)
+	assert.Equal(t, trace.SpanKindServer, spans[0].SpanKind)
+	assert.Equal(t, "server-op", spans[0].Name)
+}
+
+func TestStartProducerSpan(t *testing.T) {
+	tracer, exporter := setupTestTracer(t)
+
+	ctx, span := StartProducerSpan(context.Background(), tracer, "producer-op")
+	require.NotNil(t, ctx)
+	span.End()
+
+	spans := exporter.GetSpans()
+	require.Len(t, spans, 1)
+	assert.Equal(t, trace.SpanKindProducer, spans[0].SpanKind)
+	assert.Equal(t, "producer-op", spans[0].Name)
+}
+
+func TestStartConsumerSpan(t *testing.T) {
+	tracer, exporter := setupTestTracer(t)
+
+	ctx, span := StartConsumerSpan(context.Background(), tracer, "consumer-op")
+	require.NotNil(t, ctx)
+	span.End()
+
+	spans := exporter.GetSpans()
+	require.Len(t, spans, 1)
+	assert.Equal(t, trace.SpanKindConsumer, spans[0].SpanKind)
+	assert.Equal(t, "consumer-op", spans[0].Name)
+}
+
+func TestStartClientSpan(t *testing.T) {
+	tracer, exporter := setupTestTracer(t)
+
+	ctx, span := StartClientSpan(context.Background(), tracer, "client-op")
+	require.NotNil(t, ctx)
+	span.End()
+
+	spans := exporter.GetSpans()
+	require.Len(t, spans, 1)
+	assert.Equal(t, trace.SpanKindClient, spans[0].SpanKind)
+	assert.Equal(t, "client-op", spans[0].Name)
 }
