@@ -40,10 +40,11 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/ratelimit"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/pkg/shared/tracing"
 )
 
 var rateLimiters = make(map[string]ratelimit.Limiter)
@@ -413,19 +414,37 @@ func (sensorCtx *SensorContext) triggerOne(ctx context.Context, sensor *v1alpha1
 		sensorCtx.metrics.ActionDuration(sensor.Name, trigger.Template.Name, float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
 
-	// Extract trace context from event extensions and start a trigger span
+	// Extract trace context from event extensions
 	ctx = extractTraceFromEvents(ctx, eventsMapping)
-	ctx, span := otel.Tracer("argo-events-sensor").Start(ctx, "sensor.trigger",
-		trace.WithAttributes(
-			attribute.String("sensor.name", sensor.Name),
-			attribute.String("trigger.name", trigger.Template.Name),
-			attribute.StringSlice("dependencies", depNames),
-			attribute.StringSlice("event.ids", eventIDs),
-		),
+
+	// Create CONSUMER span for EventBus message consumption.
+	// Parent is the remote eventsource.publish PRODUCER span (via CloudEvent traceparent).
+	// This creates the eventsource -> sensor edge in the service graph.
+	busType, busAddr := extractSensorBusInfo(sensorCtx.eventBusConfig)
+	consumeAttrs := tracing.MessagingAttributes(busType, sensorCtx.eventBusSubject, "", busAddr)
+	consumeAttrs = append(consumeAttrs,
+		attribute.String("sensor.name", sensor.Name),
+		attribute.String("messaging.operation.type", "process"),
+		attribute.String("messaging.operation.name", "process"),
 	)
-	defer func() {
-		span.End()
-	}()
+	ctx, consumeSpan := tracing.StartConsumerSpan(ctx, otel.Tracer("argo-events-sensor"), "sensor.consume", consumeAttrs...)
+	defer consumeSpan.End()
+
+	// Create CLIENT span for trigger execution
+	triggerAttrs := []attribute.KeyValue{
+		attribute.String("sensor.name", sensor.Name),
+		attribute.String("trigger.name", trigger.Template.Name),
+		attribute.StringSlice("dependencies", depNames),
+		attribute.StringSlice("event.ids", eventIDs),
+	}
+	if trigger.Template.HTTP != nil {
+		triggerAttrs = append(triggerAttrs,
+			attribute.String("server.address", trigger.Template.HTTP.URL),
+			attribute.String("http.request.method", trigger.Template.HTTP.Method),
+		)
+	}
+	ctx, span := tracing.StartClientSpan(ctx, otel.Tracer("argo-events-sensor"), "sensor.trigger", triggerAttrs...)
+	defer span.End()
 
 	if err := sensortriggers.ApplyTemplateParameters(eventsMapping, &trigger); err != nil {
 		log.Errorf("failed to apply template parameters, %v", err)
@@ -587,6 +606,21 @@ func extractTraceFromEvents(ctx context.Context, eventsMapping map[string]*v1alp
 		}
 	}
 	return ctx
+}
+
+// extractSensorBusInfo reads the EventBus config and returns the bus type and server address.
+// busType is one of "kafka", "jetstream", "stan", or "unknown".
+func extractSensorBusInfo(bc *v1alpha1.BusConfig) (busType, serverAddr string) {
+	switch {
+	case bc != nil && bc.Kafka != nil:
+		return "kafka", bc.Kafka.URL
+	case bc != nil && bc.JetStream != nil:
+		return "jetstream", bc.JetStream.URL
+	case bc != nil && bc.NATS != nil:
+		return "stan", bc.NATS.URL
+	default:
+		return "unknown", ""
+	}
 }
 
 func unique(stringSlice []string) []string {
