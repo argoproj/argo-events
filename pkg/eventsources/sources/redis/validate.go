@@ -31,7 +31,10 @@ func validate(eventSource *v1alpha1.RedisEventSource) error {
 	if eventSource == nil {
 		return v1alpha1.ErrNilEventSource
 	}
-	if eventSource.HostAddress == "" {
+	if eventSource.URL != nil && eventSource.HostAddress != "" {
+		return fmt.Errorf("url and hostAddress are mutually exclusive")
+	}
+	if eventSource.URL == nil && eventSource.HostAddress == "" {
 		return fmt.Errorf("host address must be specified")
 	}
 	if eventSource.Channels == nil {

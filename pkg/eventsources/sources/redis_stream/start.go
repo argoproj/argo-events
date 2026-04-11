@@ -66,22 +66,34 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	redisEventSource := &el.EventSource
 
-	opt := &redis.Options{
-		Addr: redisEventSource.HostAddress,
-		DB:   int(redisEventSource.DB),
-	}
+	var opt *redis.Options
 
-	log.Info("retrieving password if it has been configured...")
-	if redisEventSource.Password != nil {
-		password, err := sharedutil.GetSecretFromVolume(redisEventSource.Password)
+	if redisEventSource.URL != nil {
+		urlStr, err := sharedutil.GetSecretFromVolume(redisEventSource.URL)
 		if err != nil {
-			return fmt.Errorf("failed to find the secret password %s, %w", redisEventSource.Password.Name, err)
+			return fmt.Errorf("failed to find the secret URL %s, %w", redisEventSource.URL.Name, err)
 		}
-		opt.Password = password
-	}
-
-	if redisEventSource.Username != "" {
-		opt.Username = redisEventSource.Username
+		parsedOpt, err := redis.ParseURL(urlStr)
+		if err != nil {
+			return fmt.Errorf("failed to parse redis URL, %w", err)
+		}
+		opt = parsedOpt
+	} else {
+		opt = &redis.Options{
+			Addr: redisEventSource.HostAddress,
+			DB:   int(redisEventSource.DB),
+		}
+		log.Info("retrieving password if it has been configured...")
+		if redisEventSource.Password != nil {
+			password, err := sharedutil.GetSecretFromVolume(redisEventSource.Password)
+			if err != nil {
+				return fmt.Errorf("failed to find the secret password %s, %w", redisEventSource.Password.Name, err)
+			}
+			opt.Password = password
+		}
+		if redisEventSource.Username != "" {
+			opt.Username = redisEventSource.Username
+		}
 	}
 
 	if redisEventSource.TLS != nil {
