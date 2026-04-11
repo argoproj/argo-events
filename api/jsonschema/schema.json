@@ -2458,6 +2458,10 @@
     "io.argoproj.events.v1alpha1.KafkaBus": {
       "description": "KafkaBus holds the KafkaBus EventBus information",
       "properties": {
+        "consumerBatchMaxWait": {
+          "description": "ConsumerBatchMaxWait sets the maximum time the Kafka sensor consumer will wait to fill a batch of messages before processing them. Accepts a Go duration string (e.g., \"1s\", \"100ms\", \"0\" to disable batching). When set to \"0\", messages are processed individually in real-time without batching. Defaults to \"1s\" if not specified.",
+          "type": "string"
+        },
         "consumerGroup": {
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.KafkaConsumerGroup",
           "description": "Consumer group for kafka client"
@@ -2476,6 +2480,10 @@
         },
         "topic": {
           "description": "Topic name, defaults to {namespace_name}-{eventbus_name}",
+          "type": "string"
+        },
+        "transactionRetryBackoff": {
+          "description": "TransactionRetryBackoff sets the backoff duration between Kafka transaction retry attempts when CONCURRENT_TRANSACTIONS errors occur. Lower values reduce latency at the cost of slightly higher CPU from more frequent retries. Accepts a Go duration string (e.g., \"10ms\", \"100ms\"). Defaults to \"10ms\". Use \"100ms\" for cross-region deployments with high coordinator latency.",
           "type": "string"
         },
         "url": {
@@ -3965,6 +3973,10 @@
         "errorOnFailedRound": {
           "description": "ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails. Once sensor state is set to `error`, no further triggers will be processed.",
           "type": "boolean"
+        },
+        "eventBusConsumerBatchMaxWait": {
+          "description": "EventBusConsumerBatchMaxWait overrides the EventBus-level consumerBatchMaxWait for this sensor. Same format: a Go duration string (e.g., \"1s\", \"100ms\") or \"0\" to disable batching. If not set, the EventBus-level value is used.",
+          "type": "string"
         },
         "eventBusName": {
           "description": "EventBusName references to a EventBus name. By default the value is \"default\"",
