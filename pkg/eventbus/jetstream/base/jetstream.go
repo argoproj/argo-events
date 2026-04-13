@@ -2,7 +2,6 @@ package base
 
 import (
 	"bytes"
-	"crypto/tls"
 	"fmt"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -77,9 +76,7 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 		opts = append(opts, nats.Secure(tlsConfig))
 		log.Info("Client-side TLS configuration enabled on the NATS connection")
 	} else {
-		opts = append(opts, nats.Secure(&tls.Config{
-			InsecureSkipVerify: true,
-		}))
+		log.Info("No TLS configuration provided, connecting without TLS")
 	}
 
 	switch stream.auth.Strategy {
