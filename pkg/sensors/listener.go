@@ -377,6 +377,13 @@ func (sensorCtx *SensorContext) triggerActions(ctx context.Context, sensor *v1al
 		go func() {
 			err := sensorCtx.triggerWithRateLimit(ctx, sensor, trigger, eventsMapping, depNames, eventIDs)
 			if err != nil {
+				// Fire-and-forget triggers (AtLeastOnce=false) do not go
+				// through the caller's DoWithRetry loop, so the caller
+				// cannot observe this failure and bump
+				// action_retries_failed_total. Record it here instead to
+				// keep the metric consistent with the AtLeastOnce=true
+				// path. See argoproj/argo-events#3947.
+				sensorCtx.metrics.ActionRetriesFailed(sensor.Name, trigger.Template.Name)
 				// Log the error, and let it continue
 				logger := logging.FromContext(ctx)
 				logger.Errorw("Failed to execute a trigger", zap.Error(err), zap.String(logging.LabelTriggerName, trigger.Template.Name))
