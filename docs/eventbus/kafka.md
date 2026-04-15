@@ -125,6 +125,21 @@ named as follows.
 | trigger | `{spec.kafka.topic}-{sensor-name}-trigger` |
 | action  | `{spec.kafka.topic}-{sensor-name}-action`  |
 
+
+### Understanding event, trigger and action topics
+
+Argo Events uses three types of topics in the Kafka EventBus:
+
+- **Event topic** – the primary topic where EventSource components publish events. Each EventBus must have an event topic.
+- **Trigger topic** – each Sensor has a trigger topic used by the Sensor to dispatch trigger events once conditions are satisfied. The default trigger topic name is `{namespace}-{sensor-name}-trigger`.
+- **Action topic** – each Sensor has an action topic used by the Sensor to publish action events (for example, tasks triggered by the Sensor). The default action topic name is `{namespace}-{sensor-name}-action`.
+
+If the Kafka cluster has `auto.create.topics.enable` set to `true`, these topics are created automatically. Otherwise, you must create them manually.
+
+### Partition recommendations
+
+To take advantage of horizontal scaling, ensure each topic has more than one partition. Ideally, specify at least as many partitions as the number of replicas you plan to run for EventSources or Sensors. Multiple partitions allow Kafka consumers to process events concurrently across replicas. When manually creating topics, choose a partition count that accommodates your expected maximum number of Sensor replicas.
+
 ## Horizontal Scaling and Leader Election
 
 Sensors that use a Kafka EventBus can scale horizontally. Specifying replicas
