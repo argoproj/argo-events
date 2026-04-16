@@ -27,7 +27,7 @@ const (
 	InfoLevel            = "info"
 	DebugLevel           = "debug"
 	ErrorLevel           = "error"
-	WarnLevel        = "warn"
+	WarnLevel            = "warn"
 )
 
 // NewArgoEventsLogger returns a new ArgoEventsLogger
@@ -78,10 +78,10 @@ func ConfigureLogLevelLogger(logLevel string) zap.Config {
 		logConfig.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
 	case DebugLevel:
 		logConfig.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
-	
-			case WarnLevel:
+
+	case WarnLevel:
 		logConfig.Level = zap.NewAtomicLevelAt(zap.WarnLevel)
-default:
+	default:
 		logConfig.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
 	}
 	return logConfig
