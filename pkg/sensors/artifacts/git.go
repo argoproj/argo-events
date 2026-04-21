@@ -17,11 +17,14 @@ limitations under the License.
 package artifacts
 
 import (
+	"context"
 	"fmt"
+	nethttp "net/http"
 	"os"
 	"path"
 	"strings"
 
+	ghinstallation "github.com/bradleyfalzon/ghinstallation/v2"
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -107,6 +110,24 @@ func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 		return &http.BasicAuth{
 			Username: username,
 			Password: password,
+		}, nil
+	}
+	if g.artifact.GithubApp != nil {
+		privateKey, err := sharedutil.GetSecretFromVolume(g.artifact.GithubApp.PrivateKey)
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve github app private key, %w", err)
+		}
+		itr, err := ghinstallation.New(nethttp.DefaultTransport, g.artifact.GithubApp.AppID, g.artifact.GithubApp.InstallationID, []byte(privateKey))
+		if err != nil {
+			return nil, fmt.Errorf("failed to create github app transport, %w", err)
+		}
+		token, err := itr.Token(context.Background())
+		if err != nil {
+			return nil, fmt.Errorf("failed to get github app installation token, %w", err)
+		}
+		return &http.BasicAuth{
+			Username: "x-access-token",
+			Password: token,
 		}, nil
 	}
 	if g.artifact.SSHKeySecret != nil {
