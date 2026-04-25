@@ -217,6 +217,19 @@ func newKubernetesElector(namespace string, leasename string, hostname string) (
 	}, nil
 }
 
+func durationFromEnv (envVar string, defaultDuration time.Duration) time.Duration {
+	variable, exists := os.LookupEnv(envVar)
+	if !exists {
+		return defaultDuration
+	}
+	d, err := time.ParseDuration(variable)
+	if err != nil {
+		 fmt.Fprintf(os.Stderr, "invalid value for %s, using default\n", envVar)
+		 return defaultDuration
+	}
+	return d
+}
+
 func (e *kubernetesElector) RunOrDie(ctx context.Context, callbacks LeaderCallbacks) {
 	logger := logging.FromContext(ctx)
 
