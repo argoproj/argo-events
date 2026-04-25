@@ -71,7 +71,9 @@ Jetstream has the concept of a Stream, and Subjects (i.e. topics) which are used
 
 ### Exotic
 
-To use an existing JetStream service, follow the example below.
+To use an existing JetStream service instead of having Argo Events manage one,
+use `jetstreamExotic`. This is useful when you already have a NATS JetStream
+cluster and want Argo Events to connect to it as a client.
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -80,9 +82,67 @@ metadata:
   name: default
 spec:
   jetstreamExotic:
-    url: nats://xxxxx:xxx
+    url: nats://my-nats-server:4222
     accessSecret:
       name: my-secret-name
       key: secret-key
     streamConfig: ""
 ```
+
+#### Authentication
+
+The `accessSecret` field references a Kubernetes Secret containing the
+credentials used to authenticate with the NATS server. When specified, Argo
+Events uses basic (password) authentication. The Secret key should contain the
+**NATS password or token** as a plain string.
+
+For example, create the Secret:
+
+```bash
+kubectl create secret generic nats-auth \
+  --from-literal=password=my-nats-password \
+  -n argo-events
+```
+
+Then reference it in the EventBus:
+
+```yaml
+spec:
+  jetstreamExotic:
+    url: nats://my-nats-server:4222
+    accessSecret:
+      name: nats-auth
+      key: password
+```
+
+If your NATS server does not require authentication (e.g., running in a
+service mesh that provides mTLS, or in a development environment), you can
+omit the `accessSecret` field entirely.
+
+#### TLS
+
+When `tls` is configured, Argo Events connects to the NATS server over TLS:
+
+```yaml
+spec:
+  jetstreamExotic:
+    url: nats://my-nats-server:4222
+    tls:
+      caCertSecret:
+        name: nats-tls
+        key: ca.crt
+      clientCertSecret:
+        name: nats-tls
+        key: tls.crt
+      clientKeySecret:
+        name: nats-tls
+        key: tls.key
+```
+
+#### Stream Configuration
+
+The `streamConfig` field allows you to override the default JetStream stream
+settings (e.g., retention policy, max age). If left empty, Argo Events uses
+its default stream configuration. See the
+[NATS JetStream stream configuration](https://docs.nats.io/nats-concepts/jetstream/streams#configuration)
+for available options.
