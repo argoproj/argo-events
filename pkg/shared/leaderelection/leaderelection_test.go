@@ -52,14 +52,14 @@ func TestLeaderElectionWithKubernetesElector(t *testing.T) {
 }
 
 func TestDurationFromEnv(t *testing.T) {
-    d := durationFromEnv("SOME_VAR", 5*time.Second)
-    assert.Equal(t, 5*time.Second, d)
+	d := durationFromEnv("SOME_VAR", 5*time.Second)
+	assert.Equal(t, 5*time.Second, d)
 
-    t.Setenv("SOME_VAR", "10s")
-    d = durationFromEnv("SOME_VAR", 5*time.Second)
-    assert.Equal(t, 10*time.Second, d)
+	t.Setenv("SOME_VAR", "10s")
+	d = durationFromEnv("SOME_VAR", 5*time.Second)
+	assert.Equal(t, 10*time.Second, d)
 
-    t.Setenv("SOME_VAR", "abc")
-    d = durationFromEnv("SOME_VAR", 5*time.Second)
-    assert.Equal(t, 5*time.Second, d)
+	t.Setenv("SOME_VAR", "abc")
+	d = durationFromEnv("SOME_VAR", 5*time.Second)
+	assert.Equal(t, 5*time.Second, d)
 }

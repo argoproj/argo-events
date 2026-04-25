@@ -217,15 +217,15 @@ func newKubernetesElector(namespace string, leasename string, hostname string) (
 	}, nil
 }
 
-func durationFromEnv (envVar string, defaultDuration time.Duration) time.Duration {
+func durationFromEnv(envVar string, defaultDuration time.Duration) time.Duration {
 	variable, exists := os.LookupEnv(envVar)
 	if !exists {
 		return defaultDuration
 	}
 	d, err := time.ParseDuration(variable)
 	if err != nil {
-		 fmt.Fprintf(os.Stderr, "invalid value for %s, using default\n", envVar)
-		 return defaultDuration
+		fmt.Fprintf(os.Stderr, "invalid value for %s, using default\n", envVar)
+		return defaultDuration
 	}
 	return d
 }
@@ -263,9 +263,9 @@ func (e *kubernetesElector) RunOrDie(ctx context.Context, callbacks LeaderCallba
 			leaderelection.RunOrDie(ctx, leaderelection.LeaderElectionConfig{
 				Lock:            lock,
 				ReleaseOnCancel: true,
-				LeaseDuration:   durationFromEnv(aev1.EnvVarLeaderElectionLeaseDuration, 5 * time.Second),
-				RenewDeadline:   durationFromEnv(aev1.EnvVarLeaderElectionRenewDeadline, 2 * time.Second),
-				RetryPeriod:     durationFromEnv(aev1.EnvVarLeaderElectionRetryPeriod, 1 * time.Second),
+				LeaseDuration:   durationFromEnv(aev1.EnvVarLeaderElectionLeaseDuration, 5*time.Second),
+				RenewDeadline:   durationFromEnv(aev1.EnvVarLeaderElectionRenewDeadline, 2*time.Second),
+				RetryPeriod:     durationFromEnv(aev1.EnvVarLeaderElectionRetryPeriod, 1*time.Second),
 				Callbacks: leaderelection.LeaderCallbacks{
 					OnStartedLeading: callbacks.OnStartedLeading,
 					OnStoppedLeading: callbacks.OnStoppedLeading,
