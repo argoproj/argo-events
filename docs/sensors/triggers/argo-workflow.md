@@ -42,6 +42,33 @@ Note: You will need to have [Argo Workflows](https://argoproj.github.io/argo-wor
 
 1. List the workflow using `argo list`.
 
+## Triggering an existing WorkflowTemplate
+
+If your workflow logic already lives in a `WorkflowTemplate` (deployed
+independently, for example via Argo Workflows itself), the sensor doesn't
+need to redeclare the steps inline. The trigger just submits a `Workflow`
+that references the template via `workflowTemplateRef`:
+
+```yaml
+triggers:
+  - template:
+      name: argo-workflow-trigger
+      argoWorkflow:
+        operation: submit
+        source:
+          resource:
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: workflow-template-print-message-
+            spec:
+              workflowTemplateRef:
+                name: workflow-template-print-message
+```
+
+A complete sensor + `WorkflowTemplate` pair is available at
+[examples/sensors/sensor-to-existing-workflow-template.yaml](https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/sensor-to-existing-workflow-template.yaml).
+
 ## Parameterization
 
 Similar to other type of triggers, sensor offers parameterization for the Argo workflow trigger. Parameterization is specially useful when
