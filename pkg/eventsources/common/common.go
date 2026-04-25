@@ -102,3 +102,20 @@ func WithHTTPHeaders(headers http.Header) Option {
 		return nil
 	}
 }
+
+// WithKafkaHeaders extracts W3C trace context headers (traceparent/tracestate)
+// from a Kafka record's headers map and sets them as CloudEvent extensions.
+// This enables trace propagation from Kafka producers (e.g. franz-go via
+// otel.GetTextMapPropagator().Inject) into the eventbus dispatch chain
+// where SpanFromCloudEvent will pick them up as the parent span.
+func WithKafkaHeaders(headers map[string]string) Option {
+	return func(e *event.Event) error {
+		if tp, ok := headers["traceparent"]; ok && tp != "" {
+			e.SetExtension("traceparent", tp)
+		}
+		if ts, ok := headers["tracestate"]; ok && ts != "" {
+			e.SetExtension("tracestate", ts)
+		}
+		return nil
+	}
+}
