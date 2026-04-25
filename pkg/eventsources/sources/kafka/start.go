@@ -288,7 +288,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 
 		kafkaID := genUniqueID(el.GetEventSourceName(), el.GetEventName(), kafkaEventSource.URL, msg.Topic, msg.Partition, msg.Offset)
 
-		if err = dispatch(eventBody, eventsourcecommon.WithID(kafkaID)); err != nil {
+		if err = dispatch(eventBody, eventsourcecommon.WithID(kafkaID), eventsourcecommon.WithKafkaHeaders(headers)); err != nil {
 			return fmt.Errorf("failed to dispatch a Kafka event, %w", err)
 		}
 		return nil
@@ -472,7 +472,7 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 
 	messageID := genUniqueID(consumer.eventSourceName, consumer.eventName, consumer.kafkaEventSource.URL, message.Topic, message.Partition, message.Offset)
 
-	if err = consumer.dispatch(eventBody, eventsourcecommon.WithID(messageID)); err != nil {
+	if err = consumer.dispatch(eventBody, eventsourcecommon.WithID(messageID), eventsourcecommon.WithKafkaHeaders(headers)); err != nil {
 		return fmt.Errorf("failed to dispatch a kafka event, %w", err)
 	}
 	session.MarkMessage(message, "")
