@@ -263,9 +263,9 @@ func (e *kubernetesElector) RunOrDie(ctx context.Context, callbacks LeaderCallba
 			leaderelection.RunOrDie(ctx, leaderelection.LeaderElectionConfig{
 				Lock:            lock,
 				ReleaseOnCancel: true,
-				LeaseDuration:   5 * time.Second,
-				RenewDeadline:   2 * time.Second,
-				RetryPeriod:     1 * time.Second,
+				LeaseDuration:   durationFromEnv(aev1.EnvVarLeaderElectionLeaseDuration, 5 * time.Second),
+				RenewDeadline:   durationFromEnv(aev1.EnvVarLeaderElectionRenewDeadline, 2 * time.Second),
+				RetryPeriod:     durationFromEnv(aev1.EnvVarLeaderElectionRetryPeriod, 1 * time.Second),
 				Callbacks: leaderelection.LeaderCallbacks{
 					OnStartedLeading: callbacks.OnStartedLeading,
 					OnStoppedLeading: callbacks.OnStoppedLeading,
