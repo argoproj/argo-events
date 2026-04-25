@@ -67,7 +67,7 @@ require (
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/pkg/sftp v1.13.10
 	github.com/prometheus/client_golang v1.23.2
-	github.com/rabbitmq/amqp091-go v1.10.0
+	github.com/rabbitmq/amqp091-go v1.11.0
 	github.com/radovskyb/watcher v1.0.7
 	github.com/riferrei/srclient v0.7.4
 	github.com/robfig/cron/v3 v3.0.1
