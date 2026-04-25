@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -49,4 +50,17 @@ func TestLeaderElectionWithKubernetesElector(t *testing.T) {
 		_, ok := elector.(*kubernetesElector)
 		assert.True(t, ok)
 	}
+}
+
+func TestDurationFromEnv(t *testing.T) {
+	d := durationFromEnv("SOME_VAR", 5*time.Second)
+	assert.Equal(t, 5*time.Second, d)
+
+	t.Setenv("SOME_VAR", "10s")
+	d = durationFromEnv("SOME_VAR", 5*time.Second)
+	assert.Equal(t, 10*time.Second, d)
+
+	t.Setenv("SOME_VAR", "abc")
+	d = durationFromEnv("SOME_VAR", 5*time.Second)
+	assert.Equal(t, 5*time.Second, d)
 }
