@@ -31,6 +31,10 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/riferrei/srclient"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -40,6 +44,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/pkg/metrics"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
+	"github.com/argoproj/argo-events/pkg/shared/tracing"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
@@ -266,6 +271,29 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 			headers[string(recordHeader.Key)] = string(recordHeader.Value)
 		}
 
+		// Extract upstream W3C trace context from the Kafka record headers
+		parentCtx := otel.GetTextMapPropagator().Extract(ctx, propagation.MapCarrier(headers))
+
+		// Start an eventsource.consume CONSUMER span as the parent for the
+		// downstream eventsource.publish PRODUCER span emitted in eventing.go.
+		spanCtx, consumeSpan := tracing.StartConsumerSpan(parentCtx, otel.Tracer("argo-events-eventsource"), "eventsource.consume",
+			attribute.String("eventsource.name", el.GetEventSourceName()),
+			attribute.String("eventsource.type", "kafka"),
+			attribute.String("messaging.system", "kafka"),
+			attribute.String("messaging.destination.name", msg.Topic),
+			attribute.String("messaging.operation.type", "receive"),
+			attribute.String("messaging.kafka.message.key", string(msg.Key)),
+			attribute.Int("messaging.kafka.message.partition", int(msg.Partition)),
+			attribute.Int64("messaging.kafka.message.offset", msg.Offset),
+		)
+		defer consumeSpan.End()
+
+		// Re-inject the CONSUMER span's trace context into the headers map so
+		// WithKafkaHeaders writes the CONSUMER traceparent as the CloudEvent
+		// extension. eventing.go's SpanFromCloudEvent then makes the
+		// eventsource.publish PRODUCER span a child of CONSUMER.
+		otel.GetTextMapPropagator().Inject(spanCtx, propagation.MapCarrier(headers))
+
 		eventData.Headers = headers
 
 		if kafkaEventSource.JSONBody {
@@ -289,6 +317,8 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 		kafkaID := genUniqueID(el.GetEventSourceName(), el.GetEventName(), kafkaEventSource.URL, msg.Topic, msg.Partition, msg.Offset)
 
 		if err = dispatch(eventBody, eventsourcecommon.WithID(kafkaID), eventsourcecommon.WithKafkaHeaders(headers)); err != nil {
+			consumeSpan.RecordError(err)
+			consumeSpan.SetStatus(codes.Error, err.Error())
 			return fmt.Errorf("failed to dispatch a Kafka event, %w", err)
 		}
 		return nil
@@ -450,6 +480,29 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 		headers[string(recordHeader.Key)] = string(recordHeader.Value)
 	}
 
+	// Extract upstream W3C trace context from the Kafka record headers
+	parentCtx := otel.GetTextMapPropagator().Extract(session.Context(), propagation.MapCarrier(headers))
+
+	// Start an eventsource.consume CONSUMER span as the parent for the
+	// downstream eventsource.publish PRODUCER span emitted in eventing.go.
+	spanCtx, consumeSpan := tracing.StartConsumerSpan(parentCtx, otel.Tracer("argo-events-eventsource"), "eventsource.consume",
+		attribute.String("eventsource.name", consumer.eventSourceName),
+		attribute.String("eventsource.type", "kafka"),
+		attribute.String("messaging.system", "kafka"),
+		attribute.String("messaging.destination.name", message.Topic),
+		attribute.String("messaging.operation.type", "receive"),
+		attribute.String("messaging.kafka.message.key", string(message.Key)),
+		attribute.Int("messaging.kafka.message.partition", int(message.Partition)),
+		attribute.Int64("messaging.kafka.message.offset", message.Offset),
+	)
+	defer consumeSpan.End()
+
+	// Re-inject the CONSUMER span's trace context into the headers map so
+	// WithKafkaHeaders writes the CONSUMER traceparent as the CloudEvent
+	// extension. eventing.go's SpanFromCloudEvent then makes the
+	// eventsource.publish PRODUCER span a child of CONSUMER.
+	otel.GetTextMapPropagator().Inject(spanCtx, propagation.MapCarrier(headers))
+
 	eventData.Headers = headers
 
 	if consumer.kafkaEventSource.JSONBody {
@@ -473,6 +526,8 @@ func (consumer *Consumer) processOne(session sarama.ConsumerGroupSession, messag
 	messageID := genUniqueID(consumer.eventSourceName, consumer.eventName, consumer.kafkaEventSource.URL, message.Topic, message.Partition, message.Offset)
 
 	if err = consumer.dispatch(eventBody, eventsourcecommon.WithID(messageID), eventsourcecommon.WithKafkaHeaders(headers)); err != nil {
+		consumeSpan.RecordError(err)
+		consumeSpan.SetStatus(codes.Error, err.Error())
 		return fmt.Errorf("failed to dispatch a kafka event, %w", err)
 	}
 	session.MarkMessage(message, "")
