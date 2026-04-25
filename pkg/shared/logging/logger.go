@@ -26,6 +26,7 @@ const (
 	TimestampFormat      = "2006-01-02 15:04:05"
 	InfoLevel            = "info"
 	DebugLevel           = "debug"
+	WarnLevel            = "warn"
 	ErrorLevel           = "error"
 )
 
@@ -77,6 +78,8 @@ func ConfigureLogLevelLogger(logLevel string) zap.Config {
 		logConfig.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
 	case DebugLevel:
 		logConfig.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+	case WarnLevel:
+		logConfig.Level = zap.NewAtomicLevelAt(zap.WarnLevel)
 	default:
 		logConfig.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
 	}
