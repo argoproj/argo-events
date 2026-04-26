@@ -993,6 +993,9 @@ type GitArtifact struct {
 	// Whether to ignore host key
 	// +optional
 	InsecureIgnoreHostKey bool `json:"insecureIgnoreHostKey,omitempty" protobuf:"bytes,10,opt,name=insecureIgnoreHostKey"`
+	// GithubApp holds the GitHub App credentials for authentication
+	// +optional
+	GithubApp *GithubAppCreds `json:"githubApp,omitempty" protobuf:"bytes,11,opt,name=githubApp"`
 }
 
 // GitRemoteConfig contains the configuration of a Git remote

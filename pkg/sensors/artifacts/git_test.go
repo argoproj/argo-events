@@ -90,3 +90,26 @@ func TestGetBranchOrTag(t *testing.T) {
 		assert.Equal(t, "refs/something/weird/or/specific", br.Branch.String())
 	})
 }
+
+func TestGetGitAuthGithubApp(t *testing.T) {
+	t.Run("github app creds set", func(t *testing.T) {
+		reader := &GitArtifactReader{
+			artifact: &v1alpha1.GitArtifact{
+				URL: "https://github.com/org/repo",
+				GithubApp: &v1alpha1.GithubAppCreds{
+					PrivateKey: &corev1.SecretKeySelector{
+						Key: "private-key",
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: "github-app-secret",
+						},
+					},
+					AppID:          12345,
+					InstallationID: 67890,
+				},
+			},
+		}
+		assert.NotNil(t, reader.artifact.GithubApp)
+		assert.Equal(t, int64(12345), reader.artifact.GithubApp.AppID)
+		assert.Equal(t, int64(67890), reader.artifact.GithubApp.InstallationID)
+	})
+}
