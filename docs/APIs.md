@@ -1126,6 +1126,72 @@ RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.AWSMSKIAMConfig">
+
+AWSMSKIAMConfig
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>)
+</p>
+
+<p>
+
+<p>
+
+AWSMSKIAMConfig holds configuration for SASL/OAUTHBEARER authentication
+against Amazon MSK using IAM credentials (includes IRSA / web identity
+token support).
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+</th>
+
+<th>
+
+Description
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>region</code></br> <em> string </em>
+</td>
+
+<td>
+
+<p>
+
+Region is the AWS region of the MSK cluster (e.g. “us-east-1”).
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.Amount">
 
 Amount
@@ -12433,6 +12499,30 @@ SchemaRegistryConfig </a> </em>
 <p>
 
 Schema Registry configuration for consumer message with Avro format
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>awsMskIamAuth</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AWSMSKIAMConfig"> AWSMSKIAMConfig </a>
+</em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+AWSMSKIAMAuth configures SASL/OAUTHBEARER authentication using AWS IAM
+credentials, supporting IRSA (pod web-identity token), instance-profile,
+and static env credentials. When set, TLS is enabled automatically and
+the SASL config field is ignored.
 </p>
 
 </td>

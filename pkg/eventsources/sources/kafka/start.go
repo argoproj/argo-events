@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/IBM/sarama"
+	saslsigner "github.com/aws/aws-msk-iam-sasl-signer-go/signer"
 	"github.com/riferrei/srclient"
 	"go.uber.org/zap"
 
@@ -359,6 +360,17 @@ func getSaramaConfig(kafkaEventSource *v1alpha1.KafkaEventSource, log *zap.Sugar
 		config.Net.SASL.Password = password
 	}
 
+	if kafkaEventSource.AWSMSKIAMAuth != nil {
+		config.Net.SASL.Enable = true
+		config.Net.SASL.Mechanism = sarama.SASLTypeOAuth
+		config.Net.SASL.TokenProvider = &mskIAMTokenProvider{region: kafkaEventSource.AWSMSKIAMAuth.Region}
+		// MSK IAM authentication always requires TLS
+		config.Net.TLS.Enable = true
+		if config.Net.TLS.Config == nil {
+			config.Net.TLS.Config = &tls.Config{MinVersion: tls.VersionTLS12}
+		}
+	}
+
 	if kafkaEventSource.TLS != nil {
 		tlsConfig, err := sharedutil.GetTLSConfig(kafkaEventSource.TLS)
 		if err != nil {
@@ -499,4 +511,21 @@ func genUniqueID(eventSourceName, eventName, kafkaURL, topic string, partition i
 	kafkaID := fmt.Sprintf("%s:%s:%s:%s:%d:%d", eventSourceName, eventName, strings.Split(kafkaURL, ",")[0], topic, partition, offset)
 
 	return kafkaID
+}
+
+// mskIAMTokenProvider implements sarama.AccessTokenProvider using AWS MSK IAM signing.
+// It uses the AWS SDK default credential chain, which automatically handles IRSA
+// (EKS pod web-identity tokens via AWS_WEB_IDENTITY_TOKEN_FILE / AWS_ROLE_ARN),
+// EC2 instance profiles, and static environment credentials.
+type mskIAMTokenProvider struct {
+	region string
+}
+
+func (p *mskIAMTokenProvider) Token() (*sarama.AccessToken, error) {
+	ctx := context.Background()
+	token, _, err := saslsigner.GenerateAuthToken(ctx, p.region)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate MSK IAM auth token: %w", err)
+	}
+	return &sarama.AccessToken{Token: token}, nil
 }
