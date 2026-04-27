@@ -2,6 +2,7 @@ package base
 
 import (
 	"strings"
+	"time"
 
 	"github.com/IBM/sarama"
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -57,6 +58,19 @@ func (k *Kafka) Config() (*sarama.Config, error) {
 	config.Producer.Idempotent = true
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Net.MaxOpenRequests = 1
+
+	// Transaction retry tuning — configurable via EventBus CRD.
+	// Default 10ms is optimized for single-region deployments where the
+	// Kafka broker resolves CONCURRENT_TRANSACTIONS within milliseconds.
+	txnRetryBackoff := 10 * time.Millisecond
+	if k.config.TransactionRetryBackoff != "" {
+		if d, err := time.ParseDuration(k.config.TransactionRetryBackoff); err == nil && d > 0 {
+			txnRetryBackoff = d
+		}
+	}
+	config.Producer.Transaction.Retry.Backoff = txnRetryBackoff
+	config.Producer.Transaction.Retry.Max = 100
+
 	// Partitioner selection
 	switch k.config.Partitioner {
 	case "hash":

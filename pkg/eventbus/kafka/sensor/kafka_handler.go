@@ -22,6 +22,10 @@ type KafkaHandler struct {
 	OffsetManager sarama.OffsetManager
 	TriggerTopic  string
 
+	// BatchMaxWait is the maximum time to wait for a batch of messages.
+	// When set to 0, messages are processed individually in real-time.
+	BatchMaxWait time.Duration
+
 	// handler functions
 	// one function for each consumed topic, return messages, an
 	// offset and an optional function that will in a transaction
@@ -137,11 +141,87 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 		return fmt.Errorf("unrecognized topic %s or partition %d", claim.Topic(), claim.Partition())
 	}
 
-	// Batch messsages from the claim message channel. A message will
-	// be produced to the batched channel if the max batch size is
-	// reached or the time limit has elapsed, whichever happens
-	// first. Batching helps optimize kafka transactions.
-	batch := base.Batch(100, 1*time.Second, claim.Messages())
+	if h.BatchMaxWait == 0 {
+		return h.consumeClaimRealtime(session, claim, handler, checkpoint)
+	}
+	return h.consumeClaimBatched(session, claim, handler, checkpoint)
+}
+
+// consumeClaimRealtime processes messages one at a time without batching,
+// providing the lowest possible latency.
+func (h *KafkaHandler) consumeClaimRealtime(
+	session sarama.ConsumerGroupSession,
+	claim sarama.ConsumerGroupClaim,
+	handler func(*sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()),
+	checkpoint *Checkpoint,
+) error {
+	for {
+		select {
+		case msg := <-claim.Messages():
+			if msg == nil {
+				continue
+			}
+
+			key := string(msg.Key)
+
+			h.Logger.Infow("Received message",
+				zap.String("topic", msg.Topic),
+				zap.String("key", key),
+				zap.Int32("partition", msg.Partition),
+				zap.Int64("offset", msg.Offset))
+
+			if checkpoint.Init {
+				session.MarkOffset(msg.Topic, msg.Partition, msg.Offset, "")
+				session.Commit()
+				checkpoint.Init = false
+			}
+
+			if checkpoint.Skip(key, msg.Offset) {
+				h.Logger.Infof("Skipping trigger '%s' (%d<%d)", key, msg.Offset, checkpoint.Offsets[key])
+				continue
+			}
+
+			messages, offset, f := handler(msg)
+			if msg.Topic == h.TriggerTopic && len(messages) > 0 {
+				checkpoint.Set(key, msg.Offset+1)
+			}
+
+			transaction := &KafkaTransaction{
+				Logger:        h.Logger,
+				Producer:      h.Producer,
+				GroupName:     h.GroupName,
+				Topic:         claim.Topic(),
+				Partition:     claim.Partition(),
+				ResetOffset:   msg.Offset,
+				ResetMetadata: checkpoint.Metadata(),
+			}
+
+			func() {
+				h.Lock()
+				defer h.Unlock()
+				if err := transaction.Commit(session, messages, offset, checkpoint.Metadata()); err != nil {
+					h.Logger.Errorw("Transaction error", zap.Error(err))
+				}
+			}()
+
+			if f != nil {
+				go f()
+			}
+		case <-session.Context().Done():
+			return nil
+		}
+	}
+}
+
+// consumeClaimBatched processes messages in batches, amortizing Kafka
+// transaction overhead across multiple messages for better throughput.
+func (h *KafkaHandler) consumeClaimBatched(
+	session sarama.ConsumerGroupSession,
+	claim sarama.ConsumerGroupClaim,
+	handler func(*sarama.ConsumerMessage) ([]*sarama.ProducerMessage, int64, func()),
+	checkpoint *Checkpoint,
+) error {
+	batch := base.Batch(100, h.BatchMaxWait, claim.Messages())
 
 	for {
 		select {

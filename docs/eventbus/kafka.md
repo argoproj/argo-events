@@ -90,6 +90,71 @@ When starting up a new group do we want to start from the oldest event
 
 Producer partitioning strategy. Supported values: `random`, `hash`, `roundrobin`, `manual`. Defaults to `random`.
 
+### consumerBatchMaxWait
+
+Sets the maximum time the sensor consumer will wait to fill a batch of
+messages before processing them. Accepts a Go duration string (e.g.,
+`1s`, `500ms`, `100ms`). Set to `0` to disable batching and process
+messages individually in real-time. Defaults to `1s`.
+
+```yaml
+spec:
+  kafka:
+    url: kafka:9092
+    consumerBatchMaxWait: "100ms"  # or "0" for real-time
+```
+
+**Performance considerations:**
+
+- Higher values improve throughput by amortizing Kafka transaction
+  overhead across more messages, but increase latency.
+- Lower values reduce latency at the cost of more frequent transactions.
+- Setting to `0` provides the lowest latency (real-time processing).
+  Single-dependency triggers bypass the action topic entirely in this
+  mode, invoking actions directly without Kafka transactions. Multi-dependency
+  triggers still use the trigger topic for dependency aggregation but skip
+  the action topic once all dependencies are satisfied.
+
+This value can be overridden per Sensor using the
+`eventBusConsumerBatchMaxWait` field in the Sensor spec:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: my-sensor
+spec:
+  eventBusConsumerBatchMaxWait: "0"  # real-time for this sensor only
+```
+
+If both are set, the Sensor-level value takes precedence over the
+EventBus-level value.
+
+### transactionRetryBackoff
+
+Sets the backoff duration between Kafka transaction retry attempts when
+`CONCURRENT_TRANSACTIONS` errors occur. The Kafka broker returns this error
+when a new transaction starts before the previous one is fully finalized.
+Lower values reduce latency at the cost of slightly higher CPU from more
+frequent retries. Accepts a Go duration string. Defaults to `10ms`.
+
+```yaml
+spec:
+  kafka:
+    url: kafka:9092
+    transactionRetryBackoff: "10ms"  # default, optimized for single-region
+```
+
+For cross-region deployments where the transaction coordinator has higher
+latency, use a larger value:
+
+```yaml
+spec:
+  kafka:
+    url: kafka:9092
+    transactionRetryBackoff: "100ms"  # cross-region deployments
+```
+
 ## Security
 
 You can enable TLS or SASL authentication, see above for configuration
@@ -104,6 +169,12 @@ the Kafka `auto.create.topics.enable` cluster configuration is set to true,
 otherwise it is your responsibility to create these topics. If a topic does
 not exist and cannot be automatically created, the EventSource and/or Sensor
 will exit with an error.
+
+> **Note:** While all three topics are always created, the action topic is
+> bypassed in common flows. Single-dependency triggers invoke actions directly
+> without producing to the action topic. Multi-dependency triggers also skip
+> the action topic once all dependencies are satisfied. The action topic
+> remains as a fallback and is still consumed by the Sensor.
 
 If you want to take advantage of the horizontal scaling enabled by the Kafka
 EventBus be sure to create topics with more than one partition.
