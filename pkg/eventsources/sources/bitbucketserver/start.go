@@ -297,7 +297,7 @@ func (router *Router) manageBitbucketServerWebhooks(ctx context.Context, bitbuck
 			case <-ticker.C:
 				err = router.applyBitbucketServerWebhooks(bitbucketServerEventSource)
 				if err != nil {
-					router.route.Logger.Errorf("re-applying bitbucketserver webhooks failed: %w", err)
+					router.route.Logger.Errorf("re-applying bitbucketserver webhooks failed: %v", err)
 				}
 			}
 		}
