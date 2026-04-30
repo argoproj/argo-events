@@ -6,6 +6,7 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/event"
+	natslib "github.com/nats-io/nats.go"
 )
 
 type Option func(*event.Event) error
@@ -118,4 +119,39 @@ func WithKafkaHeaders(headers map[string]string) Option {
 		}
 		return nil
 	}
+}
+
+// WithNATSHeaders extracts W3C trace context headers (traceparent/tracestate)
+// from a NATS message's headers and sets them as CloudEvent extensions.
+// This enables trace propagation from NATS/JetStream producers (e.g. nats.go
+// via otel.GetTextMapPropagator().Inject into nats.Header) into the eventbus
+// dispatch chain where SpanFromCloudEvent will pick them up as the parent
+// span.
+//
+// nats.Header.Set does NOT canonicalize keys (unlike http.Header), so
+// lookups are done case-sensitively for both lowercase ("traceparent",
+// emitted by OTel propagators) and Title case ("Traceparent", emitted
+// by callers using textproto helpers). Safe to call with a nil header.
+func WithNATSHeaders(headers natslib.Header) Option {
+	return func(e *event.Event) error {
+		if headers == nil {
+			return nil
+		}
+		if tp := firstNonEmpty(headers, "traceparent", "Traceparent"); tp != "" {
+			e.SetExtension("traceparent", tp)
+		}
+		if ts := firstNonEmpty(headers, "tracestate", "Tracestate"); ts != "" {
+			e.SetExtension("tracestate", ts)
+		}
+		return nil
+	}
+}
+
+func firstNonEmpty(h natslib.Header, keys ...string) string {
+	for _, k := range keys {
+		if v := h.Get(k); v != "" {
+			return v
+		}
+	}
+	return ""
 }

@@ -6,6 +6,7 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/event"
+	natslib "github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -96,6 +97,76 @@ func TestWithKafkaHeaders(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			e := cloudevents.NewEvent()
 			if err := WithKafkaHeaders(tt.headers)(&e); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got, _ := e.Extensions()["traceparent"].(string); got != tt.wantTP {
+				t.Errorf("traceparent extension = %q, want %q", got, tt.wantTP)
+			}
+			if got, _ := e.Extensions()["tracestate"].(string); got != tt.wantTS {
+				t.Errorf("tracestate extension = %q, want %q", got, tt.wantTS)
+			}
+		})
+	}
+}
+
+func TestWithNATSHeaders(t *testing.T) {
+	// nats.Header.Set canonicalizes via textproto.MIMEHeader, so the stored
+	// key is "Traceparent" (Title case) regardless of input case. The Get
+	// in WithNATSHeaders mirrors WithHTTPHeaders by looking up the canonical
+	// form.
+	makeHdr := func(kvs map[string]string) natslib.Header {
+		if kvs == nil {
+			return nil
+		}
+		h := natslib.Header{}
+		for k, v := range kvs {
+			h.Set(k, v)
+		}
+		return h
+	}
+
+	tests := []struct {
+		name    string
+		headers map[string]string
+		wantTP  string
+		wantTS  string
+	}{
+		{
+			name: "traceparent and tracestate present (lowercase keys, canonicalised by Set)",
+			headers: map[string]string{
+				"traceparent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
+				"tracestate":  "rojo=00f067aa0ba902b7",
+			},
+			wantTP: "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
+			wantTS: "rojo=00f067aa0ba902b7",
+		},
+		{
+			name: "only traceparent",
+			headers: map[string]string{
+				"traceparent": "00-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb-01",
+			},
+			wantTP: "00-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb-01",
+			wantTS: "",
+		},
+		{
+			name:    "no trace headers — no extension set",
+			headers: map[string]string{"x-other": "v"},
+			wantTP:  "",
+			wantTS:  "",
+		},
+		{
+			name:    "nil headers — safe no-op",
+			headers: nil,
+			wantTP:  "",
+			wantTS:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			e := cloudevents.NewEvent()
+			if err := WithNATSHeaders(makeHdr(tt.headers))(&e); err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
 			if got, _ := e.Extensions()["traceparent"].(string); got != tt.wantTP {
