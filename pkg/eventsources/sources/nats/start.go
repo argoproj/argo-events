@@ -151,7 +151,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			return
 		}
 		log.Info("dispatching the event on data channel...")
-		if err = dispatch(eventBody); err != nil {
+		if err = dispatch(eventBody, eventsourcecommon.WithNATSHeaders(msg.Header)); err != nil {
 			log.Errorw("failed to dispatch a NATS event", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 		}
