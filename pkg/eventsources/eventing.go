@@ -12,6 +12,9 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.uber.org/zap"
 
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -54,6 +57,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/shared/expr"
 	"github.com/argoproj/argo-events/pkg/shared/leaderelection"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
+	"github.com/argoproj/argo-events/pkg/shared/tracing"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
@@ -576,13 +580,40 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSour
 						if err != nil {
 							return err
 						}
+
+						// Extract parent trace from CloudEvent extensions (if present)
+						// and start a PRODUCER publish span with messaging attributes.
+						spanCtx := tracing.SpanFromCloudEvent(ctx, event)
+
+						busType, busAddr := extractBusInfo(e.eventBusConfig)
+						spanAttrs := tracing.MessagingAttributes(busType, e.eventBusSubject, "", busAddr)
+						spanAttrs = append(spanAttrs,
+							attribute.String("eventsource.name", s.GetEventSourceName()),
+							attribute.String("eventsource.type", string(s.GetEventSourceType())),
+							attribute.String("event.name", s.GetEventName()),
+							attribute.String("event.id", event.ID()),
+							attribute.String("messaging.operation.type", "send"),
+							attribute.String("messaging.operation.name", "send"),
+						)
+
+						spanCtx, span := tracing.StartProducerSpan(spanCtx, otel.Tracer("argo-events-eventsource"), "eventsource.publish", spanAttrs...)
+						// Inject updated trace context back into CloudEvent extensions
+						tracing.InjectTraceIntoCloudEvent(spanCtx, &event)
+
 						eventBody, err := json.Marshal(event)
 						if err != nil {
+							span.RecordError(err)
+							span.SetStatus(codes.Error, "failed to marshal event")
+							span.End()
 							return err
 						}
 
 						if e.eventBusConn == nil || e.eventBusConn.IsClosed() {
-							return eventbuscommon.NewEventBusError(fmt.Errorf("failed to publish event, eventbus connection closed"))
+							publishErr := eventbuscommon.NewEventBusError(fmt.Errorf("failed to publish event, eventbus connection closed"))
+							span.RecordError(publishErr)
+							span.SetStatus(codes.Error, "eventbus connection closed")
+							span.End()
+							return publishErr
 						}
 
 						msg := eventbuscommon.Message{
@@ -600,11 +631,16 @@ func (e *EventSourceAdaptor) run(ctx context.Context, servers map[aev1.EventSour
 							logger.Errorw("Failed to publish an event", zap.Error(err), zap.String(logging.LabelEventName,
 								s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 							e.metrics.EventSentFailed(s.GetEventSourceName(), s.GetEventName())
+							span.RecordError(err)
+							span.SetStatus(codes.Error, "failed to publish event")
+							span.End()
 							return eventbuscommon.NewEventBusError(err)
 						}
 						logger.Infow("Succeeded to publish an event", zap.String(logging.LabelEventName,
 							s.GetEventName()), zap.Any(logging.LabelEventSourceType, s.GetEventSourceType()), zap.String("eventID", event.ID()))
 						e.metrics.EventSent(s.GetEventSourceName(), s.GetEventName())
+						span.SetStatus(codes.Ok, "event published")
+						span.End()
 						return nil
 					})
 				}); err != nil {
@@ -643,6 +679,21 @@ func generateClientID(hostname string) string {
 	randomNum, _ := rand.Int(rand.Reader, big.NewInt(int64(1000)))
 	clientID := fmt.Sprintf("client-%s-%v", strings.ReplaceAll(hostname, ".", "_"), randomNum.Int64())
 	return clientID
+}
+
+// extractBusInfo reads the EventBus config and returns the bus type and server address.
+// busType is one of "kafka", "jetstream", "stan", or "unknown".
+func extractBusInfo(bc *aev1.BusConfig) (busType, serverAddr string) {
+	switch {
+	case bc != nil && bc.Kafka != nil:
+		return "kafka", bc.Kafka.URL
+	case bc != nil && bc.JetStream != nil:
+		return "jetstream", bc.JetStream.URL
+	case bc != nil && bc.NATS != nil:
+		return "stan", bc.NATS.URL
+	default:
+		return "unknown", ""
+	}
 }
 
 func filterEvent(data []byte, filter *aev1.EventSourceFilter) (bool, error) {

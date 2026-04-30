@@ -14,6 +14,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/eventsources"
 	"github.com/argoproj/argo-events/pkg/metrics"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
+	"github.com/argoproj/argo-events/pkg/shared/tracing"
 )
 
 func Start() {
@@ -55,6 +56,19 @@ func Start() {
 
 	logger = logger.With(logging.LabelEventSourceName, eventSource.Name)
 	ctx := logging.WithLogger(signals.SetupSignalHandler(), logger)
+
+	// Initialize OpenTelemetry tracing (no-op if OTEL_EXPORTER_OTLP_ENDPOINT is not set)
+	shutdown, err := tracing.InitTracer("argo-events-eventsource")
+	if err != nil {
+		logger.Warnw("failed to initialize tracing, continuing without tracing", zap.Error(err))
+	} else {
+		defer func() {
+			if err := shutdown(ctx); err != nil {
+				logger.Warnw("failed to shutdown tracer", zap.Error(err))
+			}
+		}()
+	}
+
 	m := metrics.NewMetrics(eventSource.Namespace)
 	go m.Run(ctx, fmt.Sprintf(":%d", v1alpha1.EventSourceMetricsPort))
 

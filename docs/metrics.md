@@ -151,3 +151,87 @@ for monitoring your applications running with Argo Events.
 
   - `argo_events_event_service_running_total`.
   - Other Kubernetes metrics such as CPU or memory.
+
+## OpenTelemetry Distributed Tracing
+
+Argo Events supports OpenTelemetry distributed tracing for end-to-end
+visibility across the event pipeline (EventSource -> EventBus -> Sensor -> Trigger).
+
+Tracing is **opt-in** and controlled entirely via standard OpenTelemetry
+environment variables. When not configured, there is zero performance impact.
+
+### Configuration
+
+Add the following environment variables to your EventSource and Sensor pod
+templates to enable tracing:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: webhook
+spec:
+  template:
+    container:
+      env:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://jaeger-collector.observability:4317"
+        - name: OTEL_TRACES_EXPORTER
+          value: "otlp"
+  webhook:
+    example:
+      port: "12000"
+      endpoint: /example
+      method: POST
+```
+
+The same environment variables should be added to the Sensor spec:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook
+spec:
+  template:
+    container:
+      env:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://jaeger-collector.observability:4317"
+        - name: OTEL_TRACES_EXPORTER
+          value: "otlp"
+  # ... dependencies and triggers
+```
+
+### Environment Variables
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP collector endpoint (e.g., `http://jaeger:4317`) | unset (tracing disabled) |
+| `OTEL_TRACES_EXPORTER` | Set to `none` to explicitly disable tracing | `otlp` |
+| `OTEL_SERVICE_NAME` | Override the default service name | `argo-events-eventsource` or `argo-events-sensor` |
+
+### Trace Spans
+
+When tracing is enabled, the following spans are created:
+
+- **`eventsource.publish`** - Created when an event source publishes an event to
+  the EventBus. Attributes: `eventsource.name`, `eventsource.type`, `event.name`,
+  `event.id`.
+
+- **`sensor.trigger`** - Created when a sensor executes a trigger. Attributes:
+  `sensor.name`, `trigger.name`, `dependencies`, `event.ids`.
+
+### CloudEvents Trace Context Propagation
+
+Argo Events preserves
+[W3C Trace Context](https://github.com/cloudevents/spec/blob/main/cloudevents/extensions/distributed-tracing.md)
+from incoming CloudEvents. When an external system sends a CloudEvent with
+`traceparent`/`tracestate` headers (or extensions), the trace context is:
+
+1. Preserved in the event as it flows through the EventBus.
+2. Used as the parent span for `eventsource.publish`.
+3. Propagated to `sensor.trigger`, creating a connected trace across the pipeline.
+
+This enables end-to-end distributed traces from an external event producer
+through Argo Events to the triggered action.
