@@ -23,6 +23,9 @@ import (
 	"time"
 
 	natslib "github.com/nats-io/nats.go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -31,8 +34,27 @@ import (
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
 	metrics "github.com/argoproj/argo-events/pkg/metrics"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
+	"github.com/argoproj/argo-events/pkg/shared/tracing"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
+
+// natsHeaderCarrier adapts nats.Header to propagation.TextMapCarrier so the
+// OTel TextMapPropagator can Extract/Inject W3C trace context across the
+// NATS subscribe boundary. nats.Header.Set is a plain map write (no
+// canonicalisation), so producers and consumers must agree on case;
+// callers that follow the standard W3C casing (lowercase "traceparent")
+// interoperate with OTel's TraceContext propagator out of the box.
+type natsHeaderCarrier natslib.Header
+
+func (c natsHeaderCarrier) Get(key string) string { return natslib.Header(c).Get(key) }
+func (c natsHeaderCarrier) Set(key, val string)   { natslib.Header(c).Set(key, val) }
+func (c natsHeaderCarrier) Keys() []string {
+	keys := make([]string, 0, len(c))
+	for k := range c {
+		keys = append(keys, k)
+	}
+	return keys
+}
 
 // EventListener implements Eventing for nats event source
 type EventListener struct {
@@ -133,6 +155,32 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 		}(time.Now())
 
+		// Ensure we have a header map even if the message arrived without one;
+		// the inject step below needs a writable carrier.
+		if msg.Header == nil {
+			msg.Header = natslib.Header{}
+		}
+
+		// Extract upstream W3C trace context from the NATS message headers.
+		parentCtx := otel.GetTextMapPropagator().Extract(ctx, natsHeaderCarrier(msg.Header))
+
+		// Start an eventsource.consume CONSUMER span as the parent for the
+		// downstream eventsource.publish PRODUCER span emitted in eventing.go.
+		spanCtx, consumeSpan := tracing.StartConsumerSpan(parentCtx, otel.Tracer("argo-events-eventsource"), "eventsource.consume",
+			attribute.String("eventsource.name", el.GetEventSourceName()),
+			attribute.String("eventsource.type", "nats"),
+			attribute.String("messaging.system", "nats"),
+			attribute.String("messaging.destination.name", msg.Subject),
+			attribute.String("messaging.operation.type", "receive"),
+		)
+		defer consumeSpan.End()
+
+		// Re-inject the CONSUMER span's trace context into the headers so
+		// WithNATSHeaders writes the CONSUMER traceparent as the CloudEvent
+		// extension. eventing.go's SpanFromCloudEvent then makes the
+		// eventsource.publish PRODUCER span a child of CONSUMER.
+		otel.GetTextMapPropagator().Inject(spanCtx, natsHeaderCarrier(msg.Header))
+
 		eventData := &events.NATSEventData{
 			Subject:  msg.Subject,
 			Header:   msg.Header,
@@ -148,12 +196,16 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if err != nil {
 			log.Errorw("failed to marshal the event data, rejecting the event...", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
+			consumeSpan.RecordError(err)
+			consumeSpan.SetStatus(codes.Error, err.Error())
 			return
 		}
 		log.Info("dispatching the event on data channel...")
 		if err = dispatch(eventBody, eventsourcecommon.WithNATSHeaders(msg.Header)); err != nil {
 			log.Errorw("failed to dispatch a NATS event", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
+			consumeSpan.RecordError(err)
+			consumeSpan.SetStatus(codes.Error, err.Error())
 		}
 	}
 
