@@ -1438,6 +1438,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#triggering-an-existing-workflowtemplate" class="md-nav__link">
+    Triggering an existing WorkflowTemplate
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#parameterization" class="md-nav__link">
     Parameterization
   </a>
@@ -2115,6 +2122,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#triggering-an-existing-workflowtemplate" class="md-nav__link">
+    Triggering an existing WorkflowTemplate
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#parameterization" class="md-nav__link">
     Parameterization
   </a>
@@ -2206,6 +2220,28 @@
 <p>List the workflow using <code>argo list</code>.</p>
 </li>
 </ol>
+<h2 id="triggering-an-existing-workflowtemplate">Triggering an existing WorkflowTemplate<a class="headerlink" href="#triggering-an-existing-workflowtemplate" title="Permanent link">&para;</a></h2>
+<p>If your workflow logic already lives in a <code>WorkflowTemplate</code> (deployed
+independently, for example via Argo Workflows itself), the sensor doesn't
+need to redeclare the steps inline. The trigger just submits a <code>Workflow</code>
+that references the template via <code>workflowTemplateRef</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">triggers</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argo-workflow-trigger</span>
+<span class="w">      </span><span class="nt">argoWorkflow</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">operation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">submit</span>
+<span class="w">        </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">resource</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="w">            </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Workflow</span>
+<span class="w">            </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">generateName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workflow-template-print-message-</span>
+<span class="w">            </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">workflowTemplateRef</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workflow-template-print-message</span>
+</code></pre></div>
+<p>A complete sensor + <code>WorkflowTemplate</code> pair is available at
+<a href="https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/sensor-to-existing-workflow-template.yaml">examples/sensors/sensor-to-existing-workflow-template.yaml</a>.</p>
 <h2 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h2>
 <p>Similar to other type of triggers, sensor offers parameterization for the Argo workflow trigger. Parameterization is specially useful when
 you want to define a generic trigger template in the sensor and populate the workflow object values on the fly.</p>
