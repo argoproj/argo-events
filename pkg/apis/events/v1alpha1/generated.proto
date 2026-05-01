@@ -1332,6 +1332,10 @@ message GitArtifact {
   // Whether to ignore host key
   // +optional
   optional bool insecureIgnoreHostKey = 10;
+
+  // GithubApp holds the GitHub App credentials for authentication
+  // +optional
+  optional GithubAppCreds githubApp = 11;
 }
 
 // GitCreds contain reference to git username and password

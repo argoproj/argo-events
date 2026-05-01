@@ -51,3 +51,20 @@ spec:
                 key: key
               filePath: "examples/hello-world.yaml"
               branch: "master"
+    - template:
+        name: workflow-trigger-3
+        k8s:
+          operation: create
+          source:
+            git:
+              url: "https://github.com/argoproj/argo.git"
+              cloneDirectory: "/git/argoproj"
+              # Github application auth. Instead of using personal token `creds` use app PEM
+              githubApp:
+                privateKey:
+                  name: github-app-pem
+                  key: privateKey.pem
+                appID: 12345
+                installationID: 67890
+              filePath: "examples/hello-world.yaml"
+              branch: "main"

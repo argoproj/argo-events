@@ -3723,12 +3723,18 @@ func schema_pkg_apis_events_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 							Format:      "",
 						},
 					},
+					"githubApp": {
+						SchemaProps: spec.SchemaProps{
+							Description: "GithubApp holds the GitHub App credentials for authentication",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GithubAppCreds"),
+						},
+					},
 				},
 				Required: []string{"url", "cloneDirectory", "filePath"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitCreds", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitRemoteConfig", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitCreds", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitRemoteConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GithubAppCreds", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

@@ -1896,6 +1896,10 @@
           "description": "Path to file that contains trigger resource definition",
           "type": "string"
         },
+        "githubApp": {
+          "description": "GithubApp holds the GitHub App credentials for authentication",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.GithubAppCreds"
+        },
         "insecureIgnoreHostKey": {
           "description": "Whether to ignore host key",
           "type": "boolean"
