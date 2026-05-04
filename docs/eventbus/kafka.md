@@ -105,25 +105,83 @@ otherwise it is your responsibility to create these topics. If a topic does
 not exist and cannot be automatically created, the EventSource and/or Sensor
 will exit with an error.
 
-If you want to take advantage of the horizontal scaling enabled by the Kafka
-EventBus be sure to create topics with more than one partition.
+### How Each Topic Is Used
+
+Argo Events uses three Kafka topics per Sensor to implement reliable event
+delivery:
+
+- **Event topic** — The shared communication channel between EventSources and
+  Sensors. EventSources **produce** CloudEvents messages to this topic, keyed
+  by `{source}.{subject}`. Sensors **consume** from it using a consumer group
+  to receive the events that match their dependency definitions. All
+  EventSources and Sensors that share the same EventBus write to and read from
+  the same event topic.
+
+- **Trigger topic** — An internal topic used by the Sensor for **transaction
+  coordination**. When a Sensor evaluates its dependency expression and decides
+  which triggers to fire, it writes the trigger evaluation state to this topic.
+  This enables exactly-once processing semantics across Sensor replicas and
+  ensures that triggers are not evaluated more than once for the same set of
+  events, even when multiple Sensor pods are running.
+
+- **Action topic** — An internal topic used by the Sensor to **record completed
+  actions**. After a trigger action (e.g., creating a Workflow, sending an HTTP
+  request) has been executed, the result is written to this topic. This
+  provides delivery guarantees and allows the Sensor to track which actions
+  have already been performed, preventing duplicate execution on restart or
+  rebalance.
+
+The trigger and action topics are specific to each Sensor, so they do not
+interfere with other Sensors sharing the same EventBus.
+
+### Topic Naming
 
 By default the topics are named as follows.
 
-| topic   | name                                                |
-| ------- | --------------------------------------------------- |
-| event   | `{namespace}-{eventbus-name}`                       |
-| trigger | `{namespace}-{eventbus-name}-{sensor-name}-trigger` |
-| action  | `{namespace}-{eventbus-name}-{sensor-name}-action`  |
+| topic   | name                                                | used by          |
+| ------- | --------------------------------------------------- | ---------------- |
+| event   | `{namespace}-{eventbus-name}`                       | EventSource + Sensor |
+| trigger | `{namespace}-{eventbus-name}-{sensor-name}-trigger` | Sensor only      |
+| action  | `{namespace}-{eventbus-name}-{sensor-name}-action`  | Sensor only      |
 
 If a topic name is specified in the EventBus specification, then the topics are
 named as follows.
 
-| topic   | name                                       |
-| ------- | ------------------------------------------ |
-| event   | `{spec.kafka.topic}`                       |
-| trigger | `{spec.kafka.topic}-{sensor-name}-trigger` |
-| action  | `{spec.kafka.topic}-{sensor-name}-action`  |
+| topic   | name                                       | used by          |
+| ------- | ------------------------------------------ | ---------------- |
+| event   | `{spec.kafka.topic}`                       | EventSource + Sensor |
+| trigger | `{spec.kafka.topic}-{sensor-name}-trigger` | Sensor only      |
+| action  | `{spec.kafka.topic}-{sensor-name}-action`  | Sensor only      |
+
+### Partitioning Recommendations
+
+If you want to take advantage of the horizontal scaling enabled by the Kafka
+EventBus, create topics with more than one partition. Here are some guidelines:
+
+- **Event topic** — The number of partitions determines the maximum parallelism
+  for Sensor consumers. Set the partition count to at least the number of
+  Sensor replicas you plan to run. If you expect high event throughput, use
+  more partitions to distribute the load.
+
+- **Trigger and action topics** — These are used for internal coordination and
+  typically have lower throughput than the event topic. A small number of
+  partitions (e.g., 1-3) is generally sufficient.
+
+### Single vs. Multiple EventBus
+
+A single EventBus (and therefore a single event topic) is sufficient for most
+use cases, even when you have EventSources producing different types of events.
+Events are keyed by `{source}.{subject}`, and each Sensor filters only the
+events matching its dependency definitions.
+
+Consider using **separate EventBus** resources (and therefore separate event
+topics) when:
+
+- You want to isolate event traffic between teams or environments.
+- Different event streams have significantly different throughput requirements
+  or retention policies.
+- You need different security configurations (TLS, SASL) for different event
+  producers.
 
 ## Horizontal Scaling and Leader Election
 

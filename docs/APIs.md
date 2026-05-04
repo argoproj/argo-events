@@ -9535,6 +9535,27 @@ Whether to ignore host key
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>githubApp</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GithubAppCreds"> GithubAppCreds </a>
+</em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+GithubApp holds the GitHub App credentials for authentication
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -9706,6 +9727,7 @@ GithubAppCreds
 <p>
 
 (<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GitArtifact">GitArtifact</a>,
 <a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>)
 </p>
 

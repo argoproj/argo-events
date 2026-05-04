@@ -1914,6 +1914,11 @@ func (in *GitArtifact) DeepCopyInto(out *GitArtifact) {
 		*out = new(GitRemoteConfig)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.GithubApp != nil {
+		in, out := &in.GithubApp, &out.GithubApp
+		*out = new(GithubAppCreds)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

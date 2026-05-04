@@ -111,6 +111,12 @@ const (
 	EnvVarPodName = "POD_NAME"
 	// ENVVarLeaderElection sets the leader election mode
 	EnvVarLeaderElection = "LEADER_ELECTION"
+	// EnvVarLeaderElectionLeaseDuration sets the leader election lease duration (e.g. "15s")
+	EnvVarLeaderElectionLeaseDuration = "LEADER_ELECTION_LEASE_DURATION"
+	// EnvVarLeaderElectionRenewDeadline sets the leader election renew deadline (e.g. "10s")
+	EnvVarLeaderElectionRenewDeadline = "LEADER_ELECTION_RENEW_DEADLINE"
+	// EnvVarLeaderElectionRetryPeriod sets the leader election retry period (e.g. "2s")
+	EnvVarLeaderElectionRetryPeriod = "LEADER_ELECTION_RETRY_PERIOD"
 	// EnvImagePullPolicy is the env var to set container's ImagePullPolicy
 	EnvImagePullPolicy = "IMAGE_PULL_POLICY"
 )
