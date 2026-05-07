@@ -7424,6 +7424,13 @@ func schema_pkg_apis_events_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
+					"eventBusNamespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "EventBusNamespace, when set, allows the Sensor to subscribe to an EventBus in a different namespace. Defaults to the Sensor's own namespace. Any Secret referenced by the EventBus (auth, TLS) must also exist in the Sensor's namespace; cross-namespace Secret resolution is not performed. Requires a cluster-scoped controller install (namespace-scoped installs can only watch EventBuses in their own managed namespace).",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"replicas": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Replicas is the sensor deployment replicas",
