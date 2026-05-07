@@ -2874,6 +2874,11 @@ message SensorSpec {
   // LoggingFields add additional key-value pairs when logging happens
   // +optional
   map<string, string> loggingFields = 8;
+
+  // EventBusNamespace, when set, allows the Sensor to subscribe to an EventBus
+  // in a different namespace. Defaults to the Sensor's own namespace.
+  // +optional
+  optional string eventBusNamespace = 9;
 }
 
 // SensorStatus contains information about the status of a sensor.

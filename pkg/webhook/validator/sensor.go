@@ -13,8 +13,8 @@ import (
 )
 
 type sensor struct {
-	client    kubernetes.Interface
-	aeClient  eventsclient.ArgoprojV1alpha1Interface
+	client   kubernetes.Interface
+	aeClient eventsclient.ArgoprojV1alpha1Interface
 	// eventBusClient is kept for callers that pass a pre-scoped client (e.g. tests).
 	// When aeClient is set it takes precedence, allowing cross-namespace resolution.
 	eventBusClient    eventsclient.EventBusInterface
