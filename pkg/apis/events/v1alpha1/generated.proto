@@ -3463,4 +3463,3 @@ message WebhookEventSource {
   // +optional
   optional EventSourceFilter filter = 2;
 }
-
