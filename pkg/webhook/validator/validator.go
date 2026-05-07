@@ -79,7 +79,7 @@ func GetValidator(ctx context.Context, client kubernetes.Interface, aeClient eve
 				return nil, err
 			}
 		}
-		return NewSensorValidator(client, aeClient.EventBus(new.Namespace), aeClient.EventSources(new.Namespace), aeClient.Sensors(new.Namespace), old, new), nil
+		return NewSensorValidator(client, aeClient, aeClient.EventBus(new.Namespace), aeClient.EventSources(new.Namespace), aeClient.Sensors(new.Namespace), old, new), nil
 	default:
 		return nil, fmt.Errorf("unrecognized GVK %v", kind)
 	}

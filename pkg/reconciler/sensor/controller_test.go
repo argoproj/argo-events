@@ -66,6 +66,57 @@ func TestReconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, sensorObj.Status.IsReady())
 	})
+
+	t.Run("test reconcile with cross-namespace eventbus", func(t *testing.T) {
+		const busNamespace = "bus-ns"
+		ctx := context.TODO()
+		cl := fake.NewClientBuilder().Build()
+
+		crossNsBus := fakeEventBus.DeepCopy()
+		crossNsBus.Namespace = busNamespace
+		crossNsBus.Status.MarkDeployed("test", "test")
+		crossNsBus.Status.MarkConfigured()
+		err := cl.Create(ctx, crossNsBus)
+		assert.Nil(t, err)
+
+		sensorWithCrossNs := sensorObj.DeepCopy()
+		sensorWithCrossNs.Spec.EventBusNamespace = busNamespace
+		r := &reconciler{
+			client:      cl,
+			scheme:      scheme.Scheme,
+			sensorImage: testImage,
+			logger:      logging.NewArgoEventsLogger(),
+		}
+		err = r.reconcile(ctx, sensorWithCrossNs)
+		assert.NoError(t, err)
+		assert.True(t, sensorWithCrossNs.Status.IsReady())
+	})
+
+	t.Run("test reconcile cross-namespace ignores eventbus in sensor namespace", func(t *testing.T) {
+		const busNamespace = "bus-ns"
+		ctx := context.TODO()
+		cl := fake.NewClientBuilder().Build()
+
+		// Create a bus in the sensor's own namespace but NOT in bus-ns.
+		localBus := fakeEventBus.DeepCopy()
+		localBus.Status.MarkDeployed("test", "test")
+		localBus.Status.MarkConfigured()
+		err := cl.Create(ctx, localBus)
+		assert.Nil(t, err)
+
+		sensorWithCrossNs := sensorObj.DeepCopy()
+		sensorWithCrossNs.Spec.EventBusNamespace = busNamespace
+		r := &reconciler{
+			client:      cl,
+			scheme:      scheme.Scheme,
+			sensorImage: testImage,
+			logger:      logging.NewArgoEventsLogger(),
+		}
+		// Should fail: the EventBus exists in the sensor's ns but not in bus-ns.
+		err = r.reconcile(ctx, sensorWithCrossNs)
+		assert.Error(t, err)
+		assert.False(t, sensorWithCrossNs.Status.IsReady())
+	})
 }
 
 func init() {

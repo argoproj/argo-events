@@ -112,7 +112,7 @@ func TestValidateSensor(t *testing.T) {
 		sensor.Namespace = testNamespace
 		newSensor := sensor.DeepCopy()
 		newSensor.Generation++
-		v := NewSensorValidator(fakeK8sClient, fakeEventsClient.EventBus(testNamespace), fakeEventsClient.EventSources(testNamespace), fakeEventsClient.Sensors(testNamespace), sensor, newSensor)
+		v := NewSensorValidator(fakeK8sClient, fakeEventsClient, fakeEventsClient.EventBus(testNamespace), fakeEventsClient.EventSources(testNamespace), fakeEventsClient.Sensors(testNamespace), sensor, newSensor)
 		r := v.ValidateCreate(contextWithLogger(t))
 		assert.True(t, r.Allowed)
 		r = v.ValidateUpdate(contextWithLogger(t))
@@ -128,7 +128,7 @@ func TestValidateSensorUpdateSameGeneration(t *testing.T) {
 
 	assert.Equal(t, fakeSensorWithFinalizer.Generation, testSensor.Generation, "Test setup: generations should be the same")
 
-	v := NewSensorValidator(fakeK8sClient, nil, nil, nil, fakeSensorWithFinalizer, testSensor)
+	v := NewSensorValidator(fakeK8sClient, nil, nil, nil, nil, fakeSensorWithFinalizer, testSensor)
 	r := v.ValidateUpdate(contextWithLogger(t))
 
 	assert.True(t, r.Allowed, "ValidateUpdate should allow changes when generation is unchanged")
@@ -143,7 +143,7 @@ func TestValidateSensorUpdateNewGeneration(t *testing.T) {
 
 	assert.NotEqual(t, fakeSensorWithFinalizer.Generation, testSensor.Generation, "Test setup: generations should be different")
 
-	v := NewSensorValidator(fakeK8sClient, nil, nil, nil, fakeSensorWithFinalizer, testSensor)
+	v := NewSensorValidator(fakeK8sClient, nil, nil, nil, nil, fakeSensorWithFinalizer, testSensor)
 	r := v.ValidateUpdate(contextWithLogger(t))
 
 	assert.False(t, r.Allowed, "ValidateUpdate should deny when ValidateCreate is called with nil eventBusClient")
@@ -167,7 +167,7 @@ func TestValidateSensorUpdateNewGenerationValidation(t *testing.T) {
 	testSensor.Finalizers = []string{}
 	testSensor.Generation++
 
-	v := NewSensorValidator(fakeK8sClient, fakeEventsClient.EventBus(testNamespace), fakeEventsClient.EventSources(testNamespace), fakeEventsClient.Sensors(testNamespace), fakeSensorWithFinalizer, testSensor)
+	v := NewSensorValidator(fakeK8sClient, fakeEventsClient, fakeEventsClient.EventBus(testNamespace), fakeEventsClient.EventSources(testNamespace), fakeEventsClient.Sensors(testNamespace), fakeSensorWithFinalizer, testSensor)
 	r := v.ValidateUpdate(contextWithLogger(t))
 
 	assert.True(t, r.Allowed, "ValidateUpdate should succeed when generation changes and validation passes")
@@ -181,7 +181,7 @@ func TestValidateSensorUpdateNewGenerationValidationFails(t *testing.T) {
 	testSensor.Generation++
 	testSensor.Spec.EventBusName = "non-existent-eventbus"
 
-	v := NewSensorValidator(fakeK8sClient, fakeEventsClient.EventBus(testNamespace), fakeEventsClient.EventSources(testNamespace), fakeEventsClient.Sensors(testNamespace), fakeSensorWithFinalizer, testSensor)
+	v := NewSensorValidator(fakeK8sClient, fakeEventsClient, fakeEventsClient.EventBus(testNamespace), fakeEventsClient.EventSources(testNamespace), fakeEventsClient.Sensors(testNamespace), fakeSensorWithFinalizer, testSensor)
 	r := v.ValidateUpdate(contextWithLogger(t))
 
 	assert.False(t, r.Allowed, "ValidateUpdate should fail when generation changes and validation fails")
@@ -194,10 +194,46 @@ func TestValidateSensorCreateDenied(t *testing.T) {
 	testSensor := fakeSensorWithFinalizer.DeepCopy()
 	testSensor.Spec.EventBusName = "non-existent-eventbus"
 
-	v := NewSensorValidator(fakeK8sClient, fakeEventsClient.EventBus(testNamespace), fakeEventsClient.EventSources(testNamespace), fakeEventsClient.Sensors(testNamespace), nil, testSensor)
+	v := NewSensorValidator(fakeK8sClient, fakeEventsClient, fakeEventsClient.EventBus(testNamespace), fakeEventsClient.EventSources(testNamespace), fakeEventsClient.Sensors(testNamespace), nil, testSensor)
 	r := v.ValidateCreate(contextWithLogger(t))
 
 	assert.False(t, r.Allowed, "ValidateCreate should deny when EventBus is not found")
 	assert.NotNil(t, r.Result, "ValidateCreate should return a result with error message")
+	assert.Contains(t, r.Result.Message, "failed to get EventBus", "Error message should mention EventBus failure")
+}
+
+// TestValidateSensorCrossNamespaceEventBus tests that a Sensor referencing an EventBus in another namespace is accepted.
+func TestValidateSensorCrossNamespaceEventBus(t *testing.T) {
+	const busNamespace = "bus-ns"
+
+	crossNsBus := fakeBus.DeepCopy()
+	crossNsBus.Namespace = busNamespace
+	crossNsBus.Status.MarkDeployed("test", "test")
+	crossNsBus.Status.MarkConfigured()
+	_, err := fakeEventsClient.EventBus(busNamespace).Create(context.TODO(), crossNsBus, metav1.CreateOptions{})
+	if err != nil && !strings.Contains(err.Error(), "already exists") {
+		assert.Nil(t, err)
+	}
+
+	testSensor := fakeSensorWithFinalizer.DeepCopy()
+	testSensor.Spec.EventBusNamespace = busNamespace
+
+	v := NewSensorValidator(fakeK8sClient, fakeEventsClient, fakeEventsClient.EventBus(testNamespace), fakeEventsClient.EventSources(testNamespace), fakeEventsClient.Sensors(testNamespace), nil, testSensor)
+	r := v.ValidateCreate(contextWithLogger(t))
+
+	assert.True(t, r.Allowed, "ValidateCreate should accept a Sensor whose EventBusNamespace points to an existing EventBus in another namespace")
+}
+
+// TestValidateSensorCrossNamespaceEventBusMissing tests that a Sensor referencing a non-existent EventBus in another namespace is rejected.
+func TestValidateSensorCrossNamespaceEventBusMissing(t *testing.T) {
+	const busNamespace = "missing-ns"
+
+	testSensor := fakeSensorWithFinalizer.DeepCopy()
+	testSensor.Spec.EventBusNamespace = busNamespace
+
+	v := NewSensorValidator(fakeK8sClient, fakeEventsClient, fakeEventsClient.EventBus(testNamespace), fakeEventsClient.EventSources(testNamespace), fakeEventsClient.Sensors(testNamespace), nil, testSensor)
+	r := v.ValidateCreate(contextWithLogger(t))
+
+	assert.False(t, r.Allowed, "ValidateCreate should deny when EventBus is missing in the referenced namespace")
 	assert.Contains(t, r.Result.Message, "failed to get EventBus", "Error message should mention EventBus failure")
 }
