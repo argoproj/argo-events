@@ -26,6 +26,7 @@ const (
 	TimestampFormat      = "2006-01-02 15:04:05"
 	InfoLevel            = "info"
 	DebugLevel           = "debug"
+	WarnLevel            = "warn"
 	ErrorLevel           = "error"
 	WarnLevel            = "warn"
 )

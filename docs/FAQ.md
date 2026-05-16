@@ -25,7 +25,7 @@ with the desired namespace and service account. Make sure to grant the service a
      * Make sure you have configured the event source correctly.
      * Check the event-source pod's containers logs.
 
-Note: You can set the environment variable `LOG_LEVEL:info/debug/error` in any of the containers to output debug logs. See [here](https://github.com/argoproj/argo-events/blob/master/examples/sensors/log-debug.yaml) for a debug example.
+Note: You can set the environment variable `LOG_LEVEL:info/debug/warn/error` in any of the containers to control log verbosity. See [here](https://github.com/argoproj/argo-events/blob/master/examples/sensors/log-debug.yaml) for a debug example. `warn` is useful for sensors with high-frequency triggers (e.g. an HTTP trigger fired on every event) where the default `info` output is too noisy.
 
 **Q. The event-source pod is receiving events but nothing happens.**
 
