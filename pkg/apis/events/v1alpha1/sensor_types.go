@@ -87,6 +87,14 @@ type SensorSpec struct {
 	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"varint,4,opt,name=errorOnFailedRound"`
 	// EventBusName references to a EventBus name. By default the value is "default"
 	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,5,opt,name=eventBusName"`
+	// EventBusNamespace, when set, allows the Sensor to subscribe to an EventBus
+	// in a different namespace. Defaults to the Sensor's own namespace.
+	// Any Secret referenced by the EventBus (auth, TLS) must also exist in the
+	// Sensor's namespace; cross-namespace Secret resolution is not performed.
+	// Requires a cluster-scoped controller install (namespace-scoped installs can
+	// only watch EventBuses in their own managed namespace).
+	// +optional
+	EventBusNamespace string `json:"eventBusNamespace,omitempty" protobuf:"bytes,9,opt,name=eventBusNamespace"`
 	// Replicas is the sensor deployment replicas
 	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,6,opt,name=replicas"`
 	// RevisionHistoryLimit specifies how many old deployment revisions to retain
@@ -106,6 +114,15 @@ func (s SensorSpec) GetReplicas() int32 {
 		replicas = 1
 	}
 	return replicas
+}
+
+// GetEventBusNamespace returns the namespace of the referenced EventBus.
+// Falls back to defaultNs (usually the Sensor's own namespace) when the field is unset.
+func (s SensorSpec) GetEventBusNamespace(defaultNs string) string {
+	if s.EventBusNamespace != "" {
+		return s.EventBusNamespace
+	}
+	return defaultNs
 }
 
 type LogicalOperator string

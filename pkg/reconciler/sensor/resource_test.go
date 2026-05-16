@@ -212,6 +212,50 @@ var (
 )
 
 func Test_BuildDeployment(t *testing.T) {
+	t.Run("test eventbus subject uses eventbus namespace", func(t *testing.T) {
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: sensorObj,
+			Labels: testLabels,
+		}
+		deployment, err := buildDeployment(args, fakeEventBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+		wantSubject := fmt.Sprintf("eventbus-%s", fakeEventBus.Namespace)
+		var gotSubject string
+		for _, env := range deployment.Spec.Template.Spec.Containers[0].Env {
+			if env.Name == v1alpha1.EnvVarEventBusSubject {
+				gotSubject = env.Value
+			}
+		}
+		assert.Equal(t, wantSubject, gotSubject, "EVENTBUS_SUBJECT should derive from eventBus.Namespace, not sensor.Namespace")
+	})
+
+	t.Run("test eventbus subject uses cross-namespace eventbus namespace", func(t *testing.T) {
+		const busNamespace = "bus-ns"
+		crossNsBus := fakeEventBus.DeepCopy()
+		crossNsBus.Namespace = busNamespace
+
+		sensorInOtherNs := sensorObj.DeepCopy()
+		sensorInOtherNs.Spec.EventBusNamespace = busNamespace
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: sensorInOtherNs,
+			Labels: testLabels,
+		}
+		deployment, err := buildDeployment(args, crossNsBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+		wantSubject := fmt.Sprintf("eventbus-%s", busNamespace)
+		var gotSubject string
+		for _, env := range deployment.Spec.Template.Spec.Containers[0].Env {
+			if env.Name == v1alpha1.EnvVarEventBusSubject {
+				gotSubject = env.Value
+			}
+		}
+		assert.Equal(t, wantSubject, gotSubject, "EVENTBUS_SUBJECT should use the EventBus namespace, not the Sensor namespace")
+	})
+
 	t.Run("test build with eventbus", func(t *testing.T) {
 		args := &AdaptorArgs{
 			Image:  testImage,

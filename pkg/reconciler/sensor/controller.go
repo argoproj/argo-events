@@ -103,7 +103,8 @@ func (r *reconciler) reconcile(ctx context.Context, sensor *v1alpha1.Sensor) err
 	if len(sensor.Spec.EventBusName) > 0 {
 		eventBusName = sensor.Spec.EventBusName
 	}
-	err := r.client.Get(ctx, types.NamespacedName{Namespace: sensor.Namespace, Name: eventBusName}, eventBus)
+	ebNamespace := sensor.Spec.GetEventBusNamespace(sensor.Namespace)
+	err := r.client.Get(ctx, types.NamespacedName{Namespace: ebNamespace, Name: eventBusName}, eventBus)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			sensor.Status.MarkDeployFailed("EventBusNotFound", "EventBus not found.")

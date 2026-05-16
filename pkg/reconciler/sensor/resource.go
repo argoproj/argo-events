@@ -148,7 +148,7 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 		},
 		{
 			Name:  v1alpha1.EnvVarEventBusSubject,
-			Value: fmt.Sprintf("eventbus-%s", args.Sensor.Namespace),
+			Value: fmt.Sprintf("eventbus-%s", eventBus.Namespace),
 		},
 		{
 			Name:      v1alpha1.EnvVarPodName,

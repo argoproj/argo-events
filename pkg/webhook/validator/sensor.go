@@ -13,7 +13,10 @@ import (
 )
 
 type sensor struct {
-	client            kubernetes.Interface
+	client   kubernetes.Interface
+	aeClient eventsclient.ArgoprojV1alpha1Interface
+	// eventBusClient is kept for callers that pass a pre-scoped client (e.g. tests).
+	// When aeClient is set it takes precedence, allowing cross-namespace resolution.
 	eventBusClient    eventsclient.EventBusInterface
 	eventSourceClient eventsclient.EventSourceInterface
 	sensorClient      eventsclient.SensorInterface
@@ -22,10 +25,22 @@ type sensor struct {
 	newSensor *v1alpha1.Sensor
 }
 
-// NewSensorValidator returns a validator for Sensor
-func NewSensorValidator(client kubernetes.Interface, ebClient eventsclient.EventBusInterface,
-	esClient eventsclient.EventSourceInterface, sClient eventsclient.SensorInterface, old, new *v1alpha1.Sensor) Validator {
-	return &sensor{client: client, eventBusClient: ebClient, eventSourceClient: esClient, sensorClient: sClient, oldSensor: old, newSensor: new}
+// NewSensorValidator returns a validator for Sensor.
+// aeClient, when non-nil, is used to resolve the EventBus in the namespace specified by
+// EventBusNamespace (or the Sensor's own namespace when the field is unset). ebClient is
+// used as a fallback when aeClient is nil (e.g. in unit tests that pre-scope the client).
+func NewSensorValidator(client kubernetes.Interface, aeClient eventsclient.ArgoprojV1alpha1Interface,
+	ebClient eventsclient.EventBusInterface, esClient eventsclient.EventSourceInterface,
+	sClient eventsclient.SensorInterface, old, new *v1alpha1.Sensor) Validator {
+	return &sensor{
+		client:            client,
+		aeClient:          aeClient,
+		eventBusClient:    ebClient,
+		eventSourceClient: esClient,
+		sensorClient:      sClient,
+		oldSensor:         old,
+		newSensor:         new,
+	}
 }
 
 func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionResponse {
@@ -33,10 +48,21 @@ func (s *sensor) ValidateCreate(ctx context.Context) *admissionv1.AdmissionRespo
 	if len(s.newSensor.Spec.EventBusName) > 0 {
 		eventBusName = s.newSensor.Spec.EventBusName
 	}
-	if s.eventBusClient == nil {
+
+	// Resolve the EventBus client, preferring the full aeClient so we can look up
+	// an EventBus in a different namespace when EventBusNamespace is set.
+	var ebClient eventsclient.EventBusInterface
+	if s.aeClient != nil {
+		ebNamespace := s.newSensor.Spec.GetEventBusNamespace(s.newSensor.Namespace)
+		ebClient = s.aeClient.EventBus(ebNamespace)
+	} else {
+		ebClient = s.eventBusClient
+	}
+
+	if ebClient == nil {
 		return DeniedResponse("invalid EventBus: eventBusClient is nil")
 	}
-	eventBus, err := s.eventBusClient.Get(ctx, eventBusName, metav1.GetOptions{})
+	eventBus, err := ebClient.Get(ctx, eventBusName, metav1.GetOptions{})
 	if err != nil {
 		return DeniedResponse("failed to get EventBus eventBusName=%s; err=%v", eventBusName, err)
 	}

@@ -21,3 +21,39 @@ Sensor correspondingly, so that they can find the right one. See EventSource
 [spec](../APIs.md#argoproj.io/v1alpha1.EventSourceSpec)
 and Sensor
 [spec](../APIs.md#argoproj.io/v1alpha1.SensorSpec).
+
+## Cross-namespace EventBus reference (Sensor)
+
+By default a Sensor looks for its EventBus in its own namespace. Platform teams
+that keep a centralised EventBus (plus its Secrets) in a shared namespace can
+instruct a Sensor to subscribe to it by setting `eventBusNamespace`:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: my-sensor
+  namespace: app-ns          # Sensor lives here
+spec:
+  eventBusName: default
+  eventBusNamespace: bus-ns  # EventBus lives here
+  # … dependencies, triggers …
+```
+
+### Requirements and limitations
+
+**Secrets must be pre-replicated.** Any Secret referenced by the EventBus
+(access token, TLS certificates) must also exist in the Sensor's namespace.
+The controller does not copy Secrets across namespaces. A tool such as
+[Kyverno](https://kyverno.io/) can automate the replication.
+
+**Cluster-scoped install only.** The cross-namespace lookup requires the
+controller to read EventBus objects outside its own namespace. This is only
+possible with the cluster-scoped installation profile. If you use the
+namespace-scoped install (`--namespaced`), ensure the EventBus namespace is
+included in `--managed-namespace`. See [Managed Namespace](../managed-namespace.md)
+for details.
+
+**EventSource cross-namespace reference is not yet supported.** Only the Sensor
+side is implemented. A follow-up contribution can mirror the same change for
+EventSource.
