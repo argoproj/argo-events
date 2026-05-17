@@ -58,3 +58,15 @@ spec:
 #        userSecret:
 #          key: user
 #          name: my-user
+
+##    Enable AWS MSK IAM authentication (IRSA / web-identity token)
+##    Requires the pod service account to be annotated with an IAM role ARN:
+##      eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/<role-name>
+##    TLS is enabled automatically; do not also set the sasl or tls blocks.
+#  aws-msk-iam-example:
+#    url: b-1.my-cluster.abc123.c2.kafka.us-east-1.amazonaws.com:9098
+#    topic: my-topic
+#    consumerGroup:
+#      groupName: my-group
+#    awsMskIamAuth:
+#      region: us-east-1
