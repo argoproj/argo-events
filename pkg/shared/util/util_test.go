@@ -45,6 +45,7 @@ func TestFormatEndpoint(t *testing.T) {
 
 func TestFormattedURL(t *testing.T) {
 	assert.Equal(t, "test-url/fake", FormattedURL("test-url", "fake"))
+	assert.Equal(t, "test-url/fake", FormattedURL("test-url/", "/fake"))
 }
 
 type statusVal int

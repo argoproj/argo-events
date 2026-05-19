@@ -87,7 +87,7 @@ func FormatEndpoint(endpoint string) string {
 
 // FormattedURL returns a formatted url
 func FormattedURL(url, endpoint string) string {
-	return fmt.Sprintf("%s%s", url, FormatEndpoint(endpoint))
+	return fmt.Sprintf("%s%s", strings.TrimRight(url, "/"), FormatEndpoint(endpoint))
 }
 
 func ErrEventSourceTypeMismatch(eventSourceType string) string {
