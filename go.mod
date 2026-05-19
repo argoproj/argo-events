@@ -37,7 +37,7 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.5.1
 	github.com/emitter-io/go/v2 v2.0.9
 	github.com/evilmonkeyinc/jsonpath v0.8.1
-	github.com/fsnotify/fsnotify v1.10.0
+	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gavv/httpexpect/v2 v2.16.0
 	github.com/gfleury/go-bitbucket-v1 v0.0.0-20210707202713-7d616f7c18ac
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
@@ -88,9 +88,9 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4
 	golang.org/x/crypto v0.51.0
 	golang.org/x/tools v0.45.0
-	google.golang.org/api v0.278.0
-	google.golang.org/grpc v1.81.0
-	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.1
+	google.golang.org/api v0.279.0
+	google.golang.org/grpc v1.81.1
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.2
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/jcmturner/gokrb5.v5 v5.3.0
 	k8s.io/api v0.32.2
