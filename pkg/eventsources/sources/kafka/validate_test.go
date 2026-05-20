@@ -53,3 +53,39 @@ func TestValidateEventSource(t *testing.T) {
 		assert.NoError(t, err)
 	}
 }
+
+func TestValidateEventSource_AWSMSKIAMAuth(t *testing.T) {
+	t.Run("valid aws msk iam auth", func(t *testing.T) {
+		l := &EventListener{
+			KafkaEventSource: v1alpha1.KafkaEventSource{
+				URL:   "broker.kafka.us-east-1.amazonaws.com:9098",
+				Topic: "my-topic",
+				ConsumerGroup: &v1alpha1.KafkaConsumerGroup{
+					GroupName: "my-group",
+				},
+				AWSMSKIAMAuth: &v1alpha1.AWSMSKIAMConfig{
+					Region: "us-east-1",
+				},
+			},
+		}
+		err := l.ValidateEventSource(context.Background())
+		assert.NoError(t, err)
+	})
+
+	t.Run("missing region", func(t *testing.T) {
+		l := &EventListener{
+			KafkaEventSource: v1alpha1.KafkaEventSource{
+				URL:   "broker.kafka.us-east-1.amazonaws.com:9098",
+				Topic: "my-topic",
+				ConsumerGroup: &v1alpha1.KafkaConsumerGroup{
+					GroupName: "my-group",
+				},
+				AWSMSKIAMAuth: &v1alpha1.AWSMSKIAMConfig{
+					Region: "",
+				},
+			},
+		}
+		err := l.ValidateEventSource(context.Background())
+		assert.EqualError(t, err, "awsMskIamAuth.region must be specified")
+	})
+}
