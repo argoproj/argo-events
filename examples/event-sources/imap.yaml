@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: imap
+spec:
+  imap:
+    example:
+      hostAddress: mail.gmail.com:993
+      startTLS: true
+      username:
+        name: imap-secret
+        key: username
+      password:
+        name: imap-secret
+        key: password
+      metadata:
+        source: imap-eventsource

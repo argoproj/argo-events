@@ -92,6 +92,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitlabEventSource":            schema_pkg_apis_events_v1alpha1_GitlabEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.HDFSEventSource":              schema_pkg_apis_events_v1alpha1_HDFSEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.HTTPTrigger":                  schema_pkg_apis_events_v1alpha1_HTTPTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.IMAPEventSource":              schema_pkg_apis_events_v1alpha1_IMAPEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Int64OrString":                schema_pkg_apis_events_v1alpha1_Int64OrString(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.JetStreamBus":                 schema_pkg_apis_events_v1alpha1_JetStreamBus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.JetStreamConfig":              schema_pkg_apis_events_v1alpha1_JetStreamConfig(ref),
@@ -3295,11 +3296,26 @@ func schema_pkg_apis_events_v1alpha1_EventSourceSpec(ref common.ReferenceCallbac
 							},
 						},
 					},
+					"imap": {
+						SchemaProps: spec.SchemaProps{
+							Description: "IMAP event sources",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.IMAPEventSource"),
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureQueueStorageEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureServiceBusEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BitbucketEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BitbucketServerEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GerritEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PulsarEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisStreamEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SFTPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StripeEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebhookEventSource"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureQueueStorageEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureServiceBusEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BitbucketEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BitbucketServerEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GerritEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.IMAPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PulsarEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisStreamEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SFTPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StripeEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebhookEventSource"},
 	}
 }
 
@@ -4185,7 +4201,8 @@ func schema_pkg_apis_events_v1alpha1_HDFSEventSource(ref common.ReferenceCallbac
 					},
 					"addresses": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
+							Description: "Addresses is accessible addresses of HDFS name nodes",
+							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -4399,6 +4416,77 @@ func schema_pkg_apis_events_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SecureHeader", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter"},
+	}
+}
+
+func schema_pkg_apis_events_v1alpha1_IMAPEventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "IMAPEventSource refers to event-source for HDFS related events",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"hostAddress": {
+						SchemaProps: spec.SchemaProps{
+							Description: "HostAddress is the address of the host for IMAP server",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username to use to connect to broker",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"password": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Password to use to connect to broker",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"connectionBackoff": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Backoff holds parameters applied to connection.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Backoff"),
+						},
+					},
+					"startTLS": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the emitter client.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"filter": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Filter",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter"),
+						},
+					},
+				},
+				Required: []string{"hostAddress"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Backoff", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

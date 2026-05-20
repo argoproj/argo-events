@@ -108,6 +108,8 @@ type EventSourceSpec struct {
 	Gerrit map[string]GerritEventSource `json:"gerrit,omitempty" protobuf:"bytes,35,rep,name=gerrit"`
 	// MNS event sources
 	MNS map[string]MNSEventSource `json:"mns,omitempty" protobuf:"bytes,36,rep,name=mns"`
+	// IMAP event sources
+	IMAP map[string]IMAPEventSource `json:"imap,omitempty" protobuf:"bytes,37,rep,name=imap"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
@@ -1104,7 +1106,6 @@ type HDFSEventSource struct {
 	// CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)
 	CheckInterval string `json:"checkInterval,omitempty" protobuf:"bytes,3,opt,name=checkInterval"`
 	// Addresses is accessible addresses of HDFS name nodes
-
 	Addresses []string `json:"addresses" protobuf:"bytes,4,rep,name=addresses"`
 	// HDFSUser is the user to access HDFS file system.
 	// It is ignored if either ccache or keytab is used.
@@ -1130,6 +1131,30 @@ type HDFSEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,12,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,13,opt,name=filter"`
+}
+
+// IMAPEventSource refers to event-source for IMAP related events
+type IMAPEventSource struct {
+	// HostAddress is the address of the host for IMAP server
+	HostAddress string `json:"hostAddress" protobuf:"bytes,1,opt,name=hostaddress"`
+	// Username to use to connect to broker
+	// +optional
+	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,2,opt,name=username"`
+	// Password to use to connect to broker
+	// +optional
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,3,opt,name=password"`
+	// Backoff holds parameters applied to connection.
+	// +optional
+	ConnectionBackoff *Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+	// TLS configuration for the emitter client.
+	// +optional
+	StartTLS bool `json:"startTLS,omitempty" protobuf:"varint,5,opt,name=startTLS"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,13,opt,name=filter"`
