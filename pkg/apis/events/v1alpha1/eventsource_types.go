@@ -498,6 +498,11 @@ type KafkaEventSource struct {
 	// Schema Registry configuration for consumer message with Avro format
 	// +optional
 	SchemaRegistry *SchemaRegistryConfig `json:"schemaRegistry,omitempty" protobuf:"bytes,14,opt,name=schemaRegistry"`
+	// AWSMSKIAMAuth configures SASL/OAUTHBEARER authentication using AWS IAM credentials,
+	// supporting IRSA (pod web-identity token), instance-profile, and static env credentials.
+	// When set, TLS is enabled automatically and the SASL config field is ignored.
+	// +optional
+	AWSMSKIAMAuth *AWSMSKIAMConfig `json:"awsMskIamAuth,omitempty" protobuf:"bytes,15,opt,name=awsMskIamAuth"`
 }
 
 type KafkaConsumerGroup struct {

@@ -47,5 +47,10 @@ func validate(eventSource *v1alpha1.KafkaEventSource) error {
 	if eventSource.SASL != nil {
 		return v1alpha1.ValidateSASLConfig(eventSource.SASL)
 	}
+	if eventSource.AWSMSKIAMAuth != nil {
+		if eventSource.AWSMSKIAMAuth.Region == "" {
+			return fmt.Errorf("awsMskIamAuth.region must be specified")
+		}
+	}
 	return nil
 }
