@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: imap
+spec:
+  template:
+    serviceAccountName: operate-workflow-sa
+  dependencies:
+    - name: test-dep
+      eventSourceName: imap
+      eventName: example
+  triggers:
+    - template:
+        name: imap-workflow-trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: imap-
+              spec:
+                entrypoint: email-processor
+                arguments:
+                  parameters:
+                  - name: email-subject
+                    # the value will get overridden by event payload from test-dep
+                    value: "No Subject"
+                  - name: email-from
+                    # the value will get overridden by event payload from test-dep
+                    value: "unknown@example.com"
+                  - name: email-timestamp
+                    # the value will get overridden by event payload from test-dep
+                    value: "unknown"
+                templates:
+                - name: email-processor
+                  inputs:
+                    parameters:
+                    - name: email-subject
+                    - name: email-from
+                    - name: email-timestamp
+                  container:
+                    image: alpine:latest
+                    command: [sh]
+                    args:
+                      - -c
+                      - |
+                        echo "Processing email:"
+                        echo "Subject: {{inputs.parameters.email-subject}}"
+                        echo "From: {{inputs.parameters.email-from}}"
+                        echo "Received: {{inputs.parameters.email-timestamp}}"
+                        echo "Email processing completed successfully!"
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: subject
+              dest: spec.arguments.parameters.0.value
+            - src:
+                dependencyName: test-dep
+                dataKey: from
+              dest: spec.arguments.parameters.1.value
+            - src:
+                dependencyName: test-dep
+                dataKey: timestamp
+              dest: spec.arguments.parameters.2.value
