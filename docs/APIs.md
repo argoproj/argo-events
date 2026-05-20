@@ -2550,6 +2550,7 @@ Backoff
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>,
 <a href="#argoproj.io/v1alpha1.EmitterEventSource">EmitterEventSource</a>,
+<a href="#argoproj.io/v1alpha1.IMAPEventSource">IMAPEventSource</a>,
 <a href="#argoproj.io/v1alpha1.K8SResourcePolicy">K8SResourcePolicy</a>,
 <a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>,
 <a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>,
@@ -7523,6 +7524,27 @@ MNS event sources
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>imap</code></br> <em>
+<a href="#argoproj.io/v1alpha1.IMAPEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.IMAPEventSource
+</a> </em>
+</td>
+
+<td>
+
+<p>
+
+IMAP event sources
+</p>
+
+</td>
+
+</tr>
+
 </table>
 
 </td>
@@ -7571,6 +7593,7 @@ EventSourceFilter
 <a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>,
 <a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,
 <a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>,
+<a href="#argoproj.io/v1alpha1.IMAPEventSource">IMAPEventSource</a>,
 <a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>,
 <a href="#argoproj.io/v1alpha1.MNSEventSource">MNSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>,
@@ -8414,6 +8437,27 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSo
 <p>
 
 MNS event sources
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>imap</code></br> <em>
+<a href="#argoproj.io/v1alpha1.IMAPEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.IMAPEventSource
+</a> </em>
+</td>
+
+<td>
+
+<p>
+
+IMAP event sources
 </p>
 
 </td>
@@ -10567,6 +10611,11 @@ the directory state, e.g. 1s, 30m, 2h… (defaults to 1m)
 
 <td>
 
+<p>
+
+Addresses is accessible addresses of HDFS name nodes
+</p>
+
 </td>
 
 </tr>
@@ -11008,6 +11057,192 @@ Parameters.
 <p>
 
 Host refers to the domain name of the server (for virtual hosting).
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.IMAPEventSource">
+
+IMAPEventSource
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+
+<p>
+
+<p>
+
+IMAPEventSource refers to event-source for HDFS related events
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+</th>
+
+<th>
+
+Description
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>hostAddress</code></br> <em> string </em>
+</td>
+
+<td>
+
+<p>
+
+HostAddress is the address of the host for IMAP server
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>username</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Username to use to connect to broker
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>password</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Password to use to connect to broker
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>connectionBackoff</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Backoff"> Backoff </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Backoff holds parameters applied to connection.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>startTLS</code></br> <em> bool </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+TLS configuration for the emitter client.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Filter
 </p>
 
 </td>

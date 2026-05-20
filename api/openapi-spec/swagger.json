@@ -1547,6 +1547,13 @@
             "$ref": "#/definitions/io.argoproj.events.v1alpha1.HDFSEventSource"
           }
         },
+        "imap": {
+          "description": "IMAP event sources",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.IMAPEventSource"
+          }
+        },
         "kafka": {
           "description": "Kafka event sources",
           "type": "object",
@@ -2157,6 +2164,7 @@
       ],
       "properties": {
         "addresses": {
+          "description": "Addresses is accessible addresses of HDFS name nodes",
           "type": "array",
           "items": {
             "type": "string"
@@ -2289,6 +2297,46 @@
         "url": {
           "description": "URL refers to the URL to send HTTP request to.",
           "type": "string"
+        }
+      }
+    },
+    "io.argoproj.events.v1alpha1.IMAPEventSource": {
+      "description": "IMAPEventSource refers to event-source for HDFS related events",
+      "type": "object",
+      "required": [
+        "hostAddress"
+      ],
+      "properties": {
+        "connectionBackoff": {
+          "description": "Backoff holds parameters applied to connection.",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.Backoff"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.EventSourceFilter"
+        },
+        "hostAddress": {
+          "description": "HostAddress is the address of the host for IMAP server",
+          "type": "string"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "password": {
+          "description": "Password to use to connect to broker",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "startTLS": {
+          "description": "TLS configuration for the emitter client.",
+          "type": "boolean"
+        },
+        "username": {
+          "description": "Username to use to connect to broker",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         }
       }
     },

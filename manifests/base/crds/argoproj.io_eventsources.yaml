@@ -1,7 +1,10 @@
-# This is an auto-generated file. DO NOT EDIT
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
   name: eventsources.argoproj.io
 spec:
   group: argoproj.io
@@ -25,11 +28,2080 @@ spec:
           metadata:
             type: object
           spec:
+            properties:
+              amqp:
+                additionalProperties:
+                  properties:
+                    auth:
+                      properties:
+                        password:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        username:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                      type: object
+                    connectionBackoff:
+                      properties:
+                        duration:
+                          properties:
+                            int64Val:
+                              format: int64
+                              type: integer
+                            strVal:
+                              type: string
+                            type:
+                              format: int64
+                              type: integer
+                          required:
+                          - type
+                          type: object
+                        factor:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        jitter:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        steps:
+                          format: int32
+                          type: integer
+                      type: object
+                    consume:
+                      properties:
+                        autoAck:
+                          type: boolean
+                        consumerTag:
+                          type: string
+                        exclusive:
+                          type: boolean
+                        noLocal:
+                          type: boolean
+                        noWait:
+                          type: boolean
+                      type: object
+                    exchangeDeclare:
+                      properties:
+                        autoDelete:
+                          type: boolean
+                        durable:
+                          type: boolean
+                        internal:
+                          type: boolean
+                        noWait:
+                          type: boolean
+                      type: object
+                    exchangeName:
+                      type: string
+                    exchangeType:
+                      type: string
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    jsonBody:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    queueBind:
+                      properties:
+                        noWait:
+                          type: boolean
+                      type: object
+                    queueDeclare:
+                      properties:
+                        arguments:
+                          type: string
+                        autoDelete:
+                          type: boolean
+                        durable:
+                          type: boolean
+                        exclusive:
+                          type: boolean
+                        name:
+                          type: string
+                        noWait:
+                          type: boolean
+                      type: object
+                    routingKey:
+                      type: string
+                    tls:
+                      properties:
+                        caCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        insecureSkipVerify:
+                          type: boolean
+                      type: object
+                    url:
+                      type: string
+                    urlSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                  required:
+                  - exchangeName
+                  - exchangeType
+                  - routingKey
+                  type: object
+                type: object
+              azureEventsHub:
+                additionalProperties:
+                  properties:
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    fqdn:
+                      type: string
+                    hubName:
+                      type: string
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    sharedAccessKey:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    sharedAccessKeyName:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                  required:
+                  - fqdn
+                  - hubName
+                  type: object
+                type: object
+              azureQueueStorage:
+                additionalProperties:
+                  properties:
+                    connectionString:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    decodeMessage:
+                      type: boolean
+                    dlq:
+                      type: boolean
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    jsonBody:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    queueName:
+                      type: string
+                    storageAccountName:
+                      type: string
+                    waitTimeInSeconds:
+                      format: int32
+                      type: integer
+                  required:
+                  - queueName
+                  type: object
+                type: object
+              azureServiceBus:
+                additionalProperties:
+                  properties:
+                    connectionString:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    fullyQualifiedNamespace:
+                      type: string
+                    jsonBody:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    queueName:
+                      type: string
+                    subscriptionName:
+                      type: string
+                    tls:
+                      properties:
+                        caCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        insecureSkipVerify:
+                          type: boolean
+                      type: object
+                    topicName:
+                      type: string
+                  required:
+                  - queueName
+                  - subscriptionName
+                  - topicName
+                  type: object
+                type: object
+              bitbucket:
+                additionalProperties:
+                  properties:
+                    auth:
+                      properties:
+                        basic:
+                          properties:
+                            password:
+                              $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                            username:
+                              $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                          required:
+                          - password
+                          - username
+                          type: object
+                        oauthToken:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                      type: object
+                    deleteHookOnFinish:
+                      type: boolean
+                    events:
+                      items:
+                        type: string
+                      type: array
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    owner:
+                      type: string
+                    projectKey:
+                      type: string
+                    repositories:
+                      items:
+                        properties:
+                          owner:
+                            type: string
+                          repositorySlug:
+                            type: string
+                        required:
+                        - owner
+                        - repositorySlug
+                        type: object
+                      type: array
+                    repositorySlug:
+                      type: string
+                    webhook:
+                      properties:
+                        authSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        endpoint:
+                          type: string
+                        maxPayloadSize:
+                          format: int64
+                          type: integer
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        method:
+                          type: string
+                        port:
+                          type: string
+                        serverCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        serverKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        url:
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                  required:
+                  - auth
+                  - events
+                  - webhook
+                  type: object
+                type: object
+              bitbucketserver:
+                additionalProperties:
+                  properties:
+                    accessToken:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    bitbucketserverBaseURL:
+                      type: string
+                    checkInterval:
+                      type: string
+                    deleteHookOnFinish:
+                      type: boolean
+                    events:
+                      items:
+                        type: string
+                      type: array
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    oneEventPerChange:
+                      type: boolean
+                    projectKey:
+                      type: string
+                    projects:
+                      items:
+                        type: string
+                      type: array
+                    repositories:
+                      items:
+                        properties:
+                          projectKey:
+                            type: string
+                          repositorySlug:
+                            type: string
+                        required:
+                        - projectKey
+                        - repositorySlug
+                        type: object
+                      type: array
+                    repositorySlug:
+                      type: string
+                    skipBranchRefsChangedOnOpenPR:
+                      type: boolean
+                    tls:
+                      properties:
+                        caCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        insecureSkipVerify:
+                          type: boolean
+                      type: object
+                    webhook:
+                      properties:
+                        authSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        endpoint:
+                          type: string
+                        maxPayloadSize:
+                          format: int64
+                          type: integer
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        method:
+                          type: string
+                        port:
+                          type: string
+                        serverCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        serverKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        url:
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                    webhookSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                  required:
+                  - bitbucketserverBaseURL
+                  type: object
+                type: object
+              calendar:
+                additionalProperties:
+                  properties:
+                    exclusionDates:
+                      items:
+                        type: string
+                      type: array
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    interval:
+                      type: string
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    persistence:
+                      properties:
+                        catchup:
+                          properties:
+                            enabled:
+                              type: boolean
+                            maxDuration:
+                              type: string
+                          type: object
+                        configMap:
+                          properties:
+                            createIfNotExist:
+                              type: boolean
+                            name:
+                              type: string
+                          type: object
+                      type: object
+                    schedule:
+                      type: string
+                    timezone:
+                      type: string
+                  type: object
+                type: object
+              emitter:
+                additionalProperties:
+                  properties:
+                    broker:
+                      type: string
+                    channelKey:
+                      type: string
+                    channelName:
+                      type: string
+                    connectionBackoff:
+                      properties:
+                        duration:
+                          properties:
+                            int64Val:
+                              format: int64
+                              type: integer
+                            strVal:
+                              type: string
+                            type:
+                              format: int64
+                              type: integer
+                          required:
+                          - type
+                          type: object
+                        factor:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        jitter:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        steps:
+                          format: int32
+                          type: integer
+                      type: object
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    jsonBody:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    password:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    tls:
+                      properties:
+                        caCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        insecureSkipVerify:
+                          type: boolean
+                      type: object
+                    username:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                  required:
+                  - broker
+                  - channelKey
+                  - channelName
+                  type: object
+                type: object
+              eventBusName:
+                type: string
+              file:
+                additionalProperties:
+                  properties:
+                    eventType:
+                      type: string
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    polling:
+                      type: boolean
+                    watchPathConfig:
+                      properties:
+                        directory:
+                          type: string
+                        path:
+                          type: string
+                        pathRegexp:
+                          type: string
+                      required:
+                      - directory
+                      type: object
+                  required:
+                  - eventType
+                  - watchPathConfig
+                  type: object
+                type: object
+              generic:
+                additionalProperties:
+                  properties:
+                    authSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    config:
+                      type: string
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    insecure:
+                      type: boolean
+                    jsonBody:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    url:
+                      type: string
+                  required:
+                  - config
+                  - url
+                  type: object
+                type: object
+              gerrit:
+                additionalProperties:
+                  properties:
+                    auth:
+                      properties:
+                        password:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        username:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                      type: object
+                    deleteHookOnFinish:
+                      type: boolean
+                    events:
+                      items:
+                        type: string
+                      type: array
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    gerritBaseURL:
+                      type: string
+                    hookName:
+                      type: string
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    projects:
+                      items:
+                        type: string
+                      type: array
+                    sslVerify:
+                      type: boolean
+                    webhook:
+                      properties:
+                        authSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        endpoint:
+                          type: string
+                        maxPayloadSize:
+                          format: int64
+                          type: integer
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        method:
+                          type: string
+                        port:
+                          type: string
+                        serverCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        serverKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        url:
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                  required:
+                  - events
+                  - gerritBaseURL
+                  - hookName
+                  type: object
+                type: object
+              github:
+                additionalProperties:
+                  properties:
+                    active:
+                      type: boolean
+                    apiToken:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    contentType:
+                      type: string
+                    deleteHookOnFinish:
+                      type: boolean
+                    events:
+                      items:
+                        type: string
+                      type: array
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    githubApp:
+                      properties:
+                        appID:
+                          format: int64
+                          type: integer
+                        installationID:
+                          format: int64
+                          type: integer
+                        privateKey:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                      required:
+                      - appID
+                      - installationID
+                      - privateKey
+                      type: object
+                    githubBaseURL:
+                      type: string
+                    githubUploadURL:
+                      type: string
+                    id:
+                      format: int64
+                      type: integer
+                    insecure:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    organizations:
+                      items:
+                        type: string
+                      type: array
+                    owner:
+                      type: string
+                    repositories:
+                      items:
+                        properties:
+                          names:
+                            items:
+                              type: string
+                            type: array
+                          owner:
+                            type: string
+                        type: object
+                      type: array
+                    repository:
+                      type: string
+                    webhook:
+                      properties:
+                        authSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        endpoint:
+                          type: string
+                        maxPayloadSize:
+                          format: int64
+                          type: integer
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        method:
+                          type: string
+                        port:
+                          type: string
+                        serverCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        serverKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        url:
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                    webhookSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                  required:
+                  - events
+                  type: object
+                type: object
+              gitlab:
+                additionalProperties:
+                  properties:
+                    accessToken:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    deleteHookOnFinish:
+                      type: boolean
+                    enableSSLVerification:
+                      type: boolean
+                    events:
+                      items:
+                        type: string
+                      type: array
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    gitlabBaseURL:
+                      type: string
+                    groups:
+                      items:
+                        type: string
+                      type: array
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    projectID:
+                      type: string
+                    projects:
+                      items:
+                        type: string
+                      type: array
+                    secretToken:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    webhook:
+                      properties:
+                        authSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        endpoint:
+                          type: string
+                        maxPayloadSize:
+                          format: int64
+                          type: integer
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        method:
+                          type: string
+                        port:
+                          type: string
+                        serverCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        serverKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        url:
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                  required:
+                  - events
+                  - gitlabBaseURL
+                  type: object
+                type: object
+              hdfs:
+                additionalProperties:
+                  properties:
+                    addresses:
+                      items:
+                        type: string
+                      type: array
+                    checkInterval:
+                      type: string
+                    directory:
+                      type: string
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    hdfsUser:
+                      type: string
+                    krbCCacheSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    krbConfigConfigMap:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0ConfigMapKeySelector'
+                    krbKeytabSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    krbRealm:
+                      type: string
+                    krbServicePrincipalName:
+                      type: string
+                    krbUsername:
+                      type: string
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    path:
+                      type: string
+                    pathRegexp:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - addresses
+                  - directory
+                  - type
+                  type: object
+                type: object
+              imap:
+                additionalProperties:
+                  properties:
+                    connectionBackoff:
+                      properties:
+                        duration:
+                          properties:
+                            int64Val:
+                              format: int64
+                              type: integer
+                            strVal:
+                              type: string
+                            type:
+                              format: int64
+                              type: integer
+                          required:
+                          - type
+                          type: object
+                        factor:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        jitter:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        steps:
+                          format: int32
+                          type: integer
+                      type: object
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    hostAddress:
+                      type: string
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    password:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    startTLS:
+                      type: boolean
+                    username:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                  required:
+                  - hostAddress
+                  type: object
+                type: object
+              kafka:
+                additionalProperties:
+                  properties:
+                    config:
+                      type: string
+                    connectionBackoff:
+                      properties:
+                        duration:
+                          properties:
+                            int64Val:
+                              format: int64
+                              type: integer
+                            strVal:
+                              type: string
+                            type:
+                              format: int64
+                              type: integer
+                          required:
+                          - type
+                          type: object
+                        factor:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        jitter:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        steps:
+                          format: int32
+                          type: integer
+                      type: object
+                    consumerGroup:
+                      properties:
+                        groupName:
+                          type: string
+                        oldest:
+                          type: boolean
+                        rebalanceStrategy:
+                          type: string
+                      required:
+                      - groupName
+                      type: object
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    jsonBody:
+                      type: boolean
+                    limitEventsPerSecond:
+                      format: int64
+                      type: integer
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    partition:
+                      type: string
+                    sasl:
+                      properties:
+                        mechanism:
+                          type: string
+                        passwordSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        userSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                      type: object
+                    schemaRegistry:
+                      properties:
+                        auth:
+                          properties:
+                            password:
+                              $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                            username:
+                              $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                          type: object
+                        schemaId:
+                          format: int32
+                          type: integer
+                        url:
+                          type: string
+                      required:
+                      - url
+                      type: object
+                    tls:
+                      properties:
+                        caCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        insecureSkipVerify:
+                          type: boolean
+                      type: object
+                    topic:
+                      type: string
+                    url:
+                      type: string
+                    version:
+                      type: string
+                  required:
+                  - topic
+                  - url
+                  type: object
+                type: object
+              minio:
+                additionalProperties:
+                  properties:
+                    accessKey:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    bucket:
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    caCertificate:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    endpoint:
+                      type: string
+                    events:
+                      items:
+                        type: string
+                      type: array
+                    filter:
+                      properties:
+                        prefix:
+                          type: string
+                        suffix:
+                          type: string
+                      required:
+                      - prefix
+                      - suffix
+                      type: object
+                    insecure:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    region:
+                      type: string
+                    secretKey:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                  required:
+                  - accessKey
+                  - bucket
+                  - endpoint
+                  - secretKey
+                  type: object
+                type: object
+              mns:
+                additionalProperties:
+                  properties:
+                    accessKey:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    endpoint:
+                      type: string
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    jsonBody:
+                      type: boolean
+                    queue:
+                      type: string
+                    secretKey:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                  required:
+                  - queue
+                  type: object
+                type: object
+              mqtt:
+                additionalProperties:
+                  properties:
+                    auth:
+                      properties:
+                        password:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        username:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                      type: object
+                    clientId:
+                      type: string
+                    connectionBackoff:
+                      properties:
+                        duration:
+                          properties:
+                            int64Val:
+                              format: int64
+                              type: integer
+                            strVal:
+                              type: string
+                            type:
+                              format: int64
+                              type: integer
+                          required:
+                          - type
+                          type: object
+                        factor:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        jitter:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        steps:
+                          format: int32
+                          type: integer
+                      type: object
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    jsonBody:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    tls:
+                      properties:
+                        caCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        insecureSkipVerify:
+                          type: boolean
+                      type: object
+                    topic:
+                      type: string
+                    url:
+                      type: string
+                  required:
+                  - clientId
+                  - topic
+                  - url
+                  type: object
+                type: object
+              nats:
+                additionalProperties:
+                  properties:
+                    auth:
+                      properties:
+                        basic:
+                          properties:
+                            password:
+                              $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                            username:
+                              $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                          type: object
+                        credential:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        nkey:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        token:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                      type: object
+                    connectionBackoff:
+                      properties:
+                        duration:
+                          properties:
+                            int64Val:
+                              format: int64
+                              type: integer
+                            strVal:
+                              type: string
+                            type:
+                              format: int64
+                              type: integer
+                          required:
+                          - type
+                          type: object
+                        factor:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        jitter:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        steps:
+                          format: int32
+                          type: integer
+                      type: object
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    jsonBody:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    queue:
+                      type: string
+                    subject:
+                      type: string
+                    tls:
+                      properties:
+                        caCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        insecureSkipVerify:
+                          type: boolean
+                      type: object
+                    url:
+                      type: string
+                  required:
+                  - subject
+                  - url
+                  type: object
+                type: object
+              nsq:
+                additionalProperties:
+                  properties:
+                    channel:
+                      type: string
+                    connectionBackoff:
+                      properties:
+                        duration:
+                          properties:
+                            int64Val:
+                              format: int64
+                              type: integer
+                            strVal:
+                              type: string
+                            type:
+                              format: int64
+                              type: integer
+                          required:
+                          - type
+                          type: object
+                        factor:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        jitter:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        steps:
+                          format: int32
+                          type: integer
+                      type: object
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    hostAddress:
+                      type: string
+                    jsonBody:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    tls:
+                      properties:
+                        caCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        insecureSkipVerify:
+                          type: boolean
+                      type: object
+                    topic:
+                      type: string
+                  required:
+                  - channel
+                  - hostAddress
+                  - topic
+                  type: object
+                type: object
+              pubSub:
+                additionalProperties:
+                  properties:
+                    credentialSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    deleteSubscriptionOnFinish:
+                      type: boolean
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    jsonBody:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    projectID:
+                      type: string
+                    subscriptionID:
+                      type: string
+                    topic:
+                      type: string
+                    topicProjectID:
+                      type: string
+                  type: object
+                type: object
+              pulsar:
+                additionalProperties:
+                  properties:
+                    authAthenzParams:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    authAthenzSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    authTokenSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    connectionBackoff:
+                      properties:
+                        duration:
+                          properties:
+                            int64Val:
+                              format: int64
+                              type: integer
+                            strVal:
+                              type: string
+                            type:
+                              format: int64
+                              type: integer
+                          required:
+                          - type
+                          type: object
+                        factor:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        jitter:
+                          properties:
+                            value:
+                              format: byte
+                              type: string
+                          required:
+                          - value
+                          type: object
+                        steps:
+                          format: int32
+                          type: integer
+                      type: object
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    jsonBody:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    tls:
+                      properties:
+                        caCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        insecureSkipVerify:
+                          type: boolean
+                      type: object
+                    tlsAllowInsecureConnection:
+                      type: boolean
+                    tlsTrustCertsSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    tlsValidateHostname:
+                      type: boolean
+                    topics:
+                      items:
+                        type: string
+                      type: array
+                    type:
+                      type: string
+                    url:
+                      type: string
+                  required:
+                  - topics
+                  - url
+                  type: object
+                type: object
+              redis:
+                additionalProperties:
+                  properties:
+                    channels:
+                      items:
+                        type: string
+                      type: array
+                    db:
+                      format: int32
+                      type: integer
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    hostAddress:
+                      type: string
+                    jsonBody:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    namespace:
+                      type: string
+                    password:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    tls:
+                      properties:
+                        caCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        insecureSkipVerify:
+                          type: boolean
+                      type: object
+                    username:
+                      type: string
+                  required:
+                  - channels
+                  - hostAddress
+                  type: object
+                type: object
+              redisStream:
+                additionalProperties:
+                  properties:
+                    consumerGroup:
+                      type: string
+                    db:
+                      format: int32
+                      type: integer
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    hostAddress:
+                      type: string
+                    maxMsgCountPerRead:
+                      format: int32
+                      type: integer
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    password:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    streams:
+                      items:
+                        type: string
+                      type: array
+                    tls:
+                      properties:
+                        caCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        clientKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        insecureSkipVerify:
+                          type: boolean
+                      type: object
+                    username:
+                      type: string
+                  required:
+                  - hostAddress
+                  - streams
+                  type: object
+                type: object
+              replicas:
+                format: int32
+                type: integer
+              resource:
+                additionalProperties:
+                  properties:
+                    eventTypes:
+                      items:
+                        type: string
+                      type: array
+                    filter:
+                      properties:
+                        afterStart:
+                          type: boolean
+                        createdBy:
+                          format: date-time
+                          type: string
+                        fields:
+                          items:
+                            properties:
+                              key:
+                                type: string
+                              operation:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                            - key
+                            - value
+                            type: object
+                          type: array
+                        labels:
+                          items:
+                            properties:
+                              key:
+                                type: string
+                              operation:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                            - key
+                            - value
+                            type: object
+                          type: array
+                        prefix:
+                          type: string
+                      type: object
+                    group:
+                      type: string
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    namespace:
+                      type: string
+                    resource:
+                      type: string
+                    version:
+                      type: string
+                  required:
+                  - eventTypes
+                  - group
+                  - namespace
+                  - resource
+                  - version
+                  type: object
+                type: object
+              service:
+                properties:
+                  clusterIP:
+                    type: string
+                  metadata:
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      labels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                  ports:
+                    items:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0ServicePort'
+                    type: array
+                    x-kubernetes-list-map-keys:
+                    - port
+                    - protocol
+                    x-kubernetes-list-type: map
+                type: object
+              sftp:
+                additionalProperties:
+                  properties:
+                    address:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    eventType:
+                      type: string
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    password:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    pollIntervalDuration:
+                      type: string
+                    sshKeySecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    username:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    watchPathConfig:
+                      properties:
+                        directory:
+                          type: string
+                        path:
+                          type: string
+                        pathRegexp:
+                          type: string
+                      required:
+                      - directory
+                      type: object
+                  required:
+                  - eventType
+                  - watchPathConfig
+                  type: object
+                type: object
+              slack:
+                additionalProperties:
+                  properties:
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    signingSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    token:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    webhook:
+                      properties:
+                        authSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        endpoint:
+                          type: string
+                        maxPayloadSize:
+                          format: int64
+                          type: integer
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        method:
+                          type: string
+                        port:
+                          type: string
+                        serverCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        serverKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        url:
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                  type: object
+                type: object
+              sns:
+                additionalProperties:
+                  properties:
+                    accessKey:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    endpoint:
+                      type: string
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    region:
+                      type: string
+                    roleARN:
+                      type: string
+                    secretKey:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    topicArn:
+                      type: string
+                    validateSignature:
+                      type: boolean
+                    webhook:
+                      properties:
+                        authSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        endpoint:
+                          type: string
+                        maxPayloadSize:
+                          format: int64
+                          type: integer
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        method:
+                          type: string
+                        port:
+                          type: string
+                        serverCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        serverKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        url:
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                  required:
+                  - region
+                  - topicArn
+                  type: object
+                type: object
+              sqs:
+                additionalProperties:
+                  properties:
+                    accessKey:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    dlq:
+                      type: boolean
+                    endpoint:
+                      type: string
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    jsonBody:
+                      type: boolean
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    queue:
+                      type: string
+                    queueAccountId:
+                      type: string
+                    region:
+                      type: string
+                    roleARN:
+                      type: string
+                    secretKey:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    sessionToken:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    waitTimeSeconds:
+                      format: int64
+                      type: integer
+                  required:
+                  - queue
+                  - region
+                  - waitTimeSeconds
+                  type: object
+                type: object
+              storageGrid:
+                additionalProperties:
+                  properties:
+                    apiURL:
+                      type: string
+                    authToken:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    bucket:
+                      type: string
+                    events:
+                      items:
+                        type: string
+                      type: array
+                    filter:
+                      properties:
+                        prefix:
+                          type: string
+                        suffix:
+                          type: string
+                      required:
+                      - prefix
+                      - suffix
+                      type: object
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    region:
+                      type: string
+                    topicArn:
+                      type: string
+                    webhook:
+                      properties:
+                        authSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        endpoint:
+                          type: string
+                        maxPayloadSize:
+                          format: int64
+                          type: integer
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        method:
+                          type: string
+                        port:
+                          type: string
+                        serverCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        serverKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        url:
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                  required:
+                  - apiURL
+                  - authToken
+                  - bucket
+                  - topicArn
+                  type: object
+                type: object
+              stripe:
+                additionalProperties:
+                  properties:
+                    apiKey:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    createWebhook:
+                      type: boolean
+                    eventFilter:
+                      items:
+                        type: string
+                      type: array
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    webhook:
+                      properties:
+                        authSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        endpoint:
+                          type: string
+                        maxPayloadSize:
+                          format: int64
+                          type: integer
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        method:
+                          type: string
+                        port:
+                          type: string
+                        serverCertSecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        serverKeySecret:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                        url:
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                  type: object
+                type: object
+              template:
+                properties:
+                  affinity:
+                    $ref: '#/definitions/k8s.io~1api~1core~1v1~0Affinity'
+                  container:
+                    properties:
+                      env:
+                        items:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0EnvVar'
+                        type: array
+                      envFrom:
+                        items:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0EnvFromSource'
+                        type: array
+                      imagePullPolicy:
+                        $ref: '#/definitions/k8s.io~1api~1core~1v1~0PullPolicy'
+                      resources:
+                        $ref: '#/definitions/k8s.io~1api~1core~1v1~0ResourceRequirements'
+                      securityContext:
+                        $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecurityContext'
+                      volumeMounts:
+                        items:
+                          $ref: '#/definitions/k8s.io~1api~1core~1v1~0VolumeMount'
+                        type: array
+                    type: object
+                  imagePullSecrets:
+                    items:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0LocalObjectReference'
+                    type: array
+                  metadata:
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      labels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  priority:
+                    format: int32
+                    type: integer
+                  priorityClassName:
+                    type: string
+                  securityContext:
+                    $ref: '#/definitions/k8s.io~1api~1core~1v1~0PodSecurityContext'
+                  serviceAccountName:
+                    type: string
+                  tolerations:
+                    items:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0Toleration'
+                    type: array
+                  volumes:
+                    items:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0Volume'
+                    type: array
+                type: object
+              webhook:
+                additionalProperties:
+                  properties:
+                    authSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    endpoint:
+                      type: string
+                    filter:
+                      properties:
+                        expression:
+                          type: string
+                      type: object
+                    maxPayloadSize:
+                      format: int64
+                      type: integer
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    method:
+                      type: string
+                    port:
+                      type: string
+                    serverCertSecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    serverKeySecret:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0SecretKeySelector'
+                    url:
+                      type: string
+                  required:
+                  - endpoint
+                  - method
+                  - port
+                  - url
+                  type: object
+                type: object
             type: object
-            x-kubernetes-preserve-unknown-fields: true
           status:
+            properties:
+              conditions:
+                items:
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      type: string
+                    status:
+                      $ref: '#/definitions/k8s.io~1api~1core~1v1~0ConditionStatus'
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
             type: object
-            x-kubernetes-preserve-unknown-fields: true
         required:
         - metadata
         - spec
@@ -38,3 +2110,9 @@ spec:
     storage: true
     subresources:
       status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
