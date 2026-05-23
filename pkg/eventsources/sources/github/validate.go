@@ -41,20 +41,20 @@ func validate(githubEventSource *v1alpha1.GithubEventSource) error {
 	}
 
 	if githubEventSource.ContentType != "" {
-		if !(githubEventSource.ContentType == "json" || githubEventSource.ContentType == "form") { //nolint:staticcheck
+		ct := githubEventSource.ContentType
+		if ct != "json" && ct != "form" {
 			return fmt.Errorf("content type must be \"json\" or \"form\"")
 		}
 	}
 
 	// in order to avoid requests ending accidentally to public GitHub,
 	// make sure that both are set if either one is provided
-	if githubEventSource.GithubBaseURL != "" || githubEventSource.GithubUploadURL != "" { //nolint:staticcheck
-		if githubEventSource.GithubBaseURL == "" {
-			return fmt.Errorf("githubBaseURL is required when githubUploadURL is set")
-		}
-		if githubEventSource.GithubUploadURL == "" {
-			return fmt.Errorf("githubUploadURL is required when githubBaseURL is set")
-		}
+	if githubEventSource.GithubBaseURL == "" && githubEventSource.GithubUploadURL == "" {
+		// both empty: OK (using public GitHub)
+	} else if githubEventSource.GithubBaseURL == "" {
+		return fmt.Errorf("githubBaseURL is required when githubUploadURL is set")
+	} else if githubEventSource.GithubUploadURL == "" {
+		return fmt.Errorf("githubUploadURL is required when githubBaseURL is set")
 	}
 	return webhook.ValidateWebhookContext(githubEventSource.Webhook)
 }
