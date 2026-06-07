@@ -24,6 +24,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
@@ -52,4 +53,51 @@ func TestValidateEventSource(t *testing.T) {
 		err := l.ValidateEventSource(context.Background())
 		assert.NoError(t, err)
 	}
+}
+
+func TestValidateEventSourceAllowsEmptyFieldSelectorOperation(t *testing.T) {
+	listener := &EventListener{
+		ResourceEventSource: v1alpha1.ResourceEventSource{
+			GroupVersionResource: metav1.GroupVersionResource{
+				Version:  "v1",
+				Resource: "pods",
+			},
+			EventTypes: []v1alpha1.ResourceEventType{v1alpha1.ADD},
+			Filter: &v1alpha1.ResourceFilter{
+				Fields: []v1alpha1.Selector{
+					{
+						Key:   "metadata.name",
+						Value: "demo",
+					},
+				},
+			},
+		},
+	}
+
+	err := listener.ValidateEventSource(context.Background())
+	assert.NoError(t, err)
+}
+
+func TestValidateEventSourceRejectsUnsupportedFieldSelectorOperation(t *testing.T) {
+	listener := &EventListener{
+		ResourceEventSource: v1alpha1.ResourceEventSource{
+			GroupVersionResource: metav1.GroupVersionResource{
+				Version:  "v1",
+				Resource: "pods",
+			},
+			EventTypes: []v1alpha1.ResourceEventType{v1alpha1.ADD},
+			Filter: &v1alpha1.ResourceFilter{
+				Fields: []v1alpha1.Selector{
+					{
+						Key:       "metadata.name",
+						Operation: "in",
+						Value:     "example",
+					},
+				},
+			},
+		},
+	}
+
+	err := listener.ValidateEventSource(context.Background())
+	assert.EqualError(t, err, "unsupported field selector operation in")
 }

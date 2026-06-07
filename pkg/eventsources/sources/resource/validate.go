@@ -45,12 +45,12 @@ func validate(eventSource *v1alpha1.ResourceEventSource) error {
 	}
 	if eventSource.Filter != nil {
 		if eventSource.Filter.Labels != nil {
-			if err := validateSelectors(eventSource.Filter.Labels); err != nil {
+			if err := validateLabelSelectors(eventSource.Filter.Labels); err != nil {
 				return err
 			}
 		}
 		if eventSource.Filter.Fields != nil {
-			if err := validateSelectors(eventSource.Filter.Fields); err != nil {
+			if err := validateFieldSelectors(eventSource.Filter.Fields); err != nil {
 				return err
 			}
 		}
@@ -58,7 +58,7 @@ func validate(eventSource *v1alpha1.ResourceEventSource) error {
 	return nil
 }
 
-func validateSelectors(selectors []v1alpha1.Selector) error {
+func validateLabelSelectors(selectors []v1alpha1.Selector) error {
 	for _, sel := range selectors {
 		if sel.Key == "" {
 			return fmt.Errorf("key can't be empty for selector")
@@ -66,8 +66,24 @@ func validateSelectors(selectors []v1alpha1.Selector) error {
 		if sel.Operation == "" {
 			continue
 		}
-		if selection.Operator(sel.Operation) == "" {
+		switch selection.Operator(sel.Operation) {
+		case selection.Equals, selection.DoubleEquals, selection.NotEquals, selection.In, selection.NotIn, selection.Exists, selection.DoesNotExist, selection.GreaterThan, selection.LessThan:
+		default:
 			return fmt.Errorf("unknown selection operation %s", sel.Operation)
+		}
+	}
+	return nil
+}
+
+func validateFieldSelectors(selectors []v1alpha1.Selector) error {
+	for _, sel := range selectors {
+		if sel.Key == "" {
+			return fmt.Errorf("key can't be empty for selector")
+		}
+		switch selection.Operator(sel.Operation) {
+		case "", selection.Equals, selection.DoubleEquals, selection.NotEquals:
+		default:
+			return fmt.Errorf("unsupported field selector operation %s", sel.Operation)
 		}
 	}
 	return nil
