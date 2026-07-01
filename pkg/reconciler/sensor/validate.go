@@ -180,6 +180,11 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
 		}
 	}
+	if template.GRPC != nil {
+		if err := validateGRPCTrigger(template.GRPC); err != nil {
+			return fmt.Errorf("template %s is invalid, %w", template.Name, err)
+		}
+	}
 	return nil
 }
 
@@ -412,6 +417,67 @@ func validateEmailTrigger(trigger *v1alpha1.EmailTrigger) error {
 		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
 				return fmt.Errorf("resource parameter index: %d. err: %w", i, err)
+			}
+		}
+	}
+	return nil
+}
+
+// grpcSchemaFieldTypes is the set of scalar types the GRPC trigger's
+// schema accepts. Kept in sync with scalarFieldTypes in
+// pkg/sensors/triggers/grpc/schema.go.
+var grpcSchemaFieldTypes = map[string]bool{
+	"string": true,
+	"int32":  true,
+	"int64":  true,
+	"uint32": true,
+	"uint64": true,
+	"float":  true,
+	"double": true,
+	"bool":   true,
+	"bytes":  true,
+}
+
+// validateGRPCTrigger validates the GRPC trigger
+func validateGRPCTrigger(trigger *v1alpha1.GRPCTrigger) error {
+	if trigger == nil {
+		return fmt.Errorf("GRPC trigger can't be nil")
+	}
+	if trigger.URL == "" {
+		return fmt.Errorf("server URL is not specified")
+	}
+	if trigger.Method == "" {
+		return fmt.Errorf("gRPC method is not specified")
+	}
+	if !trigger.Insecure && trigger.TLS == nil {
+		return fmt.Errorf("either tls or insecure must be configured for the gRPC trigger")
+	}
+
+	seenNumbers := make(map[int32]bool, len(trigger.Schema))
+	for _, f := range trigger.Schema {
+		if !grpcSchemaFieldTypes[f.Type] {
+			return fmt.Errorf("unsupported schema field type %q for field %q", f.Type, f.Name)
+		}
+		if f.Number <= 0 {
+			return fmt.Errorf("schema field %q has an invalid field number %d, must be positive", f.Name, f.Number)
+		}
+		if seenNumbers[f.Number] {
+			return fmt.Errorf("duplicate field number %d in schema", f.Number)
+		}
+		seenNumbers[f.Number] = true
+	}
+
+	if trigger.Parameters != nil {
+		for i, parameter := range trigger.Parameters {
+			if err := validateTriggerParameter(&parameter); err != nil {
+				return fmt.Errorf("resource parameter index: %d. err: %w", i, err)
+			}
+		}
+	}
+	if trigger.Payload != nil {
+		for i, p := range trigger.Payload {
+			if err := validateTriggerParameter(&p); err != nil {
+				return fmt.Errorf("payload index: %d. err: %w", i, err)
 			}
 		}
 	}
@@ -716,6 +782,9 @@ func validateTriggerPolicy(trigger *v1alpha1.Trigger) error {
 		return validateStatusPolicy(trigger.Policy.Status)
 	}
 	if trigger.Template.AWSLambda != nil {
+		return validateStatusPolicy(trigger.Policy.Status)
+	}
+	if trigger.Template.GRPC != nil {
 		return validateStatusPolicy(trigger.Policy.Status)
 	}
 	return nil
