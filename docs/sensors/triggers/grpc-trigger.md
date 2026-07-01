@@ -33,10 +33,11 @@ grpc:
 - `schema` describes the request message fields. Supported `type` values are `string`, `int32`, `int64`, `uint32`, `uint64`, `float`, `double`, `bool`, and `bytes`. Nested messages and repeated fields are not supported.
 - `payload` works exactly like every other trigger's `payload`: a list of `src`/`dest` pairs that build the request from event data. Each `dest` should match a `name` in `schema`.
 - `insecure: true` connects over plaintext, with no encryption or verification — suitable only for trusted internal networks. Otherwise, set `tls` (same structure as the [HTTP trigger's TLS config](http-trigger.md)) for TLS/mTLS. Exactly one of `tls` or `insecure` must be set.
+- `timeout` is the per-call timeout in seconds. Defaults to `10` if unset.
 
 ### ⚠️ Getting the field `number` right
 
-The `number` for each schema field **must exactly match the field number declared in the target service's real `.proto` file** — not the order you happen to list fields in. Protobuf's wire format is is keyed by field number, not by name: if you get a number wrong, the server will not error, it will silently decode your value into the *wrong field* (or drop it as unknown).
+The `number` for each schema field **must exactly match the field number declared in the target service's real `.proto` file** — not the order you happen to list fields in. Protobuf's wire format is keyed by field number, not by name: if you get a number wrong, the server will not error, it will silently decode your value into the *wrong field* (or drop it as unknown).
 
 To find the correct numbers, either read the target's `.proto` source directly, or if the target has [server reflection](https://github.com/grpc/grpc/blob/master/doc/server-reflection.md) enabled, run:
 
