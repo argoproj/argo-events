@@ -1778,6 +1778,82 @@
         }
       }
     },
+    "io.argoproj.events.v1alpha1.GRPCSchemaField": {
+      "description": "GRPCSchemaField describes a single field of the gRPC request message.",
+      "type": "object",
+      "required": [
+        "name",
+        "number",
+        "type"
+      ],
+      "properties": {
+        "name": {
+          "description": "Name is the proto/JSON field name.",
+          "type": "string"
+        },
+        "number": {
+          "description": "Number is the protobuf field number, taken from the target's .proto.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "type": {
+          "description": "Type is the scalar field type: string, int32, int64, uint32, uint64, float, double, bool, or bytes.",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.events.v1alpha1.GRPCTrigger": {
+      "description": "GRPCTrigger is the trigger to invoke an arbitrary unary gRPC method on a target server. Since no compiled client stubs exist for the target service, the request message shape is described by Schema.",
+      "type": "object",
+      "required": [
+        "url",
+        "method"
+      ],
+      "properties": {
+        "insecure": {
+          "description": "Insecure disables TLS entirely (plaintext connection).",
+          "type": "boolean"
+        },
+        "method": {
+          "description": "Method is the fully-qualified RPC method path, e.g. \"/helloworld.Greeter/SayHello\".",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "Parameters is the list of key-value extracted from event's payload that are applied to the gRPC trigger resource.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.TriggerParameter"
+          }
+        },
+        "payload": {
+          "description": "Payload is the list of key-value extracted from an event payload to construct the gRPC request message.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.TriggerParameter"
+          }
+        },
+        "schema": {
+          "description": "Schema describes the request message's fields. Number MUST match the field number in the target's real .proto definition, or the message will be silently misinterpreted on the wire.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.GRPCSchemaField"
+          }
+        },
+        "timeout": {
+          "description": "Timeout for the RPC call, in seconds. Defaults to 10.",
+          "type": "integer",
+          "format": "int64"
+        },
+        "tls": {
+          "description": "TLS configuration for the gRPC connection. Mutually exclusive with Insecure.",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.TLSConfig"
+        },
+        "url": {
+          "description": "URL is the target gRPC server address (host:port).",
+          "type": "string"
+        }
+      }
+    },
     "io.argoproj.events.v1alpha1.GenericEventSource": {
       "description": "GenericEventSource refers to a generic event source. It can be used to implement a custom event source.",
       "type": "object",
@@ -4569,6 +4645,10 @@
         "email": {
           "description": "Email refers to the trigger designed to send an email notification",
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.EmailTrigger"
+        },
+        "grpc": {
+          "description": "GRPC refers to the trigger designed to invoke an arbitrary unary gRPC method.",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.GRPCTrigger"
         },
         "http": {
           "description": "HTTP refers to the trigger designed to dispatch a HTTP request with on-the-fly constructable payload.",

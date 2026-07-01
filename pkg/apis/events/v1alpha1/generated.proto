@@ -1227,6 +1227,59 @@ message FileEventSource {
   optional EventSourceFilter filter = 5;
 }
 
+// GRPCSchemaField describes a single field of the gRPC request message.
+message GRPCSchemaField {
+  // Name is the proto/JSON field name.
+  optional string name = 1;
+
+  // Number is the protobuf field number, taken from the target's .proto.
+  optional int32 number = 2;
+
+  // Type is the scalar field type: string, int32, int64, uint32, uint64,
+  // float, double, bool, or bytes.
+  optional string type = 3;
+}
+
+// GRPCTrigger is the trigger to invoke an arbitrary unary gRPC method on a
+// target server. Since no compiled client stubs exist for the target
+// service, the request message shape is described by Schema.
+message GRPCTrigger {
+  // URL is the target gRPC server address (host:port).
+  optional string url = 1;
+
+  // Method is the fully-qualified RPC method path,
+  // e.g. "/helloworld.Greeter/SayHello".
+  optional string method = 2;
+
+  // Schema describes the request message's fields. Number MUST match the
+  // field number in the target's real .proto definition, or the message
+  // will be silently misinterpreted on the wire.
+  // +optional
+  repeated GRPCSchemaField schema = 3;
+
+  // Payload is the list of key-value extracted from an event payload to
+  // construct the gRPC request message.
+  // +optional
+  repeated TriggerParameter payload = 4;
+
+  // TLS configuration for the gRPC connection. Mutually exclusive with Insecure.
+  // +optional
+  optional TLSConfig tls = 5;
+
+  // Insecure disables TLS entirely (plaintext connection).
+  // +optional
+  optional bool insecure = 6;
+
+  // Timeout for the RPC call, in seconds. Defaults to 10.
+  // +optional
+  optional int64 timeout = 7;
+
+  // Parameters is the list of key-value extracted from event's payload
+  // that are applied to the gRPC trigger resource.
+  // +optional
+  repeated TriggerParameter parameters = 8;
+}
+
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
 message GenericEventSource {
   // URL of the gRPC server that implements the event source.
@@ -3394,6 +3447,10 @@ message TriggerTemplate {
   // Email refers to the trigger designed to send an email notification
   // +optional
   optional EmailTrigger email = 17;
+
+  // GRPC refers to the trigger designed to invoke an arbitrary unary gRPC method.
+  // +optional
+  optional GRPCTrigger grpc = 18;
 }
 
 // URLArtifact contains information about an artifact at an HTTP endpoint.
