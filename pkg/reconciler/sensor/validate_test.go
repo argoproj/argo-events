@@ -721,6 +721,18 @@ func TestValidateGRPCTrigger(t *testing.T) {
 		err := validateGRPCTrigger(trigger)
 		assert.ErrorContains(t, err, "duplicate")
 	})
+
+	t.Run("both tls and insecure set", func(t *testing.T) {
+		trigger := &v1alpha1.GRPCTrigger{
+			URL:      "localhost:9000",
+			Method:   "/pkg.Svc/Method",
+			Insecure: true,
+			TLS:      &v1alpha1.TLSConfig{Enabled: true},
+		}
+		err := validateGRPCTrigger(trigger)
+		assert.Error(t, err)
+		assert.ErrorContains(t, err, "mutually exclusive")
+	})
 }
 
 func TestValidateTriggerPolicy_GRPC(t *testing.T) {

@@ -452,6 +452,9 @@ func validateGRPCTrigger(trigger *v1alpha1.GRPCTrigger) error {
 	if !trigger.Insecure && trigger.TLS == nil {
 		return fmt.Errorf("either tls or insecure must be configured for the gRPC trigger")
 	}
+	if trigger.Insecure && trigger.TLS != nil {
+		return fmt.Errorf("tls and insecure are mutually exclusive, only one may be configured for the gRPC trigger")
+	}
 
 	seenNumbers := make(map[int32]bool, len(trigger.Schema))
 	for _, f := range trigger.Schema {
