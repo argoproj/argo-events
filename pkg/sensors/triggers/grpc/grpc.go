@@ -19,17 +19,24 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/types/dynamicpb"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/sensors/policy"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
+
+const defaultGRPCTimeout = 10 * time.Second
 
 // GRPCTrigger describes the trigger to invoke an arbitrary unary gRPC method
 type GRPCTrigger struct {
@@ -111,4 +118,66 @@ func (t *GRPCTrigger) ApplyResourceParameters(events map[string]*v1alpha1.Event,
 		return gt, nil
 	}
 	return resource, nil
+}
+
+// Execute executes the trigger. The response body is never decoded — the
+// returned value is always a *status.Status, even when the RPC completes
+// with a non-OK code, mirroring how HTTPTrigger.Execute returns the raw
+// *http.Response for non-2xx codes. A non-nil error here means the call
+// could not even be attempted (bad schema, malformed payload).
+func (t *GRPCTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Event, resource interface{}) (interface{}, error) {
+	trigger, ok := resource.(*v1alpha1.GRPCTrigger)
+	if !ok {
+		return nil, fmt.Errorf("failed to interpret the trigger resource")
+	}
+
+	desc, err := buildRequestDescriptor(trigger.Schema)
+	if err != nil {
+		return nil, err
+	}
+
+	var payload []byte
+	if trigger.Payload != nil {
+		payload, err = triggers.ConstructPayload(events, trigger.Payload)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	msg := dynamicpb.NewMessage(desc)
+	if len(payload) > 0 {
+		if err := protojson.Unmarshal(payload, msg); err != nil {
+			return nil, fmt.Errorf("failed to construct the gRPC request message, %w", err)
+		}
+	}
+
+	timeout := defaultGRPCTimeout
+	if trigger.Timeout > 0 {
+		timeout = time.Duration(trigger.Timeout) * time.Second
+	}
+	callCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	t.Logger.Infow("invoking gRPC method...", zap.Any("url", trigger.URL), zap.Any("method", trigger.Method))
+
+	reply := dynamicpb.NewMessage(emptyResponseDescriptor)
+	invokeErr := t.Conn.Invoke(callCtx, trigger.Method, msg, reply)
+	return status.Convert(invokeErr), nil
+}
+
+// ApplyPolicy applies policy on the trigger, reusing the same generic
+// status-code allow-list mechanism every other trigger type uses
+// (v1alpha1.Trigger.Policy.Status.Allow), interpreting Allow's values as
+// gRPC status codes instead of HTTP status codes.
+func (t *GRPCTrigger) ApplyPolicy(ctx context.Context, resource interface{}) error {
+	if t.Trigger.Policy == nil || t.Trigger.Policy.Status == nil || t.Trigger.Policy.Status.Allow == nil {
+		return nil
+	}
+	st, ok := resource.(*status.Status)
+	if !ok {
+		return fmt.Errorf("failed to interpret the trigger execution response")
+	}
+
+	p := policy.NewStatusPolicy(int(st.Code()), t.Trigger.Policy.Status.GetAllow())
+	return p.ApplyPolicy(ctx)
 }
