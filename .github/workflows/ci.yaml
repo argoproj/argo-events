@@ -21,7 +21,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v6
         with:
-          go-version: "1.25.5"
+          go-version: "1.26"
       - name: Restore go build cache
         uses: actions/cache@v5
         with:
@@ -48,7 +48,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v6
         with:
-          go-version: "1.25.5"
+          go-version: "1.26"
       - name: Restore go build cache
         uses: actions/cache@v5
         with:
@@ -75,7 +75,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v6
         with:
-          go-version: "1.25.5"
+          go-version: "1.26"
       - name: Restore go build cache
         uses: actions/cache@v5
         with:
@@ -108,7 +108,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v6
         with:
-          go-version: "1.25.5"
+          go-version: "1.26"
       - name: Restore go build cache
         uses: actions/cache@v5
         with:
@@ -119,7 +119,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       - name: Install k3d
-        run: curl -sfL https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash &
+        run:
+          curl -sfL
+          https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash &
       - name: Create k3d cluster
         run: |
           k3d cluster create e2e
