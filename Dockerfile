@@ -2,7 +2,7 @@ ARG ARCH=$TARGETARCH
 ####################################################################################################
 # base
 ####################################################################################################
-FROM alpine:3.16.2 as base
+FROM alpine:3.23 AS base
 ARG ARCH
 RUN apk update && apk upgrade && \
     apk add ca-certificates && \
@@ -20,7 +20,7 @@ RUN chmod +x /bin/argo-events
 ####################################################################################################
 # argo-events
 ####################################################################################################
-FROM scratch as argo-events
+FROM scratch AS argo-events
 ARG ARCH
 COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
