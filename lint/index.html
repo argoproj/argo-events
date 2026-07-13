@@ -2558,16 +2558,22 @@
 
 
 <h1 id="linting-eventsource-and-sensor-resources">Linting EventSource and Sensor Resources<a class="headerlink" href="#linting-eventsource-and-sensor-resources" title="Permanent link">&para;</a></h1>
-<p>The <code>argo-events lint</code> command validates EventSource and Sensor resource files without deploying them to a cluster. This allows you to catch configuration errors early in your development process and in CI/CD pipelines.</p>
+<p>The <code>argo-events lint</code> command validates EventSource and Sensor resource files
+without deploying them to a cluster. This allows you to catch configuration
+errors early in your development process and in CI/CD pipelines.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The lint command performs the same validation checks that the Argo Events controllers run when resources are created or updated. This includes:</p>
+<p>The lint command performs the same validation checks that the Argo Events
+controllers run when resources are created or updated. This includes:</p>
 <ul>
-<li><strong>EventSource validation</strong>: Validates event source configuration, required fields, and type-specific requirements</li>
-<li><strong>Sensor validation</strong>: Validates sensor dependencies, triggers, and trigger templates</li>
+<li><strong>EventSource validation</strong>: Validates event source configuration, required
+  fields, and type-specific requirements</li>
+<li><strong>Sensor validation</strong>: Validates sensor dependencies, triggers, and trigger
+  templates</li>
 <li><strong>Schema validation</strong>: Ensures resources conform to the Kubernetes API schema</li>
 </ul>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<p>The lint command is built into the <code>argo-events</code> binary. After building or installing argo-events, the lint command is available:</p>
+<p>The lint command is built into the <code>argo-events</code> binary. After building or
+installing argo-events, the lint command is available:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Build from source</span>
 make<span class="w"> </span>build
 
@@ -2578,29 +2584,30 @@ make<span class="w"> </span>build
 <h3 id="validate-a-single-file">Validate a single file<a class="headerlink" href="#validate-a-single-file" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>event-source.yaml
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>✓ event-source.yaml: EventSource is valid
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="validate-multiple-files">Validate multiple files<a class="headerlink" href="#validate-multiple-files" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>event-source.yaml<span class="w"> </span>sensor.yaml
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>✓ event-source.yaml: EventSource is valid
 ✓ sensor.yaml: Sensor is valid
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="validate-a-directory">Validate a directory<a class="headerlink" href="#validate-a-directory" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>examples/event-sources/
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>✓ examples/event-sources/calendar.yaml: EventSource is valid
 ✓ examples/event-sources/webhook.yaml: EventSource is valid
 ✓ examples/event-sources/kafka.yaml: EventSource is valid
 ...
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="validate-directories-recursively">Validate directories recursively<a class="headerlink" href="#validate-directories-recursively" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>-R<span class="w"> </span>examples/
 </code></pre></div>
-<p>This will validate all <code>.yaml</code> and <code>.yml</code> files in the <code>examples/</code> directory and all subdirectories.</p>
+<p>This will validate all <code>.yaml</code> and <code>.yml</code> files in the <code>examples/</code> directory and
+all subdirectories.</p>
 <h2 id="flags">Flags<a class="headerlink" href="#flags" title="Permanent link">&para;</a></h2>
 <h3 id="-r-recursive"><code>-R, --recursive</code><a class="headerlink" href="#-r-recursive" title="Permanent link">&para;</a></h3>
 <p>Process directories recursively.</p>
@@ -2611,7 +2618,8 @@ make<span class="w"> </span>build
 <div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>--strict<span class="w"> </span>sensor.yaml
 </code></pre></div>
 <h2 id="exit-codes">Exit Codes<a class="headerlink" href="#exit-codes" title="Permanent link">&para;</a></h2>
-<p>The lint command uses exit codes to indicate success or failure, making it suitable for use in CI/CD pipelines:</p>
+<p>The lint command uses exit codes to indicate success or failure, making it
+suitable for use in CI/CD pipelines:</p>
 <ul>
 <li><strong>0</strong>: All resources are valid</li>
 <li><strong>1</strong>: One or more resources have validation errors</li>
@@ -2629,9 +2637,9 @@ make<span class="w"> </span>build
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v3</span>
 
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Go</span>
-<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-go@v4</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-go@v6</span>
 <span class="w">        </span><span class="nt">with</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">go-version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1.20&#39;</span>
+<span class="w">          </span><span class="nt">go-version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.26&quot;</span>
 
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install argo-events</span>
 <span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
@@ -2717,16 +2725,17 @@ argo-events<span class="w"> </span>lint<span class="w"> </span><span class="nv">
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>argo-events<span class="w"> </span>lint<span class="w"> </span>combined.yaml
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>✓ combined.yaml (document 1): EventSource is valid
 ✓ combined.yaml (document 2): Sensor is valid
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="common-validation-errors">Common Validation Errors<a class="headerlink" href="#common-validation-errors" title="Permanent link">&para;</a></h2>
 <h3 id="eventsource-errors">EventSource Errors<a class="headerlink" href="#eventsource-errors" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>✗<span class="w"> </span>webhook.yaml:<span class="w"> </span>EventSource<span class="w"> </span>validation<span class="w"> </span>failed
 <span class="w">  </span>Error:<span class="w"> </span>endpoint<span class="w"> </span>can<span class="err">&#39;</span>t<span class="w"> </span>be<span class="w"> </span>empty
 </code></pre></div>
-<p><strong>Solution</strong>: Ensure all required fields are specified in the event source configuration.</p>
+<p><strong>Solution</strong>: Ensure all required fields are specified in the event source
+configuration.</p>
 <h3 id="sensor-errors">Sensor Errors<a class="headerlink" href="#sensor-errors" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>✗<span class="w"> </span>sensor.yaml:<span class="w"> </span>Sensor<span class="w"> </span>validation<span class="w"> </span>failed
 <span class="w">  </span>Error:<span class="w"> </span>no<span class="w"> </span>triggers<span class="w"> </span>found
@@ -2736,26 +2745,37 @@ argo-events<span class="w"> </span>lint<span class="w"> </span><span class="nv">
 <div class="highlight"><pre><span></span><code>!<span class="w"> </span>sensor.yaml:<span class="w"> </span>Sensor<span class="w"> </span>validation<span class="w"> </span>incomplete<span class="w"> </span><span class="o">(</span>EventBus<span class="w"> </span>not<span class="w"> </span>available<span class="o">)</span>
 <span class="w">  </span>Note:<span class="w"> </span>nil<span class="w"> </span>eventbus
 </code></pre></div>
-<p><strong>Note</strong>: When linting sensors without access to a cluster, the EventBus cannot be validated. This is expected behavior for offline linting and results in a warning rather than an error.</p>
+<p><strong>Note</strong>: When linting sensors without access to a cluster, the EventBus cannot
+be validated. This is expected behavior for offline linting and results in a
+warning rather than an error.</p>
 <h2 id="ignored-files">Ignored Files<a class="headerlink" href="#ignored-files" title="Permanent link">&para;</a></h2>
-<p>The lint command only processes:
-- Files with <code>.yaml</code> or <code>.yml</code> extensions
-- Files containing EventSource or Sensor resources (other Kubernetes resources are ignored)</p>
+<p>The lint command only processes:</p>
+<ul>
+<li>Files with <code>.yaml</code> or <code>.yml</code> extensions</li>
+<li>Files containing EventSource or Sensor resources (other Kubernetes resources
+  are ignored)</li>
+</ul>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>EventBus validation</strong>: Sensors require an EventBus to function, but the lint command cannot validate EventBus availability when running offline. A dummy EventBus is used for basic validation.</li>
-<li><strong>External dependencies</strong>: The lint command does not validate external dependencies like service accounts, secrets, or workflow templates referenced in trigger specifications.</li>
+<li><strong>EventBus validation</strong>: Sensors require an EventBus to function, but the lint
+  command cannot validate EventBus availability when running offline. A dummy
+  EventBus is used for basic validation.</li>
+<li><strong>External dependencies</strong>: The lint command does not validate external
+  dependencies like service accounts, secrets, or workflow templates referenced
+  in trigger specifications.</li>
 </ul>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="no-output-produced">No output produced<a class="headerlink" href="#no-output-produced" title="Permanent link">&para;</a></h3>
-<p>If lint produces no output, ensure:
-1. The file contains valid YAML
-2. The resources have <code>kind: EventSource</code> or <code>kind: Sensor</code>
-3. The files have <code>.yaml</code> or <code>.yml</code> extensions</p>
+<p>If lint produces no output, ensure:</p>
+<ol>
+<li>The file contains valid YAML</li>
+<li>The resources have <code>kind: EventSource</code> or <code>kind: Sensor</code></li>
+<li>The files have <code>.yaml</code> or <code>.yml</code> extensions</li>
+</ol>
 <h3 id="permission-denied">Permission denied<a class="headerlink" href="#permission-denied" title="Permanent link">&para;</a></h3>
-<p>If you get "permission denied" errors:
+<p>If you get "permission denied" errors:</p>
 <div class="highlight"><pre><span></span><code>chmod<span class="w"> </span>+x<span class="w"> </span>dist/argo-events
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="related-commands">Related Commands<a class="headerlink" href="#related-commands" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Argo Workflows lint: <code>argo lint workflow.yaml</code></li>
@@ -2763,7 +2783,8 @@ argo-events<span class="w"> </span>lint<span class="w"> </span><span class="nv">
 <li>Helm lint: <code>helm lint chart/</code></li>
 </ul>
 <h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
-<p>To improve the lint command or report issues, see <a href="../CONTRIBUTING/">CONTRIBUTING.md</a>.</p>
+<p>To improve the lint command or report issues, see
+<a href="../CONTRIBUTING/">CONTRIBUTING.md</a>.</p>
 
               
             </article>
