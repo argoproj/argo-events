@@ -1,18 +1,24 @@
 # Linting EventSource and Sensor Resources
 
-The `argo-events lint` command validates EventSource and Sensor resource files without deploying them to a cluster. This allows you to catch configuration errors early in your development process and in CI/CD pipelines.
+The `argo-events lint` command validates EventSource and Sensor resource files
+without deploying them to a cluster. This allows you to catch configuration
+errors early in your development process and in CI/CD pipelines.
 
 ## Overview
 
-The lint command performs the same validation checks that the Argo Events controllers run when resources are created or updated. This includes:
+The lint command performs the same validation checks that the Argo Events
+controllers run when resources are created or updated. This includes:
 
-- **EventSource validation**: Validates event source configuration, required fields, and type-specific requirements
-- **Sensor validation**: Validates sensor dependencies, triggers, and trigger templates
+- **EventSource validation**: Validates event source configuration, required
+  fields, and type-specific requirements
+- **Sensor validation**: Validates sensor dependencies, triggers, and trigger
+  templates
 - **Schema validation**: Ensures resources conform to the Kubernetes API schema
 
 ## Installation
 
-The lint command is built into the `argo-events` binary. After building or installing argo-events, the lint command is available:
+The lint command is built into the `argo-events` binary. After building or
+installing argo-events, the lint command is available:
 
 ```bash
 # Build from source
@@ -31,6 +37,7 @@ argo-events lint event-source.yaml
 ```
 
 Output:
+
 ```
 ✓ event-source.yaml: EventSource is valid
 ```
@@ -42,6 +49,7 @@ argo-events lint event-source.yaml sensor.yaml
 ```
 
 Output:
+
 ```
 ✓ event-source.yaml: EventSource is valid
 ✓ sensor.yaml: Sensor is valid
@@ -54,6 +62,7 @@ argo-events lint examples/event-sources/
 ```
 
 Output:
+
 ```
 ✓ examples/event-sources/calendar.yaml: EventSource is valid
 ✓ examples/event-sources/webhook.yaml: EventSource is valid
@@ -67,7 +76,8 @@ Output:
 argo-events lint -R examples/
 ```
 
-This will validate all `.yaml` and `.yml` files in the `examples/` directory and all subdirectories.
+This will validate all `.yaml` and `.yml` files in the `examples/` directory and
+all subdirectories.
 
 ## Flags
 
@@ -89,7 +99,8 @@ argo-events lint --strict sensor.yaml
 
 ## Exit Codes
 
-The lint command uses exit codes to indicate success or failure, making it suitable for use in CI/CD pipelines:
+The lint command uses exit codes to indicate success or failure, making it
+suitable for use in CI/CD pipelines:
 
 - **0**: All resources are valid
 - **1**: One or more resources have validation errors
@@ -109,19 +120,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
         with:
-          go-version: '1.20'
-      
+          go-version: "1.26"
+
       - name: Install argo-events
         run: |
           git clone https://github.com/argoproj/argo-events.git
           cd argo-events
           make build
           sudo mv dist/argo-events /usr/local/bin/
-      
+
       - name: Lint EventSources and Sensors
         run: argo-events lint -R manifests/
 ```
@@ -214,6 +225,7 @@ argo-events lint combined.yaml
 ```
 
 Output:
+
 ```
 ✓ combined.yaml (document 1): EventSource is valid
 ✓ combined.yaml (document 2): Sensor is valid
@@ -228,7 +240,8 @@ Output:
   Error: endpoint can't be empty
 ```
 
-**Solution**: Ensure all required fields are specified in the event source configuration.
+**Solution**: Ensure all required fields are specified in the event source
+configuration.
 
 ### Sensor Errors
 
@@ -246,24 +259,33 @@ Output:
   Note: nil eventbus
 ```
 
-**Note**: When linting sensors without access to a cluster, the EventBus cannot be validated. This is expected behavior for offline linting and results in a warning rather than an error.
+**Note**: When linting sensors without access to a cluster, the EventBus cannot
+be validated. This is expected behavior for offline linting and results in a
+warning rather than an error.
 
 ## Ignored Files
 
 The lint command only processes:
+
 - Files with `.yaml` or `.yml` extensions
-- Files containing EventSource or Sensor resources (other Kubernetes resources are ignored)
+- Files containing EventSource or Sensor resources (other Kubernetes resources
+  are ignored)
 
 ## Limitations
 
-- **EventBus validation**: Sensors require an EventBus to function, but the lint command cannot validate EventBus availability when running offline. A dummy EventBus is used for basic validation.
-- **External dependencies**: The lint command does not validate external dependencies like service accounts, secrets, or workflow templates referenced in trigger specifications.
+- **EventBus validation**: Sensors require an EventBus to function, but the lint
+  command cannot validate EventBus availability when running offline. A dummy
+  EventBus is used for basic validation.
+- **External dependencies**: The lint command does not validate external
+  dependencies like service accounts, secrets, or workflow templates referenced
+  in trigger specifications.
 
 ## Troubleshooting
 
 ### No output produced
 
 If lint produces no output, ensure:
+
 1. The file contains valid YAML
 2. The resources have `kind: EventSource` or `kind: Sensor`
 3. The files have `.yaml` or `.yml` extensions
@@ -271,6 +293,7 @@ If lint produces no output, ensure:
 ### Permission denied
 
 If you get "permission denied" errors:
+
 ```bash
 chmod +x dist/argo-events
 ```
@@ -283,4 +306,5 @@ chmod +x dist/argo-events
 
 ## Contributing
 
-To improve the lint command or report issues, see [CONTRIBUTING.md](CONTRIBUTING.md).
+To improve the lint command or report issues, see
+[CONTRIBUTING.md](CONTRIBUTING.md).
