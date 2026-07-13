@@ -23,12 +23,14 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v6
         with:
-          go-version: "1.25.5"
+          go-version: "1.26"
       - name: build
         run: make docs
       - name: deploy
         uses: peaceiris/actions-gh-pages@v4
-        if: github.repository == 'argoproj/argo-events' && github.ref == 'refs/heads/master'
+        if:
+          github.repository == 'argoproj/argo-events' && github.ref ==
+          'refs/heads/master'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
