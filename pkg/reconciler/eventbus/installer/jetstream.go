@@ -539,7 +539,9 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 
 	if !oldClientObjExisting || !oldServerObjExisting {
 		// Generate server-auth.conf file
-		encryptionKey := sharedutil.RandomString(12)
+		// 32 bytes satisfies NATS' recommended minimum and exceeds the
+		// 112-bit HMAC key strength required by OpenSSL FIPS providers.
+		encryptionKey := sharedutil.RandomString(32)
 		jsUser := sharedutil.RandomString(8)
 		jsPass := sharedutil.RandomString(16)
 		sysPassword := sharedutil.RandomString(24)
