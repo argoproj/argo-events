@@ -88,7 +88,7 @@ func (c *Container) ApplyToContainer(cc *corev1.Container) {
 	if cc.SecurityContext == nil {
 		cc.SecurityContext = c.SecurityContext
 	}
-	if cc.ImagePullPolicy != "" {
+	if c.ImagePullPolicy != "" {
 		cc.ImagePullPolicy = c.ImagePullPolicy
 	}
 	if len(c.Env) > 0 {
