@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	"dario.cat/mergo"
+	"github.com/emirpasic/gods/containers"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -90,6 +91,9 @@ func (c *Container) ApplyToContainer(cc *corev1.Container) {
 	}
 	if cc.ImagePullPolicy != "" {
 		cc.ImagePullPolicy = c.ImagePullPolicy
+	}
+	else if cc.ImagePullPolicy == ""{
+		cc.ImagePullPolicy = corev1.PullIfNotPresent
 	}
 	if len(c.Env) > 0 {
 		cc.Env = append(cc.Env, c.Env...)
