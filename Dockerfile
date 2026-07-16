@@ -1,29 +1,49 @@
 ARG ARCH=$TARGETARCH
+ARG ARGO_VERSION=v3.7.9
+
 ####################################################################################################
-# base
+# common-builder
 ####################################################################################################
-FROM alpine:3.23 AS base
+FROM alpine:3.23 AS builder
+
 ARG ARCH
-RUN apk update && apk upgrade && \
-    apk add ca-certificates && \
-    apk --no-cache add tzdata
+ARG ARGO_VERSION
 
-ENV ARGO_VERSION=v3.7.9
-
-RUN wget -q https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-${ARCH}.gz
-RUN gunzip -f argo-linux-${ARCH}.gz
-RUN chmod +x argo-linux-${ARCH}
-RUN mv ./argo-linux-${ARCH} /usr/local/bin/argo
-COPY dist/argo-events-linux-${ARCH} /bin/argo-events
+RUN apk add --no-cache \
+        ca-certificates \
+        tzdata \
+        wget
+RUN wget -q https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-${TARGETARCH}.gz \
+    && gunzip -f argo-linux-${TARGETARCH}.gz \
+    && chmod +x argo-linux-${TARGETARCH} \
+    && mv argo-linux-${TARGETARCH} /usr/local/bin/argo
+COPY dist/argo-events-linux-${TARGETARCH} /bin/argo-events
 RUN chmod +x /bin/argo-events
+####################################################################################################
+# Common non-root builder
+####################################################################################################
+FROM builder AS builder-non-root
 
+RUN addgroup -g 8737 argo-events \
+ && adduser -D -u 8737 -G argo-events argo-events \
+ && chown 8737:8737 /usr/local/bin/argo /bin/argo-events
 ####################################################################################################
 # argo-events
 ####################################################################################################
 FROM scratch AS argo-events
-ARG ARCH
-COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=base /usr/local/bin/argo /usr/local/bin/argo
-COPY --from=base /bin/argo-events /bin/argo-events
+
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=builder /usr/local/bin/argo /usr/local/bin/argo
+COPY --from=builder /bin/argo-events /bin/argo-events
+
+ENTRYPOINT [ "/bin/argo-events" ]
+
+####################################################################################################
+# argo-events-non-root
+####################################################################################################
+FROM builder-non-root AS argo-events-non-root
+
+# Run as non-root user (UID 8737)
+USER 8737
 ENTRYPOINT [ "/bin/argo-events" ]
