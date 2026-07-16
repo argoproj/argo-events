@@ -13,11 +13,11 @@ RUN apk add --no-cache \
         ca-certificates \
         tzdata \
         wget
-RUN wget -q https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-${TARGETARCH}.gz \
-    && gunzip -f argo-linux-${TARGETARCH}.gz \
-    && chmod +x argo-linux-${TARGETARCH} \
-    && mv argo-linux-${TARGETARCH} /usr/local/bin/argo
-COPY dist/argo-events-linux-${TARGETARCH} /bin/argo-events
+RUN wget -q https://github.com/argoproj/argo-workflows/releases/download/${ARGO_VERSION}/argo-linux-${ARCH}.gz \
+    && gunzip -f argo-linux-${ARCH}.gz \
+    && chmod +x argo-linux-${ARCH} \
+    && mv argo-linux-${ARCH} /usr/local/bin/argo
+COPY dist/argo-events-linux-${ARCH} /bin/argo-events
 RUN chmod +x /bin/argo-events
 ####################################################################################################
 # Common non-root builder
