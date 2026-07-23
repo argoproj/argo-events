@@ -411,6 +411,16 @@ func NewEventSourceAdaptor(eventSource *aev1.EventSource, eventBusConfig *aev1.B
 	}
 }
 
+// needsLeaderElection returns true when leader election is required to
+// coordinate multiple replicas of a "recreate" strategy event source. With
+// a single replica there is no other instance to contend with for
+// leadership, so electing is unnecessary and only adds a risk of
+// crash-looping on transient API server latency.
+// See https://github.com/argoproj/argo-events/issues/4112.
+func needsLeaderElection(isRecreateType bool, replicas int) bool {
+	return isRecreateType && replicas > 1
+}
+
 // Start function
 func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 	log := logging.FromContext(ctx)
@@ -430,12 +440,13 @@ func (e *EventSourceAdaptor) Start(ctx context.Context) error {
 		break
 	}
 
-	if !isRecreateType {
+	replicas := int(e.eventSource.Spec.GetReplicas())
+
+	if !needsLeaderElection(isRecreateType, replicas) {
 		return e.run(ctx, servers, filters)
 	}
 
 	clusterName := fmt.Sprintf("%s-eventsource-%s", e.eventSource.Namespace, e.eventSource.Name)
-	replicas := int(e.eventSource.Spec.GetReplicas())
 	leasename := fmt.Sprintf("eventsource-%s", e.eventSource.Name)
 
 	elector, err := leaderelection.NewElector(ctx, *e.eventBusConfig, clusterName, replicas, e.eventSource.Namespace, leasename, e.hostname)
