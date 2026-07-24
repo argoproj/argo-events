@@ -336,7 +336,7 @@ func filterFields(jsonData []byte, selectors []v1alpha1.Selector, log *zap.Sugar
 		match := exp.Match([]byte(res.Str))
 
 		switch selection.Operator(selector.Operation) {
-		case selection.Equals, selection.DoubleEquals:
+		case "", selection.Equals, selection.DoubleEquals:
 			if !match {
 				return false
 			}
