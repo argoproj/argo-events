@@ -156,4 +156,23 @@ func TestFilterName(t *testing.T) {
 		ok := filterName(gridNotification, storageGridEventSource)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
+
+	convey.Convey("A notification with no records must not panic and should not pass a prefix/suffix filter", t, func() {
+		storageGridEventSource := &v1alpha1.StorageGridEventSource{
+			Filter: &v1alpha1.StorageGridFilter{
+				Prefix: "hello-",
+				Suffix: ".txt",
+			},
+		}
+		emptyNotification := `{"Action":"Publish","Message":{"Records":[]},"TopicArn":"urn:h:sns:us-east::my_topic_1","Version":"2010-03-31"}`
+		var gridNotification *events.StorageGridNotification
+		err := json.Unmarshal([]byte(emptyNotification), &gridNotification)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(gridNotification, convey.ShouldNotBeNil)
+
+		convey.So(func() {
+			ok := filterName(gridNotification, storageGridEventSource)
+			convey.So(ok, convey.ShouldEqual, false)
+		}, convey.ShouldNotPanic)
+	})
 }
