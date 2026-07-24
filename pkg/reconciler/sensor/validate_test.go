@@ -650,3 +650,103 @@ func TestValidTriggers(t *testing.T) {
 		assert.Equal(t, true, strings.Contains(err.Error(), "invalid timezone"))
 	})
 }
+
+func TestValidateGRPCTrigger(t *testing.T) {
+	t.Run("valid trigger", func(t *testing.T) {
+		trigger := &v1alpha1.GRPCTrigger{
+			URL:      "localhost:9000",
+			Method:   "/helloworld.Greeter/SayHello",
+			Insecure: true,
+			Schema: []v1alpha1.GRPCSchemaField{
+				{Name: "message", Number: 1, Type: "string"},
+			},
+			Payload: []v1alpha1.TriggerParameter{
+				{
+					Src:  &v1alpha1.TriggerParameterSource{DependencyName: "dep"},
+					Dest: "message",
+				},
+			},
+		}
+		assert.NoError(t, validateGRPCTrigger(trigger))
+	})
+
+	t.Run("nil trigger", func(t *testing.T) {
+		assert.Error(t, validateGRPCTrigger(nil))
+	})
+
+	t.Run("missing url", func(t *testing.T) {
+		trigger := &v1alpha1.GRPCTrigger{Method: "/pkg.Svc/Method", Insecure: true}
+		err := validateGRPCTrigger(trigger)
+		assert.ErrorContains(t, err, "server URL")
+	})
+
+	t.Run("missing method", func(t *testing.T) {
+		trigger := &v1alpha1.GRPCTrigger{URL: "localhost:9000", Insecure: true}
+		err := validateGRPCTrigger(trigger)
+		assert.ErrorContains(t, err, "method")
+	})
+
+	t.Run("neither tls nor insecure", func(t *testing.T) {
+		trigger := &v1alpha1.GRPCTrigger{URL: "localhost:9000", Method: "/pkg.Svc/Method"}
+		err := validateGRPCTrigger(trigger)
+		assert.ErrorContains(t, err, "tls")
+	})
+
+	t.Run("unsupported schema field type", func(t *testing.T) {
+		trigger := &v1alpha1.GRPCTrigger{
+			URL: "localhost:9000", Method: "/pkg.Svc/Method", Insecure: true,
+			Schema: []v1alpha1.GRPCSchemaField{{Name: "x", Number: 1, Type: "map"}},
+		}
+		err := validateGRPCTrigger(trigger)
+		assert.ErrorContains(t, err, "unsupported")
+	})
+
+	t.Run("non-positive field number", func(t *testing.T) {
+		trigger := &v1alpha1.GRPCTrigger{
+			URL: "localhost:9000", Method: "/pkg.Svc/Method", Insecure: true,
+			Schema: []v1alpha1.GRPCSchemaField{{Name: "x", Number: 0, Type: "string"}},
+		}
+		err := validateGRPCTrigger(trigger)
+		assert.ErrorContains(t, err, "field number")
+	})
+
+	t.Run("duplicate field number", func(t *testing.T) {
+		trigger := &v1alpha1.GRPCTrigger{
+			URL: "localhost:9000", Method: "/pkg.Svc/Method", Insecure: true,
+			Schema: []v1alpha1.GRPCSchemaField{
+				{Name: "x", Number: 1, Type: "string"},
+				{Name: "y", Number: 1, Type: "int32"},
+			},
+		}
+		err := validateGRPCTrigger(trigger)
+		assert.ErrorContains(t, err, "duplicate")
+	})
+
+	t.Run("both tls and insecure set", func(t *testing.T) {
+		trigger := &v1alpha1.GRPCTrigger{
+			URL:      "localhost:9000",
+			Method:   "/pkg.Svc/Method",
+			Insecure: true,
+			TLS:      &v1alpha1.TLSConfig{Enabled: true},
+		}
+		err := validateGRPCTrigger(trigger)
+		assert.Error(t, err)
+		assert.ErrorContains(t, err, "mutually exclusive")
+	})
+}
+
+func TestValidateTriggerPolicy_GRPC(t *testing.T) {
+	trigger := &v1alpha1.Trigger{
+		Template: &v1alpha1.TriggerTemplate{
+			Name: "grpc-trigger",
+			GRPC: &v1alpha1.GRPCTrigger{URL: "localhost:9000", Method: "/pkg.Svc/Method", Insecure: true},
+		},
+		Policy: &v1alpha1.TriggerPolicy{
+			Status: &v1alpha1.StatusPolicy{Allow: []int32{0}},
+		},
+	}
+	assert.NoError(t, validateTriggerPolicy(trigger))
+
+	trigger.Policy.Status.Allow = nil
+	assert.Error(t, validateTriggerPolicy(trigger))
+}

@@ -98,6 +98,7 @@ nav:
               - "sensors/triggers/argo-workflow.md"
               - "sensors/triggers/aws-lambda.md"
               - "sensors/triggers/http-trigger.md"
+              - "sensors/triggers/grpc-trigger.md"
               - "sensors/triggers/nats-trigger.md"
               - "sensors/triggers/kafka-trigger.md"
               - "sensors/triggers/k8s-object-trigger.md"
