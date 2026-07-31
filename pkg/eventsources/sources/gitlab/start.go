@@ -244,7 +244,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		f := func() {
 			for _, g := range gitlabEventSource.GetGroups() {
-				hooks, _, err := router.gitlabClient.Groups.ListGroupHooks(g, &gitlab.ListGroupHooksOptions{})
+				hooks, err := listGroupHooks(router.gitlabClient, g)
 				if err != nil {
 					logger.Errorf("failed to list existing webhooks of group %s. err: %+v", g, err)
 					continue
@@ -265,7 +265,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			}
 
 			for _, p := range gitlabEventSource.GetProjects() {
-				hooks, _, err := router.gitlabClient.Projects.ListProjectHooks(p, &gitlab.ListProjectHooksOptions{})
+				hooks, err := listProjectHooks(router.gitlabClient, p)
 				if err != nil {
 					logger.Errorf("failed to list existing webhooks of project %s. err: %+v", p, err)
 					continue

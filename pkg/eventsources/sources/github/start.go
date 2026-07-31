@@ -306,7 +306,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 		f := func() {
 			for _, org := range githubEventSource.Organizations {
-				hooks, _, err := router.githubClient.Organizations.ListHooks(ctx, org, nil)
+				hooks, err := listOrganizationHooks(ctx, router.githubClient, org)
 				if err != nil {
 					logger.Errorf("failed to list existing webhooks of organization %s. err: %+v", org, err)
 					continue
@@ -328,7 +328,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 			for _, r := range githubEventSource.GetOwnedRepositories() {
 				for _, name := range r.Names {
-					hooks, _, err := router.githubClient.Repositories.ListHooks(ctx, r.Owner, name, nil)
+					hooks, err := listRepositoryHooks(ctx, router.githubClient, r.Owner, name)
 					if err != nil {
 						logger.Errorf("failed to list existing webhooks of %s/%s. err: %+v", r.Owner, name, err)
 						continue
