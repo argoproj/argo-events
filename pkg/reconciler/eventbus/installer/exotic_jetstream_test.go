@@ -38,6 +38,8 @@ func TestInstallationJSExotic(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, conf.JetStream)
 		assert.Equal(t, conf.JetStream.URL, testJSExoticURL)
+		// Exotic config without tls is passed through unset so clients use plain TCP.
+		assert.Nil(t, conf.JetStream.TLS)
 	})
 }
 
