@@ -2146,19 +2146,19 @@
 <span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example03</span>
 <span class="w">  </span><span class="nt">triggers</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dep02&quot;</span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">"dep02"</span>
 <span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trigger01</span>
 <span class="w">        </span><span class="nt">http</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://abc.com/hello1</span>
 <span class="w">          </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GET</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dep02</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep03&quot;</span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">"dep02</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep03"</span>
 <span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trigger02</span>
 <span class="w">        </span><span class="nt">http</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://abc.com/hello2</span>
 <span class="w">          </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GET</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(dep01</span><span class="nv"> </span><span class="s">||</span><span class="nv"> </span><span class="s">dep02)</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep03&quot;</span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">"(dep01</span><span class="nv"> </span><span class="s">||</span><span class="nv"> </span><span class="s">dep02)</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep03"</span>
 <span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trigger03</span>
 <span class="w">        </span><span class="nt">http</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://abc.com/hello3</span>
@@ -2180,11 +2180,11 @@ won't be executed until the expression resolves to true. The operators in
 <div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">triggers</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dep01</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep02&quot;</span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">"dep01</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">dep02"</span>
 <span class="w">        </span><span class="nt">conditionsReset</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">byTime</span><span class="p">:</span>
 <span class="w">              </span><span class="c1"># Reset conditions at 23:59</span>
-<span class="w">              </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;59</span><span class="nv"> </span><span class="s">23</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+<span class="w">              </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">"59</span><span class="nv"> </span><span class="s">23</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*"</span>
 <span class="w">              </span><span class="c1"># Optional, defaults to UTC</span>
 <span class="w">              </span><span class="c1"># More info for timezone: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</span>
 <span class="w">              </span><span class="nt">timezone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">America/Los_Angeles</span>

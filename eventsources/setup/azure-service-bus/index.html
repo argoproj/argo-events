@@ -2130,25 +2130,25 @@
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span>
-<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">"id"</span><span class="p">:</span><span class="w"> </span><span class="s">"unique_event_id"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"source"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_event_source"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"specversion"</span><span class="p">:</span><span class="w"> </span><span class="s">"cloud_events_version"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_event_source"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"datacontenttype"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_data"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_configuration_within_event_source"</span>
+<span class="w">          </span><span class="s">"time"</span><span class="p">:</span><span class="w"> </span><span class="s">"event_time"</span><span class="p">,</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="s">&quot;applicationProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ApplicationProperties can be used to store custom metadata for a message&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Body represents the message body&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;contentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ContentType is the MIME content type&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;correlationID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;CorrelationID is the correlation identifier&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;enqueuedTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;EnqueuedTime is the time when the message was enqueued&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;messageID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ID of the message&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;replyTo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ReplyTo is an application-defined value specify a reply path to the receiver of the message&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;sequenceNumber&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SequenceNumber is a unique number assigned to a message by Service Bus&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Subject enables an application to indicate the purpose of the message, similar to an email subject line&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">"applicationProperties"</span><span class="p">:</span><span class="w"> </span><span class="s">"ApplicationProperties can be used to store custom metadata for a message"</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"body"</span><span class="p">:</span><span class="w"> </span><span class="s">"Body represents the message body"</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"contentType"</span><span class="p">:</span><span class="w"> </span><span class="s">"ContentType is the MIME content type"</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"correlationID"</span><span class="p">:</span><span class="w"> </span><span class="s">"CorrelationID is the correlation identifier"</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"enqueuedTime"</span><span class="p">:</span><span class="w"> </span><span class="s">"EnqueuedTime is the time when the message was enqueued"</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"messageID"</span><span class="p">:</span><span class="w"> </span><span class="s">"ID of the message"</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"replyTo"</span><span class="p">:</span><span class="w"> </span><span class="s">"ReplyTo is an application-defined value specify a reply path to the receiver of the message"</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"sequenceNumber"</span><span class="p">:</span><span class="w"> </span><span class="s">"SequenceNumber is a unique number assigned to a message by Service Bus"</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s">"Subject enables an application to indicate the purpose of the message, similar to an email subject line"</span><span class="p">,</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 </code></pre></div>
@@ -2206,11 +2206,11 @@
 This is the connection string for your Azure Service Bus.</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">azure.servicebus</span><span class="w"> </span><span class="kn">import</span> <span class="n">ServiceBusClient</span><span class="p">,</span> <span class="n">ServiceBusMessage</span>
-<span class="n">servicebus_client</span> <span class="o">=</span> <span class="n">ServiceBusClient</span><span class="o">.</span><span class="n">from_connection_string</span><span class="p">(</span><span class="n">conn_str</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SERVICE_BUS_CONNECTION_STRING&#39;</span><span class="p">])</span>
+<span class="n">servicebus_client</span> <span class="o">=</span> <span class="n">ServiceBusClient</span><span class="o">.</span><span class="n">from_connection_string</span><span class="p">(</span><span class="n">conn_str</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">'SERVICE_BUS_CONNECTION_STRING'</span><span class="p">])</span>
 <span class="k">with</span> <span class="n">servicebus_client</span><span class="p">:</span>
-    <span class="n">sender</span> <span class="o">=</span> <span class="n">servicebus_client</span><span class="o">.</span><span class="n">get_queue_sender</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+    <span class="n">sender</span> <span class="o">=</span> <span class="n">servicebus_client</span><span class="o">.</span><span class="n">get_queue_sender</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="s2">"test"</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">sender</span><span class="p">:</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="n">ServiceBusMessage</span><span class="p">(</span><span class="s1">&#39;{&quot;hello&quot;: &quot;world&quot;}&#39;</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">ServiceBusMessage</span><span class="p">(</span><span class="s1">'{"hello": "world"}'</span><span class="p">)</span>
         <span class="n">sender</span><span class="o">.</span><span class="n">send_messages</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 </code></pre></div>
 

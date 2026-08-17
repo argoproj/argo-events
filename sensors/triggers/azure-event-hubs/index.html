@@ -2203,7 +2203,7 @@
 <p>The <code>payload</code> contains the list of <code>src</code> which refers to the source events and <code>dest</code> which refers to destination key within the resulting request payload.</p>
 <p>The <code>payload</code> declared above will generate a message body like below,</p>
 <div class="codehilite"><pre><span></span><code> {
-     &quot;message&quot;: &quot;some message here&quot; // name/key of the object
+     "message": "some message here" // name/key of the object
  }
 </code></pre></div>
 
@@ -2216,7 +2216,7 @@
 </li>
 <li>
 <p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code>.</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>

@@ -2070,18 +2070,18 @@
 <h1 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h1>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="s2">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="s2">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event_time&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">        </span><span class="s2">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s2">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"type_of_event_source"</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">"specversion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cloud_events_version"</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name_of_the_event_source"</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unique_event_id"</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">"time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"event_time"</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">"datacontenttype"</span><span class="p">:</span><span class="w"> </span><span class="s2">"type_of_data"</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name_of_the_configuration_within_event_source"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="s2">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="s2">&quot;topic&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_topic&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;message_payload&quot;</span>
+<span class="w">        </span><span class="s2">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s2">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name_of_the_topic"</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">"body"</span><span class="p">:</span><span class="w"> </span><span class="s2">"message_payload"</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 </code></pre></div>
@@ -2124,11 +2124,11 @@ spec:
       containers:
         <span class="k">-</span> env:
             <span class="k">-</span> name: EMITTER_LICENSE
-              value: &quot;zT83oDV0DWY5_JysbSTPTDr8KB0AAAAAAAAAAAAAAAI&quot; # This is a test license, DO NOT USE IN PRODUCTION!
+              value: "zT83oDV0DWY5_JysbSTPTDr8KB0AAAAAAAAAAAAAAAI" # This is a test license, DO NOT USE IN PRODUCTION!
             <span class="k">-</span> name: EMITTER_CLUSTER_SEED
-              value: &quot;broker&quot;
+              value: "broker"
             <span class="k">-</span> name: EMITTER_CLUSTER_ADVERTISE
-              value: &quot;private:4000&quot;
+              value: "private:4000"
           name: broker
           image: emitter/server:latest
           ports:

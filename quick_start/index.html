@@ -2136,13 +2136,13 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
 </li>
 <li>
 <p>Use either Curl or Postman to send a POST request to <a href="http://localhost:12000/example">http://localhost:12000/example</a>.</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>
 <li>
 <p>Verify that an Argo workflow was triggered.</p>
-<div class="codehilite"><pre><span></span><code>kubectl -n argo-events get workflows | grep &quot;webhook&quot;
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events get workflows | grep "webhook"
 </code></pre></div>
 
 </li>

@@ -2176,8 +2176,8 @@
 <p>The <code>payload</code> contains the list of <code>src</code> which refers to the source event and <code>dest</code> which refers to destination key within result request payload.</p>
 <p>The <code>payload</code> declared above will generate a message body like below,</p>
 <div class="codehilite"><pre><span></span><code> {
-     &quot;fileName&quot;: &quot;hello.txt&quot; // name/key of the object
-     &quot;bucket&quot;: &quot;input&quot; // name of the bucket
+     "fileName": "hello.txt" // name/key of the object
+     "bucket": "input" // name of the bucket
  }
 </code></pre></div>
 
@@ -2190,13 +2190,13 @@
 </li>
 <li>
 <p>Subscribe to the subject called <code>minio-events</code>. Refer the nats example to publish a message to the subject <a href="https://github.com/nats-io/go-nats-examples/tree/master/patterns/publish-subscribe">https://github.com/nats-io/go-nats-examples/tree/master/patterns/publish-subscribe</a>.</p>
-<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="k">go</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">main</span><span class="p">.</span><span class="k">go</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">localhost</span><span class="w"> </span><span class="n">minio</span><span class="o">-</span><span class="n">events</span><span class="err">&#39;</span>
+<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="k">go</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">main</span><span class="p">.</span><span class="k">go</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">localhost</span><span class="w"> </span><span class="n">minio</span><span class="o">-</span><span class="n">events</span><span class="err">'</span>
 </code></pre></div>
 
 </li>
 <li>
 <p>Drop a file called <code>hello.txt</code> onto the bucket <code>input</code> and you will receive the message on NATS subscriber as follows.</p>
-<div class="codehilite"><pre><span></span><code>[#1] Received on [minio-events]: &#39;{&quot;bucket&quot;:&quot;input&quot;,&quot;fileName&quot;:&quot;hello.txt&quot;}&#39;
+<div class="codehilite"><pre><span></span><code>[#1] Received on [minio-events]: '{"bucket":"input","fileName":"hello.txt"}'
 </code></pre></div>
 
 </li>

@@ -2295,14 +2295,14 @@
 </li>
 <li>
 <p>Send a http request to the event-source-pod to fire the Slack trigger.</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;text&quot;:&quot;Hello, World!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{"text":"Hello, World!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 <p><strong>Note</strong>: The default slack-trigger will send the message "hello world" to the #general channel. You may change the default message and channel in slack-trigger.yaml under triggers.slack.channel and triggers.slack.message.</p>
 </li>
 <li>
 <p>Alternatively, you can dynamically determine the channel and message based on parameterization of your event.</p>
-<div class="codehilite"><pre><span></span><code><span class="nv">curl</span><span class="w"> </span><span class="o">-</span><span class="nv">d</span><span class="w"> </span><span class="s1">&#39;{&quot;channel&quot;:&quot;random&quot;,&quot;message&quot;:&quot;test message&quot;}&#39;</span><span class="w"> </span><span class="o">-</span><span class="nv">H</span><span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="o">-</span><span class="nv">X</span><span class="w"> </span><span class="nv">POST</span><span class="w"> </span><span class="nv">http</span>:<span class="o">//</span><span class="nv">localhost</span>:<span class="mi">12000</span><span class="o">/</span><span class="nv">example</span>
+<div class="codehilite"><pre><span></span><code><span class="nv">curl</span><span class="w"> </span><span class="o">-</span><span class="nv">d</span><span class="w"> </span><span class="s1">'{"channel":"random","message":"test message"}'</span><span class="w"> </span><span class="o">-</span><span class="nv">H</span><span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="o">-</span><span class="nv">X</span><span class="w"> </span><span class="nv">POST</span><span class="w"> </span><span class="nv">http</span>:<span class="o">//</span><span class="nv">localhost</span>:<span class="mi">12000</span><span class="o">/</span><span class="nv">example</span>
 </code></pre></div>
 
 </li>
@@ -2332,8 +2332,8 @@
 <p>The <code>dest</code> is the destination key within the result payload.</p>
 <p>So, the above trigger parameters will generate a request payload as,</p>
 <div class="codehilite"><pre><span></span><code>    {
-        &quot;channel&quot;: &quot;channel_to_send_message&quot;,
-        &quot;message&quot;: &quot;message_to_send_to_channel&quot;
+        "channel": "channel_to_send_message",
+        "message": "message_to_send_to_channel"
     }
 </code></pre></div>
 
@@ -2347,8 +2347,8 @@ generate complex event payloads, take a look at <a href="https://github.com/tidw
           name: slack-trigger
           slack:
             sender:
-              username: &quot;Cool Robot&quot;
-              icon: &quot;:robot_face:&quot; # emoji or url, e.g. https://example.com/image.png
+              username: "Cool Robot"
+              icon: ":robot_face:" # emoji or url, e.g. https://example.com/image.png
 </code></pre></div>
 
 <h4 id="sending-messages-to-slack-threads">Sending messages to Slack threads:<a class="headerlink" href="#sending-messages-to-slack-threads" title="Permanent link">&para;</a></h4>
@@ -2356,7 +2356,7 @@ generate complex event payloads, take a look at <a href="https://github.com/tidw
 <span class="w">          </span><span class="nl">name:</span><span class="w"> </span><span class="n">slack</span><span class="o">-</span><span class="n">trigger</span>
 <span class="w">          </span><span class="nl">slack:</span>
 <span class="w">            </span><span class="nl">thread:</span>
-<span class="w">              </span><span class="nl">messageAggregationKey:</span><span class="w"> </span><span class="s">&quot;abcdefg&quot;</span><span class="w"> </span><span class="p">#</span><span class="w"> </span><span class="n">aggregate</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">send</span><span class="w"> </span><span class="n">them</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="n">Slack</span><span class="w"> </span><span class="n">thread</span>
+<span class="w">              </span><span class="nl">messageAggregationKey:</span><span class="w"> </span><span class="s">"abcdefg"</span><span class="w"> </span><span class="p">#</span><span class="w"> </span><span class="n">aggregate</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">send</span><span class="w"> </span><span class="n">them</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="n">Slack</span><span class="w"> </span><span class="n">thread</span>
 <span class="w">              </span><span class="nl">broadcastMessageToChannel:</span><span class="w"> </span><span class="n">true</span><span class="w"> </span><span class="p">#</span><span class="w"> </span><span class="n">also</span><span class="w"> </span><span class="n">broadcast</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">thread</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">channel</span>
 </code></pre></div>
 
@@ -2364,33 +2364,33 @@ generate complex event payloads, take a look at <a href="https://github.com/tidw
 <div class="codehilite"><pre><span></span><code>     <span class="k">-</span> template:
           name: slack-trigger
           slack:
-            message: &quot;hello world!&quot;
+            message: "hello world!"
             attachments: |
               [{
-                &quot;title&quot;: &quot;Attachment1!&quot;,
-                &quot;title_link&quot;: &quot;https://argoproj.github.io/argo-events/sensors/triggers/slack-trigger/&quot;,
-                &quot;color&quot;: &quot;#18be52&quot;,
-                &quot;fields&quot;: [{
-                  &quot;title&quot;: &quot;Hello1&quot;,
-                  &quot;value&quot;: &quot;Hello World1&quot;,
-                  &quot;short&quot;: true
+                "title": "Attachment1!",
+                "title_link": "https://argoproj.github.io/argo-events/sensors/triggers/slack-trigger/",
+                "color": "#18be52",
+                "fields": [{
+                  "title": "Hello1",
+                  "value": "Hello World1",
+                  "short": true
                 }, {
-                  &quot;title&quot;: &quot;Hello2&quot;,
-                  &quot;value&quot;: &quot;Hello World2&quot;,
-                  &quot;short&quot;: true
+                  "title": "Hello2",
+                  "value": "Hello World2",
+                  "short": true
                 }]
               }, {
-                &quot;title&quot;: &quot;Attachment2!&quot;,
-                &quot;title_link&quot;: &quot;https://argoproj.github.io/argo-events/sensors/triggers/slack-trigger/&quot;,
-                &quot;color&quot;: &quot;#18be52&quot;,
-                &quot;fields&quot;: [{
-                  &quot;title&quot;: &quot;Hello1&quot;,
-                  &quot;value&quot;: &quot;Hello World1&quot;,
-                  &quot;short&quot;: true
+                "title": "Attachment2!",
+                "title_link": "https://argoproj.github.io/argo-events/sensors/triggers/slack-trigger/",
+                "color": "#18be52",
+                "fields": [{
+                  "title": "Hello1",
+                  "value": "Hello World1",
+                  "short": true
                 }, {
-                  &quot;title&quot;: &quot;Hello2&quot;,
-                  &quot;value&quot;: &quot;Hello World2&quot;,
-                  &quot;short&quot;: true
+                  "title": "Hello2",
+                  "value": "Hello World2",
+                  "short": true
                 }]
               }]
 </code></pre></div>
@@ -2401,65 +2401,65 @@ generate complex event payloads, take a look at <a href="https://github.com/tidw
 <span class="w">          </span><span class="nx">slack</span><span class="p">:</span>
 <span class="w">            </span><span class="nx">blocks</span><span class="p">:</span><span class="w"> </span><span class="o">|</span>
 <span class="w">              </span><span class="p">[{</span>
-<span class="w">                </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;actions&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="s">&quot;block_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;actionblock789&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="s">&quot;elements&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
-<span class="w">                    </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;datepicker&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="s">&quot;action_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;datepicker123&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="s">&quot;initial_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1990-04-28&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="s">&quot;placeholder&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                      </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;plain_text&quot;</span><span class="p">,</span>
-<span class="w">                      </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Select a date&quot;</span>
+<span class="w">                </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"actions"</span><span class="p">,</span>
+<span class="w">                </span><span class="s">"block_id"</span><span class="p">:</span><span class="w"> </span><span class="s">"actionblock789"</span><span class="p">,</span>
+<span class="w">                </span><span class="s">"elements"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="w">                    </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"datepicker"</span><span class="p">,</span>
+<span class="w">                    </span><span class="s">"action_id"</span><span class="p">:</span><span class="w"> </span><span class="s">"datepicker123"</span><span class="p">,</span>
+<span class="w">                    </span><span class="s">"initial_date"</span><span class="p">:</span><span class="w"> </span><span class="s">"1990-04-28"</span><span class="p">,</span>
+<span class="w">                    </span><span class="s">"placeholder"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                      </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"plain_text"</span><span class="p">,</span>
+<span class="w">                      </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="s">"Select a date"</span>
 <span class="w">                    </span><span class="p">}</span>
 <span class="w">                  </span><span class="p">},</span>
 <span class="w">                  </span><span class="p">{</span>
-<span class="w">                    </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;overflow&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="s">&quot;options&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
-<span class="w">                        </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;plain_text&quot;</span><span class="p">,</span>
-<span class="w">                          </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*this is plain_text text*&quot;</span>
+<span class="w">                    </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"overflow"</span><span class="p">,</span>
+<span class="w">                    </span><span class="s">"options"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="w">                        </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                          </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"plain_text"</span><span class="p">,</span>
+<span class="w">                          </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="s">"*this is plain_text text*"</span>
 <span class="w">                        </span><span class="p">},</span>
-<span class="w">                        </span><span class="s">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value-0&quot;</span>
+<span class="w">                        </span><span class="s">"value"</span><span class="p">:</span><span class="w"> </span><span class="s">"value-0"</span>
 <span class="w">                      </span><span class="p">},</span>
 <span class="w">                      </span><span class="p">{</span>
-<span class="w">                        </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;plain_text&quot;</span><span class="p">,</span>
-<span class="w">                          </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*this is plain_text text*&quot;</span>
+<span class="w">                        </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                          </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"plain_text"</span><span class="p">,</span>
+<span class="w">                          </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="s">"*this is plain_text text*"</span>
 <span class="w">                        </span><span class="p">},</span>
-<span class="w">                        </span><span class="s">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value-1&quot;</span>
+<span class="w">                        </span><span class="s">"value"</span><span class="p">:</span><span class="w"> </span><span class="s">"value-1"</span>
 <span class="w">                      </span><span class="p">},</span>
 <span class="w">                      </span><span class="p">{</span>
-<span class="w">                        </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;plain_text&quot;</span><span class="p">,</span>
-<span class="w">                          </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*this is plain_text text*&quot;</span>
+<span class="w">                        </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                          </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"plain_text"</span><span class="p">,</span>
+<span class="w">                          </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="s">"*this is plain_text text*"</span>
 <span class="w">                        </span><span class="p">},</span>
-<span class="w">                        </span><span class="s">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value-2&quot;</span>
+<span class="w">                        </span><span class="s">"value"</span><span class="p">:</span><span class="w"> </span><span class="s">"value-2"</span>
 <span class="w">                      </span><span class="p">},</span>
 <span class="w">                      </span><span class="p">{</span>
-<span class="w">                        </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;plain_text&quot;</span><span class="p">,</span>
-<span class="w">                          </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*this is plain_text text*&quot;</span>
+<span class="w">                        </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                          </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"plain_text"</span><span class="p">,</span>
+<span class="w">                          </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="s">"*this is plain_text text*"</span>
 <span class="w">                        </span><span class="p">},</span>
-<span class="w">                        </span><span class="s">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value-3&quot;</span>
+<span class="w">                        </span><span class="s">"value"</span><span class="p">:</span><span class="w"> </span><span class="s">"value-3"</span>
 <span class="w">                      </span><span class="p">},</span>
 <span class="w">                      </span><span class="p">{</span>
-<span class="w">                        </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;plain_text&quot;</span><span class="p">,</span>
-<span class="w">                          </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*this is plain_text text*&quot;</span>
+<span class="w">                        </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                          </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"plain_text"</span><span class="p">,</span>
+<span class="w">                          </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="s">"*this is plain_text text*"</span>
 <span class="w">                        </span><span class="p">},</span>
-<span class="w">                        </span><span class="s">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value-4&quot;</span>
+<span class="w">                        </span><span class="s">"value"</span><span class="p">:</span><span class="w"> </span><span class="s">"value-4"</span>
 <span class="w">                      </span><span class="p">}</span>
 <span class="w">                    </span><span class="p">],</span>
-<span class="w">                    </span><span class="s">&quot;action_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;overflow&quot;</span>
+<span class="w">                    </span><span class="s">"action_id"</span><span class="p">:</span><span class="w"> </span><span class="s">"overflow"</span>
 <span class="w">                  </span><span class="p">},</span>
 <span class="w">                  </span><span class="p">{</span>
-<span class="w">                    </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;button&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                      </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;plain_text&quot;</span><span class="p">,</span>
-<span class="w">                      </span><span class="s">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Click Me&quot;</span>
+<span class="w">                    </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"button"</span><span class="p">,</span>
+<span class="w">                    </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                      </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"plain_text"</span><span class="p">,</span>
+<span class="w">                      </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="s">"Click Me"</span>
 <span class="w">                    </span><span class="p">},</span>
-<span class="w">                    </span><span class="s">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;click_me_123&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="s">&quot;action_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;button&quot;</span>
+<span class="w">                    </span><span class="s">"value"</span><span class="p">:</span><span class="w"> </span><span class="s">"click_me_123"</span><span class="p">,</span>
+<span class="w">                    </span><span class="s">"action_id"</span><span class="p">:</span><span class="w"> </span><span class="s">"button"</span>
 <span class="w">                  </span><span class="p">}</span>
 <span class="w">                </span><span class="p">]</span>
 <span class="w">              </span><span class="p">}]</span>

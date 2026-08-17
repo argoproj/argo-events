@@ -2170,18 +2170,18 @@
 <h1 id="expr-filter">Expr filter<a class="headerlink" href="#expr-filter" title="Permanent link">&para;</a></h1>
 <p>Expr filters are applied to the event data. A CloudEvent from Webhook event-source has payload structure as:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event_time&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">    </span><span class="nt">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"type_of_event_source"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"specversion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cloud_events_version"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name_of_the_event_source"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unique_event_id"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"event_time"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"datacontenttype"</span><span class="p">:</span><span class="w"> </span><span class="s2">"type_of_data"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name_of_the_configuration_within_event_source"</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;header&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
-<span class="w">      </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">    </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"header"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">      </span><span class="nt">"body"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -2217,9 +2217,9 @@
 <span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span>
 <span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sample-event</span>
 <span class="w">      </span><span class="nt">filters</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">exprLogicalOperator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;or&quot;</span>
+<span class="w">        </span><span class="nt">exprLogicalOperator</span><span class="p">:</span><span class="w"> </span><span class="s">"or"</span>
 <span class="w">        </span><span class="nt">exprs</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">a == &quot;b&quot; || c != 10</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">a == "b" || c != 10</span>
 <span class="w">            </span><span class="nt">fields</span><span class="p">:</span>
 <span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">a</span>
 <span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">a</span>
@@ -2269,7 +2269,7 @@ together with comparators (<code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</co
 </li>
 <li>
 <p>Send an HTTP request to event-source</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{ &quot;a&quot;: &quot;b&quot;, &quot;c&quot;: 11, &quot;d&quot;: { &quot;e&quot;: true } }&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{ "a": "b", "c": 11, "d": { "e": true } }' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>
@@ -2278,7 +2278,7 @@ together with comparators (<code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</co
 </li>
 <li>
 <p>Send another HTTP request to event-source</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{ &quot;a&quot;: &quot;b&quot;, &quot;c&quot;: 11, &quot;d&quot;: { &quot;e&quot;: false } }&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{ "a": "b", "c": 11, "d": { "e": false } }' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>

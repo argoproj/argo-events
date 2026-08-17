@@ -2251,18 +2251,18 @@ with the event payload.</p>
 <p>Webhook event-source consumes events through HTTP requests and transforms them into CloudEvents.
 The structure of the event the Webhook sensor receives from the event-source over the eventbus looks like following,</p>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">        </span><span class="s">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_event_source"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"specversion"</span><span class="p">:</span><span class="w"> </span><span class="s">"cloud_events_version"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"source"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_event_source"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"id"</span><span class="p">:</span><span class="w"> </span><span class="s">"unique_event_id"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"time"</span><span class="p">:</span><span class="w"> </span><span class="s">"event_time"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"datacontenttype"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_data"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_configuration_within_event_source"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="s">&quot;header&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
-<span class="w">          </span><span class="s">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">        </span><span class="s">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">"header"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">          </span><span class="s">"body"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 </code></pre></div>
@@ -2296,7 +2296,7 @@ the event-source over the eventbus, lets see how we can use the event context to
 </li>
 <li>
 <p>Send an HTTP request to the event-source pod.</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>
@@ -2326,7 +2326,7 @@ print the message.</p>
 </li>
 <li>
 <p>Send an HTTP request to the event-source pod.</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>
@@ -2347,7 +2347,7 @@ print the message.</p>
                         ##        .
                   ## ## ##       ==
                ## ## ## ##      ===
-           /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===
+           /""""""""""""""""___/ ===
       ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
            \______ o          __/
             \    \        __/
@@ -2374,7 +2374,7 @@ important when the <code>key</code> you defined in the parameter doesn't exist i
 </li>
 <li>
 <p>Send an HTTP request to the event-source pod.</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>
@@ -2396,39 +2396,39 @@ context and event data before it gets applied to the trigger via <code>parameter
 <p>Take a look at the example defined <a href="https://github.com/argoproj/argo-events/blob/stable/examples/sensors/trigger-with-template.yaml">here</a>, it contains the parameters
 as follows,</p>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">parameters</span><span class="p">:</span>
-<span class="w">    </span><span class="c1"># Retrieve the &#39;message&#39; key from the payload</span>
+<span class="w">    </span><span class="c1"># Retrieve the 'message' key from the payload</span>
 <span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span>
 <span class="w">        </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-<span class="w">        </span><span class="n">dataTemplate</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{ .Input.body.message | title }}&quot;</span>
+<span class="w">        </span><span class="n">dataTemplate</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ .Input.body.message | title }}"</span>
 <span class="w">      </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">spec</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="mf">0.</span><span class="n">value</span>
 <span class="w">    </span><span class="c1"># Title case the context subject</span>
 <span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span>
 <span class="w">        </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-<span class="w">        </span><span class="n">contextTemplate</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{ .Input.subject | title }}&quot;</span>
+<span class="w">        </span><span class="n">contextTemplate</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ .Input.subject | title }}"</span>
 <span class="w">      </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">spec</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="mf">1.</span><span class="n">value</span>
-<span class="w">    </span><span class="c1"># Retrieve the &#39;name&#39; key from the payload, remove all whitespace and lowercase it.</span>
+<span class="w">    </span><span class="c1"># Retrieve the 'name' key from the payload, remove all whitespace and lowercase it.</span>
 <span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">src</span><span class="p">:</span>
 <span class="w">        </span><span class="n">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-<span class="w">        </span><span class="n">dataTemplate</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{ .Input.body.name | nospace | lower }}-&quot;</span>
+<span class="w">        </span><span class="n">dataTemplate</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ .Input.body.name | nospace | lower }}-"</span>
 <span class="w">      </span><span class="n">dest</span><span class="p">:</span><span class="w"> </span><span class="n">metadata</span><span class="o">.</span><span class="n">generateName</span>
 <span class="w">      </span><span class="n">operation</span><span class="p">:</span><span class="w"> </span><span class="n">append</span>
 </code></pre></div>
 
 <p>Consider the event the sensor received has format like,</p>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">        </span><span class="s">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_event_source"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"specversion"</span><span class="p">:</span><span class="w"> </span><span class="s">"cloud_events_version"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"source"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_event_source"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"id"</span><span class="p">:</span><span class="w"> </span><span class="s">"unique_event_id"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"time"</span><span class="p">:</span><span class="w"> </span><span class="s">"event_time"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"datacontenttype"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_data"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_configuration_within_event_source"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="s">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="s">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;foo bar&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hello there!!&quot;</span>
+<span class="w">        </span><span class="s">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">"body"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">"name"</span><span class="p">:</span><span class="w"> </span><span class="s">"foo bar"</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"message"</span><span class="p">:</span><span class="w"> </span><span class="s">"hello there!!"</span>
 <span class="w">          </span><span class="p">},</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
@@ -2450,7 +2450,7 @@ as follows,</p>
 </li>
 </ol>
 <p>Send a curl request to event-source as follows,</p>
-<div class="codehilite"><pre><span></span><code>    curl -d &#39;{&quot;name&quot;:&quot;foo bar&quot;, &quot;message&quot;: &quot;hello there!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>    curl -d '{"name":"foo bar", "message": "hello there!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 <p>and you will see an Argo workflow being sprung with name like <code>webhook-foobar-xxxxx</code>.</p>
@@ -2464,7 +2464,7 @@ as follows,</p>
                         ##        .
                   ## ## ##       ==
                ## ## ## ##      ===
-           /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===
+           /""""""""""""""""___/ ===
       ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
            \______ o          __/
             \    \        __/
@@ -2486,7 +2486,7 @@ a parameter comes handy.</p>
 </li>
 <li>
 <p>Send an HTTP request to the event-source.</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;hey!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{"message":"hey!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>
@@ -2520,7 +2520,7 @@ applying a parameter at the trigger template level.</p>
 </li>
 <li>
 <p>Send an HTTP request to the event-source.</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;dependencyName&quot;:&quot;test-dep&quot;, &quot;dataKey&quot;: &quot;body.message&quot;, &quot;dest&quot;: &quot;spec.arguments.parameters.0.value&quot;, &quot;message&quot;: &quot;amazing!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{"dependencyName":"test-dep", "dataKey": "body.message", "dest": "spec.arguments.parameters.0.value", "message": "amazing!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>
@@ -2541,7 +2541,7 @@ applying a parameter at the trigger template level.</p>
                     ##        .
               ## ## ##       ==
            ## ## ## ##      ===
-       /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===
+       /""""""""""""""""___/ ===
     ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
        \______ o          __/
         \    \        __/

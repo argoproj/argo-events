@@ -2158,19 +2158,19 @@
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
 <div class="codehilite"><pre><span></span><code><span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">              </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">            </span><span class="s">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_event_source"</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"specversion"</span><span class="p">:</span><span class="w"> </span><span class="s">"cloud_events_version"</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"source"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_event_source"</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"id"</span><span class="p">:</span><span class="w"> </span><span class="s">"unique_event_id"</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"time"</span><span class="p">:</span><span class="w"> </span><span class="s">"event_time"</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"datacontenttype"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_data"</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_configuration_within_event_source"</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">               </span><span class="s">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Body is the message data&quot;</span><span class="p">,</span>
-<span class="w">               </span><span class="s">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;timestamp of the message&quot;</span><span class="p">,</span>
-<span class="w">               </span><span class="s">&quot;nsqdAddress&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;NSQDAddress is the address of the nsq host&quot;</span>
+<span class="w">            </span><span class="s">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="s">"body"</span><span class="p">:</span><span class="w"> </span><span class="s">"Body is the message data"</span><span class="p">,</span>
+<span class="w">               </span><span class="s">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s">"timestamp of the message"</span><span class="p">,</span>
+<span class="w">               </span><span class="s">"nsqdAddress"</span><span class="p">:</span><span class="w"> </span><span class="s">"NSQDAddress is the address of the nsq host"</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">}</span>
 </code></pre></div>
@@ -2242,7 +2242,7 @@
 <span class="nx">metadata</span><span class="p">:</span>
 <span class="w">  </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">nsqlookupd</span>
 <span class="nx">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nx">serviceName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;nsqlookupd&quot;</span>
+<span class="w">  </span><span class="nx">serviceName</span><span class="p">:</span><span class="w"> </span><span class="s">"nsqlookupd"</span>
 <span class="w">  </span><span class="nx">replicas</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
 <span class="w">  </span><span class="nx">updateStrategy</span><span class="p">:</span>
 <span class="w">    </span><span class="k">type</span><span class="p">:</span><span class="w"> </span><span class="nx">RollingUpdate</span>
@@ -2390,9 +2390,9 @@
 </li>
 <li>
 <p>Create topic <code>hello</code> and channel <code>my-channel</code>.</p>
-<div class="codehilite"><pre><span></span><code>curl -X POST &#39;http://localhost:4151/topic/create?topic=hello&#39;
+<div class="codehilite"><pre><span></span><code>curl -X POST 'http://localhost:4151/topic/create?topic=hello'
 
-curl -X POST &#39;http://localhost:4151/channel/create?topic=hello&amp;channel=my-channel&#39;
+curl -X POST 'http://localhost:4151/channel/create?topic=hello&amp;channel=my-channel'
 </code></pre></div>
 
 </li>
@@ -2410,7 +2410,7 @@ curl -X POST &#39;http://localhost:4151/channel/create?topic=hello&amp;channel=m
 </li>
 <li>
 <p>Publish a message on topic <code>hello</code> and channel <code>my-channel</code>.</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;: &quot;hello&quot;}&#39; &#39;http://localhost:4151/pub?topic=hello&amp;channel=my-channel&#39;
+<div class="codehilite"><pre><span></span><code>curl -d '{"message": "hello"}' 'http://localhost:4151/pub?topic=hello&amp;channel=my-channel'
 </code></pre></div>
 
 </li>

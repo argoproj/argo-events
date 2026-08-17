@@ -2205,7 +2205,7 @@ spec:
                 containers:
                   - name: hello-container
                     args:
-                      - &quot;hello-world&quot;
+                      - "hello-world"
                     command:
                       - echo
                     image: busybox
@@ -2230,23 +2230,23 @@ spec:
 </li>
 <li>
 <p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code>.</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>
 <li>
 <p>After the pod was completed, inspect the logs of the pod, you will see something similar as below.</p>
 <div class="codehilite"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;webhook&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;specVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0.3&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;webhook&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;eventID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;30306463666539362d346666642d343336332d383861312d336538363333613564313932&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2020-01-11T21:23:07.682961Z&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;dataContentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;application/json&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example&quot;</span>
+<span class="w">  </span><span class="s">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"webhook"</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"specVersion"</span><span class="p">:</span><span class="w"> </span><span class="s">"0.3"</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"source"</span><span class="p">:</span><span class="w"> </span><span class="s">"webhook"</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"eventID"</span><span class="p">:</span><span class="w"> </span><span class="s">"30306463666539362d346666642d343336332d383861312d336538363333613564313932"</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"time"</span><span class="p">:</span><span class="w"> </span><span class="s">"2020-01-11T21:23:07.682961Z"</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"dataContentType"</span><span class="p">:</span><span class="w"> </span><span class="s">"application/json"</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s">"example"</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;eyJoZWFkZXIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50LUxlbmd0aCI6WyIxOSJdLCJDb250ZW50LVR5cGUiOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLUFnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5Ijp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ==&quot;</span>
+<span class="w">  </span><span class="s">"data"</span><span class="p">:</span><span class="w"> </span><span class="s">"eyJoZWFkZXIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50LUxlbmd0aCI6WyIxOSJdLCJDb250ZW50LVR5cGUiOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLUFnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5Ijp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ=="</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -2271,7 +2271,7 @@ you want to define a generic trigger template in the sensor and populate the K8s
 <p>To determine whether the K8s object was successful or not, the K8s trigger provides a <code>Resource Labels</code> policy.
 The <code>Resource Labels</code> holds a list of labels which are checked against the triggered K8s object to determine the status of the object.</p>
 <div class="codehilite"><pre><span></span><code><span class="w">            </span>#<span class="w"> </span><span class="nv">Policy</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">configure</span><span class="w"> </span><span class="nv">backoff</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">execution</span><span class="w"> </span><span class="nv">criteria</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">trigger</span>
-<span class="w">            </span>#<span class="w"> </span><span class="nv">Because</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">sensor</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">able</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">trigger</span><span class="w"> </span><span class="nv">any</span><span class="w"> </span><span class="nv">K8s</span><span class="w"> </span><span class="nv">resource</span>,<span class="w"> </span><span class="nv">it</span><span class="w"> </span><span class="nv">determines</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">resource</span><span class="w"> </span><span class="nv">state</span><span class="w"> </span><span class="nv">by</span><span class="w"> </span><span class="nv">looking</span><span class="w"> </span><span class="nv">at</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">resource</span><span class="err">&#39;s labels.</span>
+<span class="w">            </span>#<span class="w"> </span><span class="nv">Because</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">sensor</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">able</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">trigger</span><span class="w"> </span><span class="nv">any</span><span class="w"> </span><span class="nv">K8s</span><span class="w"> </span><span class="nv">resource</span>,<span class="w"> </span><span class="nv">it</span><span class="w"> </span><span class="nv">determines</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">resource</span><span class="w"> </span><span class="nv">state</span><span class="w"> </span><span class="nv">by</span><span class="w"> </span><span class="nv">looking</span><span class="w"> </span><span class="nv">at</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">resource</span><span class="err">'s labels.</span>
 <span class="err">            policy:</span>
 <span class="err">              k8s:</span>
 <span class="err">                # Backoff before checking the resource labels</span>

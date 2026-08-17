@@ -2115,7 +2115,7 @@
 <p>The Service Bus message needs a body. In order to construct a messaged based on your event data, the Azure Service Bus sensor has the payload field as part of the trigger.</p>
 <p>The payload declared above will generate a message body like below,</p>
 <div class="codehilite"><pre><span></span><code>{
-    &quot;message&quot;: &quot;some message here&quot; // name/key of the object
+    "message": "some message here" // name/key of the object
 }
 </code></pre></div>
 
@@ -2128,7 +2128,7 @@
 </li>
 <li>
 <p>Use either Curl or Postman to send a post request to the http://localhost:12000/example.</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>

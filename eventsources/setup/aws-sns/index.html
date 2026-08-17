@@ -2144,18 +2144,18 @@
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over eventbus looks like following,</p>
 <div class="codehilite"><pre><span></span><code><span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">              </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
-<span class="w">              </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">            </span><span class="s">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_event_source"</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"specversion"</span><span class="p">:</span><span class="w"> </span><span class="s">"cloud_events_version"</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"source"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_event_source"</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"id"</span><span class="p">:</span><span class="w"> </span><span class="s">"unique_event_id"</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"time"</span><span class="p">:</span><span class="w"> </span><span class="s">"event_time"</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"datacontenttype"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_data"</span><span class="p">,</span>
+<span class="w">              </span><span class="s">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_configuration_within_event_source"</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">             </span><span class="s">&quot;header&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sns headers&quot;</span><span class="p">,</span>
-<span class="w">               </span><span class="s">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;body refers to the sns notification data&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">             </span><span class="s">"header"</span><span class="p">:</span><span class="w"> </span><span class="s">"sns headers"</span><span class="p">,</span>
+<span class="w">               </span><span class="s">"body"</span><span class="p">:</span><span class="w"> </span><span class="s">"body refers to the sns notification data"</span><span class="p">,</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">}</span>
 </code></pre></div>

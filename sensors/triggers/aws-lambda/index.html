@@ -2206,7 +2206,7 @@ that are not native to AWS.</p>
 <li>
 <p>Create a basic lambda function called <code>hello</code> either using AWS cli or console.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">exports</span><span class="o">.</span><span class="n">handler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">async</span><span class="w"> </span><span class="p">(</span><span class="n">event</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;name =&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="o">.</span><span class="n">name</span><span class="p">);</span>
+<span class="w">    </span><span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">'name ='</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="o">.</span><span class="n">name</span><span class="p">);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">event</span><span class="o">.</span><span class="n">name</span><span class="p">;</span>
 <span class="p">};</span>
 </code></pre></div>
@@ -2232,7 +2232,7 @@ that are not native to AWS.</p>
 </li>
 <li>
 <p>Once the sensor pod is in running state, make a <code>curl</code> request to webhook event-source pod,</p>
-<div class="codehilite"><pre><span></span><code> curl -d &#39;{&quot;name&quot;:&quot;foo&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code> curl -d '{"name":"foo"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>
@@ -2267,7 +2267,7 @@ is invoked when sensor receives an event from the eventbus. In order to construc
 <p>The <code>payload</code> contains the list of <code>src</code> which refers to the source event and <code>dest</code> which refers to destination key within result request payload.</p>
 <p>The <code>payload</code> declared above will generate a request payload like below,</p>
 <div class="codehilite"><pre><span></span><code>    {
-      &quot;name&quot;: &quot;foo&quot; // name field from event data
+      "name": "foo" // name field from event data
     }
 </code></pre></div>
 

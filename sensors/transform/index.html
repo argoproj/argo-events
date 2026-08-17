@@ -2204,12 +2204,12 @@
 <span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span>
 <span class="w">      </span><span class="nt">transform</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|-</span>
-<span class="w">          </span><span class="no">event.body.message=&#39;updated&#39;</span>
+<span class="w">          </span><span class="no">event.body.message='updated'</span>
 <span class="w">          </span><span class="no">return event</span>
 <span class="w">  </span><span class="nt">triggers</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-workflow-trigger</span>
-<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;test-dep&quot;</span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">"test-dep"</span>
 <span class="w">        </span><span class="nt">k8s</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">operation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">create</span>
 <span class="w">          </span><span class="nt">source</span><span class="p">:</span>
@@ -2233,7 +2233,7 @@
 <span class="w">                    </span><span class="nt">container</span><span class="p">:</span>
 <span class="w">                      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">busybox</span>
 <span class="w">                      </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">echo</span><span class="p p-Indicator">]</span>
-<span class="w">                      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;{{inputs.parameters.message}}&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">                      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"{{inputs.parameters.message}}"</span><span class="p p-Indicator">]</span>
 <span class="w">          </span><span class="nt">parameters</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span>
 <span class="w">                </span><span class="nt">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-dep</span>
@@ -2275,7 +2275,7 @@
 <span class="w">  </span><span class="nt">triggers</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-workflow-trigger</span>
-<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;test-dep&quot;</span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">"test-dep"</span>
 <span class="w">        </span><span class="nt">k8s</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">operation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">create</span>
 <span class="w">          </span><span class="nt">source</span><span class="p">:</span>
@@ -2289,7 +2289,7 @@
 <span class="w">                </span><span class="nt">arguments</span><span class="p">:</span>
 <span class="w">                  </span><span class="nt">parameters</span><span class="p">:</span>
 <span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">env</span>
-<span class="w">                      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[]&quot;</span>
+<span class="w">                      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"[]"</span>
 <span class="w">                </span><span class="nt">templates</span><span class="p">:</span>
 <span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">print-message</span>
 <span class="w">                    </span><span class="nt">inputs</span><span class="p">:</span>
@@ -2298,7 +2298,7 @@
 <span class="w">                    </span><span class="nt">container</span><span class="p">:</span>
 <span class="w">                      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">busybox</span>
 <span class="w">                      </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">echo</span><span class="p p-Indicator">]</span>
-<span class="w">                      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;{{inputs.parameters.env}}&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">                      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"{{inputs.parameters.env}}"</span><span class="p p-Indicator">]</span>
 <span class="w">          </span><span class="nt">parameters</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span>
 <span class="w">                </span><span class="nt">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-dep</span>
@@ -2319,11 +2319,11 @@
 <span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span>
 <span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span>
 <span class="w">      </span><span class="nt">transform</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">jq</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.body.message</span><span class="nv"> </span><span class="s">*=</span><span class="nv"> </span><span class="s">2&quot;</span>
+<span class="w">        </span><span class="nt">jq</span><span class="p">:</span><span class="w"> </span><span class="s">".body.message</span><span class="nv"> </span><span class="s">*=</span><span class="nv"> </span><span class="s">2"</span>
 <span class="w">  </span><span class="nt">triggers</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-workflow-trigger-1</span>
-<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;test-dep-foo&quot;</span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">"test-dep-foo"</span>
 <span class="w">        </span><span class="nt">k8s</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">operation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">create</span>
 <span class="w">          </span><span class="nt">source</span><span class="p">:</span>
@@ -2347,7 +2347,7 @@
 <span class="w">                    </span><span class="nt">container</span><span class="p">:</span>
 <span class="w">                      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">busybox</span>
 <span class="w">                      </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">echo</span><span class="p p-Indicator">]</span>
-<span class="w">                      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;{{inputs.parameters.message}}&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">                      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"{{inputs.parameters.message}}"</span><span class="p p-Indicator">]</span>
 <span class="w">          </span><span class="nt">parameters</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span>
 <span class="w">                </span><span class="nt">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-dep</span>

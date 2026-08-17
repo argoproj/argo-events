@@ -2210,18 +2210,18 @@
 <h1 id="time-filter">Time Filter<a class="headerlink" href="#time-filter" title="Permanent link">&para;</a></h1>
 <p>Time filter is applied to the event time, contained in the event context. A CloudEvent from Webhook event-source has payload structure as:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event_time&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">    </span><span class="nt">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"type_of_event_source"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"specversion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cloud_events_version"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name_of_the_event_source"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unique_event_id"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"event_time"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"datacontenttype"</span><span class="p">:</span><span class="w"> </span><span class="s2">"type_of_data"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name_of_the_configuration_within_event_source"</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;header&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
-<span class="w">      </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">    </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"header"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">      </span><span class="nt">"body"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -2251,8 +2251,8 @@ you need to make sure an event occurs between a certain time-frame.</p>
 <span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span>
 <span class="w">      </span><span class="nt">filters</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">time</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;02:30:00&quot;</span>
-<span class="w">          </span><span class="nt">stop</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;04:30:00&quot;</span>
+<span class="w">          </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="s">"02:30:00"</span>
+<span class="w">          </span><span class="nt">stop</span><span class="p">:</span><span class="w"> </span><span class="s">"04:30:00"</span>
 </code></pre></div>
 <h3 id="example-with-timezone">Example with timezone<a class="headerlink" href="#example-with-timezone" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
@@ -2268,9 +2268,9 @@ you need to make sure an event occurs between a certain time-frame.</p>
 <span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span>
 <span class="w">      </span><span class="nt">filters</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">time</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;09:00:00&quot;</span>
-<span class="w">          </span><span class="nt">stop</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;17:00:00&quot;</span>
-<span class="w">          </span><span class="nt">timezone</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;America/New_York&quot;</span><span class="w">  </span><span class="c1"># 9 AM to 5 PM Eastern Time</span>
+<span class="w">          </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="s">"09:00:00"</span>
+<span class="w">          </span><span class="nt">stop</span><span class="p">:</span><span class="w"> </span><span class="s">"17:00:00"</span>
+<span class="w">          </span><span class="nt">timezone</span><span class="p">:</span><span class="w"> </span><span class="s">"America/New_York"</span><span class="w">  </span><span class="c1"># 9 AM to 5 PM Eastern Time</span>
 </code></pre></div>
 <p>If <code>stop</code> is smaller than <code>start</code> (<code>stop</code> &lt; <code>start</code>), the stop time is treated as next day of <code>start</code>.</p>
 <p><strong>Note</strong>: <code>start</code> is inclusive while <code>stop</code> is exclusive.</p>
@@ -2308,7 +2308,7 @@ you need to make sure an event occurs between a certain time-frame.</p>
 </li>
 <li>
 <p>Send an HTTP request to event-source</p>
-<div class="codehilite"><pre><span></span><code>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>

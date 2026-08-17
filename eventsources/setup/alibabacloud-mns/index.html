@@ -2129,18 +2129,18 @@
 <p>MNS event-source subscribes to Alibaba Cloud MNS/SMQ topics, listen events and helps sensor trigger the workflows.</p>
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;specversion&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;source&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;time&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;event_time&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;datacontenttype&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;subject&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">    </span><span class="s2">"context"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s2">"type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"type_of_event_source"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"specversion"</span><span class="o">:</span><span class="w"> </span><span class="s2">"cloud_events_version"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"source"</span><span class="o">:</span><span class="w"> </span><span class="s2">"name_of_the_event_source"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"id"</span><span class="o">:</span><span class="w"> </span><span class="s2">"unique_event_id"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"time"</span><span class="o">:</span><span class="w"> </span><span class="s2">"event_time"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"datacontenttype"</span><span class="o">:</span><span class="w"> </span><span class="s2">"type_of_data"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"subject"</span><span class="o">:</span><span class="w"> </span><span class="s2">"name_of_the_configuration_within_event_source"</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="s2">&quot;data&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="s2">&quot;messageId&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;mns message id&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;body&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;body refers to the alibaba mns notification data&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">"data"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s2">"messageId"</span><span class="o">:</span><span class="w"> </span><span class="s2">"mns message id"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"body"</span><span class="o">:</span><span class="w"> </span><span class="s2">"body refers to the alibaba mns notification data"</span><span class="p">,</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>

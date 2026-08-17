@@ -2129,18 +2129,18 @@
 <p>Script filters can be used to filter the events with <a href="https://www.lua.org/">LUA</a> scripts.</p>
 <p>Script filters are applied to the event <code>data</code>. A CloudEvent from Webhook event-source has payload structure as:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unique_event_id&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event_time&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type_of_data&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">  </span><span class="nt">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"type_of_event_source"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"specversion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cloud_events_version"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name_of_the_event_source"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unique_event_id"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"event_time"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"datacontenttype"</span><span class="p">:</span><span class="w"> </span><span class="s2">"type_of_data"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name_of_the_configuration_within_event_source"</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;header&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
-<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"header"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">    </span><span class="nt">"body"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -2148,7 +2148,7 @@
 <p>An Script filter can be defined under <code>filters</code> with a field <code>script</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">filters</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|-</span>
-<span class="w">    </span><span class="no">if event.body.a == &quot;b&quot; and event.body.d.e == &quot;z&quot; then return true else return false end</span>
+<span class="w">    </span><span class="no">if event.body.a == "b" and event.body.d.e == "z" then return true else return false end</span>
 </code></pre></div>
 <h2 id="practical-example">Practical example<a class="headerlink" href="#practical-example" title="Permanent link">&para;</a></h2>
 <ol>
@@ -2167,7 +2167,7 @@
 <li>
 <p>Send an HTTP request to the event-source</p>
 <div class="codehilite"><pre><span></span><code>kubectl port-forward svc/webhook-eventsource-svc 12000
-curl -d &#39;{&quot;hello&quot;: &quot;world&quot;}&#39; -X POST http://localhost:12000/example
+curl -d '{"hello": "world"}' -X POST http://localhost:12000/example
 </code></pre></div>
 
 </li>
@@ -2176,7 +2176,7 @@ curl -d &#39;{&quot;hello&quot;: &quot;world&quot;}&#39; -X POST http://localhos
 </li>
 <li>
 <p>Send another HTTP request the event-source</p>
-<div class="codehilite"><pre><span></span><code>curl -X POST -d &#39;{&quot;a&quot;: &quot;b&quot;, &quot;d&quot;: {&quot;e&quot;: &quot;z&quot;}}&#39; http://localhost:12000/example
+<div class="codehilite"><pre><span></span><code>curl -X POST -d '{"a": "b", "d": {"e": "z"}}' http://localhost:12000/example
 </code></pre></div>
 
 </li>

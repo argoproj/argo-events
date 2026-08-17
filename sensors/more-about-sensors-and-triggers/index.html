@@ -2234,9 +2234,9 @@ different <code>Sensor</code> objects, so if you do have similar requirements, u
 <span class="w">        </span><span class="nt">data</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">body.value</span>
 <span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">number</span>
-<span class="w">            </span><span class="nt">comparator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;&quot;</span>
+<span class="w">            </span><span class="nt">comparator</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;"</span>
 <span class="w">            </span><span class="nt">value</span><span class="p">:</span>
-<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;20.0&quot;</span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"20.0"</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dep02</span>
 <span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span>
 <span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span>
@@ -2244,9 +2244,9 @@ different <code>Sensor</code> objects, so if you do have similar requirements, u
 <span class="w">        </span><span class="nt">data</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">body.value</span>
 <span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">number</span>
-<span class="w">            </span><span class="nt">comparator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&gt;&quot;</span>
+<span class="w">            </span><span class="nt">comparator</span><span class="p">:</span><span class="w"> </span><span class="s">"&gt;"</span>
 <span class="w">            </span><span class="nt">value</span><span class="p">:</span>
-<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;50.0&quot;</span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"50.0"</span>
 </code></pre></div>
 <p>Note that this is not an issue for the Jetstream bus, however.</p>
 <h2 id="events-delivery-order">Events Delivery Order<a class="headerlink" href="#events-delivery-order" title="Permanent link">&para;</a></h2>
@@ -2281,19 +2281,19 @@ results.</p>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">retryStrategy</span><span class="p">:</span>
 <span class="w">        </span><span class="c1"># Give up after this many times</span>
 <span class="w">        </span><span class="nt">steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="w">        </span><span class="c1"># The initial duration, use strings like &quot;2s&quot;, &quot;1m&quot;</span>
+<span class="w">        </span><span class="c1"># The initial duration, use strings like "2s", "1m"</span>
 <span class="w">        </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2s</span>
 <span class="w">        </span><span class="c1"># Duration is multiplied by factor each retry, if factor is not zero</span>
 <span class="w">        </span><span class="c1"># and steps limit has not been reached.</span>
 <span class="w">        </span><span class="c1"># Should not be negative</span>
 <span class="w">        </span><span class="c1">#</span>
-<span class="w">        </span><span class="c1"># Defaults to &quot;1.0&quot;</span>
+<span class="w">        </span><span class="c1"># Defaults to "1.0"</span>
 <span class="w">        </span><span class="nt">factor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
 <span class="w">        </span><span class="c1"># The sleep between each retry is the duration plus an additional</span>
 <span class="w">        </span><span class="c1"># amount chosen uniformly at random from the interval between</span>
 <span class="w">        </span><span class="c1"># zero and `jitter * duration`.</span>
 <span class="w">        </span><span class="c1">#</span>
-<span class="w">        </span><span class="c1"># Defaults to &quot;1&quot;</span>
+<span class="w">        </span><span class="c1"># Defaults to "1"</span>
 <span class="w">        </span><span class="nt">jitter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 </code></pre></div>
 <h2 id="trigger-rate-limit">Trigger Rate Limit<a class="headerlink" href="#trigger-rate-limit" title="Permanent link">&para;</a></h2>

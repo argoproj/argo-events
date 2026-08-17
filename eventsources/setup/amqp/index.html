@@ -2144,30 +2144,30 @@
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">        </span><span class="s">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_event_source"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"specversion"</span><span class="p">:</span><span class="w"> </span><span class="s">"cloud_events_version"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"source"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_event_source"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"id"</span><span class="p">:</span><span class="w"> </span><span class="s">"unique_event_id"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"time"</span><span class="p">:</span><span class="w"> </span><span class="s">"event_time"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"datacontenttype"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_data"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_configuration_within_event_source"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">           </span><span class="s">&quot;contentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ContentType is the MIME content type&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;contentEncoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ContentEncoding is the MIME content encoding&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;deliveryMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Delivery mode can be either - non-persistent (1) or persistent (2)&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;priority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Priority refers to the use - 0 to 9&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;correlationId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;CorrelationId is the correlation identifier&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;replyTo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ReplyTo is the address to reply to (ex: RPC)&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;expiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Expiration refers to message expiration spec&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;messageId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MessageId is message identifier&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Timestamp refers to the message timestamp&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Type refers to the message type name&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;appId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AppId refers to the application id&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;exchange&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Exchange is basic.publish exchange&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;routingKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;RoutingKey is basic.publish routing key&quot;</span><span class="p">,</span>
-<span class="w">           </span><span class="s">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Body represents the message body&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">           </span><span class="s">"contentType"</span><span class="p">:</span><span class="w"> </span><span class="s">"ContentType is the MIME content type"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"contentEncoding"</span><span class="p">:</span><span class="w"> </span><span class="s">"ContentEncoding is the MIME content encoding"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"deliveryMode"</span><span class="p">:</span><span class="w"> </span><span class="s">"Delivery mode can be either - non-persistent (1) or persistent (2)"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"priority"</span><span class="p">:</span><span class="w"> </span><span class="s">"Priority refers to the use - 0 to 9"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"correlationId"</span><span class="p">:</span><span class="w"> </span><span class="s">"CorrelationId is the correlation identifier"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"replyTo"</span><span class="p">:</span><span class="w"> </span><span class="s">"ReplyTo is the address to reply to (ex: RPC)"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"expiration"</span><span class="p">:</span><span class="w"> </span><span class="s">"Expiration refers to message expiration spec"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"messageId"</span><span class="p">:</span><span class="w"> </span><span class="s">"MessageId is message identifier"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s">"Timestamp refers to the message timestamp"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"Type refers to the message type name"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"appId"</span><span class="p">:</span><span class="w"> </span><span class="s">"AppId refers to the application id"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"exchange"</span><span class="p">:</span><span class="w"> </span><span class="s">"Exchange is basic.publish exchange"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"routingKey"</span><span class="p">:</span><span class="w"> </span><span class="s">"RoutingKey is basic.publish routing key"</span><span class="p">,</span>
+<span class="w">           </span><span class="s">"body"</span><span class="p">:</span><span class="w"> </span><span class="s">"Body represents the message body"</span><span class="p">,</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 </code></pre></div>
@@ -2248,11 +2248,11 @@ spec:
 <li>
 <p>Open a python REPL and run following code to publish a message on <code>exchange</code> called <code>test</code>.</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pika</span>
-<span class="n">connection</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">))</span>
+<span class="n">connection</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">))</span>
 <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
-<span class="n">channel</span><span class="o">.</span><span class="n">basic_publish</span><span class="p">(</span><span class="n">exchange</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">,</span>
-                      <span class="n">routing_key</span><span class="o">=</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span>
-                      <span class="n">body</span><span class="o">=</span><span class="s1">&#39;{&quot;message&quot;: &quot;hello&quot;}&#39;</span><span class="p">)</span>
+<span class="n">channel</span><span class="o">.</span><span class="n">basic_publish</span><span class="p">(</span><span class="n">exchange</span><span class="o">=</span><span class="s1">'test'</span><span class="p">,</span>
+                      <span class="n">routing_key</span><span class="o">=</span><span class="s1">'hello'</span><span class="p">,</span>
+                      <span class="n">body</span><span class="o">=</span><span class="s1">'{"message": "hello"}'</span><span class="p">)</span>
 </code></pre></div>
 
 </li>

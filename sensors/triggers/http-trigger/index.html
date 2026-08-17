@@ -2230,25 +2230,25 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 <div class="codehilite"><pre><span></span><code><span class="n">package</span> <span class="n">main</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="p">(</span>
- <span class="s2">&quot;fmt&quot;</span>
- <span class="s2">&quot;io&quot;</span>
- <span class="s2">&quot;net/http&quot;</span>
+ <span class="s2">"fmt"</span>
+ <span class="s2">"io"</span>
+ <span class="s2">"net/http"</span>
 <span class="p">)</span>
 
 <span class="n">func</span> <span class="n">hello</span><span class="p">(</span><span class="n">w</span> <span class="n">http</span><span class="o">.</span><span class="n">ResponseWriter</span><span class="p">,</span> <span class="n">req</span> <span class="o">*</span><span class="n">http</span><span class="o">.</span><span class="n">Request</span><span class="p">)</span> <span class="p">{</span>
  <span class="n">body</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">io</span><span class="o">.</span><span class="n">ReadAll</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">Body</span><span class="p">)</span>
  <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="n">nil</span> <span class="p">{</span>
-  <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">&quot;%+v</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+  <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">"%+v</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
   <span class="k">return</span>
  <span class="p">}</span>
  <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">string</span><span class="p">(</span><span class="n">body</span><span class="p">))</span>
- <span class="n">fmt</span><span class="o">.</span><span class="n">Fprintf</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="s2">&quot;hello</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+ <span class="n">fmt</span><span class="o">.</span><span class="n">Fprintf</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="s2">"hello</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
- <span class="n">http</span><span class="o">.</span><span class="n">HandleFunc</span><span class="p">(</span><span class="s2">&quot;/hello&quot;</span><span class="p">,</span> <span class="n">hello</span><span class="p">)</span>
- <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">&quot;server is listening on 8090&quot;</span><span class="p">)</span>
- <span class="n">http</span><span class="o">.</span><span class="n">ListenAndServe</span><span class="p">(</span><span class="s2">&quot;:8090&quot;</span><span class="p">,</span> <span class="n">nil</span><span class="p">)</span>
+ <span class="n">http</span><span class="o">.</span><span class="n">HandleFunc</span><span class="p">(</span><span class="s2">"/hello"</span><span class="p">,</span> <span class="n">hello</span><span class="p">)</span>
+ <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"server is listening on 8090"</span><span class="p">)</span>
+ <span class="n">http</span><span class="o">.</span><span class="n">ListenAndServe</span><span class="p">(</span><span class="s2">":8090"</span><span class="p">,</span> <span class="n">nil</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -2288,7 +2288,7 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 <li>
 <p>The sensor has triggered a http request to the http server. Take a look at the logs.</p>
 <div class="codehilite"><pre><span></span><code><span class="nx">server</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nx">listening</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="mi">8090</span>
-<span class="p">{</span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;minio&quot;</span><span class="p">,</span><span class="s">&quot;bucket&quot;</span><span class="p">:</span><span class="s">&quot;input&quot;</span><span class="p">}</span>
+<span class="p">{</span><span class="s">"type"</span><span class="p">:</span><span class="s">"minio"</span><span class="p">,</span><span class="s">"bucket"</span><span class="p">:</span><span class="s">"input"</span><span class="p">}</span>
 </code></pre></div>
 
 </li>
@@ -2317,8 +2317,8 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 <p>The <code>payload</code> contains the list of <code>src</code> which refers to the source event and <code>dest</code> which refers to destination key within result request payload.</p>
 <p>The <code>payload</code> declared above will generate a request payload like below,</p>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type of event from event&#39;s context&quot;</span>
-<span class="w">      </span><span class="s">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bucket name from event data&quot;</span>
+<span class="w">      </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"type of event from event's context"</span>
+<span class="w">      </span><span class="s">"bucket"</span><span class="p">:</span><span class="w"> </span><span class="s">"bucket name from event data"</span>
 <span class="w">    </span><span class="p">}</span>
 </code></pre></div>
 
@@ -2369,12 +2369,12 @@ to invoke OpenFaaS function.</p>
 <div class="codehilite"><pre><span></span><code> <span class="n">package</span> <span class="n">function</span>
 
  <span class="kn">import</span><span class="w"> </span><span class="p">(</span>
-  <span class="s2">&quot;fmt&quot;</span>
+  <span class="s2">"fmt"</span>
  <span class="p">)</span>
 
  <span class="o">//</span> <span class="n">Handle</span> <span class="n">a</span> <span class="n">serverless</span> <span class="n">request</span>
  <span class="n">func</span> <span class="n">Handle</span><span class="p">(</span><span class="n">req</span> <span class="p">[]</span><span class="n">byte</span><span class="p">)</span> <span class="n">string</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s2">&quot;Hello, Go. You said: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">(</span><span class="n">req</span><span class="p">))</span>
+  <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s2">"Hello, Go. You said: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">string</span><span class="p">(</span><span class="n">req</span><span class="p">))</span>
  <span class="p">}</span>
 </code></pre></div>
 
@@ -2433,7 +2433,7 @@ to invoke OpenFaaS function.</p>
 <p>Lets create a basic function.</p>
 <div class="codehilite"><pre><span></span><code><span class="nv">def</span><span class="w"> </span><span class="nv">hello</span><span class="ss">(</span><span class="nv">event</span>,<span class="w"> </span><span class="nv">context</span><span class="ss">)</span>:
 <span class="w">  </span><span class="nv">print</span><span class="w"> </span><span class="nv">event</span>
-<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nv">event</span>[<span class="s1">&#39;data&#39;</span>]
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nv">event</span>[<span class="s1">'data'</span>]
 </code></pre></div>
 
 </li>
@@ -2478,13 +2478,13 @@ to invoke OpenFaaS function.</p>
 </li>
 <li>
 <p>Once event-source and sensor pod are up and running, dispatch a message on <code>foo</code> subject using nats client.</p>
-<div class="codehilite"><pre><span></span><code><span class="k">go</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">main</span><span class="p">.</span><span class="k">go</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">localhost</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="s1">&#39;{&quot;first_name&quot;: &quot;foo&quot;, &quot;last_name&quot;: &quot;bar&quot;}&#39;</span>
+<div class="codehilite"><pre><span></span><code><span class="k">go</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">main</span><span class="p">.</span><span class="k">go</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">localhost</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="s1">'{"first_name": "foo", "last_name": "bar"}'</span>
 </code></pre></div>
 
 </li>
 <li>
 <p>It will invoke Kubeless function <code>hello</code>.</p>
-<div class="codehilite"><pre><span></span><code><span class="p">{</span><span class="err">&#39;</span><span class="nx">event</span><span class="o">-</span><span class="nx">time</span><span class="err">&#39;</span><span class="p">:</span><span class="w"> </span><span class="nx">None</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="nx">extensions</span><span class="err">&#39;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">&#39;</span><span class="nx">request</span><span class="err">&#39;</span><span class="p">:</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">LocalRequest</span><span class="p">:</span><span class="w"> </span><span class="nx">POST</span><span class="w"> </span><span class="nx">http</span><span class="p">:</span><span class="c1">//hello.kubeless.svc.cluster.local:8080/&gt; }, &#39;event-type&#39;: None, &#39;event-namespace&#39;: None, &#39;data&#39;: &#39;{&quot;first_name&quot;:&quot;foo&quot;,&quot;last_name&quot;:&quot;bar&quot;}&#39;, &#39;event-id&#39;: None}</span>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span><span class="err">'</span><span class="nx">event</span><span class="o">-</span><span class="nx">time</span><span class="err">'</span><span class="p">:</span><span class="w"> </span><span class="nx">None</span><span class="p">,</span><span class="w"> </span><span class="err">'</span><span class="nx">extensions</span><span class="err">'</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">'</span><span class="nx">request</span><span class="err">'</span><span class="p">:</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">LocalRequest</span><span class="p">:</span><span class="w"> </span><span class="nx">POST</span><span class="w"> </span><span class="nx">http</span><span class="p">:</span><span class="c1">//hello.kubeless.svc.cluster.local:8080/&gt; }, 'event-type': None, 'event-namespace': None, 'data': '{"first_name":"foo","last_name":"bar"}', 'event-id': None}</span>
 </code></pre></div>
 
 </li>

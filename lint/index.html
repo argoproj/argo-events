@@ -2639,7 +2639,7 @@ suitable for use in CI/CD pipelines:</p>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Go</span>
 <span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-go@v6</span>
 <span class="w">        </span><span class="nt">with</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">go-version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.26&quot;</span>
+<span class="w">          </span><span class="nt">go-version</span><span class="p">:</span><span class="w"> </span><span class="s">"1.26"</span>
 
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install argo-events</span>
 <span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
@@ -2665,26 +2665,26 @@ suitable for use in CI/CD pipelines:</p>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 <span class="c1"># Lint all EventSource and Sensor files before committing</span>
 
-<span class="nv">FILES</span><span class="o">=</span><span class="k">$(</span>git<span class="w"> </span>diff<span class="w"> </span>--cached<span class="w"> </span>--name-only<span class="w"> </span>--diff-filter<span class="o">=</span>ACM<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;\.(yaml|yml)$&#39;</span><span class="k">)</span>
+<span class="nv">FILES</span><span class="o">=</span><span class="k">$(</span>git<span class="w"> </span>diff<span class="w"> </span>--cached<span class="w"> </span>--name-only<span class="w"> </span>--diff-filter<span class="o">=</span>ACM<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'\.(yaml|yml)$'</span><span class="k">)</span>
 
-<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$FILES</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">"</span><span class="nv">$FILES</span><span class="s2">"</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
 <span class="w">  </span><span class="nb">exit</span><span class="w"> </span><span class="m">0</span>
 <span class="k">fi</span>
 
 <span class="k">if</span><span class="w"> </span>!<span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>argo-events<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;argo-events not found. Please install it first.&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"argo-events not found. Please install it first."</span>
 <span class="w">  </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
 <span class="k">fi</span>
 
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Linting Argo Events resources...&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">"Linting Argo Events resources..."</span>
 argo-events<span class="w"> </span>lint<span class="w"> </span><span class="nv">$FILES</span>
 
 <span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-ne<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Linting failed. Please fix the errors before committing.&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"Linting failed. Please fix the errors before committing."</span>
 <span class="w">  </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
 <span class="k">fi</span>
 
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;All resources are valid!&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">"All resources are valid!"</span>
 <span class="nb">exit</span><span class="w"> </span><span class="m">0</span>
 </code></pre></div>
 <h3 id="validate-multi-document-yaml-files">Validate Multi-Document YAML Files<a class="headerlink" href="#validate-multi-document-yaml-files" title="Permanent link">&para;</a></h3>
@@ -2696,7 +2696,7 @@ argo-events<span class="w"> </span>lint<span class="w"> </span><span class="nv">
 <span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">webhook</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">example</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12000&quot;</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">"12000"</span>
 <span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/example</span>
 <span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POST</span>
 <span class="nn">---</span>
@@ -2732,7 +2732,7 @@ argo-events<span class="w"> </span>lint<span class="w"> </span><span class="nv">
 <h2 id="common-validation-errors">Common Validation Errors<a class="headerlink" href="#common-validation-errors" title="Permanent link">&para;</a></h2>
 <h3 id="eventsource-errors">EventSource Errors<a class="headerlink" href="#eventsource-errors" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>✗<span class="w"> </span>webhook.yaml:<span class="w"> </span>EventSource<span class="w"> </span>validation<span class="w"> </span>failed
-<span class="w">  </span>Error:<span class="w"> </span>endpoint<span class="w"> </span>can<span class="err">&#39;</span>t<span class="w"> </span>be<span class="w"> </span>empty
+<span class="w">  </span>Error:<span class="w"> </span>endpoint<span class="w"> </span>can<span class="err">'</span>t<span class="w"> </span>be<span class="w"> </span>empty
 </code></pre></div>
 <p><strong>Solution</strong>: Ensure all required fields are specified in the event source
 configuration.</p>

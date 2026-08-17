@@ -2158,7 +2158,7 @@ implementation.</p>
 <h2 id="contract">Contract<a class="headerlink" href="#contract" title="Permanent link">&para;</a></h2>
 <p>In order to qualify as generic eventsource, the eventsource server needs to
 implement following gRPC contract.</p>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">syntax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;proto3&quot;</span><span class="p">;</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">syntax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"proto3"</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">package</span><span class="w"> </span><span class="n">generic</span><span class="p">;</span>
 
@@ -2196,7 +2196,7 @@ implement following gRPC contract.</p>
       generic:
         example:
           insecure: true
-          url: &quot;generic-event-source-server.argo-events.svc:8080&quot;
+          url: "generic-event-source-server.argo-events.svc:8080"
           config: |-
             key1: value1
             key2: value2

@@ -2448,7 +2448,7 @@ This command will build the images so you don't need to run <code>make image</co
 </code></pre></div>
 <p>The ephemeral container image repository must be unique and the tag is used to determine how long the image is kept.</p>
 <p>Run the following commands to generate a unique repository name and tag it so the image will be kept for 1 hour.</p>
-<div class="highlight"><pre><span></span><code>IMG_REPO=$(uuidgen | tr &#39;[:upper:]&#39; &#39;[:lower:]&#39;)
+<div class="highlight"><pre><span></span><code>IMG_REPO=$(uuidgen | tr '[:upper:]' '[:lower:]')
 IMG_VERSION=1h
 </code></pre></div>
 <p>Using the ephemeral image repository and version, run the following command to build and push a multi-arch image to ttl.sh.</p>

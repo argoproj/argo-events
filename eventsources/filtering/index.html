@@ -2079,9 +2079,9 @@ This is achieved by evaluating an expression in the EventSource spec.</p>
 <span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka.argo-events:9092</span>
 <span class="w">      </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">topic-2</span>
 <span class="w">      </span><span class="nt">jsonBody</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">      </span><span class="nt">partition</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
+<span class="w">      </span><span class="nt">partition</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
 <span class="w">      </span><span class="nt">filter</span><span class="p">:</span><span class="w"> </span><span class="c1"># filter field </span>
-<span class="w">        </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(body.id</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">4)</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">(body.name</span><span class="nv"> </span><span class="s">!=</span><span class="nv"> </span><span class="s">&#39;Joe&#39;)&quot;</span><span class="w"> </span><span class="c1">#expression to be evaluated</span>
+<span class="w">        </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="s">"(body.id</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">4)</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">(body.name</span><span class="nv"> </span><span class="s">!=</span><span class="nv"> </span><span class="s">'Joe')"</span><span class="w"> </span><span class="c1">#expression to be evaluated</span>
 <span class="w">      </span><span class="nt">connectionBackoff</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
 <span class="w">        </span><span class="nt">steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
@@ -2098,17 +2098,17 @@ This is achieved by evaluating an expression in the EventSource spec.</p>
 <ol>
 <li>Sending an event with passing filter conditions to kafka</li>
 </ol>
-<div class="highlight"><pre><span></span><code>echo &#39;{&quot;id&quot;: 4,&quot;name&quot;: &quot;John&quot;, &quot;email&quot;: &quot;john@intuit.com&quot;, &quot;department&quot;:{&quot;id&quot;: 1,&quot;name&quot;: &quot;HR&quot;,&quot;bu&quot;:{&quot;id&quot;: 2,&quot;name&quot; : &quot;devp&quot;}}}&#39; | kcat -b localhost:9092 -P -t topic-2
+<div class="highlight"><pre><span></span><code>echo '{"id": 4,"name": "John", "email": "john@intuit.com", "department":{"id": 1,"name": "HR","bu":{"id": 2,"name" : "devp"}}}' | kcat -b localhost:9092 -P -t topic-2
 </code></pre></div>
 <ol>
 <li>Sending an event with failing filter conditions</li>
 </ol>
-<div class="highlight"><pre><span></span><code>echo &#39;{&quot;id&quot;: 2,&quot;name&quot;: &quot;Johnson&quot;, &quot;email&quot;: &quot;john@intuit.com&quot;, &quot;department&quot;:{&quot;id&quot;: 1,&quot;name&quot;: &quot;HR&quot;,&quot;bu&quot;:{&quot;id&quot;: 2,&quot;name&quot; : &quot;devp&quot;}}}&#39; | kcat -b localhost:9092 -P -t topic-2
+<div class="highlight"><pre><span></span><code>echo '{"id": 2,"name": "Johnson", "email": "john@intuit.com", "department":{"id": 1,"name": "HR","bu":{"id": 2,"name" : "devp"}}}' | kcat -b localhost:9092 -P -t topic-2
 </code></pre></div>
 <h1 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h1>
 <p>Successful logs from kafka event source pod:</p>
-<div class="highlight"><pre><span></span><code>{&quot;level&quot;:&quot;info&quot;,&quot;ts&quot;:1644017495.0711913,&quot;logger&quot;:&quot;argo-events.eventsource&quot;,&quot;caller&quot;:&quot;kafka/start.go:217&quot;,&quot;msg&quot;:&quot;dispatching event on the data channel...&quot;,&quot;eventSourceName&quot;:&quot;kafka&quot;,&quot;eventSourceType&quot;:&quot;kafka&quot;,&quot;eventName&quot;:&quot;example&quot;,&quot;partition-id&quot;:&quot;0&quot;}
-{&quot;level&quot;:&quot;info&quot;,&quot;ts&quot;:1644017495.1374986,&quot;logger&quot;:&quot;argo-events.eventsource&quot;,&quot;caller&quot;:&quot;eventsources/eventing.go:514&quot;,&quot;msg&quot;:&quot;succeeded to publish an event&quot;,&quot;eventSourceName&quot;:&quot;kafka&quot;,&quot;eventName&quot;:&quot;example&quot;,&quot;eventSourceType&quot;:&quot;kafka&quot;,&quot;eventID&quot;:&quot;kafka:example:kafka-broker:9092:topic-2:0:7&quot;}
+<div class="highlight"><pre><span></span><code>{"level":"info","ts":1644017495.0711913,"logger":"argo-events.eventsource","caller":"kafka/start.go:217","msg":"dispatching event on the data channel...","eventSourceName":"kafka","eventSourceType":"kafka","eventName":"example","partition-id":"0"}
+{"level":"info","ts":1644017495.1374986,"logger":"argo-events.eventsource","caller":"eventsources/eventing.go:514","msg":"succeeded to publish an event","eventSourceName":"kafka","eventName":"example","eventSourceType":"kafka","eventID":"kafka:example:kafka-broker:9092:topic-2:0:7"}
 </code></pre></div>
 
               

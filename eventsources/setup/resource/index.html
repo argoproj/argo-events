@@ -2172,21 +2172,21 @@
 <h2 id="event-structure">Event Structure<a class="headerlink" href="#event-structure" title="Permanent link">&para;</a></h2>
 <p>The structure of an event dispatched by the event-source over the eventbus looks like following,</p>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="s">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_event_source&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;specversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cloud_events_version&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_event_source&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unique_event_id&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;event_time&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;datacontenttype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_data&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name_of_the_configuration_within_event_source&quot;</span>
+<span class="w">        </span><span class="s">"context"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_event_source"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"specversion"</span><span class="p">:</span><span class="w"> </span><span class="s">"cloud_events_version"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"source"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_event_source"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"id"</span><span class="p">:</span><span class="w"> </span><span class="s">"unique_event_id"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"time"</span><span class="p">:</span><span class="w"> </span><span class="s">"event_time"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"datacontenttype"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_data"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s">"name_of_the_configuration_within_event_source"</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="s">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;type_of_the_event&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// ADD, UPDATE or DELETE</span>
-<span class="w">          </span><span class="s">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;resource_body&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// JSON format</span>
-<span class="w">          </span><span class="s">&quot;group&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;resource_group_name&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;resource_version_name&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;resource_name&quot;</span>
+<span class="w">        </span><span class="s">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"type_of_the_event"</span><span class="p">,</span><span class="w"> </span><span class="c1">// ADD, UPDATE or DELETE</span>
+<span class="w">          </span><span class="s">"body"</span><span class="p">:</span><span class="w"> </span><span class="s">"resource_body"</span><span class="p">,</span><span class="w"> </span><span class="c1">// JSON format</span>
+<span class="w">          </span><span class="s">"group"</span><span class="p">:</span><span class="w"> </span><span class="s">"resource_group_name"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"version"</span><span class="p">:</span><span class="w"> </span><span class="s">"resource_version_name"</span><span class="p">,</span>
+<span class="w">          </span><span class="s">"resource"</span><span class="p">:</span><span class="w"> </span><span class="s">"resource_name"</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 </code></pre></div>
@@ -2225,7 +2225,7 @@
 <span class="w">    </span><span class="nl">container</span><span class="p">:</span>
 <span class="w">      </span><span class="nc">image</span><span class="err">:</span><span class="w"> </span><span class="n">busybox</span>
 <span class="w">      </span><span class="nl">command</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">echo</span><span class="o">]</span>
-<span class="w">      </span><span class="nl">args</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">&quot;hello world&quot;</span><span class="o">]</span>
+<span class="w">      </span><span class="nl">args</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">"hello world"</span><span class="o">]</span>
 </code></pre></div>
 
 </li>
@@ -2247,7 +2247,7 @@
 <span class="w">            </span>#<span class="w"> </span><span class="nv">Defaults</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="o">==</span>.
 <span class="w">            </span>#<span class="w"> </span><span class="nv">Refer</span><span class="w"> </span><span class="nv">https</span>:<span class="o">//</span><span class="nv">kubernetes</span>.<span class="nv">io</span><span class="o">/</span><span class="nv">docs</span><span class="o">/</span><span class="nv">concepts</span><span class="o">/</span><span class="nv">overview</span><span class="o">/</span><span class="nv">working</span><span class="o">-</span><span class="nv">with</span><span class="o">-</span><span class="nv">objects</span><span class="o">/</span><span class="nv">labels</span><span class="o">/</span>#<span class="nv">label</span><span class="o">-</span><span class="nv">selectors</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">more</span><span class="w"> </span><span class="nv">info</span>.
 <span class="w">            </span>#<span class="w"> </span><span class="nv">optional</span>.
-<span class="w">            </span><span class="nv">operation</span>:<span class="w"> </span><span class="s2">&quot;==&quot;</span>
+<span class="w">            </span><span class="nv">operation</span>:<span class="w"> </span><span class="s2">"=="</span>
 <span class="w">            </span><span class="nv">value</span>:<span class="w"> </span><span class="nv">my</span><span class="o">-</span><span class="nv">workflow</span>
 </code></pre></div>
 

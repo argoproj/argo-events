@@ -2349,23 +2349,23 @@
 for its metrics, which include things like how many events were generated, how
 many actions were triggered, and so on. To let your Prometheus server discover
 those user metrics, add the following to your configuration.</p>
-<div class="highlight"><pre><span></span><code>    - job_name: &#39;argo-events&#39;
+<div class="highlight"><pre><span></span><code>    - job_name: 'argo-events'
       kubernetes_sd_configs:
       - role: pod
         selectors:
         - role: pod
-          label: &#39;controller in (eventsource-controller,sensor-controller,eventbus-controller)&#39;
+          label: 'controller in (eventsource-controller,sensor-controller,eventbus-controller)'
       relabel_configs:
       - source_labels: [__meta_kubernetes_pod_label_eventbus_name, __meta_kubernetes_pod_label_controller]
         action: replace
         regex: (.+);eventbus-controller
         replacement: $1
-        target_label: &#39;eventbus_name&#39;
+        target_label: 'eventbus_name'
       - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_controller]
         action: replace
         regex: (.+);eventbus-controller
         replacement: $1
-        target_label: &#39;namespace&#39;
+        target_label: 'namespace'
       - source_labels: [__address__, __meta_kubernetes_pod_label_controller]
         action: drop
         regex: (.+):(\d222);eventbus-controller
@@ -2378,10 +2378,10 @@ and granted to your Service Account.</p>
 <span class="nt">metadata</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pod-discovery</span>
 <span class="nt">rules</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">""</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">resources</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pods</span>
-<span class="w">    </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;get&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;list&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;watch&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">verbs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"get"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"list"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"watch"</span><span class="p p-Indicator">]</span>
 </code></pre></div>
 <h3 id="eventsource">EventSource<a class="headerlink" href="#eventsource" title="Permanent link">&para;</a></h3>
 <h4 id="argo_events_event_service_running_total">argo_events_event_service_running_total<a class="headerlink" href="#argo_events_event_service_running_total" title="Permanent link">&para;</a></h4>
@@ -2413,23 +2413,23 @@ explanations.</p>
 <h2 id="controller-metrics">Controller Metrics<a class="headerlink" href="#controller-metrics" title="Permanent link">&para;</a></h2>
 <p>If you are interested in Argo Events controller metrics, add following to your
 Prometheus configuration.</p>
-<div class="highlight"><pre><span></span><code>    - job_name: &#39;argo-events-controllers&#39;
+<div class="highlight"><pre><span></span><code>    - job_name: 'argo-events-controllers'
       kubernetes_sd_configs:
       - role: pod
         selectors:
         - role: pod
-          label: &#39;app in (eventsource-controller,sensor-controller,eventbus-controller)&#39;
+          label: 'app in (eventsource-controller,sensor-controller,eventbus-controller)'
       relabel_configs:
       - source_labels: [__address__, __meta_kubernetes_pod_label_app]
         action: replace
         regex: (.+);(eventsource-controller|sensor-controller|eventbus-controller)
         replacement: $1:7777
-        target_label: &#39;__address__&#39;
+        target_label: '__address__'
       - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_app]
         action: replace
         regex: (.+);(eventsource-controller|sensor-controller|eventbus-controller)
         replacement: $1
-        target_label: &#39;namespace&#39;
+        target_label: 'namespace'
 </code></pre></div>
 <h2 id="golden-signals">Golden Signals<a class="headerlink" href="#golden-signals" title="Permanent link">&para;</a></h2>
 <p>The following metrics are considered
