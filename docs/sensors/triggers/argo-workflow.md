@@ -12,6 +12,8 @@ Argo workflow is K8s custom resource which help orchestrating parallel jobs on K
 <br/>
 <br/>
 
+For GitHub webhooks end-to-end (install Events + Workflows, credentials, Sensor, and PR test), see [Trigger Argo Workflows from GitHub](../../tutorials/08-github-trigger-workflow.md).
+
 ## Trigger a workflow
 
 Note: You will need to have [Argo Workflows](https://argoproj.github.io/argo-workflows/) installed to make this work.
