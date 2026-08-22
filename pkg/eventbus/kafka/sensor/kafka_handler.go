@@ -145,7 +145,12 @@ func (h *KafkaHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 
 	for {
 		select {
-		case msgs := <-batch:
+		case msgs, ok := <-batch:
+			if !ok {
+				// the claim's message channel closed, so sarama can rebalance
+				h.Logger.Info("Kafka batch channel closed, returning from ConsumeClaim")
+				return nil
+			}
 			if len(msgs) == 0 {
 				h.Logger.Warn("Kafka batch contains no messages")
 				continue
