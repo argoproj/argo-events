@@ -184,15 +184,11 @@ func (router *Router) PostInactivate() error {
 	return router.deleteWebhooks(bitbucketServerEventSource)
 }
 
+// listWebhooks returns all the webhooks configured on the given repository.
 func (router *Router) listWebhooks(repo v1alpha1.BitbucketServerRepository) ([]bitbucketv1.Webhook, error) {
-	apiResponse, err := router.client.DefaultApi.FindWebhooks(repo.ProjectKey, repo.RepositorySlug, nil)
+	hooks, err := router.customClient.GetWebhooks(repo.ProjectKey, repo.RepositorySlug)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list existing hooks to check for duplicates for repository %s/%s: %w", repo.ProjectKey, repo.RepositorySlug, err)
-	}
-
-	hooks, err := bitbucketv1.GetWebhooksResponse(apiResponse)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert the list of webhooks for repository %s/%s: %w", repo.ProjectKey, repo.RepositorySlug, err)
 	}
 
 	return hooks, nil
