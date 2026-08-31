@@ -83,6 +83,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ExprFilter":                   schema_pkg_apis_events_v1alpha1_ExprFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.FileArtifact":                 schema_pkg_apis_events_v1alpha1_FileArtifact(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.FileEventSource":              schema_pkg_apis_events_v1alpha1_FileEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GRPCSchemaField":              schema_pkg_apis_events_v1alpha1_GRPCSchemaField(ref),
+		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GRPCTrigger":                  schema_pkg_apis_events_v1alpha1_GRPCTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GenericEventSource":           schema_pkg_apis_events_v1alpha1_GenericEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GerritEventSource":            schema_pkg_apis_events_v1alpha1_GerritEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitArtifact":                  schema_pkg_apis_events_v1alpha1_GitArtifact(ref),
@@ -3474,6 +3476,138 @@ func schema_pkg_apis_events_v1alpha1_FileEventSource(ref common.ReferenceCallbac
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WatchPathConfig"},
+	}
+}
+
+func schema_pkg_apis_events_v1alpha1_GRPCSchemaField(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "GRPCSchemaField describes a single field of the gRPC request message.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name is the proto/JSON field name.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"number": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Number is the protobuf field number, taken from the target's .proto.",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type is the scalar field type: string, int32, int64, uint32, uint64, float, double, bool, or bytes.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"name", "number", "type"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_events_v1alpha1_GRPCTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "GRPCTrigger is the trigger to invoke an arbitrary unary gRPC method on a target server. Since no compiled client stubs exist for the target service, the request message shape is described by Schema.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Description: "URL is the target gRPC server address (host:port).",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"method": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Method is the fully-qualified RPC method path, e.g. \"/helloworld.Greeter/SayHello\".",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"schema": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Schema describes the request message's fields. Number MUST match the field number in the target's real .proto definition, or the message will be silently misinterpreted on the wire.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GRPCSchemaField"),
+									},
+								},
+							},
+						},
+					},
+					"payload": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Payload is the list of key-value extracted from an event payload to construct the gRPC request message.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the gRPC connection. Mutually exclusive with Insecure.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"),
+						},
+					},
+					"insecure": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Insecure disables TLS entirely (plaintext connection).",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"timeout": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Timeout for the RPC call, in seconds. Defaults to 10.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+					"parameters": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the gRPC trigger resource.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"url", "method"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GRPCSchemaField", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TriggerParameter"},
 	}
 }
 
@@ -8605,12 +8739,18 @@ func schema_pkg_apis_events_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EmailTrigger"),
 						},
 					},
+					"grpc": {
+						SchemaProps: spec.SchemaProps{
+							Description: "GRPC refers to the trigger designed to invoke an arbitrary unary gRPC method.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GRPCTrigger"),
+						},
+					},
 				},
 				Required: []string{"name"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureEventHubsTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureServiceBusTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ConditionsResetCriteria", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EmailTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.LogTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PulsarTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StandardK8STrigger"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureEventHubsTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureServiceBusTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ConditionsResetCriteria", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EmailTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GRPCTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.LogTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PulsarTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StandardK8STrigger"},
 	}
 }
 

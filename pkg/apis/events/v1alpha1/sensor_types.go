@@ -339,6 +339,9 @@ type TriggerTemplate struct {
 	// Email refers to the trigger designed to send an email notification
 	// +optional
 	Email *EmailTrigger `json:"email,omitempty" protobuf:"bytes,17,opt,name=email"`
+	// GRPC refers to the trigger designed to invoke an arbitrary unary gRPC method.
+	// +optional
+	GRPC *GRPCTrigger `json:"grpc,omitempty" protobuf:"bytes,18,opt,name=grpc"`
 }
 
 type ConditionsResetCriteria struct {
@@ -446,6 +449,50 @@ type SecureHeader struct {
 type ValueFromSource struct {
 	SecretKeyRef    *corev1.SecretKeySelector    `json:"secretKeyRef,omitempty" protobuf:"bytes,1,opt,name=secretKeyRef"`
 	ConfigMapKeyRef *corev1.ConfigMapKeySelector `json:"configMapKeyRef,omitempty" protobuf:"bytes,2,opt,name=configMapKeyRef"`
+}
+
+// GRPCTrigger is the trigger to invoke an arbitrary unary gRPC method on a
+// target server. Since no compiled client stubs exist for the target
+// service, the request message shape is described by Schema.
+type GRPCTrigger struct {
+	// URL is the target gRPC server address (host:port).
+	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+	// Method is the fully-qualified RPC method path,
+	// e.g. "/helloworld.Greeter/SayHello".
+	Method string `json:"method" protobuf:"bytes,2,opt,name=method"`
+	// Schema describes the request message's fields. Number MUST match the
+	// field number in the target's real .proto definition, or the message
+	// will be silently misinterpreted on the wire.
+	// +optional
+	Schema []GRPCSchemaField `json:"schema,omitempty" protobuf:"bytes,3,rep,name=schema"`
+	// Payload is the list of key-value extracted from an event payload to
+	// construct the gRPC request message.
+	// +optional
+	Payload []TriggerParameter `json:"payload,omitempty" protobuf:"bytes,4,rep,name=payload"`
+	// TLS configuration for the gRPC connection. Mutually exclusive with Insecure.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	// Insecure disables TLS entirely (plaintext connection).
+	// +optional
+	Insecure bool `json:"insecure,omitempty" protobuf:"varint,6,opt,name=insecure"`
+	// Timeout for the RPC call, in seconds. Defaults to 10.
+	// +optional
+	Timeout int64 `json:"timeout,omitempty" protobuf:"varint,7,opt,name=timeout"`
+	// Parameters is the list of key-value extracted from event's payload
+	// that are applied to the gRPC trigger resource.
+	// +optional
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,8,rep,name=parameters"`
+}
+
+// GRPCSchemaField describes a single field of the gRPC request message.
+type GRPCSchemaField struct {
+	// Name is the proto/JSON field name.
+	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+	// Number is the protobuf field number, taken from the target's .proto.
+	Number int32 `json:"number" protobuf:"varint,2,opt,name=number"`
+	// Type is the scalar field type: string, int32, int64, uint32, uint64,
+	// float, double, bool, or bytes.
+	Type string `json:"type" protobuf:"bytes,3,opt,name=type"`
 }
 
 // AWSLambdaTrigger refers to specification of the trigger to invoke an AWS Lambda function

@@ -28,6 +28,7 @@ import (
 	servicebus "github.com/argoproj/argo-events/pkg/sensors/triggers/azure-service-bus"
 	customtrigger "github.com/argoproj/argo-events/pkg/sensors/triggers/custom-trigger"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers/email"
+	grpctrigger "github.com/argoproj/argo-events/pkg/sensors/triggers/grpc"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers/http"
 	"github.com/argoproj/argo-events/pkg/sensors/triggers/kafka"
 	logtrigger "github.com/argoproj/argo-events/pkg/sensors/triggers/log"
@@ -147,6 +148,15 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 		result, err := customtrigger.NewCustomTrigger(sensorCtx.sensor, trigger, log, sensorCtx.customTriggerClients)
 		if err != nil {
 			log.Errorw("failed to new a Custom trigger", zap.Error(err))
+			return nil
+		}
+		return result
+	}
+
+	if trigger.Template.GRPC != nil {
+		result, err := grpctrigger.NewGRPCTrigger(sensorCtx.grpcTriggerClients, sensorCtx.sensor, trigger, log)
+		if err != nil {
+			log.Errorw("failed to new a GRPC trigger", zap.Error(err))
 			return nil
 		}
 		return result

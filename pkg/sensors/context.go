@@ -54,6 +54,8 @@ type SensorContext struct {
 	httpClients sharedutil.StringKeyedMap[*http.Client]
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
 	customTriggerClients sharedutil.StringKeyedMap[*grpc.ClientConn]
+	// grpcTriggerClients holds the references to the gRPC clients for GRPC triggers
+	grpcTriggerClients sharedutil.StringKeyedMap[*grpc.ClientConn]
 	// http client to send slack messages.
 	slackHTTPClient *http.Client
 	// kafkaProducers holds references to the active kafka producers
@@ -84,6 +86,7 @@ func NewSensorContext(kubeClient kubernetes.Interface, dynamicClient dynamic.Int
 		hostname:             hostname,
 		httpClients:          sharedutil.NewStringKeyedMap[*http.Client](),
 		customTriggerClients: sharedutil.NewStringKeyedMap[*grpc.ClientConn](),
+		grpcTriggerClients:   sharedutil.NewStringKeyedMap[*grpc.ClientConn](),
 		slackHTTPClient: &http.Client{
 			Timeout: time.Minute * 5,
 		},

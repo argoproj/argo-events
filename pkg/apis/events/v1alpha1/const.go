@@ -91,6 +91,7 @@ var (
 	TriggerTypeAzureEventHubs  TriggerType = "AzureEventHubs"
 	TriggerTypeAzureServiceBus TriggerType = "AzureServiceBus"
 	TriggerTypeEmail           TriggerType = "Email"
+	TriggerTypeGRPC            TriggerType = "GRPC"
 )
 
 // EventBusType is the type of event bus

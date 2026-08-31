@@ -8855,6 +8855,318 @@ Filter
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.GRPCSchemaField">
+
+GRPCSchemaField
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GRPCTrigger">GRPCTrigger</a>)
+</p>
+
+<p>
+
+<p>
+
+GRPCSchemaField describes a single field of the gRPC request message.
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+</th>
+
+<th>
+
+Description
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>name</code></br> <em> string </em>
+</td>
+
+<td>
+
+<p>
+
+Name is the proto/JSON field name.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>number</code></br> <em> int32 </em>
+</td>
+
+<td>
+
+<p>
+
+Number is the protobuf field number, taken from the target’s .proto.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>type</code></br> <em> string </em>
+</td>
+
+<td>
+
+<p>
+
+Type is the scalar field type: string, int32, int64, uint32, uint64,
+float, double, bool, or bytes.
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.GRPCTrigger">
+
+GRPCTrigger
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+</p>
+
+<p>
+
+<p>
+
+GRPCTrigger is the trigger to invoke an arbitrary unary gRPC method on a
+target server. Since no compiled client stubs exist for the target
+service, the request message shape is described by Schema.
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+</th>
+
+<th>
+
+Description
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>url</code></br> <em> string </em>
+</td>
+
+<td>
+
+<p>
+
+URL is the target gRPC server address (host:port).
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>method</code></br> <em> string </em>
+</td>
+
+<td>
+
+<p>
+
+Method is the fully-qualified RPC method path,
+e.g. “/helloworld.Greeter/SayHello”.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>schema</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GRPCSchemaField"> \[\]GRPCSchemaField
+</a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Schema describes the request message’s fields. Number MUST match the
+field number in the target’s real .proto definition, or the message will
+be silently misinterpreted on the wire.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Payload is the list of key-value extracted from an event payload to
+construct the gRPC request message.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+TLS configuration for the gRPC connection. Mutually exclusive with
+Insecure.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>insecure</code></br> <em> bool </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Insecure disables TLS entirely (plaintext connection).
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>timeout</code></br> <em> int64 </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Timeout for the RPC call, in seconds. Defaults to 10.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the gRPC trigger resource.
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.GenericEventSource">
 
 GenericEventSource
@@ -20500,6 +20812,7 @@ TLSConfig
 <a href="#argoproj.io/v1alpha1.AzureServiceBusTrigger">AzureServiceBusTrigger</a>,
 <a href="#argoproj.io/v1alpha1.BitbucketServerEventSource">BitbucketServerEventSource</a>,
 <a href="#argoproj.io/v1alpha1.EmitterEventSource">EmitterEventSource</a>,
+<a href="#argoproj.io/v1alpha1.GRPCTrigger">GRPCTrigger</a>,
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
 <a href="#argoproj.io/v1alpha1.JetStreamConfig">JetStreamConfig</a>,
 <a href="#argoproj.io/v1alpha1.KafkaBus">KafkaBus</a>,
@@ -21259,6 +21572,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.AzureServiceBusTrigger">AzureServiceBusTrigger</a>,
 <a href="#argoproj.io/v1alpha1.CustomTrigger">CustomTrigger</a>,
 <a href="#argoproj.io/v1alpha1.EmailTrigger">EmailTrigger</a>,
+<a href="#argoproj.io/v1alpha1.GRPCTrigger">GRPCTrigger</a>,
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>,
@@ -22073,6 +22387,27 @@ Azure Service Bus
 <p>
 
 Email refers to the trigger designed to send an email notification
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>grpc</code></br> <em> <a href="#argoproj.io/v1alpha1.GRPCTrigger">
+GRPCTrigger </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+GRPC refers to the trigger designed to invoke an arbitrary unary gRPC
+method.
 </p>
 
 </td>

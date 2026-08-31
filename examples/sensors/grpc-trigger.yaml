@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: grpc-trigger
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - template:
+        name: grpc-trigger
+        grpc:
+          url: greeter.argo-events.svc:9000
+          method: /helloworld.Greeter/SayHello
+          insecure: true
+          schema:
+            - name: name
+              number: 1
+              type: string
+          payload:
+            - src:
+                dependencyName: test-dep
+                dataKey: body.name
+              dest: name
+      retryStrategy:
+        steps: 3
+        duration: 3s
+      policy:
+        status:
+          allow:
+            - 0
