@@ -141,6 +141,11 @@ func TestJetStreamCreateObjects(t *testing.T) {
 		assert.Equal(t, 8, len(s.Data))
 		assert.Contains(t, s.Data, v1alpha1.JetStreamServerSecretAuthKey)
 		assert.Contains(t, s.Data, v1alpha1.JetStreamServerSecretEncryptionKey)
+		// https://github.com/argoproj/argo-events/issues/4109
+		// The JetStream encryption key must be at least 32 bytes so it
+		// satisfies NATS' recommendation and the 112-bit HMAC minimum
+		// required by OpenSSL FIPS providers.
+		assert.GreaterOrEqual(t, len(s.Data[v1alpha1.JetStreamServerSecretEncryptionKey]), 32)
 		assert.Contains(t, s.Data, v1alpha1.JetStreamServerPrivateKeyKey)
 		assert.Contains(t, s.Data, v1alpha1.JetStreamServerCertKey)
 		assert.Contains(t, s.Data, v1alpha1.JetStreamServerCACertKey)
