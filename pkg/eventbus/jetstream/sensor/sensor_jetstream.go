@@ -77,7 +77,12 @@ func (stream *SensorJetstream) Connect(ctx context.Context, triggerName string, 
 		return nil, err
 	}
 
-	return NewJetstreamTriggerConn(conn, stream.sensorName, triggerName, dependencyExpression, deps)
+	triggerConn, err := NewJetstreamTriggerConn(conn, stream.sensorName, triggerName, dependencyExpression, deps)
+	if err != nil {
+		_ = conn.Close()
+		return nil, err
+	}
+	return triggerConn, nil
 }
 
 // Update the K/V store to reflect the current Spec:
