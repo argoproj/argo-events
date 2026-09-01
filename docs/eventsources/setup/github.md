@@ -70,6 +70,8 @@ Example event-source yaml file is [here](https://github.com/argoproj/argo-events
 
 1.  Run `argo list` to find the workflow.
 
+For a full walkthrough that installs Events + Workflows and triggers a Workflow from a pull request, see [Trigger Argo Workflows from GitHub](../../tutorials/08-github-trigger-workflow.md).
+
 ## Troubleshoot
 
 Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).
