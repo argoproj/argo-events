@@ -44,6 +44,7 @@ nav:
           - "tutorials/05-trigger-custom-resources.md"
           - "tutorials/06-trigger-conditions.md"
           - "tutorials/07-policy.md"
+          - "tutorials/08-github-trigger-workflow.md"
   - User Guide:
       - Concepts:
           - "concepts/architecture.md"

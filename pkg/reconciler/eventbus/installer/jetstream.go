@@ -115,6 +115,9 @@ func (r *jetStreamInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, 
 		return nil, err
 	}
 	r.eventBus.Status.MarkDeployed("Succeeded", "JetStream is deployed")
+	// Managed JetStream always serves TLS with a self-signed cert. Advertise
+	// insecureSkipVerify so clients opt into TLS explicitly; exotic/plain TCP
+	// buses leave TLS unset and connect without nats.Secure.
 	return &v1alpha1.BusConfig{
 		JetStream: &v1alpha1.JetStreamConfig{
 			URL: fmt.Sprintf("nats://%s.%s.svc:%s", generateJetStreamServiceName(r.eventBus), r.eventBus.Namespace, strconv.Itoa(int(jsClientPort))),
@@ -125,6 +128,9 @@ func (r *jetStreamInstaller) Install(ctx context.Context) (*v1alpha1.BusConfig, 
 				Key: v1alpha1.JetStreamClientAuthSecretKey,
 			},
 			StreamConfig: string(b),
+			TLS: &v1alpha1.TLSConfig{
+				InsecureSkipVerify: true,
+			},
 		},
 	}, nil
 }
@@ -539,7 +545,9 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 
 	if !oldClientObjExisting || !oldServerObjExisting {
 		// Generate server-auth.conf file
-		encryptionKey := sharedutil.RandomString(12)
+		// 32 bytes satisfies NATS' recommended minimum and exceeds the
+		// 112-bit HMAC key strength required by OpenSSL FIPS providers.
+		encryptionKey := sharedutil.RandomString(32)
 		jsUser := sharedutil.RandomString(8)
 		jsPass := sharedutil.RandomString(16)
 		sysPassword := sharedutil.RandomString(24)

@@ -194,5 +194,9 @@ func TestInstall(t *testing.T) {
 		assert.NotNil(t, testObj.Status.Config.JetStream)
 		assert.NotEmpty(t, testObj.Status.Config.JetStream.URL)
 		assert.NotNil(t, testObj.Status.Config.JetStream.AccessSecret)
+		// Native/managed JetStream always serves TLS with a self-signed cert;
+		// BusConfig must advertise insecureSkipVerify so clients keep using TLS.
+		assert.NotNil(t, testObj.Status.Config.JetStream.TLS)
+		assert.True(t, testObj.Status.Config.JetStream.TLS.InsecureSkipVerify)
 	})
 }
