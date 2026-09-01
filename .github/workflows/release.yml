@@ -48,7 +48,7 @@ jobs:
     if: github.repository == 'argoproj/argo-events'
     strategy:
       matrix:
-        target: [argo-events]
+        target: [argo-events, argo-events-non-root]
     steps:
       - uses: actions/checkout@v6
 
@@ -77,9 +77,18 @@ jobs:
           fi
           echo "VERSION=$tag" >> $GITHUB_OUTPUT
 
+      - name: Set Image Tag
+        id: image-tag
+        run: |
+          if [ "${{ matrix.target }}" = "argo-events-nonroot" ]; then
+            echo "TAG=${{ steps.version.outputs.VERSION }}-nonroot" >> $GITHUB_OUTPUT
+          else
+            echo "TAG=${{ steps.version.outputs.VERSION }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Container build and push with arm64/amd64
         run: |
-          IMAGE_NAMESPACE=${{ secrets.QUAYIO_ORG }} VERSION=${{ steps.version.outputs.VERSION }} DOCKER_PUSH=true make image-multi
+          IMAGE_NAMESPACE=${{ secrets.QUAYIO_ORG }} VERSION=${{ steps.version.outputs.VERSION }} DOCKER_PUSH=true TARGET=${{ matrix.target }} make image-multi
 
   bom:
     runs-on: ubuntu-latest
@@ -105,6 +114,7 @@ jobs:
       - run:
           bom generate --image quay.io/argoproj/argo-events:$VERSION -o
           /tmp/argo-events.spdx
+          bom generate --image quay.io/argoproj/argo-events:$VERSION-nonroot -o /tmp/argo-events-nonroot.spdx
       # pack the boms into one file to make it easy to download
       - run: cd /tmp && tar -zcf sbom.tar.gz *.spdx
       - uses: actions/upload-artifact@v5
@@ -163,6 +173,7 @@ jobs:
       - name: Sign Argo Events container images and assets
         run: |
           cosign sign --yes --key env://COSIGN_PRIVATE_KEY quay.io/argoproj/argo-events@${{ env.IMAGE_DIGEST }}
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY quay.io/argoproj/argo-events@${{ env.IMAGE_DIGEST_NONROOT }}
           cosign sign-blob --yes --key env://COSIGN_PRIVATE_KEY --bundle ./dist/argo-events-checksums.sig ./dist/argo-events-checksums.txt
           cosign sign-blob --yes --key env://COSIGN_PRIVATE_KEY --bundle /tmp/sbom.tar.gz.sig /tmp/sbom.tar.gz
           # Retrieves the public key to release as an asset
