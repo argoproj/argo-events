@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: http-log-level
+spec:
+  # Suppress per-request info logs from the HTTP trigger while keeping warnings/errors.
+  logLevel: warn
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - template:
+        name: http-trigger
+        http:
+          url: http://example.com/hook
+          method: POST

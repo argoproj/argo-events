@@ -2887,6 +2887,11 @@ message SensorSpec {
   // LoggingFields add additional key-value pairs when logging happens
   // +optional
   map<string, string> loggingFields = 8;
+
+  // LogLevel overrides the default logger level for HTTP triggers on this sensor.
+  // Valid values: debug, info, warn, error.
+  // +optional
+  optional string logLevel = 9;
 }
 
 // SensorStatus contains information about the status of a sensor.

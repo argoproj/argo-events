@@ -3970,6 +3970,10 @@
           "description": "EventBusName references to a EventBus name. By default the value is \"default\"",
           "type": "string"
         },
+        "logLevel": {
+          "description": "LogLevel overrides the default logger level for HTTP triggers on this sensor. Valid values: debug, info, warn, error.",
+          "type": "string"
+        },
         "loggingFields": {
           "description": "LoggingFields add additional key-value pairs when logging happens",
           "type": "object",
