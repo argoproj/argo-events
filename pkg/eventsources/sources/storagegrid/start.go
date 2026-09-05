@@ -82,6 +82,9 @@ func filterName(notification *events.StorageGridNotification, eventSource *v1alp
 	if eventSource.Filter == nil {
 		return true
 	}
+	if len(notification.Message.Records) == 0 {
+		return false
+	}
 	if eventSource.Filter.Prefix != "" && eventSource.Filter.Suffix != "" {
 		return strings.HasPrefix(notification.Message.Records[0].S3.Object.Key, eventSource.Filter.Prefix) && strings.HasSuffix(notification.Message.Records[0].S3.Object.Key, eventSource.Filter.Suffix)
 	}
