@@ -384,6 +384,27 @@ func Test_BuildDeployment(t *testing.T) {
 			assert.Equal(t, gotVolumeMountNames[i], wantVolumeMountNames[i])
 		}
 	})
+
+	t.Run("test honoring ImagePullPolicy from template", func(t *testing.T) {
+		testSensor := sensorObj.DeepCopy()
+		testSensor.Spec.Template.Container.ImagePullPolicy = corev1.PullIfNotPresent
+
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: testSensor,
+			Labels: testLabels,
+		}
+
+		deployment, err := buildDeployment(args, fakeEventBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+
+		assert.Equal(
+			t,
+			corev1.PullIfNotPresent,
+			deployment.Spec.Template.Spec.Containers[0].ImagePullPolicy,
+		)
+	})
 }
 
 func TestResourceReconcile(t *testing.T) {

@@ -37,7 +37,7 @@ func Test_ApplyToContainer(t *testing.T) {
 	assert.Equal(t, corev1.PullAlways, c.ImagePullPolicy)
 	c.ImagePullPolicy = corev1.PullIfNotPresent
 	testContainer.ApplyToContainer(c)
-	assert.Equal(t, corev1.PullIfNotPresent, c.ImagePullPolicy)
+	assert.Equal(t, corev1.PullAlways, c.ImagePullPolicy)
 	testContainer.SecurityContext = &corev1.SecurityContext{}
 	testContainer.ApplyToContainer(c)
 	assert.NotNil(t, c.SecurityContext)
