@@ -46,7 +46,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/go-swagger/go-swagger v0.36.5
-	github.com/gobwas/glob v0.2.4-0.20181002190808-e7a84e9525fe
+	github.com/gobwas/glob v1.0.0
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmp v0.7.0
