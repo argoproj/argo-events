@@ -18820,6 +18820,26 @@ LoggingFields add additional key-value pairs when logging happens
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>logLevel</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+LogLevel overrides the default logger level for HTTP triggers on this
+sensor. Valid values: debug, info, warn, error.
+</p>
+
+</td>
+
+</tr>
+
 </table>
 
 </td>
@@ -19037,6 +19057,26 @@ retain
 <p>
 
 LoggingFields add additional key-value pairs when logging happens
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>logLevel</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+LogLevel overrides the default logger level for HTTP triggers on this
+sensor. Valid values: debug, info, warn, error.
 </p>
 
 </td>
