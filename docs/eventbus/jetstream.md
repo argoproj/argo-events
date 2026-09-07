@@ -1,6 +1,6 @@
 ## Jetstream
 
-[Jetstream](https://docs.nats.io/nats-concepts/jetstream) is the latest streaming server implemented by the NATS community, with improvements from the original NATS Streaming, which [reached end-of-life in June 2023](../eventbus/stan.md) and is no longer supported.
+[Jetstream](https://docs.nats.io/nats-concepts/jetstream) is the latest streaming server implemented by the NATS community, with improvements from the original NATS Streaming, which [reached end-of-life in June 2023](../eventbus/stan.md) and is deprecated in favor of JetStream.
 
 A simplest Jetstream EventBus example:
 

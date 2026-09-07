@@ -123,5 +123,9 @@ func ValidateConfig(config *GlobalConfig) error {
 		return fmt.Errorf("no jetstream versions were provided in the controller config")
 	}
 
+	if len(config.supportedSTANVersions()) == 0 {
+		return fmt.Errorf("no stan versions were provided in the controller config")
+	}
+
 	return nil
 }
