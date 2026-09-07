@@ -1,5 +1,12 @@
 ## NATS Streaming
 
+> **Deprecated:** NATS Streaming (STAN) [reached end-of-life in June
+> 2023](https://github.com/nats-io/nats-streaming-server).
+> `natsStreamingImage`/version config has been removed from the
+> controller's `controller-config.yaml`, so creating a `native` NATS
+> EventBus as described below will fail. Use [JetStream](jetstream.md)
+> instead.
+
 You can create a `native` NATS EventBus, or connect to an existing NATS
 Streaming service with `exotic` NATS EventBus.
 
