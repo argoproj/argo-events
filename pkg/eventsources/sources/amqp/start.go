@@ -185,14 +185,34 @@ func (el *EventListener) handleOne(amqpEventSource *aev1.AMQPEventSource, msg am
 
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
+		el.nack(amqpEventSource, msg, log)
 		return fmt.Errorf("failed to marshal the message, message-id: %s, %w", msg.MessageId, err)
 	}
 
 	log.Info("dispatching event ...")
 	if err = dispatch(bodyBytes); err != nil {
+		el.nack(amqpEventSource, msg, log)
 		return fmt.Errorf("failed to dispatch AMQP event, %w", err)
 	}
+
+	if !amqpEventSource.Consume.AutoAck {
+		if err := msg.Ack(false); err != nil {
+			log.Errorw("failed to ack the message", zap.Any("message-id", msg.MessageId), zap.Error(err))
+		}
+	}
 	return nil
+}
+
+// nack negatively acknowledges and requeues a message that failed processing.
+// It is a no-op when the channel was set up with AutoAck, since the broker
+// already acknowledged the message on delivery in that case.
+func (el *EventListener) nack(amqpEventSource *aev1.AMQPEventSource, msg amqplib.Delivery, log *zap.SugaredLogger) {
+	if amqpEventSource.Consume.AutoAck {
+		return
+	}
+	if err := msg.Nack(false, true); err != nil {
+		log.Errorw("failed to nack the message", zap.Any("message-id", msg.MessageId), zap.Error(err))
+	}
 }
 
 // setDefaults sets the default values in case the user hasn't defined them
