@@ -7483,6 +7483,13 @@ func schema_pkg_apis_events_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							},
 						},
 					},
+					"logLevel": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LogLevel overrides the default logger level for HTTP triggers on this sensor. Valid values: debug, info, warn, error.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"dependencies", "triggers"},
 			},

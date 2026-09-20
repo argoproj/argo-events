@@ -68,6 +68,19 @@ func FromContext(ctx context.Context) *zap.SugaredLogger {
 	return NewArgoEventsLogger()
 }
 
+// NewSugaredLoggerWithLevel returns a logger configured with the given level.
+// An empty level defaults to info.
+func NewSugaredLoggerWithLevel(logLevel string) *zap.SugaredLogger {
+	config := ConfigureLogLevelLogger(logLevel)
+	config.EncoderConfig.EncodeTime = zapcore.RFC3339NanoTimeEncoder
+	config.OutputPaths = []string{"stdout"}
+	logger, err := config.Build()
+	if err != nil {
+		panic(err)
+	}
+	return logger.Named("argo-events").Sugar()
+}
+
 // Returns logger conifg depending on the log level
 func ConfigureLogLevelLogger(logLevel string) zap.Config {
 	logConfig := zap.NewProductionConfig()
