@@ -28,3 +28,14 @@ func TestLogTrigger(t *testing.T) {
 	assert.True(t, l.shouldLog(&sv1.LogTrigger{}))
 	assert.True(t, l.shouldLog(&sv1.LogTrigger{IntervalSeconds: 1}))
 }
+
+func TestShouldLogSameInstant(t *testing.T) {
+	now := time.Now()
+	l := &LogTrigger{LastLogTime: now}
+
+	assert.True(t, l.shouldLog(&sv1.LogTrigger{}))
+	assert.False(t, l.shouldLog(&sv1.LogTrigger{IntervalSeconds: 1}))
+
+	l.LastLogTime = now.Add(-1 * time.Second)
+	assert.True(t, l.shouldLog(&sv1.LogTrigger{IntervalSeconds: 1}))
+}
