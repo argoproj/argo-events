@@ -2410,7 +2410,7 @@
       "type": "object",
       "properties": {
         "accessSecret": {
-          "description": "Secret for auth",
+          "description": "Secret for auth. Native JetStream uses YAML with username/password. Exotic JetStream also accepts a NATS credentials file (.creds) containing a user JWT and NKey seed. JetStream access secrets are injected into EventSource/Sensor pods as EVENTBUS_NATS_CREDENTIALS and as a mounted auth file; the env var is preferred when present.",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "streamConfig": {
