@@ -8,10 +8,13 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+
+	bitbucketv1 "github.com/gfleury/go-bitbucket-v1"
 )
 
 // customBitbucketServerClient returns a Bitbucket Server HTTP client that implements methods that gfleury/go-bitbucket-v1 does not.
-// Specifically getting Pull Requests associated to a commit is not supported by gfleury/go-bitbucket-v1.
+// Specifically getting Pull Requests associated to a commit is not supported by gfleury/go-bitbucket-v1, and its
+// FindWebhooks method drops the pagination parameters, which makes it unusable for repositories with many webhooks.
 type customBitbucketServerClient struct {
 	client *http.Client
 	ctx    context.Context
@@ -33,6 +36,16 @@ type pagedPullRequestsRes struct {
 	Values        []pullRequestRes `json:"values"`
 	Start         int              `json:"start"`
 	NextPageStart int              `json:"nextPageStart"`
+}
+
+// pagedWebhooksRes is a paged response with values of bitbucketv1.Webhook.
+type pagedWebhooksRes struct {
+	Size          int                   `json:"size"`
+	Limit         int                   `json:"limit"`
+	IsLastPage    bool                  `json:"isLastPage"`
+	Values        []bitbucketv1.Webhook `json:"values"`
+	Start         int                   `json:"start"`
+	NextPageStart int                   `json:"nextPageStart"`
 }
 
 type pagination struct {
@@ -78,6 +91,49 @@ func (c *customBitbucketServerClient) get(u string) ([]byte, error) {
 	}
 
 	return io.ReadAll(res.Body)
+}
+
+// GetWebhooks returns all the webhooks configured on the repository.
+//
+// Bitbucket Server returns only the first page of webhooks, so a repository
+// with more webhooks than the page size can have the webhook of this event
+// source go unnoticed, which results in a new duplicate webhook being created
+// on every event source restart.
+func (c *customBitbucketServerClient) GetWebhooks(project, repository string) ([]bitbucketv1.Webhook, error) {
+	p := pagination{Start: 0, Limit: 500}
+
+	webhooksURL := c.url.JoinPath(fmt.Sprintf("api/1.0/projects/%s/repos/%s/webhooks", project, repository))
+	query := webhooksURL.Query()
+	query.Set("limit", p.LimitStr())
+
+	var webhooks []bitbucketv1.Webhook
+	for {
+		query.Set("start", p.StartStr())
+		webhooksURL.RawQuery = query.Encode()
+
+		body, err := c.get(webhooksURL.String())
+		if err != nil {
+			return nil, err
+		}
+
+		var pagedWebhooks pagedWebhooksRes
+		err = json.Unmarshal(body, &pagedWebhooks)
+		if err != nil {
+			return nil, err
+		}
+
+		webhooks = append(webhooks, pagedWebhooks.Values...)
+
+		// The additional comparison guards against a response that would
+		// otherwise loop forever.
+		if pagedWebhooks.IsLastPage || pagedWebhooks.NextPageStart <= p.Start {
+			break
+		}
+
+		p.Start = pagedWebhooks.NextPageStart
+	}
+
+	return webhooks, nil
 }
 
 // GetCommitPullRequests returns all the Pull Requests associated to the commit id.
