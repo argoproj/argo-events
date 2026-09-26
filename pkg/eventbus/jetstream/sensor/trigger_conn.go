@@ -185,24 +185,43 @@ func (conn *JetstreamTriggerConn) shutdownSubscriptions(processMsgsCloseCh chan 
 	conn.Logger.Debug("closed NATSConn")
 }
 
+// fetchErrState tracks the last-seen fetch error and when it was last logged, so that
+// pullSubscribe can throttle log spew from a subscription stuck retrying the same error.
+type fetchErrState struct {
+	err  error
+	time time.Time
+}
+
+// trackFetchError folds fetchErr into state and reports whether it should be logged now:
+// immediately when the error message changes, and otherwise at most once every 10 seconds.
+// state.time only advances when shouldLog is true, so the throttle window is measured from
+// the last log line, not from the last fetch attempt.
+func trackFetchError(state fetchErrState, fetchErr error, now time.Time) (newState fetchErrState, shouldLog bool) {
+	shouldLog = state.err == nil || state.err.Error() != fetchErr.Error() || now.Sub(state.time) > 10*time.Second
+	newState = fetchErrState{err: fetchErr, time: state.time}
+	if shouldLog {
+		newState.time = now
+	}
+	return newState, shouldLog
+}
+
 func (conn *JetstreamTriggerConn) pullSubscribe(
 	subscription *nats.Subscription,
 	msgChannel chan<- *nats.Msg,
 	closeCh <-chan struct{},
 	wg *sync.WaitGroup) {
-	var previousErr error
-	var previousErrTime time.Time
+	var errState fetchErrState
 
 	for {
 		// call Fetch with timeout
 		msgs, fetchErr := subscription.Fetch(1, nats.MaxWait(time.Second*1))
 		if fetchErr != nil && !errors.Is(fetchErr, nats.ErrTimeout) {
-			if (previousErr != nil && previousErr.Error() != fetchErr.Error()) || time.Since(previousErrTime) > 10*time.Second {
+			var shouldLog bool
+			errState, shouldLog = trackFetchError(errState, fetchErr, time.Now())
+			if shouldLog {
 				// avoid log spew - only log error every 10 seconds
-				conn.Logger.Errorf("failed to fetch messages for subscription %+v, %v, previousErr=%v, previousErrTime=%v", subscription, fetchErr, previousErr, previousErrTime)
+				conn.Logger.Errorf("failed to fetch messages for subscription %+v, %v", subscription, fetchErr)
 			}
-			previousErr = fetchErr
-			previousErrTime = time.Now()
 		}
 
 		// read from close channel but don't block if it's empty
