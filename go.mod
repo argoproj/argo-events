@@ -7,7 +7,7 @@ retract v1.15.1 // Contains retractions only.
 retract v1.15.0 // Published accidentally.
 
 require (
-	cloud.google.com/go/compute/metadata v0.9.0
+	cloud.google.com/go/compute/metadata v0.9.1
 	cloud.google.com/go/iam v1.13.0
 	cloud.google.com/go/pubsub/v2 v2.7.0
 	dario.cat/mergo v1.0.2
