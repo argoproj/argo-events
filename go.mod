@@ -35,7 +35,7 @@ require (
 	github.com/colinmarc/hdfs v1.1.4-0.20180802165501-48eb8d6c34a9
 	github.com/doublerebel/bellows v0.0.0-20160303004610-f177d92a03d3
 	github.com/eclipse/paho.mqtt.golang v1.5.1
-	github.com/emitter-io/go/v2 v2.0.9
+	github.com/emitter-io/go/v2 v2.1.0
 	github.com/evilmonkeyinc/jsonpath v0.8.1
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gavv/httpexpect/v2 v2.16.0
