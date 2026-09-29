@@ -4634,6 +4634,11 @@ func (in *WebhookContext) DeepCopyInto(out *WebhookContext) {
 		*out = new(int64)
 		**out = **in
 	}
+	if in.BasicAuth != nil {
+		in, out := &in.BasicAuth, &out.BasicAuth
+		*out = new(BasicAuth)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

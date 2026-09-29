@@ -2753,7 +2753,8 @@ BasicAuth
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
 <a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>,
 <a href="#argoproj.io/v1alpha1.NATSAuth">NATSAuth</a>,
-<a href="#argoproj.io/v1alpha1.SchemaRegistryConfig">SchemaRegistryConfig</a>)
+<a href="#argoproj.io/v1alpha1.SchemaRegistryConfig">SchemaRegistryConfig</a>,
+<a href="#argoproj.io/v1alpha1.WebhookContext">WebhookContext</a>)
 </p>
 
 <p>
@@ -22600,6 +22601,27 @@ authentication
 MaxPayloadSize is the maximum webhook payload size that the server will
 accept. Requests exceeding that limit will be rejected with “request too
 large” response. Default value: 1048576 (1MB).
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>basicAuth</code></br> <em>
+<a href="#argoproj.io/v1alpha1.BasicAuth"> BasicAuth </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+BasicAuth holds the username and password secret selectors for basic
+authentication
 </p>
 
 </td>

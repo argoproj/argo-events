@@ -3457,6 +3457,10 @@ message WebhookContext {
   // Default value: 1048576 (1MB).
   // +optional
   optional int64 maxPayloadSize = 9;
+
+  // BasicAuth holds the username and password secret selectors for basic authentication
+  // +optional
+  optional BasicAuth basicAuth = 10;
 }
 
 // CalendarEventSource describes an HTTP based EventSource
