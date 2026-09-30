@@ -108,6 +108,9 @@ type EventSourceSpec struct {
 	Gerrit map[string]GerritEventSource `json:"gerrit,omitempty" protobuf:"bytes,35,rep,name=gerrit"`
 	// MNS event sources
 	MNS map[string]MNSEventSource `json:"mns,omitempty" protobuf:"bytes,36,rep,name=mns"`
+	// RevisionHistoryLimit specifies how many old deployment revisions to retain
+	// +optional
+	RevisionHistoryLimit *int32 `json:"revisionHistoryLimit,omitempty" protobuf:"varint,37,opt,name=revisionHistoryLimit"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
