@@ -16,7 +16,9 @@ func TestGetSensorReplicas(t *testing.T) {
 	sp := SensorSpec{}
 	assert.Equal(t, sp.GetReplicas(), int32(1))
 	sp.Replicas = convertInt(t, 0)
-	assert.Equal(t, sp.GetReplicas(), int32(1))
+	assert.Equal(t, sp.GetReplicas(), int32(0))
+	sp.Replicas = convertInt(t, -1)
+	assert.Equal(t, sp.GetReplicas(), int32(0))
 	sp.Replicas = convertInt(t, 2)
 	assert.Equal(t, sp.GetReplicas(), int32(2))
 }
