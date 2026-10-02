@@ -66,10 +66,11 @@ func (k *Kafka) Config() (*sarama.Config, error) {
 	case "manual":
 		config.Producer.Partitioner = sarama.NewManualPartitioner
 	default:
-		// Use random partitioner to distribute messages across partitions even when a key is set.
-		// This improves horizontal scaling by avoiding hot-partitioning on constant keys
-		// such as trigger names or event source/event name pairs.
-		config.Producer.Partitioner = sarama.NewRandomPartitioner
+		// Use hash partitioner so all messages for the same trigger land on one partition.
+		// Sensors track per-trigger state using committed offsets; random partitioning
+		// spreads a single trigger's messages across partitions and breaks restart
+		// recovery of multi-dependency conditions. See issue #4203.
+		config.Producer.Partitioner = sarama.NewHashPartitioner
 	}
 
 	// common config
