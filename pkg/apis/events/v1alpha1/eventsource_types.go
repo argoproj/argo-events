@@ -114,12 +114,9 @@ func (e EventSourceSpec) GetReplicas() int32 {
 	if e.Replicas == nil {
 		return 1
 	}
-	var replicas int32
-	if e.Replicas != nil {
-		replicas = *e.Replicas
-	}
-	if replicas < 1 {
-		replicas = 1
+	replicas := *e.Replicas
+	if replicas < 0 {
+		replicas = 0
 	}
 	return replicas
 }
