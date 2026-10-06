@@ -11711,7 +11711,11 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <em>(Optional)</em>
 <p>
 
-Secret for auth
+Secret for auth. Native JetStream uses YAML with username/password.
+Exotic JetStream also accepts a NATS credentials file (.creds)
+containing a user JWT and NKey seed. JetStream access secrets are
+injected into EventSource/Sensor pods as EVENTBUS_NATS_CREDENTIALS and
+as a mounted auth file; the env var is preferred when present.
 </p>
 
 </td>

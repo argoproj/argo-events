@@ -210,6 +210,14 @@ func buildDeployment(args *AdaptorArgs, eventBus *v1alpha1.EventBus) (*appv1.Dep
 	}
 
 	if accessSecret != nil {
+		if eventBus.Status.Config.JetStream != nil {
+			env = append(env, corev1.EnvVar{
+				Name: v1alpha1.EnvVarEventBusNATSCredentials,
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: accessSecret,
+				},
+			})
+		}
 		// Mount the secret as volume instead of using envFrom to gain the ability
 		// for the sensor deployment to auto reload when the secret changes
 		volumes = append(volumes, corev1.Volume{
