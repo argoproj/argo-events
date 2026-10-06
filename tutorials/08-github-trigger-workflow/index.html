@@ -13,7 +13,7 @@
     
     
       
-        <title>GCP PubSub - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>Trigger Argo Workflows from GitHub (Events + Workflows) - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#gcp-pubsub" class="md-skip">
+        <a href="#trigger-argo-workflows-from-github-events-workflows" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              GCP PubSub
+              Trigger Argo Workflows from GitHub (Events + Workflows)
             
           </span>
         </div>
@@ -208,13 +208,15 @@
         
   
   
+    
+  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="../../quick_start/" class="md-tabs__link">
+      <a href="../../quick_start/" class="md-tabs__link md-tabs__link--active">
         Getting Started
       </a>
     </li>
@@ -224,8 +226,6 @@
         
   
   
-    
-  
 
 
   
@@ -237,7 +237,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../concepts/architecture/" class="md-tabs__link md-tabs__link--active">
+      <a href="../../concepts/architecture/" class="md-tabs__link">
         User Guide
       </a>
     </li>
@@ -384,12 +384,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
       
       
       
@@ -424,12 +426,14 @@
               
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" checked>
       
       
       
@@ -452,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/01-introduction/" class="md-nav__link">
+      <a href="../01-introduction/" class="md-nav__link">
         Introduction
       </a>
     </li>
@@ -466,7 +470,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/02-parameterization/" class="md-nav__link">
+      <a href="../02-parameterization/" class="md-nav__link">
         Parameterization
       </a>
     </li>
@@ -480,7 +484,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/03-trigger-sources/" class="md-nav__link">
+      <a href="../03-trigger-sources/" class="md-nav__link">
         Trigger Sources
       </a>
     </li>
@@ -494,7 +498,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/04-standard-k8s-resources/" class="md-nav__link">
+      <a href="../04-standard-k8s-resources/" class="md-nav__link">
         Trigger Standard K8s Resources
       </a>
     </li>
@@ -508,7 +512,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/05-trigger-custom-resources/" class="md-nav__link">
+      <a href="../05-trigger-custom-resources/" class="md-nav__link">
         Trigger Custom Resources
       </a>
     </li>
@@ -522,7 +526,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/06-trigger-conditions/" class="md-nav__link">
+      <a href="../06-trigger-conditions/" class="md-nav__link">
         Trigger Conditions
       </a>
     </li>
@@ -536,7 +540,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/07-policy/" class="md-nav__link">
+      <a href="../07-policy/" class="md-nav__link">
         Policy
       </a>
     </li>
@@ -548,11 +552,128 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../tutorials/08-github-trigger-workflow/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Trigger Argo Workflows from GitHub (Events + Workflows)
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Trigger Argo Workflows from GitHub (Events + Workflows)
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-install" class="md-nav__link">
+    What you will install
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-install-argo-events" class="md-nav__link">
+    1. Install Argo Events
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-rbac-for-sensors-and-workflows" class="md-nav__link">
+    2. RBAC for Sensors and Workflows
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-github-credentials" class="md-nav__link">
+    3. GitHub credentials
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-deploy-the-github-eventsource" class="md-nav__link">
+    4. Deploy the GitHub EventSource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-deploy-the-sensor-trigger-a-workflow" class="md-nav__link">
+    5. Deploy the Sensor (trigger a Workflow)
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Deploy the Sensor (trigger a Workflow)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#trigger-an-existing-workflowtemplate" class="md-nav__link">
+    Trigger an existing WorkflowTemplate
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-test-the-integration" class="md-nav__link">
+    6. Test the integration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-optional-install-with-argo-cd" class="md-nav__link">
+    7. Optional: install with Argo CD
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-docs" class="md-nav__link">
+    Related docs
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -577,14 +698,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
       
       
       
@@ -811,14 +930,12 @@
               
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3" type="checkbox" id="__nav_3_3" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3" type="checkbox" id="__nav_3_3" >
       
       
       
@@ -867,7 +984,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/amqp/" class="md-nav__link">
+      <a href="../../eventsources/setup/amqp/" class="md-nav__link">
         AMQP
       </a>
     </li>
@@ -881,7 +998,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/aws-sns/" class="md-nav__link">
+      <a href="../../eventsources/setup/aws-sns/" class="md-nav__link">
         AWS SNS
       </a>
     </li>
@@ -895,7 +1012,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/aws-sqs/" class="md-nav__link">
+      <a href="../../eventsources/setup/aws-sqs/" class="md-nav__link">
         AWS SQS
       </a>
     </li>
@@ -909,7 +1026,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/azure-service-bus/" class="md-nav__link">
+      <a href="../../eventsources/setup/azure-service-bus/" class="md-nav__link">
         Azure Service Bus
       </a>
     </li>
@@ -923,7 +1040,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/azure-queue-storage/" class="md-nav__link">
+      <a href="../../eventsources/setup/azure-queue-storage/" class="md-nav__link">
         Azure Queue Storage
       </a>
     </li>
@@ -937,7 +1054,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/calendar/" class="md-nav__link">
+      <a href="../../eventsources/setup/calendar/" class="md-nav__link">
         Calendar
       </a>
     </li>
@@ -951,7 +1068,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/emitter/" class="md-nav__link">
+      <a href="../../eventsources/setup/emitter/" class="md-nav__link">
         Emitter
       </a>
     </li>
@@ -965,7 +1082,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/file/" class="md-nav__link">
+      <a href="../../eventsources/setup/file/" class="md-nav__link">
         File
       </a>
     </li>
@@ -979,7 +1096,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/gcp-pub-sub/" class="md-nav__link">
+      <a href="../../eventsources/setup/gcp-pub-sub/" class="md-nav__link">
         GCP Pub/Sub
       </a>
     </li>
@@ -993,7 +1110,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/github/" class="md-nav__link">
+      <a href="../../eventsources/setup/github/" class="md-nav__link">
         GitHub
       </a>
     </li>
@@ -1007,7 +1124,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/gitlab/" class="md-nav__link">
+      <a href="../../eventsources/setup/gitlab/" class="md-nav__link">
         GitLab
       </a>
     </li>
@@ -1021,7 +1138,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/bitbucket/" class="md-nav__link">
+      <a href="../../eventsources/setup/bitbucket/" class="md-nav__link">
         Bitbucket (Cloud)
       </a>
     </li>
@@ -1035,7 +1152,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/bitbucketserver/" class="md-nav__link">
+      <a href="../../eventsources/setup/bitbucketserver/" class="md-nav__link">
         Bitbucket Server
       </a>
     </li>
@@ -1049,7 +1166,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/kafka/" class="md-nav__link">
+      <a href="../../eventsources/setup/kafka/" class="md-nav__link">
         Kafka
       </a>
     </li>
@@ -1063,7 +1180,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/minio/" class="md-nav__link">
+      <a href="../../eventsources/setup/minio/" class="md-nav__link">
         Minio
       </a>
     </li>
@@ -1077,7 +1194,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/mqtt/" class="md-nav__link">
+      <a href="../../eventsources/setup/mqtt/" class="md-nav__link">
         MQTT
       </a>
     </li>
@@ -1091,7 +1208,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/nats/" class="md-nav__link">
+      <a href="../../eventsources/setup/nats/" class="md-nav__link">
         NATS
       </a>
     </li>
@@ -1105,7 +1222,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/nsq/" class="md-nav__link">
+      <a href="../../eventsources/setup/nsq/" class="md-nav__link">
         NSQ
       </a>
     </li>
@@ -1119,7 +1236,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/redis/" class="md-nav__link">
+      <a href="../../eventsources/setup/redis/" class="md-nav__link">
         Redis
       </a>
     </li>
@@ -1133,7 +1250,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/redis-streams/" class="md-nav__link">
+      <a href="../../eventsources/setup/redis-streams/" class="md-nav__link">
         Redis Streams
       </a>
     </li>
@@ -1147,7 +1264,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/resource/" class="md-nav__link">
+      <a href="../../eventsources/setup/resource/" class="md-nav__link">
         Resource
       </a>
     </li>
@@ -1161,7 +1278,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/webhook/" class="md-nav__link">
+      <a href="../../eventsources/setup/webhook/" class="md-nav__link">
         Webhook
       </a>
     </li>
@@ -1175,7 +1292,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/pulsar/" class="md-nav__link">
+      <a href="../../eventsources/setup/pulsar/" class="md-nav__link">
         Pulsar
       </a>
     </li>
@@ -1189,7 +1306,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup/alibabacloud-mns/" class="md-nav__link">
+      <a href="../../eventsources/setup/alibabacloud-mns/" class="md-nav__link">
         Alibabacloud MNS/SMQ
       </a>
     </li>
@@ -1210,7 +1327,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../multiple-events/" class="md-nav__link">
+      <a href="../../eventsources/multiple-events/" class="md-nav__link">
         EventSource With Multiple Events
       </a>
     </li>
@@ -1224,7 +1341,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../naming/" class="md-nav__link">
+      <a href="../../eventsources/naming/" class="md-nav__link">
         EventSource Names
       </a>
     </li>
@@ -1238,7 +1355,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../services/" class="md-nav__link">
+      <a href="../../eventsources/services/" class="md-nav__link">
         EventSource Services
       </a>
     </li>
@@ -1252,7 +1369,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ha/" class="md-nav__link">
+      <a href="../../eventsources/ha/" class="md-nav__link">
         EventSource High Availability
       </a>
     </li>
@@ -1266,7 +1383,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../filtering/" class="md-nav__link">
+      <a href="../../eventsources/filtering/" class="md-nav__link">
         Filtering EventSources
       </a>
     </li>
@@ -1280,7 +1397,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../webhook-authentication/" class="md-nav__link">
+      <a href="../../eventsources/webhook-authentication/" class="md-nav__link">
         Webhook Authentication
       </a>
     </li>
@@ -1294,7 +1411,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../webhook-health-check/" class="md-nav__link">
+      <a href="../../eventsources/webhook-health-check/" class="md-nav__link">
         Webhook Health Check
       </a>
     </li>
@@ -1308,7 +1425,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calendar-catch-up/" class="md-nav__link">
+      <a href="../../eventsources/calendar-catch-up/" class="md-nav__link">
         Calender EventSource Catch Up
       </a>
     </li>
@@ -1320,66 +1437,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          GCP PubSub
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../eventsources/gcp-pubsub/" class="md-nav__link">
         GCP PubSub
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#topic-and-subscription-id" class="md-nav__link">
-    Topic And Subscription ID
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#workload-identity" class="md-nav__link">
-    Workload Identity
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-with-pubsub-emulator" class="md-nav__link">
-    Running With PubSub Emulator
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1391,7 +1453,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../generic/" class="md-nav__link">
+      <a href="../../eventsources/generic/" class="md-nav__link">
         Generic EventSource
       </a>
     </li>
@@ -2113,22 +2175,84 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#topic-and-subscription-id" class="md-nav__link">
-    Topic And Subscription ID
+  <a href="#what-you-will-install" class="md-nav__link">
+    What you will install
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#workload-identity" class="md-nav__link">
-    Workload Identity
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-with-pubsub-emulator" class="md-nav__link">
-    Running With PubSub Emulator
+  <a href="#1-install-argo-events" class="md-nav__link">
+    1. Install Argo Events
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-rbac-for-sensors-and-workflows" class="md-nav__link">
+    2. RBAC for Sensors and Workflows
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-github-credentials" class="md-nav__link">
+    3. GitHub credentials
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-deploy-the-github-eventsource" class="md-nav__link">
+    4. Deploy the GitHub EventSource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-deploy-the-sensor-trigger-a-workflow" class="md-nav__link">
+    5. Deploy the Sensor (trigger a Workflow)
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Deploy the Sensor (trigger a Workflow)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#trigger-an-existing-workflowtemplate" class="md-nav__link">
+    Trigger an existing WorkflowTemplate
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-test-the-integration" class="md-nav__link">
+    6. Test the integration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-optional-install-with-argo-cd" class="md-nav__link">
+    7. Optional: install with Argo CD
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-docs" class="md-nav__link">
+    Related docs
   </a>
   
 </li>
@@ -2145,83 +2269,213 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/argoproj/argo-events/edit/master/docs/eventsources/gcp-pubsub.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/argoproj/argo-events/edit/master/docs/tutorials/08-github-trigger-workflow.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="gcp-pubsub">GCP PubSub<a class="headerlink" href="#gcp-pubsub" title="Permanent link">&para;</a></h1>
-<h2 id="topic-and-subscription-id">Topic And Subscription ID<a class="headerlink" href="#topic-and-subscription-id" title="Permanent link">&para;</a></h2>
-<p>GCP PubSub event source can listen to a PubSub with given <code>topic</code>, or
-<code>subscriptionID</code>. Here is the logic with different <code>topic</code> and <code>subscriptionID</code>
-combination.</p>
+<h1 id="trigger-argo-workflows-from-github-events-workflows">Trigger Argo Workflows from GitHub (Events + Workflows)<a class="headerlink" href="#trigger-argo-workflows-from-github-events-workflows" title="Permanent link">&para;</a></h1>
+<p>This tutorial wires <strong>Argo Events</strong> to <strong>Argo Workflows</strong> so that a GitHub
+webhook (for example a pull request event) submits a Workflow. It is the
+end-to-end path teams use for “run a pipeline when code changes.”</p>
+<p>If you only need a generic HTTP webhook, start with the
+<a href="../../quick_start/">Quick Start</a> instead. Event-source details live in
+<a href="../../eventsources/setup/github/">GitHub EventSource</a>; trigger details live in
+<a href="../../sensors/triggers/argo-workflow/">Argo Workflow Trigger</a>.</p>
+<h2 id="what-you-will-install">What you will install<a class="headerlink" href="#what-you-will-install" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Topic Provided/Existing</th>
-<th>Sub ID Provided/Existing</th>
-<th>Actions</th>
+<th>Component</th>
+<th>Role</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Yes/Yes</td>
-<td>Yes/Yes</td>
-<td>Validate if given topic matches subscription's topic</td>
+<td>Argo Workflows</td>
+<td>Runs <code>Workflow</code> objects</td>
 </tr>
 <tr>
-<td>Yes/Yes</td>
-<td>Yes/No</td>
-<td>Create a subscription with given ID</td>
+<td>Argo Events (controller + EventBus)</td>
+<td>Receives GitHub webhooks and triggers workflows</td>
 </tr>
 <tr>
-<td>Yes/Yes</td>
-<td>No/-</td>
-<td>Create or re-use subscription with auto generated subID</td>
+<td>GitHub EventSource</td>
+<td>Registers/handles the GitHub webhook</td>
 </tr>
 <tr>
-<td>Yes/No</td>
-<td>Yes/No</td>
-<td>Create a topic and a subscription with given subID</td>
-</tr>
-<tr>
-<td>Yes/No</td>
-<td>Yes/Yes</td>
-<td>Invalid</td>
-</tr>
-<tr>
-<td>Yes/No</td>
-<td>No/-</td>
-<td>Create a topic, create or re-use subscription w/ auto generated subID</td>
-</tr>
-<tr>
-<td>No/-</td>
-<td>Yes/Yes</td>
-<td>OK</td>
-</tr>
-<tr>
-<td>No/-</td>
-<td>Yes/No</td>
-<td>Invalid</td>
+<td>Sensor</td>
+<td>Maps a GitHub event to a Workflow create/submit</td>
 </tr>
 </tbody>
 </table>
-<h2 id="workload-identity">Workload Identity<a class="headerlink" href="#workload-identity" title="Permanent link">&para;</a></h2>
-<p>If you have configured
-<a href="https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity">Workload Identity</a>
-and want to use it for a PubSub EventSource, leave <code>credentialSecret</code> nil.</p>
-<p>Full spec is available <a href="../../APIs/#argoproj.io/v1alpha1.PubSubEventSource">here</a>.</p>
-<p>See a PubSub EventSource
-<a href="https://github.com/argoproj/argo-events/tree/stable/examples/event-sources/gcp-pubsub.yaml">example</a>.</p>
-<h2 id="running-with-pubsub-emulator">Running With PubSub Emulator<a class="headerlink" href="#running-with-pubsub-emulator" title="Permanent link">&para;</a></h2>
-<p>You can point this event source at the
-<a href="https://cloud.google.com/pubsub/docs/emulator">PubSub Emulator</a> by
-configuring the <code>PUBSUB_EMULATOR_HOST</code> environment variable for the event
-source pod. This can be configured on the <code>EventSource</code> resource under the
-<code>spec.template.container.env</code> key. This option is also documented in the
-PubSub EventSource
-<a href="https://github.com/argoproj/argo-events/tree/stable/examples/event-sources/gcp-pubsub.yaml">example</a>.</p>
+<div class="highlight"><pre><span></span><code>GitHub webhook ? EventSource Service ? EventBus ? Sensor ? Workflow (Argo Workflows)
+</code></pre></div>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ol>
+<li>A Kubernetes cluster and <code>kubectl</code>.</li>
+<li>
+<p><a href="https://argoproj.github.io/argo-workflows/">Argo Workflows</a> installed so
+    the workflow controller can see the namespace where Sensors create Workflows
+    (cluster-wide install, or <code>--managed-namespace</code> including that namespace).
+    Example cluster-scoped install:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="n">ARGO_WORKFLOWS_VERSION</span><span class="o">=</span><span class="mf">3.5</span><span class="o">.</span><span class="mi">4</span>
+<span class="n">kubectl</span><span class="w"> </span><span class="n">create</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="n">argo</span>
+<span class="n">kubectl</span><span class="w"> </span><span class="n">apply</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">argo</span><span class="w"> </span><span class="o">-</span><span class="n">f</span><span class="w"> </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">argoproj</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">workflows</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">download</span><span class="o">/</span><span class="n">v</span><span class="o">$</span><span class="n">ARGO_WORKFLOWS_VERSION</span><span class="o">/</span><span class="n">install</span><span class="o">.</span><span class="n">yaml</span>
+</code></pre></div>
+
+</li>
+<li>
+<p>A GitHub repository where you can add a webhook (or allow Argo Events to
+    create one via API token).</p>
+</li>
+</ol>
+<h2 id="1-install-argo-events">1. Install Argo Events<a class="headerlink" href="#1-install-argo-events" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code>    kubectl create namespace argo-events
+    kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
+    # Optional validating admission controller
+    kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install-validating-webhook.yaml
+</code></pre></div>
+
+<p>Create an EventBus in the same namespace Sensors/EventSources will use:</p>
+<div class="codehilite"><pre><span></span><code>    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+</code></pre></div>
+
+<h2 id="2-rbac-for-sensors-and-workflows">2. RBAC for Sensors and Workflows<a class="headerlink" href="#2-rbac-for-sensors-and-workflows" title="Permanent link">&para;</a></h2>
+<p>The Sensor needs permission to create Workflows. Workflow pods need their own SA
+as usual:</p>
+<div class="codehilite"><pre><span></span><code>    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/rbac/sensor-rbac.yaml
+    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/rbac/workflow-rbac.yaml
+</code></pre></div>
+
+<p>The example Sensor uses <code>serviceAccountName: operate-workflow-sa</code>. Reuse that
+name or change both the RBAC and the Sensor.</p>
+<h2 id="3-github-credentials">3. GitHub credentials<a class="headerlink" href="#3-github-credentials" title="Permanent link">&para;</a></h2>
+<p>Create a fine-grained or classic personal access token with permission to manage
+repository hooks (<code>repo</code> or hook-related scopes). Base64-encode the token and an
+optional webhook secret:</p>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nx">echo</span><span class="w"> </span><span class="o">-</span><span class="nx">n</span><span class="w"> </span><span class="s">"YOUR_GITHUB_TOKEN"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">base64</span>
+<span class="w">    </span><span class="nx">echo</span><span class="w"> </span><span class="o">-</span><span class="nx">n</span><span class="w"> </span><span class="s">"YOUR_WEBHOOK_SECRET"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">base64</span>
+
+<span class="w">    </span><span class="nx">kubectl</span><span class="w"> </span><span class="nx">apply</span><span class="w"> </span><span class="o">-</span><span class="nx">n</span><span class="w"> </span><span class="nx">argo</span><span class="o">-</span><span class="nx">events</span><span class="w"> </span><span class="o">-</span><span class="nx">f</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="err">'</span><span class="nx">EOF</span><span class="err">'</span>
+<span class="w">    </span><span class="nx">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="nx">v1</span>
+<span class="w">    </span><span class="nx">kind</span><span class="p">:</span><span class="w"> </span><span class="nx">Secret</span>
+<span class="w">    </span><span class="nx">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nx">name</span><span class="p">:</span><span class="w"> </span><span class="nx">github</span><span class="o">-</span><span class="nx">access</span>
+<span class="w">    </span><span class="k">type</span><span class="p">:</span><span class="w"> </span><span class="nx">Opaque</span>
+<span class="w">    </span><span class="nx">data</span><span class="p">:</span>
+<span class="w">      </span><span class="nx">token</span><span class="p">:</span><span class="w"> </span><span class="nx">YOUR_BASE64_TOKEN</span>
+<span class="w">      </span><span class="nx">secret</span><span class="p">:</span><span class="w"> </span><span class="nx">YOUR_BASE64_WEBHOOK_SECRET</span>
+<span class="w">    </span><span class="nx">EOF</span>
+</code></pre></div>
+
+<h2 id="4-deploy-the-github-eventsource">4. Deploy the GitHub EventSource<a class="headerlink" href="#4-deploy-the-github-eventsource" title="Permanent link">&para;</a></h2>
+<p>Start from the upstream example and set your repository and webhook URL:</p>
+<div class="codehilite"><pre><span></span><code>    curl -sL https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/github.yaml -o github-eventsource.yaml
+</code></pre></div>
+
+<p>Edit at least:</p>
+<ul>
+<li><code>spec.github.example.repositories</code> — owner/name of your repo</li>
+<li><code>spec.github.example.webhook.url</code> — <strong>publicly reachable</strong> URL of the
+  EventSource service (Ingress, LoadBalancer, or a tunnel for local demos)</li>
+</ul>
+<p>The EventSource Service name is <code>&lt;event-source-name&gt;-eventsource-svc</code> (for the
+example, <code>github-eventsource-svc</code>) on the webhook port from the manifest.</p>
+<p>Apply it:</p>
+<div class="codehilite"><pre><span></span><code>    kubectl apply -n argo-events -f github-eventsource.yaml
+</code></pre></div>
+
+<p>Expose the service (choose one):</p>
+<ul>
+<li><strong>Ingress / LoadBalancer</strong> for real GitHub webhooks.</li>
+<li><strong>Local debug:</strong>
+  <code>kubectl -n argo-events port-forward svc/github-eventsource-svc 12000:12000</code>
+  plus a tunnel (ngrok, etc.) if GitHub must reach your laptop.</li>
+</ul>
+<p>Confirm GitHub shows the webhook under repository <strong>Settings ? Webhooks</strong>, or
+check the EventSource pod logs.</p>
+<h2 id="5-deploy-the-sensor-trigger-a-workflow">5. Deploy the Sensor (trigger a Workflow)<a class="headerlink" href="#5-deploy-the-sensor-trigger-a-workflow" title="Permanent link">&para;</a></h2>
+<p>The example Sensor listens for pull request events and creates a Workflow,
+parameterizing title, number, and SHA from the payload:</p>
+<div class="codehilite"><pre><span></span><code>    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/github.yaml
+</code></pre></div>
+
+<p>Notable parts of that manifest:</p>
+<ul>
+<li><code>dependencies</code> — <code>eventSourceName: github</code>, <code>eventName: example</code>, with filters
+  on <code>X-Github-Event</code> and PR actions.</li>
+<li><code>triggers</code> — a Kubernetes trigger that creates <code>kind: Workflow</code>
+  (<code>apiVersion: argoproj.io/v1alpha1</code>), or you can use the dedicated
+  <code>argoWorkflow</code> trigger (submit/resubmit/etc.) as in
+  <a href="../../sensors/triggers/argo-workflow/">Argo Workflow Trigger</a>.</li>
+<li><code>parameters</code> — copies JSON fields from the GitHub body into Workflow
+  arguments.</li>
+</ul>
+<h3 id="trigger-an-existing-workflowtemplate">Trigger an existing WorkflowTemplate<a class="headerlink" href="#trigger-an-existing-workflowtemplate" title="Permanent link">&para;</a></h3>
+<p>If your pipeline is already packaged as a <code>WorkflowTemplate</code>, submit a thin
+Workflow that only references it:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">triggers</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github-workflow-trigger</span>
+<span class="w">      </span><span class="nt">argoWorkflow</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">operation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">submit</span>
+<span class="w">        </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">resource</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="w">            </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Workflow</span>
+<span class="w">            </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">generateName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github-pipeline-</span>
+<span class="w">            </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">workflowTemplateRef</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-workflow-template</span>
+</code></pre></div>
+<p>See
+<a href="https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/sensor-to-existing-workflow-template.yaml">examples/sensors/sensor-to-existing-workflow-template.yaml</a>.</p>
+<h2 id="6-test-the-integration">6. Test the integration<a class="headerlink" href="#6-test-the-integration" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Open or synchronize a pull request against the branch filtered in the Sensor
+    (the example uses <code>master</code> as <code>body.pull_request.base.ref</code> — change the
+    filter to <code>main</code> if needed).</li>
+<li>
+<p>List workflows in the Sensor namespace:</p>
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events get workflows
+# or: argo list -n argo-events
+</code></pre></div>
+
+</li>
+<li>
+<p>Inspect the Sensor and EventSource if nothing fires:</p>
+<div class="codehilite"><pre><span></span><code>kubectl -n argo-events get eventsource,sensor
+kubectl -n argo-events logs -l eventsource-name=github
+kubectl -n argo-events logs -l sensor-name=github
+</code></pre></div>
+
+</li>
+</ol>
+<h2 id="7-optional-install-with-argo-cd">7. Optional: install with Argo CD<a class="headerlink" href="#7-optional-install-with-argo-cd" title="Permanent link">&para;</a></h2>
+<p>Treat Argo Events and Argo Workflows as two Argo CD Applications (or one
+app-of-apps):</p>
+<ol>
+<li>App <strong>argo-workflows</strong> — manifests or Helm chart from the Workflows release
+   into namespace <code>argo</code>.</li>
+<li>App <strong>argo-events</strong> — <code>manifests/install.yaml</code> plus your EventBus,
+   EventSource, Sensor, and RBAC into <code>argo-events</code>.</li>
+<li>Keep secrets (<code>github-access</code>) out of git; use a Secret manager or Sealed
+   Secrets.</li>
+</ol>
+<p>Webhook URLs in the EventSource must match the Ingress/Service your cluster
+exposes after sync.</p>
+<h2 id="related-docs">Related docs<a class="headerlink" href="#related-docs" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../quick_start/">Quick Start</a> — webhook ? Workflow on your laptop</li>
+<li><a href="../../eventsources/setup/github/">GitHub EventSource setup</a></li>
+<li><a href="../../sensors/triggers/argo-workflow/">Argo Workflow trigger</a></li>
+<li><a href="../02-parameterization/">Parameterization</a> — pass commit SHA, branch, and PR
+  metadata into workflows</li>
+<li><a href="../../installation/">Installation</a></li>
+</ul>
 
               
             </article>
@@ -2242,7 +2496,7 @@ PubSub EventSource
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../calendar-catch-up/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Calender EventSource Catch Up" rel="prev">
+        <a href="../07-policy/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Policy" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -2251,20 +2505,20 @@ PubSub EventSource
               <span class="md-footer__direction">
                 Previous
               </span>
-              Calender EventSource Catch Up
+              Policy
             </div>
           </div>
         </a>
       
       
         
-        <a href="../generic/" class="md-footer__link md-footer__link--next" aria-label="Next: Generic EventSource" rel="next">
+        <a href="../../concepts/architecture/" class="md-footer__link md-footer__link--next" aria-label="Next: Architecture" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Generic EventSource
+              Architecture
             </div>
           </div>
           <div class="md-footer__button md-icon">

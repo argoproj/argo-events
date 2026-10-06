@@ -544,6 +544,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/08-github-trigger-workflow/" class="md-nav__link">
+        Trigger Argo Workflows from GitHub (Events + Workflows)
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -1275,9 +1289,40 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Webhook Authentication
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Webhook Authentication
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#basic-auth" class="md-nav__link">
+    Basic Auth
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -2047,6 +2092,21 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#basic-auth" class="md-nav__link">
+    Basic Auth
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -2097,6 +2157,35 @@ kubectl<span class="w"> </span>create<span class="w"> </span>secret<span class="
 <div class="highlight"><pre><span></span><code><span class="nv">TOKEN</span><span class="o">=</span><span class="s2">"Bearer af3qqs321f2ddwf1e2e67dfda3fs"</span>
 
 curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: </span><span class="nv">$TOKEN</span><span class="s2">"</span><span class="w"> </span>-d<span class="w"> </span><span class="s2">"{your data}"</span><span class="w"> </span>http://xxxxx:12000/example
+</code></pre></div>
+<h2 id="basic-auth">Basic Auth<a class="headerlink" href="#basic-auth" title="Permanent link">&para;</a></h2>
+<p>Alternatively, you can protect your endpoint with HTTP Basic Auth by specifying <code>basicAuth</code>,
+which references K8s secrets holding the username and password. <code>authSecret</code> and <code>basicAuth</code>
+are mutually exclusive, only one of them can be configured for a given endpoint.</p>
+<p>Firstly, create k8s secrets containing your username and password.</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>generic<span class="w"> </span>my-webhook-basic-auth<span class="w"> </span>--from-literal<span class="o">=</span><span class="nv">username</span><span class="o">=</span>my-username<span class="w"> </span>--from-literal<span class="o">=</span><span class="nv">password</span><span class="o">=</span>my-password
+</code></pre></div>
+<p>Then add <code>basicAuth</code> to your <code>webhook</code> EventSource.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventSource</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">webhook</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">example</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">"12000"</span>
+<span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/example</span>
+<span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POST</span>
+<span class="w">      </span><span class="nt">basicAuth</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">username</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-webhook-basic-auth</span>
+<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">username</span>
+<span class="w">        </span><span class="nt">password</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-webhook-basic-auth</span>
+<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">password</span>
+</code></pre></div>
+<p>Now you can authenticate your webhook endpoint with the configured credentials.</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-u<span class="w"> </span>my-username:my-password<span class="w"> </span>-d<span class="w"> </span><span class="s2">"{your data}"</span><span class="w"> </span>http://xxxxx:12000/example
 </code></pre></div>
 
               

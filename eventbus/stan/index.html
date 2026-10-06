@@ -544,6 +544,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/08-github-trigger-workflow/" class="md-nav__link">
+        Trigger Argo Workflows from GitHub (Events + Workflows)
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -2200,6 +2214,13 @@
   <h1>Stan</h1>
 
 <h2 id="nats-streaming">NATS Streaming<a class="headerlink" href="#nats-streaming" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p><strong>Deprecated:</strong> NATS Streaming (STAN) <a href="https://github.com/nats-io/nats-streaming-server">reached end-of-life in June
+2023</a>, and
+<code>prometheus-nats-exporter</code> has since dropped STAN support entirely.
+Existing STAN EventBuses continue to work, but new EventBuses should
+use <a href="../jetstream/">JetStream</a> instead.</p>
+</blockquote>
 <p>You can create a <code>native</code> NATS EventBus, or connect to an existing NATS
 Streaming service with <code>exotic</code> NATS EventBus.</p>
 <h3 id="native">Native<a class="headerlink" href="#native" title="Permanent link">&para;</a></h3>
