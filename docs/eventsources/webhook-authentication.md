@@ -44,3 +44,43 @@ TOKEN="Bearer af3qqs321f2ddwf1e2e67dfda3fs"
 
 curl -X POST -H "Authorization: $TOKEN" -d "{your data}" http://xxxxx:12000/example
 ```
+
+## Basic Auth
+
+Alternatively, you can protect your endpoint with HTTP Basic Auth by specifying `basicAuth`,
+which references K8s secrets holding the username and password. `authSecret` and `basicAuth`
+are mutually exclusive, only one of them can be configured for a given endpoint.
+
+Firstly, create k8s secrets containing your username and password.
+
+```sh
+kubectl create secret generic my-webhook-basic-auth --from-literal=username=my-username --from-literal=password=my-password
+```
+
+Then add `basicAuth` to your `webhook` EventSource.
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: webhook
+spec:
+  webhook:
+    example:
+      port: "12000"
+      endpoint: /example
+      method: POST
+      basicAuth:
+        username:
+          name: my-webhook-basic-auth
+          key: username
+        password:
+          name: my-webhook-basic-auth
+          key: password
+```
+
+Now you can authenticate your webhook endpoint with the configured credentials.
+
+```sh
+curl -X POST -u my-username:my-password -d "{your data}" http://xxxxx:12000/example
+```
