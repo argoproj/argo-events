@@ -111,6 +111,21 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.True(t, cmRefs > 0)
 		assert.True(t, secretRefs > 0)
 		assert.Equal(t, deployment.Spec.Template.Spec.PriorityClassName, "test-class")
+		assert.Nil(t, deployment.Spec.RevisionHistoryLimit)
+	})
+
+	t.Run("test revisionHistoryLimit", func(t *testing.T) {
+		eventSourceWithRevisionHistoryLimit := testEventSource.DeepCopy()
+		eventSourceWithRevisionHistoryLimit.Spec.RevisionHistoryLimit = func() *int32 { i := int32(3); return &i }()
+		args := &AdaptorArgs{
+			Image:       testImage,
+			EventSource: eventSourceWithRevisionHistoryLimit,
+			Labels:      testLabels,
+		}
+		deployment, err := buildDeployment(args, fakeEventBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+		assert.Equal(t, int32(3), *deployment.Spec.RevisionHistoryLimit)
 	})
 
 	t.Run("test kafka eventbus secrets attached", func(t *testing.T) {

@@ -1186,6 +1186,10 @@ message EventSourceSpec {
 
   // MNS event sources
   map<string, MNSEventSource> mns = 36;
+
+  // RevisionHistoryLimit specifies how many old deployment revisions to retain
+  // +optional
+  optional int32 revisionHistoryLimit = 37;
 }
 
 // EventSourceStatus holds the status of the event-source resource

@@ -3318,6 +3318,13 @@ func schema_pkg_apis_events_v1alpha1_EventSourceSpec(ref common.ReferenceCallbac
 							},
 						},
 					},
+					"revisionHistoryLimit": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RevisionHistoryLimit specifies how many old deployment revisions to retain",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
 				},
 			},
 		},
