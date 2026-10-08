@@ -2741,6 +2741,11 @@ message SNSEventSource {
   // Endpoint configures connection to a specific SNS endpoint instead of Amazons servers
   // +optional
   optional string endpoint = 10;
+
+  // STSEndpoint configures connection to a specific STS endpoint instead of Amazons servers,
+  // used to assume RoleARN and to exchange a web identity token for credentials
+  // +optional
+  optional string stsEndpoint = 11;
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events

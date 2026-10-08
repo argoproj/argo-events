@@ -7073,6 +7073,13 @@ func schema_pkg_apis_events_v1alpha1_SNSEventSource(ref common.ReferenceCallback
 							Format:      "",
 						},
 					},
+					"stsEndpoint": {
+						SchemaProps: spec.SchemaProps{
+							Description: "STSEndpoint configures connection to a specific STS endpoint instead of Amazons servers, used to assume RoleARN and to exchange a web identity token for credentials",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"topicArn", "region"},
 			},

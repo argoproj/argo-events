@@ -18009,6 +18009,27 @@ Amazons servers
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>stsEndpoint</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+STSEndpoint configures connection to a specific STS endpoint instead of
+Amazons servers, used to assume RoleARN and to exchange a web identity
+token for credentials
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>

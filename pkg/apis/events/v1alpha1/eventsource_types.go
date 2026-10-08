@@ -617,6 +617,10 @@ type SNSEventSource struct {
 	// Endpoint configures connection to a specific SNS endpoint instead of Amazons servers
 	// +optional
 	Endpoint string `json:"endpoint" protobuf:"bytes,10,opt,name=endpoint"`
+	// STSEndpoint configures connection to a specific STS endpoint instead of Amazons servers,
+	// used to assume RoleARN and to exchange a web identity token for credentials
+	// +optional
+	STSEndpoint string `json:"stsEndpoint,omitempty" protobuf:"bytes,11,opt,name=stsEndpoint"`
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
