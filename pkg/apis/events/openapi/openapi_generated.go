@@ -8783,12 +8783,18 @@ func schema_pkg_apis_events_v1alpha1_WebhookContext(ref common.ReferenceCallback
 							Format:      "int64",
 						},
 					},
+					"basicAuth": {
+						SchemaProps: spec.SchemaProps{
+							Description: "BasicAuth holds the username and password secret selectors for basic authentication",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BasicAuth"),
+						},
+					},
 				},
 				Required: []string{"endpoint", "method", "port", "url"},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BasicAuth", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -8872,6 +8878,12 @@ func schema_pkg_apis_events_v1alpha1_WebhookEventSource(ref common.ReferenceCall
 							Format:      "int64",
 						},
 					},
+					"basicAuth": {
+						SchemaProps: spec.SchemaProps{
+							Description: "BasicAuth holds the username and password secret selectors for basic authentication",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BasicAuth"),
+						},
+					},
 					"filter": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Filter",
@@ -8883,6 +8895,6 @@ func schema_pkg_apis_events_v1alpha1_WebhookEventSource(ref common.ReferenceCall
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }

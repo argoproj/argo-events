@@ -40,6 +40,14 @@ func ValidateWebhookContext(context *aev1.WebhookContext) error {
 			return fmt.Errorf("failed to parse server port %s. err: %+v", context.Port, err)
 		}
 	}
+	if context.AuthSecret != nil && context.BasicAuth != nil {
+		return fmt.Errorf("only one of authSecret or basicAuth can be configured")
+	}
+	if context.BasicAuth != nil {
+		if err := aev1.ValidateBasicAuth(context.BasicAuth); err != nil {
+			return fmt.Errorf("invalid basicAuth config, %w", err)
+		}
+	}
 	return nil
 }
 

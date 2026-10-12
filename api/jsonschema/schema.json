@@ -4690,6 +4690,10 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
           "description": "AuthSecret holds a secret selector that contains a bearer token for authentication"
         },
+        "basicAuth": {
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.BasicAuth",
+          "description": "BasicAuth holds the username and password secret selectors for basic authentication"
+        },
         "endpoint": {
           "description": "REST API endpoint",
           "type": "string"
@@ -4741,6 +4745,10 @@
         "authSecret": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
           "description": "AuthSecret holds a secret selector that contains a bearer token for authentication"
+        },
+        "basicAuth": {
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.BasicAuth",
+          "description": "BasicAuth holds the username and password secret selectors for basic authentication"
         },
         "endpoint": {
           "description": "REST API endpoint",
