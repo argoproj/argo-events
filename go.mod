@@ -19,6 +19,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue v1.0.1
 	github.com/IBM/sarama v1.43.0
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
+	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/ahmetb/gen-crd-api-reference-docs v0.3.0
 	github.com/aliyun/aliyun-mns-go-sdk v1.0.11
@@ -130,7 +131,6 @@ require (
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.8.0 // indirect
 	github.com/DataDog/zstd v1.5.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver/v3 v3.5.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/OvyFlash/telegram-bot-api v0.0.0-20241219171906-3f2ca0c14ada // indirect
 	github.com/PagerDuty/go-pagerduty v1.8.0 // indirect
