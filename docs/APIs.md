@@ -487,7 +487,7 @@ Auth hosts secret selectors for username and password
 <td>
 
 <code>urlSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://v1-36.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
