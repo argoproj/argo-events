@@ -57,6 +57,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Softonic](https://www.softonic.com)
 1. [SternumIOT](https://sternumiot.com/)
 1. [Swissblock Technologies](https://swissblock.net)
+1- [T-Systems](https://www.t-systems.com/)
 1. [Ubie](https://ubie.life/)
 1. [Viaduct](https://www.viaduct.ai/)
 1. [Yubo](https://www.yubo.live/)
