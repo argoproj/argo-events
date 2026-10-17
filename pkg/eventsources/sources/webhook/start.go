@@ -165,6 +165,7 @@ func GetBody(writer *http.ResponseWriter, request *http.Request, route *webhook.
 		ret := json.RawMessage(body)
 		return &ret, nil
 	case http.MethodPost:
+		request.Body = http.MaxBytesReader(*writer, request.Body, route.Context.GetMaxPayloadSize())
 		contentType := ""
 		if len(request.Header["Content-Type"]) > 0 {
 			contentType = request.Header["Content-Type"][0]
@@ -174,8 +175,6 @@ func GetBody(writer *http.ResponseWriter, request *http.Request, route *webhook.
 		case "application/x-www-form-urlencoded":
 			if err := request.ParseForm(); err != nil {
 				logger.Errorw("failed to parse form data", zap.Error(err))
-				sharedutil.SendInternalErrorResponse(*writer, err.Error())
-				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 				return nil, err
 			}
 			body, _ := json.Marshal(request.PostForm)
@@ -183,12 +182,9 @@ func GetBody(writer *http.ResponseWriter, request *http.Request, route *webhook.
 			return &ret, nil
 		// default including "application/json" is parsing body as JSON
 		default:
-			request.Body = http.MaxBytesReader(*writer, request.Body, route.Context.GetMaxPayloadSize())
 			body, err := getRequestBody(request)
 			if err != nil {
 				logger.Errorw("failed to read request body", zap.Error(err))
-				sharedutil.SendErrorResponse(*writer, err.Error())
-				route.Metrics.EventProcessingFailed(route.EventSourceName, route.EventName)
 				return nil, err
 			}
 			ret := json.RawMessage(body)
