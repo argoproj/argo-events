@@ -7590,6 +7590,26 @@ MNS event sources
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>revisionHistoryLimit</code></br> <em> int32 </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+RevisionHistoryLimit specifies how many old deployment revisions to
+retain
+</p>
+
+</td>
+
+</tr>
+
 </table>
 
 </td>
@@ -8481,6 +8501,26 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSo
 <p>
 
 MNS event sources
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>revisionHistoryLimit</code></br> <em> int32 </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+RevisionHistoryLimit specifies how many old deployment revisions to
+retain
 </p>
 
 </td>
