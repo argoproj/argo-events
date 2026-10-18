@@ -11,7 +11,9 @@ func TestGetReplicas(t *testing.T) {
 	ep := EventSourceSpec{}
 	assert.Equal(t, ep.GetReplicas(), int32(1))
 	ep.Replicas = convertInt(t, 0)
-	assert.Equal(t, ep.GetReplicas(), int32(1))
+	assert.Equal(t, ep.GetReplicas(), int32(0))
+	ep.Replicas = convertInt(t, -1)
+	assert.Equal(t, ep.GetReplicas(), int32(0))
 	ep.Replicas = convertInt(t, 2)
 	assert.Equal(t, ep.GetReplicas(), int32(2))
 }
