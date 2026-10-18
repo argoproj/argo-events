@@ -16071,6 +16071,28 @@ uses default Subscribe logic.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>maxReconnects</code></br> <em> int32 </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+MaxReconnects is the number of reconnect attempts made after the
+connection to the NATS server is lost, before the connection is closed
+and the event source is restarted. A negative value keeps reconnecting
+forever. Defaults to the NATS client default (60) if not specified.
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
