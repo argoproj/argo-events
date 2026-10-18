@@ -2419,6 +2419,11 @@ could reduce the chance of PODs being evicted.</p>
 <h3 id="replicas">Replicas<a class="headerlink" href="#replicas" title="Permanent link">&para;</a></h3>
 <p>EventSources can run with HA by setting <code>spec.replicas</code> to a number <code>&gt;1</code>, see
 more detail <a href="../eventsources/ha/">here</a>.</p>
+<p>Setting <code>spec.replicas</code> to <code>0</code> keeps the EventSource object but runs no pods,
+which is useful for the passive side of an active-passive DR setup. The
+EventSource Service (if any) still exists but has no endpoints, so requests to
+a webhook-type EventSource will fail until it is scaled back up. If
+<code>spec.replicas</code> is not set, it defaults to <code>1</code>.</p>
 <h3 id="eventsource-pod-node-selection">EventSource POD Node Selection<a class="headerlink" href="#eventsource-pod-node-selection" title="Permanent link">&para;</a></h3>
 <p>EventSource POD <code>affinity</code>, <code>nodeSelector</code> and <code>tolerations</code> could be set
 through <code>spec.template.affinity</code>, <code>spec.template.nodeSelector</code> and
@@ -2430,6 +2435,9 @@ through <code>spec.template.affinity</code>, <code>spec.template.nodeSelector</c
 <h3 id="replicas_1">Replicas<a class="headerlink" href="#replicas_1" title="Permanent link">&para;</a></h3>
 <p>Sensors can run with HA by setting <code>spec.replicas</code> to a number <code>&gt;1</code>, see more
 detail <a href="../sensors/ha/">here</a>.</p>
+<p>Setting <code>spec.replicas</code> to <code>0</code> keeps the Sensor object but runs no pods, so no
+triggers are executed until it is scaled back up. If <code>spec.replicas</code> is not
+set, it defaults to <code>1</code>.</p>
 <h3 id="sensor-pod-node-selection">Sensor POD Node Selection<a class="headerlink" href="#sensor-pod-node-selection" title="Permanent link">&para;</a></h3>
 <p>Sensor POD <code>affinity</code>, <code>nodeSelector</code> and <code>tolerations</code> could also be set
 through <code>spec.template.affinity</code>, <code>spec.template.nodeSelector</code> and
