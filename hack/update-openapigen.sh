@@ -18,4 +18,3 @@ go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
     --output-pkg openapi \
     --output-file openapi_generated.go \
     github.com/argoproj/argo-events/pkg/apis/events/${VERSION}
-

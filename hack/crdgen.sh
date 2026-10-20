@@ -24,4 +24,3 @@ find manifests/base/crds -name 'argoproj.io*.yaml' | while read -r file; do
   go run ./hack cleancrd "$file"
   add_header "$file"
 done
-

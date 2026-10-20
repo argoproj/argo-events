@@ -130,4 +130,3 @@ install-protobuf() {
   unzip ${tmp}/protoc-${protobuf_version}-${os}-${arch}.zip -d ${install_dir}
   rm -rf ${tmp}
 }
-
