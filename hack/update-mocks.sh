@@ -26,4 +26,3 @@ do
   cd ${REPO_ROOT}/${MOCK_DIR}
   mockery --name ${MOCK_NAME}
 done
-

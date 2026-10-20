@@ -35,4 +35,3 @@ kube::codegen::gen_client \
 # gofmt the tree
 subheader "running gofmt"
 find . -name "*.go" -type f -print0 | xargs -0 gofmt -s -w
-

@@ -20,4 +20,3 @@ git tag -l 'v*' | grep -v v.0.9 | sed 's/-rc/~/' | sort -rV | sed 's/~/-rc/' | w
   fi
   tag=$last
 done
-
