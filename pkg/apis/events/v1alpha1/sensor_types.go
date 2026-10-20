@@ -95,6 +95,10 @@ type SensorSpec struct {
 	// LoggingFields add additional key-value pairs when logging happens
 	// +optional
 	LoggingFields map[string]string `json:"loggingFields" protobuf:"bytes,8,rep,name=loggingFields"`
+	// LogLevel overrides the default logger level for HTTP triggers on this sensor.
+	// Valid values: debug, info, warn, error.
+	// +optional
+	LogLevel string `json:"logLevel,omitempty" protobuf:"bytes,9,opt,name=logLevel"`
 }
 
 func (s SensorSpec) GetReplicas() int32 {
