@@ -18,7 +18,7 @@ export GO111MODULE="off"
 cd "${FAKE_REPOPATH}"
 
 go run ${FAKE_REPOPATH}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/main.go \
- -config "${FAKE_REPOPATH}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
+ -config "${FAKE_REPOPATH}/hack/example-config.json" \
  -api-dir "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1" \
  -out-file "${FAKE_REPOPATH}/docs/APIs.html" \
  -template-dir "${FAKE_REPOPATH}/hack/api-docs-template"
