@@ -1,5 +1,11 @@
 ## NATS Streaming
 
+> **Deprecated:** NATS Streaming (STAN) [reached end-of-life in June
+> 2023](https://github.com/nats-io/nats-streaming-server), and
+> `prometheus-nats-exporter` has since dropped STAN support entirely.
+> Existing STAN EventBuses continue to work, but new EventBuses should
+> use [JetStream](jetstream.md) instead.
+
 You can create a `native` NATS EventBus, or connect to an existing NATS
 Streaming service with `exotic` NATS EventBus.
 

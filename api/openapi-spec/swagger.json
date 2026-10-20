@@ -2861,6 +2861,11 @@
           "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
           "type": "boolean"
         },
+        "maxReconnects": {
+          "description": "MaxReconnects is the number of reconnect attempts made after the connection to the NATS server is lost, before the connection is closed and the event source is restarted. A negative value keeps reconnecting forever. Defaults to the NATS client default (60) if not specified.",
+          "type": "integer",
+          "format": "int32"
+        },
         "metadata": {
           "description": "Metadata holds the user defined metadata which will passed along the event payload.",
           "type": "object",
@@ -4675,6 +4680,10 @@
           "description": "AuthSecret holds a secret selector that contains a bearer token for authentication",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
+        "basicAuth": {
+          "description": "BasicAuth holds the username and password secret selectors for basic authentication",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.BasicAuth"
+        },
         "endpoint": {
           "description": "REST API endpoint",
           "type": "string"
@@ -4726,6 +4735,10 @@
         "authSecret": {
           "description": "AuthSecret holds a secret selector that contains a bearer token for authentication",
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "basicAuth": {
+          "description": "BasicAuth holds the username and password secret selectors for basic authentication",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.BasicAuth"
         },
         "endpoint": {
           "description": "REST API endpoint",

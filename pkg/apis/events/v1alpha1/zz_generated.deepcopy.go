@@ -2849,6 +2849,11 @@ func (in *NATSEventsSource) DeepCopyInto(out *NATSEventsSource) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.MaxReconnects != nil {
+		in, out := &in.MaxReconnects, &out.MaxReconnects
+		*out = new(int32)
+		**out = **in
+	}
 	return
 }
 
@@ -4633,6 +4638,11 @@ func (in *WebhookContext) DeepCopyInto(out *WebhookContext) {
 		in, out := &in.MaxPayloadSize, &out.MaxPayloadSize
 		*out = new(int64)
 		**out = **in
+	}
+	if in.BasicAuth != nil {
+		in, out := &in.BasicAuth, &out.BasicAuth
+		*out = new(BasicAuth)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }

@@ -32,6 +32,9 @@ type WebhookContext struct {
 	// Default value: 1048576 (1MB).
 	// +optional
 	MaxPayloadSize *int64 `json:"maxPayloadSize,omitempty" protobuf:"bytes,9,opt,name=maxPayloadSize"`
+	// BasicAuth holds the username and password secret selectors for basic authentication
+	// +optional
+	BasicAuth *BasicAuth `json:"basicAuth,omitempty" protobuf:"bytes,10,opt,name=basicAuth"`
 }
 
 func (wc *WebhookContext) GetMaxPayloadSize() int64 {

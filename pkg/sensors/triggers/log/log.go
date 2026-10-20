@@ -54,7 +54,7 @@ func (t *LogTrigger) Execute(ctx context.Context, events map[string]*v1alpha1.Ev
 }
 
 func (t *LogTrigger) shouldLog(log *v1alpha1.LogTrigger) bool {
-	return time.Now().After(t.LastLogTime.Add(log.GetInterval()))
+	return !time.Now().Before(t.LastLogTime.Add(log.GetInterval()))
 }
 
 func (t *LogTrigger) ApplyPolicy(context.Context, interface{}) error {

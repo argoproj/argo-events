@@ -18,6 +18,7 @@ package webhook
 
 import (
 	"context"
+	"crypto/subtle"
 	"fmt"
 	"net/http"
 	"strings"
@@ -151,6 +152,28 @@ func startServer(router Router, controller *Controller) {
 				if strings.TrimPrefix(authHeader, "Bearer ") != token {
 					route.Logger.Error("invalid auth token")
 					sharedutil.SendResponse(writer, http.StatusUnauthorized, "Invalid Auth token")
+					return
+				}
+			}
+			if route.Context.BasicAuth != nil {
+				username, err := sharedutil.GetSecretFromVolume(route.Context.BasicAuth.Username)
+				if err != nil {
+					route.Logger.Errorw("failed to get basic auth username from volume", "error", err)
+					sharedutil.SendInternalErrorResponse(writer, "Error loading basic auth username")
+					return
+				}
+				password, err := sharedutil.GetSecretFromVolume(route.Context.BasicAuth.Password)
+				if err != nil {
+					route.Logger.Errorw("failed to get basic auth password from volume", "error", err)
+					sharedutil.SendInternalErrorResponse(writer, "Error loading basic auth password")
+					return
+				}
+				gotUsername, gotPassword, ok := request.BasicAuth()
+				if !ok ||
+					subtle.ConstantTimeCompare([]byte(gotUsername), []byte(username)) != 1 ||
+					subtle.ConstantTimeCompare([]byte(gotPassword), []byte(password)) != 1 {
+					route.Logger.Error("invalid basic auth credentials")
+					sharedutil.SendResponse(writer, http.StatusUnauthorized, "Invalid Basic Auth credentials")
 					return
 				}
 			}
