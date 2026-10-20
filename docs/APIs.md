@@ -487,7 +487,7 @@ Auth hosts secret selectors for username and password
 <td>
 
 <code>urlSecret</code></br> <em>
-<a href="https://v1-36.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -950,7 +950,7 @@ FunctionName refers to the name of the function to invoke.
 <td>
 
 <code>accessKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -971,7 +971,7 @@ AccessKey refers K8s secret containing aws access key
 <td>
 
 <code>secretKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -1524,7 +1524,7 @@ URL to fetch the artifact from
 <td>
 
 <code>configmap</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#configmapkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#configmapkeyselector-v1-core">
 Kubernetes core/v1.ConfigMapKeySelector </a> </em>
 </td>
 
@@ -1689,7 +1689,7 @@ HubName refers to the Azure Event Hub to send events to
 <td>
 
 <code>sharedAccessKeyName</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -1709,7 +1709,7 @@ SharedAccessKeyName refers to the name of the Shared Access Key
 <td>
 
 <code>sharedAccessKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -1840,7 +1840,7 @@ FQDN of the EventHubs namespace you created More info at
 <td>
 
 <code>sharedAccessKeyName</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -1864,7 +1864,7 @@ HubName.
 <td>
 
 <code>sharedAccessKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -2015,7 +2015,7 @@ and it is ignored if ConnectionString is set.
 <td>
 
 <code>connectionString</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -2228,7 +2228,7 @@ Description
 <td>
 
 <code>connectionString</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -2470,7 +2470,7 @@ Description
 <td>
 
 <code>connectionString</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -2794,7 +2794,7 @@ Description
 <td>
 
 <code>username</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -2815,7 +2815,7 @@ required for basic auth.
 <td>
 
 <code>password</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -2904,7 +2904,7 @@ Basic is BasicAuth auth strategy.
 <td>
 
 <code>oauthToken</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -2972,7 +2972,7 @@ Description
 <td>
 
 <code>username</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -2992,7 +2992,7 @@ Username refers to the K8s secret that holds the username.
 <td>
 
 <code>password</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -3578,7 +3578,7 @@ processing of each tag or reference update in a single webhook event.
 <td>
 
 <code>accessToken</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -3600,7 +3600,7 @@ access information.
 <td>
 
 <code>webhookSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -4263,7 +4263,7 @@ Condition type.
 <td>
 
 <code>status</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#conditionstatus-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#conditionstatus-v1-core">
 Kubernetes core/v1.ConditionStatus </a> </em>
 </td>
 
@@ -4283,7 +4283,7 @@ Condition status, True, False or Unknown.
 <td>
 
 <code>lastTransitionTime</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#time-v1-meta">
 Kubernetes meta/v1.Time </a> </em>
 </td>
 
@@ -4624,7 +4624,7 @@ Description
 <td>
 
 <code>resources</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements </a> </em>
 </td>
 
@@ -4640,7 +4640,7 @@ Kubernetes core/v1.ResourceRequirements </a> </em>
 <td>
 
 <code>imagePullPolicy</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#pullpolicy-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy </a> </em>
 </td>
 
@@ -4656,7 +4656,7 @@ Kubernetes core/v1.PullPolicy </a> </em>
 <td>
 
 <code>securityContext</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#securitycontext-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#securitycontext-v1-core">
 Kubernetes core/v1.SecurityContext </a> </em>
 </td>
 
@@ -4672,7 +4672,7 @@ Kubernetes core/v1.SecurityContext </a> </em>
 <td>
 
 <code>volumeMounts</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#volumemount-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#volumemount-v1-core">
 \[\]Kubernetes core/v1.VolumeMount </a> </em>
 </td>
 
@@ -4688,7 +4688,7 @@ Kubernetes core/v1.SecurityContext </a> </em>
 <td>
 
 <code>env</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#envvar-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#envvar-v1-core">
 \[\]Kubernetes core/v1.EnvVar </a> </em>
 </td>
 
@@ -4704,7 +4704,7 @@ Kubernetes core/v1.SecurityContext </a> </em>
 <td>
 
 <code>envFrom</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#envfromsource-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#envfromsource-v1-core">
 \[\]Kubernetes core/v1.EnvFromSource </a> </em>
 </td>
 
@@ -4767,7 +4767,7 @@ Description
 <td>
 
 <code>resources</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resourcerequirements-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#resourcerequirements-v1-core">
 Kubernetes core/v1.ResourceRequirements </a> </em>
 </td>
 
@@ -4783,7 +4783,7 @@ Kubernetes core/v1.ResourceRequirements </a> </em>
 <td>
 
 <code>imagePullPolicy</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#pullpolicy-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#pullpolicy-v1-core">
 Kubernetes core/v1.PullPolicy </a> </em>
 </td>
 
@@ -4799,7 +4799,7 @@ Kubernetes core/v1.PullPolicy </a> </em>
 <td>
 
 <code>securityContext</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#securitycontext-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#securitycontext-v1-core">
 Kubernetes core/v1.SecurityContext </a> </em>
 </td>
 
@@ -4898,7 +4898,7 @@ gRPC
 <td>
 
 <code>certSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -5246,7 +5246,7 @@ Username refers to the username used to connect to the smtp server.
 <td>
 
 <code>smtpPassword</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -5483,7 +5483,7 @@ ChannelName refers to the channel name
 <td>
 
 <code>username</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -5504,7 +5504,7 @@ Username to use to connect to broker
 <td>
 
 <code>password</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -5733,7 +5733,7 @@ Description
 <td>
 
 <code>metadata</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta </a> </em>
 </td>
 
@@ -6241,7 +6241,7 @@ Subject - The subject of the event in the context of the event producer
 <td>
 
 <code>time</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#time-v1-meta">
 Kubernetes meta/v1.Time </a> </em>
 </td>
 
@@ -6816,7 +6816,7 @@ Description
 <td>
 
 <code>metadata</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta </a> </em>
 </td>
 
@@ -8998,7 +8998,7 @@ event payload.
 <td>
 
 <code>authSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -9403,7 +9403,7 @@ Creds contain reference to git username and password
 <td>
 
 <code>sshKeySecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -9608,7 +9608,7 @@ Description
 <td>
 
 <code>username</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -9623,7 +9623,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <td>
 
 <code>password</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -9763,7 +9763,7 @@ Description
 <td>
 
 <code>privateKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -9976,7 +9976,7 @@ Events refer to Github events to which the event source will subscribe
 <td>
 
 <code>apiToken</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -9997,7 +9997,7 @@ APIToken refers to a K8s secret containing github api token
 <td>
 
 <code>webhookSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -10346,7 +10346,7 @@ Events are gitlab event to listen to. Refer
 <td>
 
 <code>accessToken</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -10465,7 +10465,7 @@ manage webhooks.
 <td>
 
 <code>secretToken</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -10662,7 +10662,7 @@ ccache or keytab is used.
 <td>
 
 <code>krbCCacheSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -10683,7 +10683,7 @@ or keytab can be set to use Kerberos.
 <td>
 
 <code>krbKeytabSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -10742,7 +10742,7 @@ if keytab is used.
 <td>
 
 <code>krbConfigConfigMap</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#configmapkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#configmapkeyselector-v1-core">
 Kubernetes core/v1.ConfigMapKeySelector </a> </em>
 </td>
 
@@ -11392,7 +11392,7 @@ scheduled on that node. More info:
 <td>
 
 <code>tolerations</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#toleration-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#toleration-v1-core">
 \[\]Kubernetes core/v1.Toleration </a> </em>
 </td>
 
@@ -11413,7 +11413,7 @@ If specified, the pod’s tolerations.
 <td>
 
 <code>securityContext</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#podsecuritycontext-v1-core">
 Kubernetes core/v1.PodSecurityContext </a> </em>
 </td>
 
@@ -11436,7 +11436,7 @@ values of each field.
 <td>
 
 <code>imagePullSecrets</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#localobjectreference-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#localobjectreference-v1-core">
 \[\]Kubernetes core/v1.LocalObjectReference </a> </em>
 </td>
 
@@ -11511,7 +11511,7 @@ value, the higher the priority. More info:
 <td>
 
 <code>affinity</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#affinity-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#affinity-v1-core">
 Kubernetes core/v1.Affinity </a> </em>
 </td>
 
@@ -11702,7 +11702,7 @@ JetStream (Nats) URL
 <td>
 
 <code>accessSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -13049,7 +13049,7 @@ Description
 <td>
 
 <code>accessKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -13069,7 +13069,7 @@ AccessKey refers K8s secret containing AlibabaCloud access key
 <td>
 
 <code>secretKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -13523,7 +13523,7 @@ Baisc auth with username and password
 <td>
 
 <code>token</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -13544,7 +13544,7 @@ Token used to connect
 <td>
 
 <code>nkey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -13565,7 +13565,7 @@ NKey used to connect
 <td>
 
 <code>credential</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -13774,7 +13774,7 @@ Auth strategy, default to AuthStrategyNone
 <td>
 
 <code>accessSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -14552,7 +14552,7 @@ scheduled on that node. More info:
 <td>
 
 <code>tolerations</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#toleration-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#toleration-v1-core">
 \[\]Kubernetes core/v1.Toleration </a> </em>
 </td>
 
@@ -14592,7 +14592,7 @@ Metadata sets the pods’s metadata, i.e. annotations and labels
 <td>
 
 <code>securityContext</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#podsecuritycontext-v1-core">
 Kubernetes core/v1.PodSecurityContext </a> </em>
 </td>
 
@@ -14634,7 +14634,7 @@ Max Age of existing messages, i.e. “72h”, “4h35m”
 <td>
 
 <code>imagePullSecrets</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#localobjectreference-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#localobjectreference-v1-core">
 \[\]Kubernetes core/v1.LocalObjectReference </a> </em>
 </td>
 
@@ -14728,7 +14728,7 @@ value, the higher the priority. More info:
 <td>
 
 <code>affinity</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#affinity-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#affinity-v1-core">
 Kubernetes core/v1.Affinity </a> </em>
 </td>
 
@@ -15004,7 +15004,7 @@ Namespace for the action. Defaults to “\_”.
 <td>
 
 <code>authToken</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -15318,7 +15318,7 @@ Name of the StorageClass required by the claim. More info:
 <td>
 
 <code>accessMode</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#persistentvolumeaccessmode-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#persistentvolumeaccessmode-v1-core">
 Kubernetes core/v1.PersistentVolumeAccessMode </a> </em>
 </td>
 
@@ -15490,7 +15490,7 @@ time you update the setting, which has a possibility of event loss.
 <td>
 
 <code>credentialSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -15697,7 +15697,7 @@ Configure the service URL for the Pulsar service.
 <td>
 
 <code>tlsTrustCertsSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -15837,7 +15837,7 @@ event payload.
 <td>
 
 <code>authTokenSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -15901,7 +15901,7 @@ Either token or athenz can be set to use auth.
 <td>
 
 <code>authAthenzSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -16048,7 +16048,7 @@ construct the request payload.
 <td>
 
 <code>tlsTrustCertsSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -16128,7 +16128,7 @@ TLS configuration for the pulsar client.
 <td>
 
 <code>authTokenSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -16191,7 +16191,7 @@ Either token or athenz can be set to use auth.
 <td>
 
 <code>authAthenzSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -16370,7 +16370,7 @@ HostAddress refers to the address of the Redis host/server
 <td>
 
 <code>password</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -16609,7 +16609,7 @@ instance)
 <td>
 
 <code>password</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -16881,7 +16881,7 @@ filter.
 <td>
 
 <code>GroupVersionResource</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#groupversionresource-v1-meta">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#groupversionresource-v1-meta">
 Kubernetes meta/v1.GroupVersionResource </a> </em>
 </td>
 
@@ -17085,7 +17085,7 @@ Same as K8s field selector, operator “=”, “==” and “!=” are supporte
 <td>
 
 <code>createdBy</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#time-v1-meta">
 Kubernetes meta/v1.Time </a> </em>
 </td>
 
@@ -17227,7 +17227,7 @@ S3Bucket </a> </em>
 <td>
 
 <code>accessKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -17242,7 +17242,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <td>
 
 <code>secretKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -17297,7 +17297,7 @@ S3Filter </a> </em>
 <td>
 
 <code>caCertificate</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -17525,7 +17525,7 @@ values: OAUTHBEARER, PLAIN (defaults to PLAIN).
 <td>
 
 <code>userSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -17546,7 +17546,7 @@ or SASL/SCRAM authentication
 <td>
 
 <code>passwordSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -17652,7 +17652,7 @@ WatchPathConfig contains configuration about the file path to watch
 <td>
 
 <code>username</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -17672,7 +17672,7 @@ Username required for authentication if any.
 <td>
 
 <code>password</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -17692,7 +17692,7 @@ Password required for authentication if any.
 <td>
 
 <code>sshKeySecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -17713,7 +17713,7 @@ contain private key and public key.
 <td>
 
 <code>address</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -17878,7 +17878,7 @@ TopicArn
 <td>
 
 <code>accessKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -17898,7 +17898,7 @@ AccessKey refers K8s secret containing aws access key
 <td>
 
 <code>secretKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -18082,7 +18082,7 @@ Description
 <td>
 
 <code>accessKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -18102,7 +18102,7 @@ AccessKey refers K8s secret containing aws access key
 <td>
 
 <code>secretKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -18319,7 +18319,7 @@ Amazons servers
 <td>
 
 <code>sessionToken</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -18661,7 +18661,7 @@ Description
 <td>
 
 <code>metadata</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta </a> </em>
 </td>
 
@@ -19201,7 +19201,7 @@ default={annotations: {}, labels: {}}
 <td>
 
 <code>ports</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#serviceport-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#serviceport-v1-core">
 \[\]Kubernetes core/v1.ServicePort </a> </em>
 </td>
 
@@ -19293,7 +19293,7 @@ Description
 <td>
 
 <code>signingSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -19313,7 +19313,7 @@ Slack App signing secret
 <td>
 
 <code>token</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -19624,7 +19624,7 @@ are applied to the trigger resource.
 <td>
 
 <code>slackToken</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -20210,7 +20210,7 @@ S3 region. Defaults to us-east-1
 <td>
 
 <code>authToken</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -20448,7 +20448,7 @@ CreateWebhook if specified creates a new webhook programmatically.
 <td>
 
 <code>apiKey</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -20575,7 +20575,7 @@ Description
 <td>
 
 <code>caCertSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -20595,7 +20595,7 @@ CACertSecret refers to the secret that contains the CA cert
 <td>
 
 <code>clientCertSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -20615,7 +20615,7 @@ ClientCertSecret refers to the secret that contains the client cert
 <td>
 
 <code>clientKeySecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -20782,7 +20782,7 @@ Container is the main container image to run in the sensor pod
 <td>
 
 <code>volumes</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#volume-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#volume-v1-core">
 \[\]Kubernetes core/v1.Volume </a> </em>
 </td>
 
@@ -20804,7 +20804,7 @@ workflow.
 <td>
 
 <code>securityContext</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#podsecuritycontext-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#podsecuritycontext-v1-core">
 Kubernetes core/v1.PodSecurityContext </a> </em>
 </td>
 
@@ -20849,7 +20849,7 @@ scheduled on that node. More info:
 <td>
 
 <code>tolerations</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#toleration-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#toleration-v1-core">
 \[\]Kubernetes core/v1.Toleration </a> </em>
 </td>
 
@@ -20870,7 +20870,7 @@ If specified, the pod’s tolerations.
 <td>
 
 <code>imagePullSecrets</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#localobjectreference-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#localobjectreference-v1-core">
 \[\]Kubernetes core/v1.LocalObjectReference </a> </em>
 </td>
 
@@ -20945,7 +20945,7 @@ value, the higher the priority. More info:
 <td>
 
 <code>affinity</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#affinity-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#affinity-v1-core">
 Kubernetes core/v1.Affinity </a> </em>
 </td>
 
@@ -22274,7 +22274,7 @@ Description
 <td>
 
 <code>secretKeyRef</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -22289,7 +22289,7 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 <td>
 
 <code>configMapKeyRef</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#configmapkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#configmapkeyselector-v1-core">
 Kubernetes core/v1.ConfigMapKeySelector </a> </em>
 </td>
 
@@ -22531,7 +22531,7 @@ URL is the url of the server.
 <td>
 
 <code>serverCertSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -22551,7 +22551,7 @@ ServerCertPath refers the file that contains the cert.
 <td>
 
 <code>serverKeySecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
@@ -22591,7 +22591,7 @@ event payload.
 <td>
 
 <code>authSecret</code></br> <em>
-<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.37/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
