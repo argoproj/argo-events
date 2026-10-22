@@ -22,7 +22,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
 	corev1 "k8s.io/api/core/v1"
 
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
@@ -77,26 +79,47 @@ func GetAWSSession(creds *credentials.Credentials, region string) (*session.Sess
 	})
 }
 
-func GetAWSSessionWithoutCreds(region string) (*session.Session, error) {
+func GetAWSSessionWithoutCreds(region, stsEndpoint string) (*session.Session, error) {
 	return session.NewSession(&aws.Config{
-		Region: &region,
+		Region:           &region,
+		EndpointResolver: stsEndpointResolver(stsEndpoint),
 	})
 }
 
-func GetAWSAssumeRoleCreds(roleARN, region string) (*session.Session, error) {
-	sess := session.Must(session.NewSession())
+func GetAWSAssumeRoleCreds(roleARN, region, stsEndpoint string) (*session.Session, error) {
+	sess := session.Must(session.NewSession(&aws.Config{
+		EndpointResolver: stsEndpointResolver(stsEndpoint),
+	}))
 	creds := stscreds.NewCredentials(sess, roleARN)
 	return GetAWSSession(creds, region)
 }
 
+// stsEndpointResolver sends STS requests, including the web identity token exchange done by
+// the default credential chain, to stsEndpoint. Other services keep their default endpoints.
+func stsEndpointResolver(stsEndpoint string) endpoints.Resolver {
+	if stsEndpoint == "" {
+		return nil
+	}
+	defaultResolver := endpoints.DefaultResolver()
+	return endpoints.ResolverFunc(func(service, region string, optFns ...func(*endpoints.Options)) (endpoints.ResolvedEndpoint, error) {
+		if service == sts.EndpointsID {
+			return endpoints.ResolvedEndpoint{
+				URL:           endpoints.AddScheme(stsEndpoint, false),
+				SigningRegion: region,
+			}, nil
+		}
+		return defaultResolver.EndpointFor(service, region, optFns...)
+	})
+}
+
 // CreateAWSSessionWithCredsInEnv based on credentials in ENV, return a aws session
-func CreateAWSSessionWithCredsInEnv(region string, roleARN string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector) (*session.Session, error) {
+func CreateAWSSessionWithCredsInEnv(region string, roleARN string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector, stsEndpoint string) (*session.Session, error) {
 	if roleARN != "" {
-		return GetAWSAssumeRoleCreds(roleARN, region)
+		return GetAWSAssumeRoleCreds(roleARN, region, stsEndpoint)
 	}
 
 	if accessKey == nil && secretKey == nil {
-		return GetAWSSessionWithoutCreds(region)
+		return GetAWSSessionWithoutCreds(region, stsEndpoint)
 	}
 
 	creds, err := GetAWSCredFromEnvironment(accessKey, secretKey)
@@ -108,13 +131,13 @@ func CreateAWSSessionWithCredsInEnv(region string, roleARN string, accessKey *co
 }
 
 // CreateAWSSessionWithCredsInVolume based on credentials in mounted volumes, return a aws session
-func CreateAWSSessionWithCredsInVolume(region string, roleARN string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector, sessionToken *corev1.SecretKeySelector) (*session.Session, error) {
+func CreateAWSSessionWithCredsInVolume(region string, roleARN string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector, sessionToken *corev1.SecretKeySelector, stsEndpoint string) (*session.Session, error) {
 	if roleARN != "" {
-		return GetAWSAssumeRoleCreds(roleARN, region)
+		return GetAWSAssumeRoleCreds(roleARN, region, stsEndpoint)
 	}
 
 	if accessKey == nil && secretKey == nil {
-		return GetAWSSessionWithoutCreds(region)
+		return GetAWSSessionWithoutCreds(region, stsEndpoint)
 	}
 
 	creds, err := GetAWSCredFromVolume(accessKey, secretKey, sessionToken)

@@ -199,7 +199,7 @@ func fetchMessages(ctx context.Context, q *sqslib.SQS, url string, maxSize, wait
 
 func (el *EventListener) createAWSSession() (*session.Session, error) {
 	sqsEventSource := &el.SQSEventSource
-	awsSession, err := awscommon.CreateAWSSessionWithCredsInVolume(sqsEventSource.Region, sqsEventSource.RoleARN, sqsEventSource.AccessKey, sqsEventSource.SecretKey, sqsEventSource.SessionToken)
+	awsSession, err := awscommon.CreateAWSSessionWithCredsInVolume(sqsEventSource.Region, sqsEventSource.RoleARN, sqsEventSource.AccessKey, sqsEventSource.SecretKey, sqsEventSource.SessionToken, "")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create aws session for %s, %w", el.GetEventName(), err)
 	}
