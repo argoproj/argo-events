@@ -124,6 +124,12 @@ spec:
 EventSources can run with HA by setting `spec.replicas` to a number `>1`, see
 more detail [here](eventsources/ha.md).
 
+Setting `spec.replicas` to `0` keeps the EventSource object but runs no pods,
+which is useful for the passive side of an active-passive DR setup. The
+EventSource Service (if any) still exists but has no endpoints, so requests to
+a webhook-type EventSource will fail until it is scaled back up. If
+`spec.replicas` is not set, it defaults to `1`.
+
 ### EventSource POD Node Selection
 
 EventSource POD `affinity`, `nodeSelector` and `tolerations` could be set
@@ -141,6 +147,10 @@ Priority could be set through `spec.template.priorityClassName` or
 
 Sensors can run with HA by setting `spec.replicas` to a number `>1`, see more
 detail [here](sensors/ha.md).
+
+Setting `spec.replicas` to `0` keeps the Sensor object but runs no pods, so no
+triggers are executed until it is scaled back up. If `spec.replicas` is not
+set, it defaults to `1`.
 
 ### Sensor POD Node Selection
 

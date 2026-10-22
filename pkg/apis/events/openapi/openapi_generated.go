@@ -5474,6 +5474,13 @@ func schema_pkg_apis_events_v1alpha1_NATSEventsSource(ref common.ReferenceCallba
 							Format:      "",
 						},
 					},
+					"maxReconnects": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MaxReconnects is the number of reconnect attempts made after the connection to the NATS server is lost, before the connection is closed and the event source is restarted. A negative value keeps reconnecting forever. Defaults to the NATS client default (60) if not specified.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
 				},
 				Required: []string{"url", "subject"},
 			},

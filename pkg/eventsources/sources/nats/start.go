@@ -34,6 +34,9 @@ import (
 	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
+// defaultNatsReconnectWait is the time between reconnect attempts.
+var defaultNatsReconnectWait = natslib.DefaultReconnectWait
+
 // EventListener implements Eventing for nats event source
 type EventListener struct {
 	EventSourceName string
@@ -65,7 +68,24 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	natsEventSource := &el.NATSEventSource
 
-	var opt []natslib.Option
+	// The subscription is restored on every reconnect. Once the reconnect attempts are exhausted the
+	// connection is closed for good, so the listener returns and is restarted instead of waiting
+	// silently on a dead connection.
+	closed := make(chan struct{})
+	opt := []natslib.Option{
+		natslib.ReconnectWait(defaultNatsReconnectWait),
+		natslib.DisconnectErrHandler(func(_ *natslib.Conn, err error) {
+			log.Warnw("disconnected from nats, reconnecting...", zap.Error(err))
+		}),
+		natslib.ClosedHandler(func(c *natslib.Conn) {
+			log.Errorw("nats connection closed", zap.Error(c.LastError()))
+			close(closed)
+		}),
+	}
+	if natsEventSource.MaxReconnects != nil {
+		opt = append(opt, natslib.MaxReconnects(int(*natsEventSource.MaxReconnects)))
+	}
+
 	if natsEventSource.TLS != nil {
 		tlsConfig, err := sharedutil.GetTLSConfig(natsEventSource.TLS)
 		if err != nil {
@@ -175,7 +195,11 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return fmt.Errorf("connection failure for event source %s, %w", el.GetEventName(), err)
 	}
 
-	<-ctx.Done()
-	log.Info("event source is stopped")
-	return nil
+	select {
+	case <-ctx.Done():
+		log.Info("event source is stopped")
+		return nil
+	case <-closed:
+		return fmt.Errorf("nats connection closed for event source %s", el.GetEventName())
+	}
 }
