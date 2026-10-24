@@ -127,8 +127,13 @@ const (
 	EnvVarEventBusConfig = "EVENTBUS_CONFIG"
 	// EnvVarEventBusSubject refers to the eventbus subject env
 	EnvVarEventBusSubject = "EVENTBUS_SUBJECT"
+	// EnvVarEventBusNATSCredentials is the JetStream/NATS credentials payload
+	// (YAML username/password or a NATS .creds file) injected from accessSecret.
+	EnvVarEventBusNATSCredentials = "EVENTBUS_NATS_CREDENTIALS"
 	// volumeMount path for eventbus auth file
 	EventBusAuthFileMountPath = "/etc/eventbus/auth"
+	// EventBusAuthFileName is the mounted auth file name (YAML or NATS .creds)
+	EventBusAuthFileName = "auth.yaml"
 	// Default NATS Streaming messages max age
 	STANMaxAge = "72h"
 	// Default NATS Streaming max messages per channel

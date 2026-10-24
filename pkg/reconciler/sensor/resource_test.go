@@ -348,6 +348,44 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.True(t, hasCertVolumeMount)
 	})
 
+	t.Run("test jetstream access secret env and volume", func(t *testing.T) {
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: sensorObj,
+			Labels: testLabels,
+		}
+		eb := fakeEventBusJetstreamWithTLS.DeepCopy()
+		eb.Status.Config.JetStream.AccessSecret = &corev1.SecretKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{Name: "nats-auth"},
+			Key:                  "user.creds",
+		}
+		deployment, err := buildDeployment(args, eb)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+
+		hasAuthVolume := false
+		for _, vol := range deployment.Spec.Template.Spec.Volumes {
+			if vol.Name == "auth-volume" {
+				hasAuthVolume = true
+			}
+		}
+		assert.True(t, hasAuthVolume)
+
+		var credEnv *corev1.EnvVar
+		for i := range deployment.Spec.Template.Spec.Containers[0].Env {
+			env := &deployment.Spec.Template.Spec.Containers[0].Env[i]
+			if env.Name == v1alpha1.EnvVarEventBusNATSCredentials {
+				credEnv = env
+				break
+			}
+		}
+		assert.NotNil(t, credEnv)
+		assert.NotNil(t, credEnv.ValueFrom)
+		assert.NotNil(t, credEnv.ValueFrom.SecretKeyRef)
+		assert.Equal(t, "nats-auth", credEnv.ValueFrom.SecretKeyRef.Name)
+		assert.Equal(t, "user.creds", credEnv.ValueFrom.SecretKeyRef.Key)
+	})
+
 	t.Run("test secret volume and volumemount order deterministic", func(t *testing.T) {
 		args := &AdaptorArgs{
 			Image:  testImage,

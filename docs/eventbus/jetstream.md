@@ -91,20 +91,27 @@ spec:
 
 #### Authentication
 
-The `accessSecret` field references a Kubernetes Secret containing the
-credentials used to authenticate with the NATS server. When specified, Argo
-Events uses basic (password) authentication. The Secret key should contain the
-**NATS password or token** as a plain string.
+The `accessSecret` field references a Kubernetes Secret used to authenticate
+with the NATS server. The Secret key may contain either:
 
-For example, create the Secret:
+- YAML with `username` and `password` (basic auth), or
+- a [NATS credentials file](https://docs.nats.io/using-nats/developer/connecting/credfile)
+  (user JWT + NKey seed, typically `*.creds`)
+
+Argo Events injects the Secret into EventSource and Sensor pods as both the
+`EVENTBUS_NATS_CREDENTIALS` environment variable and the mounted auth file.
+The env var is preferred when set; otherwise the mounted file is used. It
+detects a credentials file from its JWT/NKey markers, keeps the payload in
+memory, and connects with `nats.UserCredentialBytes`. YAML username/password
+is parsed from the same payload.
+
+For basic auth, create the Secret:
 
 ```bash
 kubectl create secret generic nats-auth \
-  --from-literal=password=my-nats-password \
+  --from-literal=client-auth=$'username: my-user\npassword: my-nats-password\n' \
   -n argo-events
 ```
-
-Then reference it in the EventBus:
 
 ```yaml
 spec:
@@ -112,7 +119,24 @@ spec:
     url: nats://my-nats-server:4222
     accessSecret:
       name: nats-auth
-      key: password
+      key: client-auth
+```
+
+For a NATS credentials file:
+
+```bash
+kubectl create secret generic nats-auth \
+  --from-file=user.creds=/path/to/user.creds \
+  -n argo-events
+```
+
+```yaml
+spec:
+  jetstreamExotic:
+    url: nats://my-nats-server:4222
+    accessSecret:
+      name: nats-auth
+      key: user.creds
 ```
 
 If your NATS server does not require authentication (e.g., running in a

@@ -97,7 +97,11 @@ func (j JetStreamBus) GetReplicas() int {
 type JetStreamConfig struct {
 	// JetStream (Nats) URL
 	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
-	// Secret for auth
+	// Secret for auth. Native JetStream uses YAML with username/password.
+	// Exotic JetStream also accepts a NATS credentials file (.creds) containing
+	// a user JWT and NKey seed. JetStream access secrets are injected into
+	// EventSource/Sensor pods as EVENTBUS_NATS_CREDENTIALS and as a mounted
+	// auth file; the env var is preferred when present.
 	// +optional
 	AccessSecret *corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,2,opt,name=accessSecret"`
 	// +optional
