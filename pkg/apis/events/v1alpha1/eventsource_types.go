@@ -114,12 +114,9 @@ func (e EventSourceSpec) GetReplicas() int32 {
 	if e.Replicas == nil {
 		return 1
 	}
-	var replicas int32
-	if e.Replicas != nil {
-		replicas = *e.Replicas
-	}
-	if replicas < 1 {
-		replicas = 1
+	replicas := *e.Replicas
+	if replicas < 0 {
+		replicas = 0
 	}
 	return replicas
 }
@@ -572,6 +569,11 @@ type NATSEventsSource struct {
 	// logic to subscribe as queue group. If the queue is empty, uses default Subscribe logic.
 	// +optional
 	Queue *string `json:"queue" protobuf:"bytes,9,opt,name=queue"`
+	// MaxReconnects is the number of reconnect attempts made after the connection to the NATS server
+	// is lost, before the connection is closed and the event source is restarted. A negative value
+	// keeps reconnecting forever. Defaults to the NATS client default (60) if not specified.
+	// +optional
+	MaxReconnects *int32 `json:"maxReconnects,omitempty" protobuf:"varint,10,opt,name=maxReconnects"`
 }
 
 // NATSAuth refers to the auth info for NATS EventSource
