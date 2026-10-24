@@ -2,6 +2,7 @@ package sensor
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -77,12 +78,37 @@ func (stream *SensorJetstream) Connect(ctx context.Context, triggerName string, 
 		return nil, err
 	}
 
+	// the EventBus may have lost the Stream and the K/V store since Initialize() (e.g. it was restarted without persistence)
+	err = stream.ensureStreamAndKeyValueStore(conn)
+	if err != nil {
+		_ = conn.Close()
+		return nil, err
+	}
+
 	triggerConn, err := NewJetstreamTriggerConn(conn, stream.sensorName, triggerName, dependencyExpression, deps)
 	if err != nil {
 		_ = conn.Close()
 		return nil, err
 	}
 	return triggerConn, nil
+}
+
+// create the Stream and the Key/Value store for this Sensor if they no longer exist
+func (stream *SensorJetstream) ensureStreamAndKeyValueStore(conn *eventbusjetstreambase.JetstreamConnection) error {
+	err := stream.CreateStream(conn)
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.JSContext.KeyValue(stream.sensorName)
+	if errors.Is(err, nats.ErrBucketNotFound) {
+		stream.Logger.Infof("K/V store for sensor %s not found, creating it", stream.sensorName)
+		_, err = conn.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: stream.sensorName})
+	}
+	if err != nil {
+		return fmt.Errorf("failed to get or create K/V store for sensor %s: %w", stream.sensorName, err)
+	}
+	return nil
 }
 
 // Update the K/V store to reflect the current Spec:
