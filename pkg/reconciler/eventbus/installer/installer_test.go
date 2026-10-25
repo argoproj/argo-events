@@ -23,6 +23,9 @@ const (
 )
 
 var (
+	// testJetStreamPrevKeyVersion is the first NATS release with prev_key support.
+	testJetStreamPrevKeyVersion = "2.10.29"
+
 	fakeConfig = &reconciler.GlobalConfig{
 		EventBus: &reconciler.EventBusConfig{
 			NATS: &reconciler.StanConfig{
@@ -38,6 +41,12 @@ var (
 				Versions: []reconciler.JetStreamVersion{
 					{
 						Version:              "2.7.3",
+						NatsImage:            testJetStreamImage,
+						ConfigReloaderImage:  testJSReloaderImage,
+						MetricsExporterImage: testJetStreamExporterImage,
+					},
+					{
+						Version:              testJetStreamPrevKeyVersion,
 						NatsImage:            testJetStreamImage,
 						ConfigReloaderImage:  testJSReloaderImage,
 						MetricsExporterImage: testJetStreamExporterImage,
