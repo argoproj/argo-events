@@ -87,6 +87,19 @@ func ProcessRouteStatus(ctrl *Controller) {
 	}
 }
 
+func parseBearerAuthorization(authHeader string) (string, bool) {
+	schemeEnd := strings.IndexByte(authHeader, ' ')
+	if schemeEnd < 0 || !strings.EqualFold(authHeader[:schemeEnd], "Bearer") {
+		return "", false
+	}
+
+	token := strings.TrimLeft(authHeader[schemeEnd:], " ")
+	if token == "" || strings.ContainsAny(token, " \t\r\n") {
+		return "", false
+	}
+	return token, true
+}
+
 // starts a http server
 func startServer(router Router, controller *Controller) {
 	// start a http server only if no other configuration previously started the server on given port
@@ -143,13 +156,13 @@ func startServer(router Router, controller *Controller) {
 					sharedutil.SendInternalErrorResponse(writer, "Error loading auth token")
 					return
 				}
-				authHeader := request.Header.Get("Authorization")
-				if !strings.HasPrefix(authHeader, "Bearer ") {
+				authToken, ok := parseBearerAuthorization(request.Header.Get("Authorization"))
+				if !ok {
 					route.Logger.Error("invalid auth header")
 					sharedutil.SendResponse(writer, http.StatusUnauthorized, "Invalid Authorization Header")
 					return
 				}
-				if strings.TrimPrefix(authHeader, "Bearer ") != token {
+				if authToken != token {
 					route.Logger.Error("invalid auth token")
 					sharedutil.SendResponse(writer, http.StatusUnauthorized, "Invalid Auth token")
 					return
