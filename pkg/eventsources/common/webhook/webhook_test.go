@@ -34,3 +34,28 @@ func TestNewWebhookHelper(t *testing.T) {
 		convey.So(controller, convey.ShouldNotBeNil)
 	})
 }
+
+func TestParseBearerAuthorization(t *testing.T) {
+	tests := []struct {
+		name      string
+		header    string
+		wantToken string
+		wantOK    bool
+	}{
+		{name: "canonical scheme", header: "Bearer token", wantToken: "token", wantOK: true},
+		{name: "lowercase scheme", header: "bearer token", wantToken: "token", wantOK: true},
+		{name: "mixed case scheme", header: "bEaReR  token", wantToken: "token", wantOK: true},
+		{name: "wrong scheme", header: "Basic token"},
+		{name: "missing token", header: "Bearer "},
+		{name: "token contains whitespace", header: "Bearer token extra"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			gotToken, gotOK := parseBearerAuthorization(test.header)
+			if gotToken != test.wantToken || gotOK != test.wantOK {
+				t.Fatalf("parseBearerAuthorization(%q) = (%q, %t), want (%q, %t)", test.header, gotToken, gotOK, test.wantToken, test.wantOK)
+			}
+		})
+	}
+}
