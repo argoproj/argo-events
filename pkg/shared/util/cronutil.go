@@ -90,8 +90,12 @@ WRAP:
 
 	for 1<<uint(t.Hour())&s.Hour == 0 {
 		// set t to the last second of the previous hour
-		t = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, loc)
-		t = t.Add(-1 * time.Second)
+		//
+		// Subtract the elapsed minutes and seconds instead of using time.Date:
+		// on the day the clocks fall back, an hour happens twice and time.Date
+		// returns the later of the two instants, which can move t forward and
+		// loop forever.
+		t = t.Add(-time.Duration(t.Minute())*time.Minute - time.Duration(t.Second()+1)*time.Second)
 
 		if t.Hour() == 23 {
 			goto WRAP
@@ -100,8 +104,8 @@ WRAP:
 
 	for 1<<uint(t.Minute())&s.Minute == 0 {
 		// set t to the last second of the previous minute
-		t = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), 0, 0, loc)
-		t = t.Add(-1 * time.Second)
+		// (see the hour loop above for why time.Date isn't used here)
+		t = t.Add(-time.Duration(t.Second()+1) * time.Second)
 
 		if t.Minute() == 59 {
 			goto WRAP
