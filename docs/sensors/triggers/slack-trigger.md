@@ -110,7 +110,7 @@ generate complex event payloads, take a look at [this library](https://github.co
                   messageAggregationKey: "abcdefg" # aggregate message by some key to send them to the same Slack thread
                   broadcastMessageToChannel: true # also broadcast the message from the thread to the channel
 
-#### Sending attachments using [Slack Attachments API](https://api.slack.com/reference/messaging/attachments):
+#### Sending attachments using [Slack Attachments API](https://docs.slack.dev/legacy/legacy-messaging/legacy-secondary-message-attachments/):
 
          - template:
               name: slack-trigger
