@@ -10,7 +10,7 @@ The Kafka trigger specification is available [here](../../APIs.md#argoproj.io/v1
 
 1.  Consider a scenario where you are expecting a file drop onto a Minio bucket and want to place that event on a Kafka topic.
 
-1.  Set up the Minio Event Source [here](https://argoproj.github.io/argo-events/setup/minio/).
+1.  Set up the Minio Event Source [here](https://argoproj.github.io/argo-events/eventsources/setup/minio/).
     Do not create the Minio sensor, we are going to create it in next step.
 
 1.  Lets create the sensor.
