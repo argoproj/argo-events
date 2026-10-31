@@ -19,7 +19,6 @@ package minio
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -91,8 +90,10 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		if err != nil {
 			return fmt.Errorf("failed to get the CA certificate for event source %s, %w", el.GetEventName(), err)
 		}
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM([]byte(caCertificate))
+		caCertPool, err := sharedutil.NewCertPoolFromPEM([]byte(caCertificate))
+		if err != nil {
+			return fmt.Errorf("invalid CA certificate for event source %s, %w", el.GetEventName(), err)
+		}
 		tlsConfig := &tls.Config{
 			RootCAs: caCertPool,
 		}
