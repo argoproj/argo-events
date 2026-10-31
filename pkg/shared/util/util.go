@@ -191,6 +191,18 @@ func GenerateEnvFromConfigMapSpec(selector *v1.ConfigMapKeySelector) v1.EnvFromS
 	}
 }
 
+// NewCertPoolFromPEM returns a certificate pool with the PEM encoded
+// certificates in caCert. It returns an error when caCert contains no valid
+// certificate, so that a bad CA does not silently produce an empty pool that
+// rejects every server certificate.
+func NewCertPoolFromPEM(caCert []byte) (*x509.CertPool, error) {
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(caCert) {
+		return nil, fmt.Errorf("no valid PEM encoded certificate found")
+	}
+	return pool, nil
+}
+
 // GetTLSConfig returns a tls configuration for given cert and key or skips the certs if InsecureSkipVerify is true.
 func GetTLSConfig(config *aev1.TLSConfig) (*tls.Config, error) {
 	if config == nil {
@@ -244,8 +256,10 @@ func GetTLSConfig(config *aev1.TLSConfig) (*tls.Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to read ca cert file %s, %w", caCertPath, err)
 		}
-		pool := x509.NewCertPool()
-		pool.AppendCertsFromPEM(caCert)
+		pool, err := NewCertPoolFromPEM(caCert)
+		if err != nil {
+			return nil, fmt.Errorf("invalid ca cert file %s, %w", caCertPath, err)
+		}
 		c.RootCAs = pool
 	}
 
