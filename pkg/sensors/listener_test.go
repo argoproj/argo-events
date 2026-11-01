@@ -146,3 +146,23 @@ func TestGetDependencyExpression(t *testing.T) {
 		assert.NoError(t, err)
 	})
 }
+
+func TestNeedsLeaderElection(t *testing.T) {
+	tests := []struct {
+		name     string
+		isKafka  bool
+		replicas int
+		want     bool
+	}{
+		{"kafka eventbus, single replica", true, 1, false},
+		{"kafka eventbus, multiple replicas", true, 3, false},
+		{"non-kafka eventbus, single replica", false, 1, false},
+		{"non-kafka eventbus, zero replicas", false, 0, false},
+		{"non-kafka eventbus, multiple replicas", false, 3, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, needsLeaderElection(tt.isKafka, tt.replicas))
+		})
+	}
+}
