@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -111,6 +112,26 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.True(t, cmRefs > 0)
 		assert.True(t, secretRefs > 0)
 		assert.Equal(t, deployment.Spec.Template.Spec.PriorityClassName, "test-class")
+	})
+
+	t.Run("test revisionHistoryLimit", func(t *testing.T) {
+		args := &AdaptorArgs{
+			Image:       testImage,
+			EventSource: testEventSource,
+			Labels:      testLabels,
+		}
+		deployment, err := buildDeployment(args, fakeEventBus)
+		assert.Nil(t, err)
+		assert.Nil(t, deployment.Spec.RevisionHistoryLimit)
+
+		eventSourceWithLimit := testEventSource.DeepCopy()
+		eventSourceWithLimit.Spec.RevisionHistoryLimit = ptr.To(int32(3))
+		args.EventSource = eventSourceWithLimit
+		deployment, err = buildDeployment(args, fakeEventBus)
+		assert.Nil(t, err)
+		if assert.NotNil(t, deployment.Spec.RevisionHistoryLimit) {
+			assert.Equal(t, int32(3), *deployment.Spec.RevisionHistoryLimit)
+		}
 	})
 
 	t.Run("test kafka eventbus secrets attached", func(t *testing.T) {
