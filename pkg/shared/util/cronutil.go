@@ -90,7 +90,11 @@ WRAP:
 
 	for 1<<uint(t.Hour())&s.Hour == 0 {
 		// set t to the last second of the previous hour
-		t = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, loc)
+		//
+		// The start of the hour is found by subtracting from the instant instead of building it with time.Date.
+		// While the clocks go back, a wall-clock hour happens twice and time.Date returns the later one, which
+		// would put t after where it started and make this loop run forever.
+		t = t.Add(-(time.Duration(t.Minute())*time.Minute + time.Duration(t.Second())*time.Second + time.Duration(t.Nanosecond())*time.Nanosecond))
 		t = t.Add(-1 * time.Second)
 
 		if t.Hour() == 23 {
@@ -99,8 +103,8 @@ WRAP:
 	}
 
 	for 1<<uint(t.Minute())&s.Minute == 0 {
-		// set t to the last second of the previous minute
-		t = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), 0, 0, loc)
+		// set t to the last second of the previous minute, see the hour loop for why this does not use time.Date
+		t = t.Add(-(time.Duration(t.Second())*time.Second + time.Duration(t.Nanosecond())*time.Nanosecond))
 		t = t.Add(-1 * time.Second)
 
 		if t.Minute() == 59 {

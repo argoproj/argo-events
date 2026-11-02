@@ -45,6 +45,12 @@ func TestPrevCronTime(t *testing.T) {
 		{"2012-11-04T02:00:00-0500", "TZ=America/New_York 0 0 0 * * ?", "2012-11-04T00:00:00-0400", false},
 		{"2012-11-05T02:00:00-0500", "TZ=America/New_York 0 0 2 * * ?", "2012-11-04T02:00:00-0500", false},
 
+		// Clocks going back in Europe/Berlin on 2026-10-25: 02:00-02:59 happens twice (CEST, then CET)
+		{"2026-10-25T03:00:00+0100", "TZ=Europe/Berlin 0 0 0 * * ?", "2026-10-25T00:00:00+0200", false},
+		{"2026-10-25T03:00:00+0100", "TZ=Europe/Berlin 0 30 1 * * ?", "2026-10-25T01:30:00+0200", false},
+		{"2026-10-25T03:00:00+0100", "TZ=Europe/Berlin 0 30 2 * * ?", "2026-10-25T02:30:00+0100", false},
+		{"2026-10-25T02:10:00+0100", "TZ=Europe/Berlin 0 45 * * * ?", "2026-10-25T02:45:00+0200", false},
+
 		// Unsatisfiable
 		{"Mon Jul 9 23:35 2012", "0 0 0 30 Feb ?", "", true},
 		{"Mon Jul 9 23:35 2012", "0 0 0 31 Apr ?", "", true},
