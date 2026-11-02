@@ -2078,6 +2078,12 @@ message NATSEventsSource {
   // logic to subscribe as queue group. If the queue is empty, uses default Subscribe logic.
   // +optional
   optional string queue = 9;
+
+  // MaxReconnects is the number of reconnect attempts made after the connection to the NATS server
+  // is lost, before the connection is closed and the event source is restarted. A negative value
+  // keeps reconnecting forever. Defaults to the NATS client default (60) if not specified.
+  // +optional
+  optional int32 maxReconnects = 10;
 }
 
 // NATSTrigger refers to the specification of the NATS trigger.

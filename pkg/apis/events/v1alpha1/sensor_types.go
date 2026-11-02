@@ -102,8 +102,8 @@ func (s SensorSpec) GetReplicas() int32 {
 		return 1
 	}
 	replicas := *s.Replicas
-	if replicas < 1 {
-		replicas = 1
+	if replicas < 0 {
+		replicas = 0
 	}
 	return replicas
 }

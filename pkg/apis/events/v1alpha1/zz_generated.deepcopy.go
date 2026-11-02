@@ -2854,6 +2854,11 @@ func (in *NATSEventsSource) DeepCopyInto(out *NATSEventsSource) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.MaxReconnects != nil {
+		in, out := &in.MaxReconnects, &out.MaxReconnects
+		*out = new(int32)
+		**out = **in
+	}
 	return
 }
 
