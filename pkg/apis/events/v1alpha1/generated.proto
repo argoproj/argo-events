@@ -1705,6 +1705,13 @@ message JetStreamBus {
   // Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB
   // +optional
   optional string maxPayload = 19;
+
+  // ClientAdvertise is the "host:port" that the NATS servers advertise to clients, written as the
+  // "client_advertise" option of the server configuration. Set it when clients reach the servers
+  // through an address other than the pod IPs, for example a load balancer.
+  // See https://docs.nats.io/running-a-nats-service/configuration#connection-and-domain-settings.
+  // +optional
+  optional string clientAdvertise = 20;
 }
 
 message JetStreamConfig {

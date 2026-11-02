@@ -2340,6 +2340,11 @@ func (in *JetStreamBus) DeepCopyInto(out *JetStreamBus) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ClientAdvertise != nil {
+		in, out := &in.ClientAdvertise, &out.ClientAdvertise
+		*out = new(string)
+		**out = **in
+	}
 	return
 }
 

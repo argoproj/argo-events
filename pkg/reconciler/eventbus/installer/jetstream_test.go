@@ -2,7 +2,7 @@ package installer
 
 import (
 	"context"
-
+	"fmt"
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
@@ -14,6 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -169,7 +170,23 @@ func TestJetStreamCreateObjects(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(c.Data))
 		assert.Contains(t, c.Annotations, v1alpha1.AnnotationResourceSpecHash)
+		assert.NotContains(t, c.Data[v1alpha1.JetStreamConfigMapKey], "client_advertise")
 	})
+
+	for _, replicas := range []int32{1, 3} {
+		t.Run(fmt.Sprintf("test create configmap with client advertise and %d replicas", replicas), func(t *testing.T) {
+			testObj := testJetStreamEventBus.DeepCopy()
+			testObj.Spec.JetStream.Replicas = &replicas
+			testObj.Spec.JetStream.ClientAdvertise = ptr.To("nats.example.com:4222")
+			i.eventBus = testObj
+			err := i.createConfigMap(ctx)
+			assert.NoError(t, err)
+			c := &corev1.ConfigMap{}
+			err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamConfigMapName(testObj)}, c)
+			assert.NoError(t, err)
+			assert.Contains(t, c.Data[v1alpha1.JetStreamConfigMapKey], "\nclient_advertise: \"nats.example.com:4222\"\n")
+		})
+	}
 }
 
 func TestBuildJetStreamStatefulSetSpec(t *testing.T) {
