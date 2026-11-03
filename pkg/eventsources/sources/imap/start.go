@@ -17,9 +17,12 @@ limitations under the License.
 package imap
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/mail"
 	"time"
 
 	"github.com/emersion/go-imap/v2"
@@ -64,125 +67,191 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		With(logging.LabelEventSourceType, el.GetEventSourceType(), logging.LabelEventName, el.GetEventName())
 	defer sources.Recover(el.GetEventName())
 
-	imapEventSource := &el.IMAPEventSource
-	username, err := sharedutil.GetSecretFromVolume(imapEventSource.Username)
+	es := &el.IMAPEventSource
+
+	username, err := sharedutil.GetSecretFromVolume(es.Username)
 	if err != nil {
 		return err
 	}
-	password, err := sharedutil.GetSecretFromVolume(imapEventSource.Password)
+	password, err := sharedutil.GetSecretFromVolume(es.Password)
 	if err != nil {
 		return err
 	}
 
-	// Connect to server
-	log.Info("connecting to IMAP server...", zap.String("hostAddress", imapEventSource.HostAddress))
+	mailbox := es.Mailbox
+	if mailbox == "" {
+		mailbox = "INBOX"
+	}
+
+	pollInterval := 30 * time.Second
+	if es.PollInterval != "" {
+		if d, err := time.ParseDuration(es.PollInterval); err == nil {
+			pollInterval = d
+		} else {
+			log.Warn("invalid pollInterval, using default", zap.Error(err))
+		}
+	}
+
+	for {
+		if ctx.Err() != nil {
+			return nil
+		}
+		if err := el.run(ctx, dispatch, log, es, username, password, mailbox, pollInterval); err != nil {
+			log.Error("IMAP event source failed, reconnecting", zap.Error(err))
+			select {
+			case <-ctx.Done():
+				return nil
+			case <-time.After(5 * time.Second):
+			}
+			continue
+		}
+		return nil
+	}
+}
+
+// run performs a single connection session.
+func (el *EventListener) run(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger, es *v1alpha1.IMAPEventSource, username, password, mailbox string, pollInterval time.Duration) error {
+	updateCh := make(chan struct{}, 1)
+	opts := &imapclient.Options{
+		UnilateralDataHandler: &imapclient.UnilateralDataHandler{
+			Mailbox: func(data *imapclient.UnilateralDataMailbox) {
+				select {
+				case updateCh <- struct{}{}:
+				default:
+				}
+			},
+		},
+	}
 
 	var c *imapclient.Client
-	if imapEventSource.StartTLS {
-		c, err = imapclient.DialTLS(imapEventSource.HostAddress, nil)
-	} else {
-		c, err = imapclient.DialInsecure(imapEventSource.HostAddress, nil)
-	}
-	if err != nil {
-		return fmt.Errorf("failed to dial IMAP server: %w", err)
+	var err error
+	if err := sharedutil.DoWithRetry(es.ConnectionBackoff, func() error {
+		if es.StartTLS {
+			c, err = imapclient.DialTLS(es.HostAddress, opts)
+		} else {
+			c, err = imapclient.DialInsecure(es.HostAddress, opts)
+		}
+		if err != nil {
+			return fmt.Errorf("failed to dial IMAP server: %w", err)
+		}
+		if err := c.Login(username, password).Wait(); err != nil {
+			c.Close()
+			return fmt.Errorf("failed to login: %w", err)
+		}
+		return nil
+	}); err != nil {
+		return err
 	}
 	defer c.Close()
 
-	if err := c.Login(username, password).Wait(); err != nil {
-		return fmt.Errorf("failed to login: %w", err)
-	}
-
-	// Select INBOX
-	mbox, err := c.Select("INBOX", nil).Wait()
+	mbox, err := c.Select(mailbox, nil).Wait()
 	if err != nil {
-		return fmt.Errorf("failed to select inbox: %w", err)
+		return fmt.Errorf("failed to select mailbox %s: %w", mailbox, err)
+	}
+	log.Info("connected to IMAP server", zap.String("mailbox", mailbox), zap.Uint32("numMessages", mbox.NumMessages))
+
+	// Determine starting UID. For UnseenOnly, process existing unseen; otherwise ignore existing.
+	lastUID := imap.UID(0)
+	if !es.UnseenOnly {
+		if data, err := c.UIDSearch(&imap.SearchCriteria{}, &imap.SearchOptions{ReturnMax: true}).Wait(); err == nil {
+			lastUID = imap.UID(data.Max)
+		}
 	}
 
-	log.Info("Successfully connected to IMAP server", zap.Uint32("numMessages", mbox.NumMessages))
-
-	// Try to use IDLE (most servers support it)
-	// We'll attempt IDLE and fall back to polling if it fails
-	log.Info("attempting to use IMAP IDLE for real-time notifications")
-	return el.startIdle(ctx, c, dispatch, log, imapEventSource, mbox.NumMessages)
-}
-
-// startIdle starts IMAP IDLE for real-time notifications
-func (el *EventListener) startIdle(ctx context.Context, c *imapclient.Client, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger, imapEventSource *v1alpha1.IMAPEventSource, initialCount uint32) error {
-	log.Warn("IDLE not supported or failed, falling back to polling")
-	return el.startPolling(ctx, c, dispatch, log, imapEventSource, initialCount)
-}
-
-// startPolling starts polling-based message checking (fallback)
-func (el *EventListener) startPolling(ctx context.Context, c *imapclient.Client, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger, imapEventSource *v1alpha1.IMAPEventSource, initialCount uint32) error {
-	log.Info("starting IMAP message polling...")
-
-	lastSeen := initialCount
-	ticker := time.NewTicker(30 * time.Second) // Poll every 30 seconds
-	defer ticker.Stop()
+	idleSupported := true
 
 	for {
-		select {
-		case <-ctx.Done():
-			log.Info("event source is stopped")
+		if ctx.Err() != nil {
 			return nil
-		case <-ticker.C:
-			log.Info("polling for new messages...")
+		}
 
-			// Refresh mailbox status
-			mboxStatus, err := c.Status("INBOX", &imap.StatusOptions{
-				NumMessages: true,
-			}).Wait()
+		if err := el.fetchNew(ctx, c, dispatch, log, es, lastUID, &lastUID); err != nil {
+			return err
+		}
+
+		if idleSupported {
+			idleCmd, err := c.Idle()
 			if err != nil {
-				log.Error("failed to get mailbox status", zap.Error(err))
+				idleSupported = false
+				log.Warn("IDLE not supported, falling back to polling", zap.Error(err))
+			} else {
+				select {
+				case <-ctx.Done():
+					_ = idleCmd.Close()
+					return nil
+				case <-updateCh:
+				case <-time.After(pollInterval):
+				}
+				if err := idleCmd.Close(); err != nil {
+					log.Debug("idle close", zap.Error(err))
+				}
 				continue
 			}
+		}
 
-			currentMessages := uint32(0)
-			if mboxStatus.NumMessages != nil {
-				currentMessages = *mboxStatus.NumMessages
-			}
-
-			log.Info("mailbox status", zap.Uint32("current", currentMessages), zap.Uint32("lastSeen", lastSeen))
-
-			if currentMessages > lastSeen {
-				log.Info("new messages found", zap.Uint32("new", currentMessages-lastSeen))
-
-				err = el.fetchNewMessages(c, dispatch, log, imapEventSource, lastSeen+1, currentMessages)
-				if err != nil {
-					log.Error("failed to fetch new messages", zap.Error(err))
-				}
-				lastSeen = currentMessages
-			}
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-time.After(pollInterval):
 		}
 	}
 }
 
-// fetchNewMessages fetches and processes new messages
-func (el *EventListener) fetchNewMessages(c *imapclient.Client, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger, imapEventSource *v1alpha1.IMAPEventSource, start, end uint32) error {
-	seqSet := imap.SeqSet{}
-	seqSet.AddRange(start, end)
-
-	fetchOptions := &imap.FetchOptions{
-		Envelope: true,
+// fetchNew fetches and dispatches messages with UID greater than lastUID.
+func (el *EventListener) fetchNew(ctx context.Context, c *imapclient.Client, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger, es *v1alpha1.IMAPEventSource, lastUID imap.UID, lastUIDPtr *imap.UID) error {
+	criteria := &imap.SearchCriteria{}
+	if lastUID > 0 {
+		uidSet := imap.UIDSet{}
+		uidSet.AddRange(lastUID+1, 0)
+		criteria.UID = []imap.UIDSet{uidSet}
+	}
+	if es.UnseenOnly {
+		criteria.NotFlag = []imap.Flag{imap.FlagSeen}
 	}
 
-	messages, err := c.Fetch(seqSet, fetchOptions).Collect()
+	data, err := c.UIDSearch(criteria, nil).Wait()
 	if err != nil {
-		return fmt.Errorf("failed to fetch messages: %w", err)
+		return fmt.Errorf("uid search failed: %w", err)
+	}
+	uidSet, _ := data.All.(imap.UIDSet)
+	nums, _ := uidSet.Nums()
+	if len(nums) == 0 {
+		return nil
+	}
+
+	fetchOpts := &imap.FetchOptions{
+		Envelope:     true,
+		UID:          true,
+		InternalDate: true,
+		BodySection:  []*imap.FetchItemBodySection{{}},
+	}
+
+	messages, err := c.Fetch(uidSet, fetchOpts).Collect()
+	if err != nil {
+		return fmt.Errorf("fetch failed: %w", err)
 	}
 
 	for _, msg := range messages {
-		if err := el.processMessage(msg, dispatch, log, imapEventSource); err != nil {
+		if msg == nil {
+			continue
+		}
+		if err := el.processMessage(ctx, msg, dispatch, log, es); err != nil {
 			log.Error("failed to process message", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
+			continue
+		}
+		if msg.UID > *lastUIDPtr {
+			*lastUIDPtr = msg.UID
+		}
+		if es.MarkSeen {
+			_ = c.Store(imap.UIDSetNum(msg.UID), &imap.StoreFlags{Op: imap.StoreFlagsAdd, Flags: []imap.Flag{imap.FlagSeen}}, nil).Close()
 		}
 	}
-
 	return nil
 }
 
 // processMessage processes a single IMAP message and dispatches an event
-func (el *EventListener) processMessage(msg *imapclient.FetchMessageBuffer, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger, imapEventSource *v1alpha1.IMAPEventSource) error {
+func (el *EventListener) processMessage(ctx context.Context, msg *imapclient.FetchMessageBuffer, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger, es *v1alpha1.IMAPEventSource) error {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
@@ -192,7 +261,6 @@ func (el *EventListener) processMessage(msg *imapclient.FetchMessageBuffer, disp
 		return fmt.Errorf("message envelope is nil")
 	}
 
-	// Convert envelope addresses to string slices
 	var toAddresses []string
 	for _, addr := range envelope.To {
 		if addr.Name != "" {
@@ -212,17 +280,34 @@ func (el *EventListener) processMessage(msg *imapclient.FetchMessageBuffer, disp
 		}
 	}
 
-	// Convert headers to map (simplified for now)
+	// Parse body and headers from fetched RFC822 content.
+	var body string
 	headers := make(map[string][]string)
+	for _, data := range msg.BodySection {
+		if len(data) == 0 {
+			continue
+		}
+		mr, err := mail.ReadMessage(bytes.NewReader(data))
+		if err == nil {
+			for k, v := range mr.Header {
+				headers[k] = v
+			}
+			b, _ := io.ReadAll(mr.Body)
+			body = string(b)
+		} else {
+			body = string(data)
+		}
+		break
+	}
 
 	eventData := &events.IMAPEventData{
 		Subject:   envelope.Subject,
 		From:      fromAddress,
 		To:        toAddresses,
-		Body:      "", // Body processing would require additional IMAP fetch for body content
+		Body:      body,
 		Headers:   headers,
 		Timestamp: envelope.Date.Format(time.RFC3339),
-		Metadata:  imapEventSource.Metadata,
+		Metadata:  es.Metadata,
 	}
 
 	eventBody, err := json.Marshal(eventData)

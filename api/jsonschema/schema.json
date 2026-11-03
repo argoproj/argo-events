@@ -2328,7 +2328,7 @@
       "type": "object"
     },
     "io.argoproj.events.v1alpha1.IMAPEventSource": {
-      "description": "IMAPEventSource refers to event-source for HDFS related events",
+      "description": "IMAPEventSource refers to event-source for IMAP related events",
       "properties": {
         "connectionBackoff": {
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.Backoff",
@@ -2342,6 +2342,14 @@
           "description": "HostAddress is the address of the host for IMAP server",
           "type": "string"
         },
+        "mailbox": {
+          "description": "Mailbox to monitor (defaults to INBOX)",
+          "type": "string"
+        },
+        "markSeen": {
+          "description": "MarkSeen marks messages as seen after they are processed.",
+          "type": "boolean"
+        },
         "metadata": {
           "additionalProperties": {
             "type": "string"
@@ -2353,8 +2361,16 @@
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
           "description": "Password to use to connect to broker"
         },
+        "pollInterval": {
+          "description": "PollInterval is the interval between polls (e.g. 30s). Defaults to 30s.",
+          "type": "string"
+        },
         "startTLS": {
           "description": "TLS configuration for the emitter client.",
+          "type": "boolean"
+        },
+        "unseenOnly": {
+          "description": "UnseenOnly only processes messages that are not yet seen.",
           "type": "boolean"
         },
         "username": {

@@ -11149,7 +11149,7 @@ IMAPEventSource
 
 <p>
 
-IMAPEventSource refers to event-source for HDFS related events
+IMAPEventSource refers to event-source for IMAP related events
 </p>
 
 </p>
@@ -11289,6 +11289,82 @@ TLS configuration for the emitter client.
 
 Metadata holds the user defined metadata which will passed along the
 event payload.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>mailbox</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Mailbox to monitor (defaults to INBOX)
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>pollInterval</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+PollInterval is the interval between polls (e.g. 30s). Defaults to 30s.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>markSeen</code></br> <em> bool </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+MarkSeen marks messages as seen after they are processed.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>unseenOnly</code></br> <em> bool </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+UnseenOnly only processes messages that are not yet seen.
 </p>
 
 </td>

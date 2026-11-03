@@ -23,7 +23,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
-// ValidateEventSource validates nats event source
+// ValidateEventSource validates imap event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context) error {
 	return validate(&listener.IMAPEventSource)
 }

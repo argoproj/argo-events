@@ -1627,6 +1627,22 @@ message IMAPEventSource {
   // +optional
   map<string, string> metadata = 6;
 
+  // Mailbox to monitor (defaults to INBOX)
+  // +optional
+  optional string mailbox = 7;
+
+  // PollInterval is the interval between polls (e.g. 30s). Defaults to 30s.
+  // +optional
+  optional string pollInterval = 8;
+
+  // MarkSeen marks messages as seen after they are processed.
+  // +optional
+  optional bool markSeen = 9;
+
+  // UnseenOnly only processes messages that are not yet seen.
+  // +optional
+  optional bool unseenOnly = 10;
+
   // Filter
   // +optional
   optional EventSourceFilter filter = 13;

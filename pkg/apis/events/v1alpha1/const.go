@@ -29,8 +29,8 @@ var (
 	GerritEvent          EventSourceType = "gerrit"
 	GithubEvent          EventSourceType = "github"
 	GitlabEvent          EventSourceType = "gitlab"
-	IMAPEvent            EventSourceType = "imap"
 	HDFSEvent            EventSourceType = "hdfs"
+	IMAPEvent            EventSourceType = "imap"
 	SlackEvent           EventSourceType = "slack"
 	StorageGridEvent     EventSourceType = "storagegrid"
 	AzureEventsHub       EventSourceType = "azureEventsHub"
@@ -66,8 +66,8 @@ var (
 		RedisEvent,
 		RedisStreamEvent,
 		ResourceEvent,
-		IMAPEvent,
 		HDFSEvent,
+		IMAPEvent,
 		FileEvent,
 		SFTPEvent,
 		GenericEvent,

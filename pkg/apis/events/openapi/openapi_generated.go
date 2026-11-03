@@ -4446,7 +4446,7 @@ func schema_pkg_apis_events_v1alpha1_IMAPEventSource(ref common.ReferenceCallbac
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "IMAPEventSource refers to event-source for HDFS related events",
+				Description: "IMAPEventSource refers to event-source for IMAP related events",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"hostAddress": {
@@ -4496,6 +4496,34 @@ func schema_pkg_apis_events_v1alpha1_IMAPEventSource(ref common.ReferenceCallbac
 									},
 								},
 							},
+						},
+					},
+					"mailbox": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Mailbox to monitor (defaults to INBOX)",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"pollInterval": {
+						SchemaProps: spec.SchemaProps{
+							Description: "PollInterval is the interval between polls (e.g. 30s). Defaults to 30s.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"markSeen": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MarkSeen marks messages as seen after they are processed.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"unseenOnly": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UnseenOnly only processes messages that are not yet seen.",
+							Type:        []string{"boolean"},
+							Format:      "",
 						},
 					},
 					"filter": {

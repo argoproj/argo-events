@@ -26,6 +26,13 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 )
 
+const (
+	testSecretName  = "test-secret"
+	usernameKey     = "username"
+	passwordKey     = "password"
+	testHostAddress = "mail.example.com:993"
+)
+
 func TestEventListener_GetEventSourceName(t *testing.T) {
 	listener := &EventListener{
 		EventSourceName: "test-event-source",
@@ -66,15 +73,15 @@ func TestValidateEventSource(t *testing.T) {
 				HostAddress: "",
 				Username: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "test-secret",
+						Name: testSecretName,
 					},
-					Key: "username",
+					Key: usernameKey,
 				},
 				Password: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "test-secret",
+						Name: testSecretName,
 					},
-					Key: "password",
+					Key: passwordKey,
 				},
 			},
 			wantErr:    true,
@@ -83,12 +90,12 @@ func TestValidateEventSource(t *testing.T) {
 		{
 			name: "missing username",
 			eventSource: &v1alpha1.IMAPEventSource{
-				HostAddress: "mail.example.com:993",
+				HostAddress: testHostAddress,
 				Password: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "test-secret",
+						Name: testSecretName,
 					},
-					Key: "password",
+					Key: passwordKey,
 				},
 			},
 			wantErr:    true,
@@ -97,12 +104,12 @@ func TestValidateEventSource(t *testing.T) {
 		{
 			name: "missing password",
 			eventSource: &v1alpha1.IMAPEventSource{
-				HostAddress: "mail.example.com:993",
+				HostAddress: testHostAddress,
 				Username: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "test-secret",
+						Name: testSecretName,
 					},
-					Key: "username",
+					Key: usernameKey,
 				},
 			},
 			wantErr:    true,
@@ -111,18 +118,18 @@ func TestValidateEventSource(t *testing.T) {
 		{
 			name: "valid config with all required fields",
 			eventSource: &v1alpha1.IMAPEventSource{
-				HostAddress: "mail.example.com:993",
+				HostAddress: testHostAddress,
 				Username: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "test-secret",
+						Name: testSecretName,
 					},
-					Key: "username",
+					Key: usernameKey,
 				},
 				Password: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "test-secret",
+						Name: testSecretName,
 					},
-					Key: "password",
+					Key: passwordKey,
 				},
 			},
 			wantErr: false,
@@ -130,18 +137,18 @@ func TestValidateEventSource(t *testing.T) {
 		{
 			name: "valid config with TLS",
 			eventSource: &v1alpha1.IMAPEventSource{
-				HostAddress: "mail.example.com:993",
+				HostAddress: testHostAddress,
 				Username: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "test-secret",
+						Name: testSecretName,
 					},
-					Key: "username",
+					Key: usernameKey,
 				},
 				Password: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "test-secret",
+						Name: testSecretName,
 					},
-					Key: "password",
+					Key: passwordKey,
 				},
 				StartTLS: true,
 			},
@@ -150,18 +157,18 @@ func TestValidateEventSource(t *testing.T) {
 		{
 			name: "valid config with all fields",
 			eventSource: &v1alpha1.IMAPEventSource{
-				HostAddress: "mail.example.com:993",
+				HostAddress: testHostAddress,
 				Username: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "test-secret",
+						Name: testSecretName,
 					},
-					Key: "username",
+					Key: usernameKey,
 				},
 				Password: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "test-secret",
+						Name: testSecretName,
 					},
-					Key: "password",
+					Key: passwordKey,
 				},
 				StartTLS: true,
 				Metadata: map[string]string{

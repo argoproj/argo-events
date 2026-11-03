@@ -60,6 +60,10 @@ IMAP event-source specification is available [here](../../APIs.md#argoproj.io/v1
 ### Optional Fields
 
 - `startTLS`: Enable TLS connection (default: `false`)
+- `mailbox`: Mailbox to monitor (default: `INBOX`)
+- `pollInterval`: Interval between polls, e.g. `30s` (default: `30s`)
+- `markSeen`: Mark messages as seen after they are processed (default: `false`)
+- `unseenOnly`: Only process messages that are not yet seen (default: `false`)
 - `connectionBackoff`: Backoff configuration for connection retries
 - `metadata`: Static metadata to include in all events
 - `filter`: Event filtering configuration

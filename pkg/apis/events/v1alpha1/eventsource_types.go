@@ -1162,6 +1162,18 @@ type IMAPEventSource struct {
 	// Metadata holds the user defined metadata which will passed along the event payload.
 	// +optional
 	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	// Mailbox to monitor (defaults to INBOX)
+	// +optional
+	Mailbox string `json:"mailbox,omitempty" protobuf:"bytes,7,opt,name=mailbox"`
+	// PollInterval is the interval between polls (e.g. 30s). Defaults to 30s.
+	// +optional
+	PollInterval string `json:"pollInterval,omitempty" protobuf:"bytes,8,opt,name=pollInterval"`
+	// MarkSeen marks messages as seen after they are processed.
+	// +optional
+	MarkSeen bool `json:"markSeen,omitempty" protobuf:"varint,9,opt,name=markSeen"`
+	// UnseenOnly only processes messages that are not yet seen.
+	// +optional
+	UnseenOnly bool `json:"unseenOnly,omitempty" protobuf:"varint,10,opt,name=unseenOnly"`
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,13,opt,name=filter"`
