@@ -4526,6 +4526,27 @@ func schema_pkg_apis_events_v1alpha1_IMAPEventSource(ref common.ReferenceCallbac
 							Format:      "",
 						},
 					},
+					"delete": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Delete deletes the message after it has been successfully dispatched.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"moveToMailbox": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MoveToMailbox moves the message to the specified mailbox after successful dispatch. The client uses the MOVE command when available, falling back to COPY+delete.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"includeAttachments": {
+						SchemaProps: spec.SchemaProps{
+							Description: "IncludeAttachments when true will fetch and embed attachment data (base64-encoded in the JSON event payload). Use with care; large attachments will produce large events.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 					"filter": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Filter",

@@ -19,10 +19,13 @@ package imap
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/quotedprintable"
 	"net/mail"
+	"strings"
 	"time"
 
 	"github.com/emersion/go-imap/v2"
@@ -220,10 +223,11 @@ func (el *EventListener) fetchNew(ctx context.Context, c *imapclient.Client, dis
 	}
 
 	fetchOpts := &imap.FetchOptions{
-		Envelope:     true,
-		UID:          true,
-		InternalDate: true,
-		BodySection:  []*imap.FetchItemBodySection{{}},
+		Envelope:      true,
+		UID:           true,
+		InternalDate:  true,
+		BodyStructure: &imap.FetchItemBodyStructure{},
+		BodySection:   []*imap.FetchItemBodySection{{}},
 	}
 
 	messages, err := c.Fetch(uidSet, fetchOpts).Collect()
@@ -235,7 +239,13 @@ func (el *EventListener) fetchNew(ctx context.Context, c *imapclient.Client, dis
 		if msg == nil {
 			continue
 		}
-		if err := el.processMessage(ctx, msg, dispatch, log, es); err != nil {
+
+		var attachments []events.IMAPAttachment
+		if es.IncludeAttachments && msg.BodyStructure != nil {
+			attachments = el.fetchAttachments(c, msg, log)
+		}
+
+		if err := el.processMessage(ctx, msg, dispatch, log, es, attachments); err != nil {
 			log.Error("failed to process message", zap.Error(err))
 			el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			continue
@@ -243,15 +253,13 @@ func (el *EventListener) fetchNew(ctx context.Context, c *imapclient.Client, dis
 		if msg.UID > *lastUIDPtr {
 			*lastUIDPtr = msg.UID
 		}
-		if es.MarkSeen {
-			_ = c.Store(imap.UIDSetNum(msg.UID), &imap.StoreFlags{Op: imap.StoreFlagsAdd, Flags: []imap.Flag{imap.FlagSeen}}, nil).Close()
-		}
+		el.postProcess(c, msg, es, log)
 	}
 	return nil
 }
 
 // processMessage processes a single IMAP message and dispatches an event
-func (el *EventListener) processMessage(ctx context.Context, msg *imapclient.FetchMessageBuffer, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger, es *v1alpha1.IMAPEventSource) error {
+func (el *EventListener) processMessage(ctx context.Context, msg *imapclient.FetchMessageBuffer, dispatch func([]byte, ...eventsourcecommon.Option) error, log *zap.SugaredLogger, es *v1alpha1.IMAPEventSource, attachments []events.IMAPAttachment) error {
 	defer func(start time.Time) {
 		el.Metrics.EventProcessingDuration(el.GetEventSourceName(), el.GetEventName(), float64(time.Since(start)/time.Millisecond))
 	}(time.Now())
@@ -301,13 +309,14 @@ func (el *EventListener) processMessage(ctx context.Context, msg *imapclient.Fet
 	}
 
 	eventData := &events.IMAPEventData{
-		Subject:   envelope.Subject,
-		From:      fromAddress,
-		To:        toAddresses,
-		Body:      body,
-		Headers:   headers,
-		Timestamp: envelope.Date.Format(time.RFC3339),
-		Metadata:  es.Metadata,
+		Subject:     envelope.Subject,
+		From:        fromAddress,
+		To:          toAddresses,
+		Body:        body,
+		Headers:     headers,
+		Timestamp:   envelope.Date.Format(time.RFC3339),
+		Metadata:    es.Metadata,
+		Attachments: attachments,
 	}
 
 	eventBody, err := json.Marshal(eventData)
@@ -323,4 +332,107 @@ func (el *EventListener) processMessage(ctx context.Context, msg *imapclient.Fet
 	}
 
 	return nil
+}
+
+// postProcess performs mailbox post-processing actions (mark seen, delete, move)
+// after a message has been successfully dispatched.
+func (el *EventListener) postProcess(c *imapclient.Client, msg *imapclient.FetchMessageBuffer, es *v1alpha1.IMAPEventSource, log *zap.SugaredLogger) {
+	uidSet := imap.UIDSetNum(msg.UID)
+
+	if es.MarkSeen {
+		if _, err := c.Store(uidSet, &imap.StoreFlags{Op: imap.StoreFlagsAdd, Silent: true, Flags: []imap.Flag{imap.FlagSeen}}, nil).Collect(); err != nil {
+			log.Warn("failed to mark message seen", zap.Error(err))
+		}
+	}
+
+	if es.MoveToMailbox != "" {
+		cmd := c.Move(uidSet, es.MoveToMailbox)
+		if _, err := cmd.Wait(); err != nil {
+			log.Warn("failed to move message", zap.String("mailbox", es.MoveToMailbox), zap.Error(err))
+		}
+		return // moved message is no longer in this mailbox; skip delete
+	}
+
+	if es.Delete {
+		if _, err := c.Store(uidSet, &imap.StoreFlags{Op: imap.StoreFlagsAdd, Silent: true, Flags: []imap.Flag{imap.FlagDeleted}}, nil).Collect(); err != nil {
+			log.Warn("failed to mark message deleted", zap.Error(err))
+		}
+		// We intentionally do not EXPUNGE here to avoid affecting other concurrent sessions.
+	}
+}
+
+// fetchAttachments finds attachment parts via BodyStructure and fetches their content.
+func (el *EventListener) fetchAttachments(c *imapclient.Client, msg *imapclient.FetchMessageBuffer, log *zap.SugaredLogger) []events.IMAPAttachment {
+	if msg.BodyStructure == nil {
+		return nil
+	}
+
+	var atts []events.IMAPAttachment
+	msg.BodyStructure.Walk(func(path []int, part imap.BodyStructure) bool {
+		sp, ok := part.(*imap.BodyStructureSinglePart)
+		if !ok {
+			return true
+		}
+		filename := sp.Filename()
+		if filename == "" {
+			if d := sp.Disposition(); d != nil {
+				filename = d.Params["filename"]
+			}
+		}
+		if filename == "" {
+			return true
+		}
+
+		// fetch this part's body section
+		sect := &imap.FetchItemBodySection{Part: path, Peek: true}
+		opts := &imap.FetchOptions{BodySection: []*imap.FetchItemBodySection{sect}}
+		uidSet := imap.UIDSetNum(msg.UID)
+		fetched, err := c.Fetch(uidSet, opts).Collect()
+		if err != nil || len(fetched) == 0 {
+			log.Debug("failed to fetch attachment section", zap.Error(err), zap.String("filename", filename))
+			// still record metadata
+			atts = append(atts, events.IMAPAttachment{
+				Filename:    filename,
+				ContentType: sp.MediaType(),
+				Size:        int64(sp.Size),
+			})
+			return true
+		}
+		var data []byte
+		for _, fmsg := range fetched {
+			if b, ok := fmsg.BodySection[sect]; ok {
+				data = b
+				break
+			}
+		}
+		decoded, err := decodeTransfer(sp.Encoding, data)
+		if err != nil {
+			log.Debug("decode attachment failed, using raw", zap.Error(err))
+			decoded = data
+		}
+		atts = append(atts, events.IMAPAttachment{
+			Filename:    filename,
+			ContentType: sp.MediaType(),
+			Size:        int64(sp.Size),
+			Data:        decoded,
+		})
+		return true
+	})
+	return atts
+}
+
+// decodeTransfer decodes body section data according to Content-Transfer-Encoding.
+func decodeTransfer(encoding string, data []byte) ([]byte, error) {
+	enc := strings.ToLower(strings.TrimSpace(encoding))
+	switch enc {
+	case "", "7bit", "8bit", "binary":
+		return data, nil
+	case "base64":
+		// data from fetch may include newlines etc.
+		return base64.StdEncoding.DecodeString(string(data))
+	case "quoted-printable":
+		return io.ReadAll(quotedprintable.NewReader(bytes.NewReader(data)))
+	default:
+		return data, fmt.Errorf("unknown transfer encoding: %s", encoding)
+	}
 }

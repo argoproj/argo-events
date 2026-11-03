@@ -2324,6 +2324,10 @@
           "description": "Backoff holds parameters applied to connection.",
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.Backoff"
         },
+        "delete": {
+          "description": "Delete deletes the message after it has been successfully dispatched.",
+          "type": "boolean"
+        },
         "filter": {
           "description": "Filter",
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.EventSourceFilter"
@@ -2331,6 +2335,10 @@
         "hostAddress": {
           "description": "HostAddress is the address of the host for IMAP server",
           "type": "string"
+        },
+        "includeAttachments": {
+          "description": "IncludeAttachments when true will fetch and embed attachment data (base64-encoded in the JSON event payload). Use with care; large attachments will produce large events.",
+          "type": "boolean"
         },
         "mailbox": {
           "description": "Mailbox to monitor (defaults to INBOX)",
@@ -2346,6 +2354,10 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "moveToMailbox": {
+          "description": "MoveToMailbox moves the message to the specified mailbox after successful dispatch. The client uses the MOVE command when available, falling back to COPY+delete.",
+          "type": "string"
         },
         "password": {
           "description": "Password to use to connect to broker",

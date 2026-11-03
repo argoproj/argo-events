@@ -64,6 +64,9 @@ IMAP event-source specification is available [here](../../APIs.md#argoproj.io/v1
 - `pollInterval`: Interval between polls, e.g. `30s` (default: `30s`)
 - `markSeen`: Mark messages as seen after they are processed (default: `false`)
 - `unseenOnly`: Only process messages that are not yet seen (default: `false`)
+- `delete`: Delete the message (set \Deleted flag) after successful dispatch (default: `false`)
+- `moveToMailbox`: Move the message to this mailbox after successful dispatch (default: none)
+- `includeAttachments`: Fetch and include attachment data (base64) in the event (default: `false`; use sparingly for large files)
 - `connectionBackoff`: Backoff configuration for connection retries
 - `metadata`: Static metadata to include in all events
 - `filter`: Event filtering configuration

@@ -1174,6 +1174,17 @@ type IMAPEventSource struct {
 	// UnseenOnly only processes messages that are not yet seen.
 	// +optional
 	UnseenOnly bool `json:"unseenOnly,omitempty" protobuf:"varint,10,opt,name=unseenOnly"`
+	// Delete deletes the message after it has been successfully dispatched.
+	// +optional
+	Delete bool `json:"delete,omitempty" protobuf:"varint,11,opt,name=delete"`
+	// MoveToMailbox moves the message to the specified mailbox after successful dispatch.
+	// The client uses the MOVE command when available, falling back to COPY+delete.
+	// +optional
+	MoveToMailbox string `json:"moveToMailbox,omitempty" protobuf:"bytes,12,opt,name=moveToMailbox"`
+	// IncludeAttachments when true will fetch and embed attachment data (base64-encoded in the JSON event payload).
+	// Use with care; large attachments will produce large events.
+	// +optional
+	IncludeAttachments bool `json:"includeAttachments,omitempty" protobuf:"varint,14,opt,name=includeAttachments"`
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,13,opt,name=filter"`

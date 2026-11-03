@@ -11375,6 +11375,67 @@ UnseenOnly only processes messages that are not yet seen.
 
 <td>
 
+<code>delete</code></br> <em> bool </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Delete deletes the message after it has been successfully dispatched.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>moveToMailbox</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+MoveToMailbox moves the message to the specified mailbox after
+successful dispatch. The client uses the MOVE command when available,
+falling back to COPY+delete.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>includeAttachments</code></br> <em> bool </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+IncludeAttachments when true will fetch and embed attachment data
+(base64-encoded in the JSON event payload). Use with care; large
+attachments will produce large events.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>filter</code></br> <em>
 <a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
 </a> </em>
