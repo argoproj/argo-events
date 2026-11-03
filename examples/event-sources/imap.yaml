@@ -15,3 +15,11 @@ spec:
         key: password
       metadata:
         source: imap-eventsource
+      # mailbox: INBOX
+      # pollInterval: 30s
+      # markSeen: false
+      # unseenOnly: false
+      # delete: false
+      # moveToMailbox: ""
+      # includeAttachments: false
+      # connectionBackoff: ...
