@@ -9,14 +9,14 @@ import (
 func TestPathConfigValidate(t *testing.T) {
 	var validConfigs []WatchPathConfig
 	validConfigs = append(validConfigs, WatchPathConfig{
-		Directory:  "/foo",
-		Path:       "bar",
+		Directory:  testDirectory,
+		Path:       testPath,
 		PathRegexp: "",
 	})
 	validConfigs = append(validConfigs, WatchPathConfig{
-		Directory:  "/foo",
+		Directory:  testDirectory,
 		Path:       "",
-		PathRegexp: "bar",
+		PathRegexp: testPath,
 	})
 	for _, config := range validConfigs {
 		err := config.Validate()
@@ -33,24 +33,24 @@ func TestPathConfigValidate(t *testing.T) {
 	// relative dir
 	invalidConfigs = append(invalidConfigs, WatchPathConfig{
 		Directory:  "foo",
-		Path:       "bar",
+		Path:       testPath,
 		PathRegexp: "",
 	})
 	// both path and path regexp
 	invalidConfigs = append(invalidConfigs, WatchPathConfig{
-		Directory:  "/foo",
-		Path:       "bar",
-		PathRegexp: "bar",
+		Directory:  testDirectory,
+		Path:       testPath,
+		PathRegexp: testPath,
 	})
 	// absolute path
 	invalidConfigs = append(invalidConfigs, WatchPathConfig{
-		Directory:  "/foo",
+		Directory:  testDirectory,
 		Path:       "/bar",
 		PathRegexp: "",
 	})
 	// invalid regexp
 	invalidConfigs = append(invalidConfigs, WatchPathConfig{
-		Directory:  "/foo",
+		Directory:  testDirectory,
 		Path:       "",
 		PathRegexp: "][",
 	})

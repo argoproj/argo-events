@@ -37,7 +37,7 @@ var (
 			JetStream: &reconciler.JetStreamConfig{
 				Versions: []reconciler.JetStreamVersion{
 					{
-						Version:              "2.7.3",
+						Version:              testVersion,
 						NatsImage:            testJetStreamImage,
 						ConfigReloaderImage:  testJSReloaderImage,
 						MetricsExporterImage: testJetStreamExporterImage,
@@ -86,7 +86,7 @@ func TestGetLinkedEventSources(t *testing.T) {
 	t.Run("get linked eventsources", func(t *testing.T) {
 		es := fakeEmptyEventSource()
 		es.Spec.EventBusName = "test-sa"
-		es.Spec.Calendar = fakeCalendarEventSourceMap("test")
+		es.Spec.Calendar = fakeCalendarEventSourceMap(testShortName)
 		cl := fake.NewClientBuilder().Build()
 		ctx := context.Background()
 		err := cl.Create(ctx, es, &client.CreateOptions{})

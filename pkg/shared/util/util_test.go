@@ -30,8 +30,8 @@ func (f *fakeHttpWriter) WriteHeader(status int) {
 
 func TestHTTPMethods(t *testing.T) {
 	f := &fakeHttpWriter{}
-	SendSuccessResponse(f, "hello")
-	assert.Equal(t, "hello", string(f.payload))
+	SendSuccessResponse(f, testHello)
+	assert.Equal(t, testHello, string(f.payload))
 	assert.Equal(t, http.StatusOK, f.header)
 
 	SendErrorResponse(f, "failure")
@@ -40,7 +40,7 @@ func TestHTTPMethods(t *testing.T) {
 }
 
 func TestFormatEndpoint(t *testing.T) {
-	assert.Equal(t, "/hello", FormatEndpoint("hello"))
+	assert.Equal(t, "/hello", FormatEndpoint(testHello))
 }
 
 func TestFormattedURL(t *testing.T) {
@@ -284,31 +284,31 @@ func TestGetTLSConfig(t *testing.T) {
 
 func TestElementsMatch(t *testing.T) {
 	assert.True(t, ElementsMatch(nil, nil))
-	assert.True(t, ElementsMatch([]string{"hello"}, []string{"hello"}))
-	assert.True(t, ElementsMatch([]string{"hello", "world"}, []string{"hello", "world"}))
+	assert.True(t, ElementsMatch([]string{testHello}, []string{testHello}))
+	assert.True(t, ElementsMatch([]string{testHello, testWorld}, []string{testHello, testWorld}))
 	assert.True(t, ElementsMatch([]string{}, []string{}))
 
-	assert.False(t, ElementsMatch([]string{"hello"}, nil))
-	assert.False(t, ElementsMatch([]string{"hello"}, []string{}))
-	assert.False(t, ElementsMatch([]string{}, []string{"hello"}))
-	assert.False(t, ElementsMatch([]string{"hello"}, []string{"hello", "world"}))
-	assert.False(t, ElementsMatch([]string{"hello", "world"}, []string{"hello"}))
-	assert.False(t, ElementsMatch([]string{"hello", "world"}, []string{"hello", "moon"}))
-	assert.True(t, ElementsMatch([]string{"hello", "world"}, []string{"world", "hello"}))
-	assert.True(t, ElementsMatch([]string{"hello", "world", "hello"}, []string{"hello", "hello", "world", "world"}))
-	assert.True(t, ElementsMatch([]string{"world", "hello"}, []string{"hello", "hello", "world", "world"}))
-	assert.True(t, ElementsMatch([]string{"hello", "hello", "world", "world"}, []string{"world", "hello"}))
-	assert.False(t, ElementsMatch([]string{"hello"}, []string{"*", "hello"}))
-	assert.False(t, ElementsMatch([]string{"hello", "*"}, []string{"hello"}))
-	assert.False(t, ElementsMatch([]string{"*", "hello", "*"}, []string{"hello"}))
-	assert.False(t, ElementsMatch([]string{"hello"}, []string{"world", "world"}))
-	assert.False(t, ElementsMatch([]string{"hello", "hello"}, []string{"world", "world"}))
+	assert.False(t, ElementsMatch([]string{testHello}, nil))
+	assert.False(t, ElementsMatch([]string{testHello}, []string{}))
+	assert.False(t, ElementsMatch([]string{}, []string{testHello}))
+	assert.False(t, ElementsMatch([]string{testHello}, []string{testHello, testWorld}))
+	assert.False(t, ElementsMatch([]string{testHello, testWorld}, []string{testHello}))
+	assert.False(t, ElementsMatch([]string{testHello, testWorld}, []string{testHello, "moon"}))
+	assert.True(t, ElementsMatch([]string{testHello, testWorld}, []string{testWorld, testHello}))
+	assert.True(t, ElementsMatch([]string{testHello, testWorld, testHello}, []string{testHello, testHello, testWorld, testWorld}))
+	assert.True(t, ElementsMatch([]string{testWorld, testHello}, []string{testHello, testHello, testWorld, testWorld}))
+	assert.True(t, ElementsMatch([]string{testHello, testHello, testWorld, testWorld}, []string{testWorld, testHello}))
+	assert.False(t, ElementsMatch([]string{testHello}, []string{"*", testHello}))
+	assert.False(t, ElementsMatch([]string{testHello, "*"}, []string{testHello}))
+	assert.False(t, ElementsMatch([]string{"*", testHello, "*"}, []string{testHello}))
+	assert.False(t, ElementsMatch([]string{testHello}, []string{testWorld, testWorld}))
+	assert.False(t, ElementsMatch([]string{testHello, testHello}, []string{testWorld, testWorld}))
 }
 
 func TestSliceContains(t *testing.T) {
-	assert.True(t, SliceContains([]string{"hello", "*"}, "*"))
-	assert.True(t, SliceContains([]string{"*", "world"}, "*"))
-	assert.True(t, SliceContains([]string{"*", "world"}, "world"))
-	assert.True(t, SliceContains([]string{"*", "hello", "*"}, "*"))
-	assert.False(t, SliceContains([]string{"hello", "world"}, "*"))
+	assert.True(t, SliceContains([]string{testHello, "*"}, "*"))
+	assert.True(t, SliceContains([]string{"*", testWorld}, "*"))
+	assert.True(t, SliceContains([]string{"*", testWorld}, testWorld))
+	assert.True(t, SliceContains([]string{"*", testHello, "*"}, "*"))
+	assert.False(t, SliceContains([]string{testHello, testWorld}, "*"))
 }

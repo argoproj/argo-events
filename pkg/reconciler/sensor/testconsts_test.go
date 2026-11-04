@@ -1,0 +1,31 @@
+package sensor
+
+// Shared test values.
+const (
+	testAuthVolume      = "auth-volume"
+	testBusinessStart   = "09:00:00"
+	testBusinessStop    = "17:00:00"
+	testContentType     = "fake-content-type"
+	testDLQTrigger      = "dlq-fake-trigger"
+	testData            = "test-data"
+	testDep             = "test-dep"
+	testDep2            = "fake-dep2"
+	testEventBusKind    = "EventBus"
+	testExpr            = "fake-expr"
+	testFake            = "fake"
+	testFakeName        = "fake-name"
+	testFakeOne         = "fake-one"
+	testFakePath        = "fake-path"
+	testFakeSource      = "fake-source"
+	testFakeTrigger     = "fake-trigger"
+	testFakeType        = "fake-type"
+	testMidnight        = "00:00:00"
+	testNATSURL         = "nats://xxxx"
+	testName            = "test"
+	testOperationCreate = "create"
+	testPathBodyValue   = "body.value"
+	testSecret0         = "secret-0"
+	testSecret1         = "secret-1"
+	testSixAM           = "06:00:00"
+	testTmp             = "tmp"
+)

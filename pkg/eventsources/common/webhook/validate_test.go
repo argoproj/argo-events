@@ -28,10 +28,10 @@ import (
 func TestValidateWebhookContextBasicAuth(t *testing.T) {
 	t.Run("valid basicAuth", func(t *testing.T) {
 		context := &aev1.WebhookContext{
-			Endpoint: "/fake",
+			Endpoint: testEndpoint,
 			Port:     "12000",
 			BasicAuth: &aev1.BasicAuth{
-				Username: &corev1.SecretKeySelector{Key: "username"},
+				Username: &corev1.SecretKeySelector{Key: testUsername},
 				Password: &corev1.SecretKeySelector{Key: "password"},
 			},
 		}
@@ -40,10 +40,10 @@ func TestValidateWebhookContextBasicAuth(t *testing.T) {
 
 	t.Run("basicAuth missing password", func(t *testing.T) {
 		context := &aev1.WebhookContext{
-			Endpoint: "/fake",
+			Endpoint: testEndpoint,
 			Port:     "12000",
 			BasicAuth: &aev1.BasicAuth{
-				Username: &corev1.SecretKeySelector{Key: "username"},
+				Username: &corev1.SecretKeySelector{Key: testUsername},
 			},
 		}
 		assert.Error(t, ValidateWebhookContext(context))
@@ -51,11 +51,11 @@ func TestValidateWebhookContextBasicAuth(t *testing.T) {
 
 	t.Run("authSecret and basicAuth are mutually exclusive", func(t *testing.T) {
 		context := &aev1.WebhookContext{
-			Endpoint:   "/fake",
+			Endpoint:   testEndpoint,
 			Port:       "12000",
 			AuthSecret: &corev1.SecretKeySelector{Key: "token"},
 			BasicAuth: &aev1.BasicAuth{
-				Username: &corev1.SecretKeySelector{Key: "username"},
+				Username: &corev1.SecretKeySelector{Key: testUsername},
 				Password: &corev1.SecretKeySelector{Key: "password"},
 			},
 		}

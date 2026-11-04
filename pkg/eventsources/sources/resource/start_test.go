@@ -45,7 +45,7 @@ func TestFilter(t *testing.T) {
 			Filter: &v1alpha1.ResourceFilter{
 				Labels: []v1alpha1.Selector{
 					{
-						Key:       "workflows.argoproj.io/phase",
+						Key:       testPhaseLabel,
 						Operation: "==",
 						Value:     "Succeeded",
 					},
@@ -79,8 +79,8 @@ func TestFilter(t *testing.T) {
 				Name:      "fake",
 				Namespace: "fake",
 				Labels: map[string]string{
-					"workflows.argoproj.io/phase": "Succeeded",
-					"name":                        "my-workflow",
+					testPhaseLabel: "Succeeded",
+					"name":         "my-workflow",
 				},
 			},
 			Spec: corev1.PodSpec{
@@ -112,18 +112,18 @@ func TestLabelSelector(t *testing.T) {
 	for _, op := range []string{"==", "=", "in"} {
 		t.Run(fmt.Sprintf("Test operator %v", op), func(t *testing.T) {
 			r, err := LabelSelector([]v1alpha1.Selector{{
-				Key:       "key",
+				Key:       testKey,
 				Operation: op,
 				Value:     "1",
 			}})
 			if err != nil {
 				t.Fatal(err)
 			}
-			validL := &labels.Set{"key": "1"}
+			validL := &labels.Set{testKey: "1"}
 			if !r.Matches(validL) {
 				t.Errorf("didnot match %v", validL)
 			}
-			invalidL := &labels.Set{"key": "2"}
+			invalidL := &labels.Set{testKey: "2"}
 			if r.Matches(invalidL) {
 				t.Errorf("matched %v", invalidL)
 			}
@@ -133,18 +133,18 @@ func TestLabelSelector(t *testing.T) {
 	for _, op := range []string{"!=", "notin"} {
 		t.Run(fmt.Sprintf("Test operator %v", op), func(t *testing.T) {
 			r, err := LabelSelector([]v1alpha1.Selector{{
-				Key:       "key",
+				Key:       testKey,
 				Operation: op,
 				Value:     "1",
 			}})
 			if err != nil {
 				t.Fatal(err)
 			}
-			validL := &labels.Set{"key": "2"}
+			validL := &labels.Set{testKey: "2"}
 			if !r.Matches(validL) {
 				t.Errorf("didnot match %v", validL)
 			}
-			invalidL := &labels.Set{"key": "1"}
+			invalidL := &labels.Set{testKey: "1"}
 			if r.Matches(invalidL) {
 				t.Errorf("matched %v", invalidL)
 			}
@@ -153,18 +153,18 @@ func TestLabelSelector(t *testing.T) {
 	// Test greater than operator
 	t.Run("Test operator gt", func(t *testing.T) {
 		r, err := LabelSelector([]v1alpha1.Selector{{
-			Key:       "key",
+			Key:       testKey,
 			Operation: "gt",
 			Value:     "1",
 		}})
 		if err != nil {
 			t.Fatal(err)
 		}
-		validL := &labels.Set{"key": "2"}
+		validL := &labels.Set{testKey: "2"}
 		if !r.Matches(validL) {
 			t.Errorf("didnot match %v", validL)
 		}
-		invalidL := &labels.Set{"key": "1"}
+		invalidL := &labels.Set{testKey: "1"}
 		if r.Matches(invalidL) {
 			t.Errorf("matched %v", invalidL)
 		}
@@ -172,18 +172,18 @@ func TestLabelSelector(t *testing.T) {
 	// Test lower than operator
 	t.Run("Test operator lt", func(t *testing.T) {
 		r, err := LabelSelector([]v1alpha1.Selector{{
-			Key:       "key",
+			Key:       testKey,
 			Operation: "lt",
 			Value:     "2",
 		}})
 		if err != nil {
 			t.Fatal(err)
 		}
-		validL := &labels.Set{"key": "1"}
+		validL := &labels.Set{testKey: "1"}
 		if !r.Matches(validL) {
 			t.Errorf("didnot match %v", validL)
 		}
-		invalidL := &labels.Set{"key": "2"}
+		invalidL := &labels.Set{testKey: "2"}
 		if r.Matches(invalidL) {
 			t.Errorf("matched %v", invalidL)
 		}
@@ -191,17 +191,17 @@ func TestLabelSelector(t *testing.T) {
 	// Test exists operator
 	t.Run("Test operator exists", func(t *testing.T) {
 		r, err := LabelSelector([]v1alpha1.Selector{{
-			Key:       "key",
+			Key:       testKey,
 			Operation: "exists",
 		}})
 		if err != nil {
 			t.Fatal(err)
 		}
-		validL := &labels.Set{"key": "something"}
+		validL := &labels.Set{testKey: testSomething}
 		if !r.Matches(validL) {
 			t.Errorf("didnot match %v", validL)
 		}
-		invalidL := &labels.Set{"notkey": "something"}
+		invalidL := &labels.Set{"notkey": testSomething}
 		if r.Matches(invalidL) {
 			t.Errorf("matched %v", invalidL)
 		}
@@ -209,17 +209,17 @@ func TestLabelSelector(t *testing.T) {
 	// Test doesnot exist operator
 	t.Run("Test operator !", func(t *testing.T) {
 		r, err := LabelSelector([]v1alpha1.Selector{{
-			Key:       "key",
+			Key:       testKey,
 			Operation: "!",
 		}})
 		if err != nil {
 			t.Fatal(err)
 		}
-		validL := &labels.Set{"notkey": "something"}
+		validL := &labels.Set{"notkey": testSomething}
 		if !r.Matches(validL) {
 			t.Errorf("didnot match %v", validL)
 		}
-		invalidL := &labels.Set{"key": "something"}
+		invalidL := &labels.Set{testKey: testSomething}
 		if r.Matches(invalidL) {
 			t.Errorf("matched %v", invalidL)
 		}
@@ -227,18 +227,18 @@ func TestLabelSelector(t *testing.T) {
 	// Test default operator
 	t.Run("Test default operator", func(t *testing.T) {
 		r, err := LabelSelector([]v1alpha1.Selector{{
-			Key:       "key",
+			Key:       testKey,
 			Operation: "",
-			Value:     "something",
+			Value:     testSomething,
 		}})
 		if err != nil {
 			t.Fatal(err)
 		}
-		validL := &labels.Set{"key": "something"}
+		validL := &labels.Set{testKey: testSomething}
 		if !r.Matches(validL) {
 			t.Errorf("didnot match %v", validL)
 		}
-		invalidL := &labels.Set{"key": "not something"}
+		invalidL := &labels.Set{testKey: "not something"}
 		if r.Matches(invalidL) {
 			t.Errorf("matched %v", invalidL)
 		}
@@ -247,7 +247,7 @@ func TestLabelSelector(t *testing.T) {
 	for _, op := range []string{"<=", ">="} {
 		t.Run(fmt.Sprintf("Invalid operator %v", op), func(t *testing.T) {
 			_, err := LabelSelector([]v1alpha1.Selector{{
-				Key:       "workflows.argoproj.io/phase",
+				Key:       testPhaseLabel,
 				Operation: op,
 				Value:     "1",
 			}})
@@ -259,19 +259,19 @@ func TestLabelSelector(t *testing.T) {
 	// Test comma separated values for in
 	t.Run("Comma separated values", func(t *testing.T) {
 		r, err := LabelSelector([]v1alpha1.Selector{{
-			Key:       "key",
+			Key:       testKey,
 			Operation: "in",
 			Value:     "a,b,",
 		}})
 		if err != nil {
 			t.Fatal("valid value threw error, value %w", err)
 		}
-		for _, validL := range []labels.Set{{"key": "a"}, {"key": "b"}, {"key": ""}} {
+		for _, validL := range []labels.Set{{testKey: "a"}, {testKey: "b"}, {testKey: ""}} {
 			if !r.Matches(validL) {
 				t.Errorf("didnot match %v", validL)
 			}
 		}
-		invalidL := &labels.Set{"key": "c"}
+		invalidL := &labels.Set{testKey: "c"}
 		if r.Matches(invalidL) {
 			t.Errorf("matched %v", invalidL)
 		}

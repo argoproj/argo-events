@@ -15,9 +15,9 @@ func TestPrevCronTime(t *testing.T) {
 		expectedErr bool
 	}{
 		// Simple cases
-		{"Mon Jul 9 15:00 2012", "0 0/15 * * * *", "Mon Jul 9 14:45 2012", false},
-		{"Mon Jul 9 14:59 2012", "0 0/15 * * * *", "Mon Jul 9 14:45 2012", false},
-		{"Mon Jul 9 15:01:59 2012", "0 0/15 * * * *", "Mon Jul 9 15:00 2012", false},
+		{"Mon Jul 9 15:00 2012", testCronEvery15Min, "Mon Jul 9 14:45 2012", false},
+		{"Mon Jul 9 14:59 2012", testCronEvery15Min, "Mon Jul 9 14:45 2012", false},
+		{"Mon Jul 9 15:01:59 2012", testCronEvery15Min, "Mon Jul 9 15:00 2012", false},
 
 		// Wrap around hours
 		{"Mon Jul 9 15:10 2012", "0 20-35/15 * * * *", "Mon Jul 9 14:35 2012", false},
