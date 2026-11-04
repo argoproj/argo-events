@@ -179,7 +179,7 @@ start: image
 	kubectl -n argo-events wait -lapp.kubernetes.io/part-of=argo-events --for=condition=Ready --timeout 60s pod --all
 
 $(GOPATH)/bin/golangci-lint:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v2.9.0
+	curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b `go env GOPATH`/bin v2.15.0
 
 .PHONY: lint
 lint: $(GOPATH)/bin/golangci-lint
