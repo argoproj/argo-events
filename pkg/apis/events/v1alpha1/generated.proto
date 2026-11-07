@@ -1186,6 +1186,9 @@ message EventSourceSpec {
 
   // MNS event sources
   map<string, MNSEventSource> mns = 36;
+
+  // IMAP event sources
+  map<string, IMAPEventSource> imap = 37;
 }
 
 // EventSourceStatus holds the status of the event-source resource
@@ -1512,6 +1515,7 @@ message HDFSEventSource {
   // CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)
   optional string checkInterval = 3;
 
+  // Addresses is accessible addresses of HDFS name nodes
   repeated string addresses = 4;
 
   // HDFSUser is the user to access HDFS file system.
@@ -1596,6 +1600,66 @@ message HTTPTrigger {
   // Host refers to the domain name of the server (for virtual hosting).
   // +optional
   optional string host = 11;
+}
+
+// IMAPEventSource refers to event-source for IMAP related events
+message IMAPEventSource {
+  // HostAddress is the address of the host for IMAP server
+  optional string hostaddress = 1;
+
+  // Username to use to connect to broker
+  // +optional
+  optional .k8s.io.api.core.v1.SecretKeySelector username = 2;
+
+  // Password to use to connect to broker
+  // +optional
+  optional .k8s.io.api.core.v1.SecretKeySelector password = 3;
+
+  // Backoff holds parameters applied to connection.
+  // +optional
+  optional Backoff connectionBackoff = 4;
+
+  // TLS configuration for the emitter client.
+  // +optional
+  optional bool startTLS = 5;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 6;
+
+  // Mailbox to monitor (defaults to INBOX)
+  // +optional
+  optional string mailbox = 7;
+
+  // PollInterval is the interval between polls (e.g. 30s). Defaults to 30s.
+  // +optional
+  optional string pollInterval = 8;
+
+  // MarkSeen marks messages as seen after they are processed.
+  // +optional
+  optional bool markSeen = 9;
+
+  // UnseenOnly only processes messages that are not yet seen.
+  // +optional
+  optional bool unseenOnly = 10;
+
+  // Delete deletes the message after it has been successfully dispatched.
+  // +optional
+  optional bool delete = 11;
+
+  // MoveToMailbox moves the message to the specified mailbox after successful dispatch.
+  // The client uses the MOVE command when available, falling back to COPY+delete.
+  // +optional
+  optional string moveToMailbox = 12;
+
+  // IncludeAttachments when true will fetch and embed attachment data (base64-encoded in the JSON event payload).
+  // Use with care; large attachments will produce large events.
+  // +optional
+  optional bool includeAttachments = 14;
+
+  // Filter
+  // +optional
+  optional EventSourceFilter filter = 13;
 }
 
 message Int64OrString {

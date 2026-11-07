@@ -344,36 +344,36 @@ func findTypesRecursive(result *[]interface{}, obj reflect.Value, t reflect.Type
 func GenerateSecretVolumeSpecs(selector *v1.SecretKeySelector) (v1.Volume, v1.VolumeMount) {
 	volName := strings.ReplaceAll("secret-"+selector.Name, "_", "-")
 	return v1.Volume{
-			Name: volName,
-			VolumeSource: v1.VolumeSource{
-				Secret: &v1.SecretVolumeSource{
-					SecretName: selector.Name,
-				},
+		Name: volName,
+		VolumeSource: v1.VolumeSource{
+			Secret: &v1.SecretVolumeSource{
+				SecretName: selector.Name,
 			},
-		}, v1.VolumeMount{
-			Name:      volName,
-			ReadOnly:  true,
-			MountPath: "/argo-events/secrets/" + selector.Name,
-		}
+		},
+	}, v1.VolumeMount{
+		Name:      volName,
+		ReadOnly:  true,
+		MountPath: "/argo-events/secrets/" + selector.Name,
+	}
 }
 
 // GenerateConfigMapVolumeSpecs builds a "volume" and "volumeMount"spec with a configMapKeySelector
 func GenerateConfigMapVolumeSpecs(selector *v1.ConfigMapKeySelector) (v1.Volume, v1.VolumeMount) {
 	volName := strings.ReplaceAll("cm-"+selector.Name, "_", "-")
 	return v1.Volume{
-			Name: volName,
-			VolumeSource: v1.VolumeSource{
-				ConfigMap: &v1.ConfigMapVolumeSource{
-					LocalObjectReference: v1.LocalObjectReference{
-						Name: selector.Name,
-					},
+		Name: volName,
+		VolumeSource: v1.VolumeSource{
+			ConfigMap: &v1.ConfigMapVolumeSource{
+				LocalObjectReference: v1.LocalObjectReference{
+					Name: selector.Name,
 				},
 			},
-		}, v1.VolumeMount{
-			Name:      volName,
-			ReadOnly:  true,
-			MountPath: "/argo-events/config/" + selector.Name,
-		}
+		},
+	}, v1.VolumeMount{
+		Name:      volName,
+		ReadOnly:  true,
+		MountPath: "/argo-events/config/" + selector.Name,
+	}
 }
 
 func uniqueVolumes(vols []v1.Volume) []v1.Volume {

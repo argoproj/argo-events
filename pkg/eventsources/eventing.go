@@ -36,6 +36,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/github"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/gitlab"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/hdfs"
+	"github.com/argoproj/argo-events/pkg/eventsources/sources/imap"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/kafka"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/minio"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/mqtt"
@@ -206,6 +207,16 @@ func GetEventingServers(eventSource *aev1.EventSource, metrics *eventsourcemetri
 			servers = append(servers, &gitlab.EventListener{EventSourceName: eventSource.Name, EventName: k, GitlabEventSource: v, Metrics: metrics})
 		}
 		result[aev1.GitlabEvent] = servers
+	}
+	if len(eventSource.Spec.IMAP) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.IMAP {
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &imap.EventListener{EventSourceName: eventSource.Name, EventName: k, IMAPEventSource: v, Metrics: metrics})
+		}
+		result[aev1.IMAPEvent] = servers
 	}
 	if len(eventSource.Spec.HDFS) != 0 {
 		servers := []EventingServer{}
