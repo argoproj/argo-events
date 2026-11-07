@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/nats-io/graft"
 	nats "github.com/nats-io/nats.go"
 	"go.uber.org/zap"
@@ -71,42 +70,13 @@ func newEventBusElector(ctx context.Context, authStrategy *aev1.AuthStrategy, cl
 
 func getEventBusAuth(ctx context.Context, authStrategy *aev1.AuthStrategy) (*eventbuscommon.Auth, error) {
 	logger := logging.FromContext(ctx)
-
-	var auth *eventbuscommon.Auth
-
-	if authStrategy == nil || *authStrategy == aev1.AuthStrategyNone {
-		auth = &eventbuscommon.Auth{
-			Strategy: aev1.AuthStrategyNone,
-		}
-	} else {
-		v := sharedutil.ViperWithLogging()
-		v.SetConfigName("auth")
-		v.SetConfigType("yaml")
-		v.AddConfigPath(eventBusAuthFileMountPath)
-
-		if err := v.ReadInConfig(); err != nil {
-			return nil, fmt.Errorf("failed to load auth.yaml. err: %w", err)
-		}
-
-		cred := &eventbuscommon.AuthCredential{}
-		if err := v.Unmarshal(cred); err != nil {
-			logger.Errorw("failed to unmarshal auth.yaml", zap.Error(err))
-			return nil, err
-		}
-
-		v.WatchConfig()
-		v.OnConfigChange(func(e fsnotify.Event) {
-			// Auth file changed, let it restart.
-			logger.Fatal("Eventbus auth config file changed, exiting..")
-		})
-
-		auth = &eventbuscommon.Auth{
-			Strategy:   *authStrategy,
-			Credential: cred,
-		}
+	strategy := aev1.AuthStrategyNone
+	if authStrategy != nil {
+		strategy = *authStrategy
 	}
-
-	return auth, nil
+	return eventbuscommon.LoadEventBusAuth(eventBusAuthFileMountPath, strategy, logger, func() {
+		logger.Fatal("Eventbus auth config file changed, exiting..")
+	})
 }
 
 type natsEventBusElector struct {
@@ -124,12 +94,8 @@ func (e *natsEventBusElector) RunOrDie(ctx context.Context, callbacks LeaderCall
 	// Will never give up
 	opts.MaxReconnect = -1
 	opts.Url = e.url
-	switch e.auth.Strategy {
-	case aev1.AuthStrategyToken:
-		opts.Token = e.auth.Credential.Token
-	case aev1.AuthStrategyBasic:
-		opts.User = e.auth.Credential.Username
-		opts.Password = e.auth.Credential.Password
+	if err := eventbuscommon.ApplyNATSAuthToOptions(&opts, e.auth); err != nil {
+		log.Fatalw("failed to apply eventbus auth", zap.Error(err))
 	}
 
 	if e.tls != nil {

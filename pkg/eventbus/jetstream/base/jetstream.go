@@ -81,17 +81,14 @@ func (stream *Jetstream) MakeConnection() (*JetstreamConnection, error) {
 		log.Info("Connecting to NATS without client-side TLS")
 	}
 
-	switch stream.auth.Strategy {
-	case v1alpha1.AuthStrategyToken:
-		log.Info("NATS auth strategy: Token")
-		opts = append(opts, nats.Token(stream.auth.Credential.Token))
-	case v1alpha1.AuthStrategyBasic:
-		log.Info("NATS auth strategy: Basic")
-		opts = append(opts, nats.UserInfo(stream.auth.Credential.Username, stream.auth.Credential.Password))
-	case v1alpha1.AuthStrategyNone:
-		log.Info("NATS auth strategy: None")
-	default:
-		return nil, fmt.Errorf("unsupported auth strategy")
+	if stream.auth == nil {
+		stream.auth = &eventbuscommon.Auth{Strategy: v1alpha1.AuthStrategyNone}
+	}
+	log.Infof("NATS auth strategy: %s", stream.auth.Strategy)
+	var err error
+	opts, err = eventbuscommon.ApplyNATSAuthOptions(opts, stream.auth)
+	if err != nil {
+		return nil, err
 	}
 	nc, err := nats.Connect(stream.url, opts...)
 	if err != nil {

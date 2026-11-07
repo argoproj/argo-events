@@ -4628,7 +4628,7 @@ func schema_pkg_apis_events_v1alpha1_JetStreamConfig(ref common.ReferenceCallbac
 					},
 					"accessSecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Secret for auth",
+							Description: "Secret for auth. Native JetStream uses YAML with username/password. Exotic JetStream also accepts a NATS credentials file (.creds) containing a user JWT and NKey seed. JetStream access secrets are injected into EventSource/Sensor pods as EVENTBUS_NATS_CREDENTIALS and as a mounted auth file; the env var is preferred when present.",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},

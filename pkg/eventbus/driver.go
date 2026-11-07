@@ -4,9 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/fsnotify/fsnotify"
-	"go.uber.org/zap"
-
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	eventbuscommon "github.com/argoproj/argo-events/pkg/eventbus/common"
 	jetstreamsource "github.com/argoproj/argo-events/pkg/eventbus/jetstream/eventsource"
@@ -16,7 +13,6 @@ import (
 	stansource "github.com/argoproj/argo-events/pkg/eventbus/stan/eventsource"
 	stansensor "github.com/argoproj/argo-events/pkg/eventbus/stan/sensor"
 	"github.com/argoproj/argo-events/pkg/shared/logging"
-	sharedutil "github.com/argoproj/argo-events/pkg/shared/util"
 )
 
 func GetEventSourceDriver(ctx context.Context, eventBusConfig v1alpha1.BusConfig, eventSourceName string, defaultSubject string) (eventbuscommon.EventSourceDriver, error) {
@@ -124,36 +120,10 @@ func GetAuth(ctx context.Context, eventBusConfig v1alpha1.BusConfig) (*eventbusc
 	default:
 		return nil, fmt.Errorf("invalid event bus")
 	}
-	var auth *eventbuscommon.Auth
-	cred := &eventbuscommon.AuthCredential{}
-	if eventBusAuth == nil || *eventBusAuth == v1alpha1.AuthStrategyNone {
-		auth = &eventbuscommon.Auth{
-			Strategy: v1alpha1.AuthStrategyNone,
-		}
-	} else {
-		v := sharedutil.ViperWithLogging()
-		v.SetConfigName("auth")
-		v.SetConfigType("yaml")
-		v.AddConfigPath(v1alpha1.EventBusAuthFileMountPath)
-		err := v.ReadInConfig()
-		if err != nil {
-			return nil, fmt.Errorf("failed to load auth.yaml. err: %w", err)
-		}
-		err = v.Unmarshal(cred)
-		if err != nil {
-			logger.Errorw("failed to unmarshal auth.yaml", zap.Error(err))
-			return nil, err
-		}
-		v.WatchConfig()
-		v.OnConfigChange(func(e fsnotify.Event) {
-			// Auth file changed, let it restart
-			logger.Fatal("Eventbus auth config file changed, exiting..")
-		})
-		auth = &eventbuscommon.Auth{
-			Strategy:   *eventBusAuth,
-			Credential: cred,
-		}
+	if eventBusAuth == nil {
+		return eventbuscommon.LoadEventBusAuth(v1alpha1.EventBusAuthFileMountPath, v1alpha1.AuthStrategyNone, logger, nil)
 	}
-
-	return auth, nil
+	return eventbuscommon.LoadEventBusAuth(v1alpha1.EventBusAuthFileMountPath, *eventBusAuth, logger, func() {
+		logger.Fatal("Eventbus auth config file changed, exiting..")
+	})
 }
