@@ -81,7 +81,7 @@ require (
 	github.com/stripe/stripe-go v70.15.0+incompatible
 	github.com/tidwall/gjson v1.20.0
 	github.com/tidwall/sjson v1.2.5
-	github.com/xdg-go/scram v1.2.0
+	github.com/xdg-go/scram v1.3.0
 	github.com/yuin/gopher-lua v1.1.2
 	gitlab.com/gitlab-org/api/client-go v1.46.0
 	go.uber.org/ratelimit v0.3.1
