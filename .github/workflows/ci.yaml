@@ -21,7 +21,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v7
         with:
-          go-version: "1.26"
+          go-version: "1.26.11"
       - name: Restore go build cache
         uses: actions/cache@v5
         with:
@@ -48,7 +48,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v7
         with:
-          go-version: "1.26"
+          go-version: "1.26.11"
       - name: Restore go build cache
         uses: actions/cache@v5
         with:
@@ -75,7 +75,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v7
         with:
-          go-version: "1.26"
+          go-version: "1.26.11"
       - name: Restore go build cache
         uses: actions/cache@v5
         with:
@@ -108,7 +108,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v7
         with:
-          go-version: "1.26"
+          go-version: "1.26.11"
       - name: Restore go build cache
         uses: actions/cache@v5
         with:

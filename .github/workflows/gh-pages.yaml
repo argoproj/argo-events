@@ -23,7 +23,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v7
         with:
-          go-version: "1.26"
+          go-version: "1.26.11"
       - name: build
         run: make docs
       - name: deploy
