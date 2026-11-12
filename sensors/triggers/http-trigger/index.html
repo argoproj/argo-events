@@ -2287,7 +2287,7 @@ can help. The HTTP trigger takes the task of consuming events from event-sources
 </li>
 <li>
 <p>Our goals is to seamlessly integrate Minio S3 bucket notifications with REST API server created in previous step. So,
-    lets set up the Minio event-source available <a href="https://argoproj.github.io/argo-events/setup/minio/">here</a>.
+    lets set up the Minio event-source available <a href="https://argoproj.github.io/argo-events/eventsources/setup/minio/">here</a>.
     Don't create the sensor as we will be deploying it in next step.</p>
 </li>
 <li>
@@ -2400,7 +2400,7 @@ to invoke OpenFaaS function.</p>
 <p>We are going to invoke OpenFaaS function on a message on Redis Subscriber.</p>
 </li>
 <li>
-<p>Let's set up the Redis Database, Redis PubSub event-source as specified <a href="https://argoproj.github.io/argo-events/setup/redis/">here</a>.
+<p>Let's set up the Redis Database, Redis PubSub event-source as specified <a href="https://argoproj.github.io/argo-events/eventsources/setup/redis/">here</a>.
     Do not create the Redis sensor, we are going to create it in next step.</p>
 </li>
 <li>
@@ -2458,7 +2458,7 @@ to invoke OpenFaaS function.</p>
 <p>Now, we are going to invoke the Kubeless function when a message is placed on a NATS queue.</p>
 </li>
 <li>
-<p>Let's set up the NATS event-source. Follow <a href="https://argoproj.github.io/argo-events/setup/nats/#setup">instructions</a> for details.
+<p>Let's set up the NATS event-source. Follow <a href="https://argoproj.github.io/argo-events/eventsources/setup/nats/#setup">instructions</a> for details.
     Do not create the NATS sensor, we are going to create it in next step.</p>
 </li>
 <li>
