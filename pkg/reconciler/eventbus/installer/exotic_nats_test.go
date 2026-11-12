@@ -20,7 +20,7 @@ var (
 	testNatsExoticBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,

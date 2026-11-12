@@ -42,7 +42,7 @@ var (
 	fakeEventBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -58,7 +58,7 @@ var (
 		Status: v1alpha1.EventBusStatus{
 			Config: v1alpha1.BusConfig{
 				NATS: &v1alpha1.NATSConfig{
-					URL:  "nats://xxxx",
+					URL:  testNATSURL,
 					Auth: &v1alpha1.AuthStrategyToken,
 					AccessSecret: &corev1.SecretKeySelector{
 						Key: "test-key",
@@ -74,7 +74,7 @@ var (
 	fakeEventBusJetstream = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -88,7 +88,7 @@ var (
 		Status: v1alpha1.EventBusStatus{
 			Config: v1alpha1.BusConfig{
 				JetStream: &v1alpha1.JetStreamConfig{
-					URL: "nats://xxxx",
+					URL: testNATSURL,
 				},
 			},
 		},
@@ -97,7 +97,7 @@ var (
 	fakeEventBusKafka = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -136,7 +136,7 @@ func fakeWebhookEventSourceMap(name string) map[string]v1alpha1.WebhookEventSour
 	return map[string]v1alpha1.WebhookEventSource{
 		name: {
 			WebhookContext: v1alpha1.WebhookContext{
-				URL:      "http://a.b",
+				URL:      testURL,
 				Endpoint: "/abc",
 				Port:     "1234",
 			},
@@ -196,7 +196,7 @@ func TestReconcile(t *testing.T) {
 		r := &reconciler{
 			client:           cl,
 			scheme:           scheme.Scheme,
-			eventSourceImage: "test-image",
+			eventSourceImage: testImage,
 			logger:           logging.NewArgoEventsLogger(),
 		}
 		err := r.reconcile(ctx, testEventSource)
@@ -217,7 +217,7 @@ func TestReconcile(t *testing.T) {
 		r := &reconciler{
 			client:           cl,
 			scheme:           scheme.Scheme,
-			eventSourceImage: "test-image",
+			eventSourceImage: testImage,
 			logger:           logging.NewArgoEventsLogger(),
 		}
 		err = r.reconcile(ctx, testEventSource)

@@ -50,14 +50,14 @@ func TestRouteActiveHandler(t *testing.T) {
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
-		router.token = "Jhj5dZrVaK7ZwHHjRyZWjbDl"
+		router.token = testToken
 		router.route.Active = true
 
 		convey.Convey("Test url verification request", func() {
 			writer := &webhook.FakeHttpWriter{}
 			urlVer := slackevents.EventsAPIURLVerificationEvent{
 				Type:      slackevents.URLVerification,
-				Token:     "Jhj5dZrVaK7ZwHHjRyZWjbDl",
+				Token:     testToken,
 				Challenge: "3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P",
 			}
 			payload, err := yaml.Marshal(urlVer)
@@ -207,7 +207,7 @@ func TestEventHandler(t *testing.T) {
 
 			j := json.RawMessage(event)
 			ce := slackevents.EventsAPICallbackEvent{
-				Token:     "Jhj5dZrVaK7ZwHHjRyZWjbDl",
+				Token:     testToken,
 				Type:      slackevents.CallbackEvent,
 				EventTime: 1234567890,
 				APIAppID:  "AXXXXXXXXX",

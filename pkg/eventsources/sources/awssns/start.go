@@ -54,8 +54,8 @@ var (
 	// used for SNS verification
 	snsSigKeys      = map[string][]string{}
 	snsKeyRealNames = map[string]string{
-		"MessageID": "MessageId",
-		"TopicARN":  "TopicArn",
+		snsKeyMessageID: "MessageId",
+		snsKeyTopicARN:  "TopicArn",
 	}
 )
 
@@ -65,19 +65,19 @@ func init() {
 
 	snsSigKeys[messageTypeNotification] = []string{
 		"Message",
-		"MessageID",
+		snsKeyMessageID,
 		"Subject",
 		"Timestamp",
-		"TopicARN",
+		snsKeyTopicARN,
 		"Type",
 	}
 	snsSigKeys[messageTypeSubscriptionConfirmation] = []string{
 		"Message",
-		"MessageID",
+		snsKeyMessageID,
 		"SubscribeURL",
 		"Timestamp",
 		"Token",
-		"TopicARN",
+		snsKeyTopicARN,
 		"Type",
 	}
 }

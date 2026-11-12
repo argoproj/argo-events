@@ -140,9 +140,9 @@ func (r *jetStreamInstaller) buildJetStreamServiceSpec() corev1.ServiceSpec {
 	return corev1.ServiceSpec{
 		Ports: []corev1.ServicePort{
 			{Name: "tcp-client", Port: jsClientPort},
-			{Name: "cluster", Port: jsClusterPort},
-			{Name: "metrics", Port: jsMetricsPort},
-			{Name: "monitor", Port: jsMonitorPort},
+			{Name: clusterPortName, Port: jsClusterPort},
+			{Name: metricsName, Port: jsMetricsPort},
+			{Name: monitorPortName, Port: jsMonitorPort},
 		},
 		Type:                     corev1.ServiceTypeClusterIP,
 		ClusterIP:                corev1.ClusterIPNone,
@@ -287,9 +287,9 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 				ShareProcessNamespace:         &shareProcessNamespace,
 				TerminationGracePeriodSeconds: &terminationGracePeriodSeconds,
 				Volumes: []corev1.Volume{
-					{Name: "pid", VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}}},
+					{Name: pidVolumeName, VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}}},
 					{
-						Name: "config-volume",
+						Name: configVolumeName,
 						VolumeSource: corev1.VolumeSource{
 							Projected: &corev1.ProjectedVolumeSource{
 								Sources: []corev1.VolumeProjection{
@@ -355,8 +355,8 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 						ImagePullPolicy: jsContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
 							{Name: "client", ContainerPort: jsClientPort},
-							{Name: "cluster", ContainerPort: jsClusterPort},
-							{Name: "monitor", ContainerPort: jsMonitorPort},
+							{Name: clusterPortName, ContainerPort: jsClusterPort},
+							{Name: monitorPortName, ContainerPort: jsMonitorPort},
 						},
 						Command: []string{jsVersion.StartCommand, "--config", "/etc/nats-config/nats-js.conf"},
 						Args:    js.StartArgs,
@@ -368,8 +368,8 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 							{Name: "JS_KEY", ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: generateJetStreamServerSecretName(r.eventBus)}, Key: v1alpha1.JetStreamServerSecretEncryptionKey}}},
 						},
 						VolumeMounts: []corev1.VolumeMount{
-							{Name: "config-volume", MountPath: "/etc/nats-config"},
-							{Name: "pid", MountPath: "/var/run/nats"},
+							{Name: configVolumeName, MountPath: "/etc/nats-config"},
+							{Name: pidVolumeName, MountPath: "/var/run/nats"},
 						},
 						SecurityContext: jsContainerSecurityContext,
 						StartupProbe: &corev1.Probe{
@@ -420,16 +420,16 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 						SecurityContext: reloaderContainerSecurityContext,
 						Args:            []string{"-pid", "/var/run/nats/nats.pid", "-config", "/etc/nats-config/nats-js.conf"},
 						VolumeMounts: []corev1.VolumeMount{
-							{Name: "config-volume", MountPath: "/etc/nats-config"},
-							{Name: "pid", MountPath: "/var/run/nats"},
+							{Name: configVolumeName, MountPath: "/etc/nats-config"},
+							{Name: pidVolumeName, MountPath: "/var/run/nats"},
 						},
 					},
 					{
-						Name:            "metrics",
+						Name:            metricsName,
 						Image:           jsVersion.MetricsExporterImage,
 						ImagePullPolicy: metricsContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
-							{Name: "metrics", ContainerPort: jsMetricsPort},
+							{Name: metricsName, ContainerPort: jsMetricsPort},
 						},
 						Args:            []string{"-connz", "-routez", "-subz", "-varz", "-prefix=nats", "-use_internal_server_id", "-jsz=all", fmt.Sprintf("http://localhost:%s", strconv.Itoa(int(jsMonitorPort)))},
 						SecurityContext: metricsContainerSecurityContext,
@@ -453,7 +453,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 	}
 
 	if js.MetricsContainerTemplate != nil {
-		containers["metrics"].Resources = js.MetricsContainerTemplate.Resources
+		containers[metricsName].Resources = js.MetricsContainerTemplate.Resources
 	}
 
 	if js.ReloaderContainerTemplate != nil {

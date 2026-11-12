@@ -14,7 +14,7 @@ import (
 var (
 	testNatsEventBus = &v1alpha1.EventBus{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "test-ns",
+			Namespace: testNS,
 			Name:      v1alpha1.DefaultEventBusName,
 		},
 		Spec: v1alpha1.EventBusSpec{
@@ -28,7 +28,7 @@ var (
 
 	testJetStreamEventBus = &v1alpha1.EventBus{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "test-ns",
+			Namespace: testNS,
 			Name:      v1alpha1.DefaultEventBusName,
 		},
 		Spec: v1alpha1.EventBusSpec{
@@ -40,7 +40,7 @@ var (
 
 	testJetStreamExoticBus = &v1alpha1.EventBus{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "test-ns",
+			Namespace: testNS,
 			Name:      v1alpha1.DefaultEventBusName,
 		},
 		Spec: v1alpha1.EventBusSpec{
@@ -52,7 +52,7 @@ var (
 
 	testKafkaEventBus = &v1alpha1.EventBus{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "test-ns",
+			Namespace: testNS,
 			Name:      v1alpha1.DefaultEventBusName,
 		},
 		Spec: v1alpha1.EventBusSpec{
