@@ -1,9 +1,17 @@
 package util
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"math/big"
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -311,4 +319,38 @@ func TestSliceContains(t *testing.T) {
 	assert.True(t, SliceContains([]string{"*", "world"}, "world"))
 	assert.True(t, SliceContains([]string{"*", "hello", "*"}, "*"))
 	assert.False(t, SliceContains([]string{"hello", "world"}, "*"))
+}
+
+func TestNewCertPoolFromPEM(t *testing.T) {
+	t.Run("valid certificate", func(t *testing.T) {
+		key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		assert.NoError(t, err)
+		tmpl := &x509.Certificate{
+			SerialNumber:          big.NewInt(1),
+			Subject:               pkix.Name{CommonName: "test-ca"},
+			NotBefore:             time.Now(),
+			NotAfter:              time.Now().Add(time.Hour),
+			IsCA:                  true,
+			BasicConstraintsValid: true,
+		}
+		der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &key.PublicKey, key)
+		assert.NoError(t, err)
+		caCert := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})
+
+		pool, err := NewCertPoolFromPEM(caCert)
+		assert.NoError(t, err)
+		assert.NotNil(t, pool)
+	})
+
+	for name, caCert := range map[string][]byte{
+		"empty":   {},
+		"not pem": []byte("not a certificate"),
+	} {
+		t.Run(name, func(t *testing.T) {
+			pool, err := NewCertPoolFromPEM(caCert)
+			assert.Nil(t, pool)
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), "no valid PEM encoded certificate found")
+		})
+	}
 }
