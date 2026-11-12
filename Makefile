@@ -69,9 +69,14 @@ K := $(foreach exec,$(EXECUTABLES), $(if $(shell which $(exec)),some string,$(er
 
 # build
 .PHONY: build
-build: dist/$(BINARY_NAME)-linux-amd64.gz dist/$(BINARY_NAME)-linux-arm64.gz dist/$(BINARY_NAME)-linux-arm.gz dist/$(BINARY_NAME)-linux-ppc64le.gz dist/$(BINARY_NAME)-linux-s390x.gz
+PLATFORMS:=linux-amd64 linux-arm64 linux-arm linux-ppc64le linux-s390x
+BINARY_GZ_TARGETS:=$(addprefix dist/$(BINARY_NAME)-,$(addsuffix .gz,$(PLATFORMS)))
 
-dist/$(BINARY_NAME)-%.gz: dist/$(BINARY_NAME)-%
+build: $(BINARY_GZ_TARGETS)
+
+# Static pattern rule: the implicit dist/$(BINARY_NAME)-% rule also matches the
+# .gz names, and newer GNU make versions pick it over the gzip rule.
+$(BINARY_GZ_TARGETS): dist/$(BINARY_NAME)-%.gz: dist/$(BINARY_NAME)-%
 	@[[ -e dist/$(BINARY_NAME)-$*.gz ]] || gzip -k dist/$(BINARY_NAME)-$*
 
 dist/$(BINARY_NAME): GOARGS = GOOS= GOARCH=
