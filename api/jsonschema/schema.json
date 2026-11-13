@@ -1655,6 +1655,11 @@
           "description": "Resource event sources",
           "type": "object"
         },
+        "revisionHistoryLimit": {
+          "description": "RevisionHistoryLimit specifies how many old deployment revisions to retain",
+          "format": "int32",
+          "type": "integer"
+        },
         "service": {
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.Service",
           "description": "Service is the specifications of the service to expose the event source"
