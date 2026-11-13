@@ -355,3 +355,79 @@ func Test_JSBufferGetReplicas(t *testing.T) {
 	s.Replicas = &five
 	assert.Equal(t, 5, s.GetReplicas())
 }
+
+func TestJetStreamUpgradeShortEncryptionKey(t *testing.T) {
+	shortKey := []byte("abcdefghijkl") // 12 bytes, as generated before #4111
+
+	tests := []struct {
+		name        string
+		version     string
+		key         []byte
+		sts         *appv1.StatefulSet
+		wantUpgrade bool
+	}{
+		{name: "short key, store still on the literal key", version: "2.10.29", key: shortKey, wantUpgrade: true},
+		{name: "short key, statefulset on the old configuration", version: "2.10.29", key: shortKey, sts: statefulSetWithEnv("JS_KEY"), wantUpgrade: true},
+		{name: "short key, statefulset already reads the key from the secret", version: "2.10.29", key: shortKey, sts: statefulSetWithEnv("JS_KEY_RAW", "JS_KEY")},
+		{name: "short key, server without prev_key support", version: "2.7.3", key: shortKey},
+		{name: "key already long enough", version: "2.10.29", key: []byte("0123456789abcdef0123456789abcdef")},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := context.TODO()
+			eb := testJetStreamEventBus.DeepCopy()
+			eb.UID = "eventbus-uid"
+			eb.Spec.JetStream.Version = tc.version
+			owner := []metav1.OwnerReference{*metav1.NewControllerRef(eb.GetObjectMeta(), v1alpha1.EventBusGroupVersionKind)}
+			server := &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{Namespace: eb.Namespace, Name: generateJetStreamServerSecretName(eb), OwnerReferences: owner},
+				Data:       map[string][]byte{v1alpha1.JetStreamServerSecretEncryptionKey: tc.key},
+			}
+			clientAuth := &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{Namespace: eb.Namespace, Name: generateJetStreamClientAuthSecretName(eb), OwnerReferences: owner},
+				Data:       map[string][]byte{v1alpha1.JetStreamClientAuthSecretKey: []byte("username: u\npassword: p")},
+			}
+			builder := fake.NewClientBuilder().WithObjects(server.DeepCopy(), clientAuth.DeepCopy())
+			if tc.sts != nil {
+				sts := tc.sts.DeepCopy()
+				sts.Namespace, sts.Name = eb.Namespace, generateJetStreamStatefulSetName(eb)
+				builder = builder.WithObjects(sts)
+			}
+			cl := builder.Build()
+			i := &jetStreamInstaller{
+				client:     cl,
+				kubeClient: k8sfake.NewSimpleClientset(server, clientAuth),
+				eventBus:   eb,
+				config:     fakeConfig,
+				labels:     testLabels,
+				logger:     zaptest.NewLogger(t).Sugar(),
+			}
+
+			assert.NoError(t, i.createSecrets(ctx))
+
+			got := &corev1.Secret{}
+			assert.NoError(t, cl.Get(ctx, types.NamespacedName{Namespace: eb.Namespace, Name: server.Name}, got))
+			key := got.Data[v1alpha1.JetStreamServerSecretEncryptionKey]
+			if tc.wantUpgrade {
+				assert.Len(t, key, minEncryptionKeyLength)
+				assert.NotEqual(t, tc.key, key)
+			} else {
+				assert.Equal(t, tc.key, key)
+			}
+		})
+	}
+}
+
+func statefulSetWithEnv(names ...string) *appv1.StatefulSet {
+	var env []corev1.EnvVar
+	for _, n := range names {
+		env = append(env, corev1.EnvVar{Name: n})
+	}
+	return &appv1.StatefulSet{
+		Spec: appv1.StatefulSetSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: "main", Env: env}}},
+			},
+		},
+	}
+}
