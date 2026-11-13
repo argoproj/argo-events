@@ -18,7 +18,11 @@ package aws
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/smartystreets/goconvey/convey"
@@ -85,7 +89,7 @@ func TestAWS(t *testing.T) {
 
 	convey.Convey("create AWS credential using already present config/IAM role", t, func() {
 		convey.Convey("Get a new aws session", func() {
-			session, err := GetAWSSessionWithoutCreds("mock-region")
+			session, err := GetAWSSessionWithoutCreds("mock-region", "")
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(session, convey.ShouldNotBeNil)
 		})
@@ -93,9 +97,66 @@ func TestAWS(t *testing.T) {
 
 	convey.Convey("create AWS credential using assume roleARN", t, func() {
 		convey.Convey("Get a new aws session", func() {
-			session, err := GetAWSAssumeRoleCreds("moke-roleARN", "mock-region")
+			session, err := GetAWSAssumeRoleCreds("moke-roleARN", "mock-region", "")
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(session, convey.ShouldNotBeNil)
+		})
+	})
+
+	convey.Convey("create AWS session using a custom STS endpoint", t, func() {
+		stsEndpoint := "http://localhost:4566"
+
+		convey.Convey("Only STS is routed to the custom endpoint", func() {
+			session, err := GetAWSSessionWithoutCreds("mock-region", stsEndpoint)
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(session.ClientConfig("sts").Endpoint, convey.ShouldEqual, stsEndpoint)
+			convey.So(session.ClientConfig("sns").Endpoint, convey.ShouldEqual, "https://sns.mock-region.amazonaws.com")
+		})
+
+		convey.Convey("Scheme is added when missing", func() {
+			resolved, err := stsEndpointResolver("localhost:4566").EndpointFor("sts", "mock-region")
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(resolved.URL, convey.ShouldEqual, "https://localhost:4566")
+		})
+	})
+
+	convey.Convey("exchange a web identity token at a custom STS endpoint", t, func() {
+		actions := make(chan string, 2)
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_ = r.ParseForm()
+			action := r.Form.Get("Action")
+			actions <- action
+			fmt.Fprintf(w, `<%[1]sResponse><%[1]sResult><Credentials><AccessKeyId>%[2]s</AccessKeyId><SecretAccessKey>secret</SecretAccessKey><SessionToken>token</SessionToken><Expiration>2099-01-01T00:00:00Z</Expiration></Credentials></%[1]sResult></%[1]sResponse>`, action, "key-from-"+action)
+		}))
+		defer server.Close()
+
+		tokenFile := filepath.Join(t.TempDir(), "token")
+		convey.So(os.WriteFile(tokenFile, []byte("web-identity-token"), 0o600), convey.ShouldBeNil)
+		t.Setenv("AWS_ACCESS_KEY_ID", "")
+		t.Setenv("AWS_SECRET_ACCESS_KEY", "")
+		t.Setenv("AWS_REGION", "mock-region")
+		t.Setenv("AWS_ROLE_ARN", "arn:aws:iam::123456789012:role/web-identity")
+		t.Setenv("AWS_WEB_IDENTITY_TOKEN_FILE", tokenFile)
+
+		convey.Convey("Without roleARN", func() {
+			session, err := CreateAWSSessionWithCredsInVolume("mock-region", "", nil, nil, nil, server.URL)
+			convey.So(err, convey.ShouldBeNil)
+
+			value, err := session.Config.Credentials.Get()
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(value.AccessKeyID, convey.ShouldEqual, "key-from-AssumeRoleWithWebIdentity")
+			convey.So(<-actions, convey.ShouldEqual, "AssumeRoleWithWebIdentity")
+		})
+
+		convey.Convey("With roleARN", func() {
+			session, err := CreateAWSSessionWithCredsInVolume("mock-region", "arn:aws:iam::123456789012:role/assumed", nil, nil, nil, server.URL)
+			convey.So(err, convey.ShouldBeNil)
+
+			value, err := session.Config.Credentials.Get()
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(value.AccessKeyID, convey.ShouldEqual, "key-from-AssumeRole")
+			convey.So(<-actions, convey.ShouldEqual, "AssumeRoleWithWebIdentity")
+			convey.So(<-actions, convey.ShouldEqual, "AssumeRole")
 		})
 	})
 }
