@@ -27,7 +27,7 @@ import (
 
 var gar = &GitArtifactReader{
 	artifact: &v1alpha1.GitArtifact{
-		URL: "fake",
+		URL: testFake,
 		Creds: &v1alpha1.GitCreds{
 			Username: &corev1.SecretKeySelector{
 				Key: "username",

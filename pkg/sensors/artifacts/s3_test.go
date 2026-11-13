@@ -26,11 +26,11 @@ import (
 func TestNewMinioClient(t *testing.T) {
 	convey.Convey("Given a configuration, get minio client", t, func() {
 		client, err := NewMinioClient(&v1alpha1.S3Artifact{
-			Endpoint: "fake",
+			Endpoint: testFake,
 			Region:   "us-east-1",
 		}, Credentials{
-			accessKey: "access",
-			secretKey: "secret",
+			accessKey: testAccessKey,
+			secretKey: testSecretKey,
 		})
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(client, convey.ShouldNotBeNil)
@@ -40,11 +40,11 @@ func TestNewMinioClient(t *testing.T) {
 func TestNewS3Reader(t *testing.T) {
 	convey.Convey("Given a minio client, get a reader", t, func() {
 		reader, err := NewS3Reader(&v1alpha1.S3Artifact{
-			Endpoint: "fake",
+			Endpoint: testFake,
 			Region:   "us-east-1",
 		}, &Credentials{
-			accessKey: "access",
-			secretKey: "secret",
+			accessKey: testAccessKey,
+			secretKey: testSecretKey,
 		})
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(reader, convey.ShouldNotBeNil)

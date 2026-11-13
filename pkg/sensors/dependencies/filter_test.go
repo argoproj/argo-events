@@ -18,15 +18,15 @@ func TestFilter(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -52,15 +52,15 @@ func TestFilter(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -85,15 +85,15 @@ func TestFilter(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -108,22 +108,22 @@ func TestFilter(t *testing.T) {
 		filter := &v1alpha1.EventDependencyFilter{
 			Time: &v1alpha1.TimeFilter{
 				Start: "09:09:0",
-				Stop:  "19:19:19",
+				Stop:  testStopTime,
 			},
 		}
 		filtersLogicalOperator := v1alpha1.AndLogicalOperator
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -139,8 +139,8 @@ func TestFilter(t *testing.T) {
 		// data filter: false
 		filter := &v1alpha1.EventDependencyFilter{
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-gateway",
+				Type:   testEventType,
+				Source: testSource,
 			},
 			Data: []v1alpha1.DataFilter{
 				{
@@ -154,15 +154,15 @@ func TestFilter(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -178,8 +178,8 @@ func TestFilter(t *testing.T) {
 		// data filter: error (false)
 		filter := &v1alpha1.EventDependencyFilter{
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-gateway",
+				Type:   testEventType,
+				Source: testSource,
 			},
 			Data: []v1alpha1.DataFilter{
 				{
@@ -193,15 +193,15 @@ func TestFilter(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -217,8 +217,8 @@ func TestFilter(t *testing.T) {
 		// data filter: true
 		filter := &v1alpha1.EventDependencyFilter{
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-fake",
+				Type:   testEventType,
+				Source: testWebhookFake,
 			},
 			Data: []v1alpha1.DataFilter{
 				{
@@ -232,15 +232,15 @@ func TestFilter(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -256,8 +256,8 @@ func TestFilter(t *testing.T) {
 		// data filter: error (false)
 		filter := &v1alpha1.EventDependencyFilter{
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-gateway",
+				Type:   testEventType,
+				Source: testSource,
 			},
 			Data: []v1alpha1.DataFilter{
 				{
@@ -271,15 +271,15 @@ func TestFilter(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -295,8 +295,8 @@ func TestFilter(t *testing.T) {
 		// data filter: false
 		filter := &v1alpha1.EventDependencyFilter{
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-gateway",
+				Type:   testEventType,
+				Source: testSource,
 			},
 			Data: []v1alpha1.DataFilter{
 				{
@@ -310,15 +310,15 @@ func TestFilter(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -334,8 +334,8 @@ func TestFilter(t *testing.T) {
 		// data filter: error (false)
 		filter := &v1alpha1.EventDependencyFilter{
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-gateway",
+				Type:   testEventType,
+				Source: testSource,
 			},
 			Data: []v1alpha1.DataFilter{
 				{
@@ -349,15 +349,15 @@ func TestFilter(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -391,20 +391,20 @@ func TestFilter(t *testing.T) {
 			Exprs: []v1alpha1.ExprFilter{
 				{
 					// C
-					Expr: `d == "hello world"`,
+					Expr: testExprDHelloWorld,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.d",
+							Path: testPathCD,
 							Name: "d",
 						},
 					},
 				},
 				{
 					// D
-					Expr: `e == false`,
+					Expr: testExprEFalse,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.e",
+							Path: testPathCE,
 							Name: "e",
 						},
 					},
@@ -451,10 +451,10 @@ func TestFilter(t *testing.T) {
 			Exprs: []v1alpha1.ExprFilter{
 				{
 					// C
-					Expr: `d == "hello world"`,
+					Expr: testExprDHelloWorld,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.d",
+							Path: testPathCD,
 							Name: "d",
 						},
 					},
@@ -464,7 +464,7 @@ func TestFilter(t *testing.T) {
 					Expr: `e == false"`,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.e",
+							Path: testPathCE,
 							Name: "e",
 						},
 					},
@@ -511,20 +511,20 @@ func TestFilter(t *testing.T) {
 			Exprs: []v1alpha1.ExprFilter{
 				{
 					// C
-					Expr: `d == "hello world"`,
+					Expr: testExprDHelloWorld,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.d",
+							Path: testPathCD,
 							Name: "d",
 						},
 					},
 				},
 				{
 					// D
-					Expr: `e == true`,
+					Expr: testExprETrue,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.e",
+							Path: testPathCE,
 							Name: "e",
 						},
 					},
@@ -571,20 +571,20 @@ func TestFilter(t *testing.T) {
 			Exprs: []v1alpha1.ExprFilter{
 				{
 					// C
-					Expr: `d == "hello world"`,
+					Expr: testExprDHelloWorld,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.d",
+							Path: testPathCD,
 							Name: "d",
 						},
 					},
 				},
 				{
 					// D
-					Expr: `e == true`,
+					Expr: testExprETrue,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.e",
+							Path: testPathCE,
 							Name: "e",
 						},
 					},
@@ -615,7 +615,7 @@ func TestFilter(t *testing.T) {
 					Expr: `A == "not-valid"`, // this will evaluate to false
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "A",
 						},
 					},
@@ -693,20 +693,20 @@ func TestFilter(t *testing.T) {
 			Exprs: []v1alpha1.ExprFilter{
 				{
 					// C
-					Expr: `d == "hello world"`,
+					Expr: testExprDHelloWorld,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.d",
+							Path: testPathCD,
 							Name: "d",
 						},
 					},
 				},
 				{
 					// D
-					Expr: `e == false`,
+					Expr: testExprEFalse,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.e",
+							Path: testPathCE,
 							Name: "e",
 						},
 					},
@@ -753,20 +753,20 @@ func TestFilter(t *testing.T) {
 			Exprs: []v1alpha1.ExprFilter{
 				{
 					// C
-					Expr: `d == "hello everybody"`,
+					Expr: testExprDHelloEverybody,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.d",
+							Path: testPathCD,
 							Name: "d",
 						},
 					},
 				},
 				{
 					// D
-					Expr: `e == true`,
+					Expr: testExprETrue,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.e",
+							Path: testPathCE,
 							Name: "e",
 						},
 					},
@@ -813,20 +813,20 @@ func TestFilter(t *testing.T) {
 			Exprs: []v1alpha1.ExprFilter{
 				{
 					// C
-					Expr: `d == "hello everybody"`,
+					Expr: testExprDHelloEverybody,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.d",
+							Path: testPathCD,
 							Name: "d",
 						},
 					},
 				},
 				{
 					// D
-					Expr: `e == false`,
+					Expr: testExprEFalse,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.e",
+							Path: testPathCE,
 							Name: "e",
 						},
 					},
@@ -873,20 +873,20 @@ func TestFilter(t *testing.T) {
 			Exprs: []v1alpha1.ExprFilter{
 				{
 					// C
-					Expr: `d == "hello everybody"`,
+					Expr: testExprDHelloEverybody,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.d",
+							Path: testPathCD,
 							Name: "d",
 						},
 					},
 				},
 				{
 					// D
-					Expr: `e == true`,
+					Expr: testExprETrue,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.e",
+							Path: testPathCE,
 							Name: "e",
 						},
 					},
@@ -943,10 +943,10 @@ func TestFilter(t *testing.T) {
 				},
 				{
 					// D
-					Expr: `e == false`,
+					Expr: testExprEFalse,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "c.e",
+							Path: testPathCE,
 							Name: "e",
 						},
 					},

@@ -191,6 +191,18 @@ func GenerateEnvFromConfigMapSpec(selector *v1.ConfigMapKeySelector) v1.EnvFromS
 	}
 }
 
+// NewCertPoolFromPEM returns a certificate pool with the PEM encoded
+// certificates in caCert. It returns an error when caCert contains no valid
+// certificate, so that a bad CA does not silently produce an empty pool that
+// rejects every server certificate.
+func NewCertPoolFromPEM(caCert []byte) (*x509.CertPool, error) {
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(caCert) {
+		return nil, fmt.Errorf("no valid PEM encoded certificate found")
+	}
+	return pool, nil
+}
+
 // GetTLSConfig returns a tls configuration for given cert and key or skips the certs if InsecureSkipVerify is true.
 func GetTLSConfig(config *aev1.TLSConfig) (*tls.Config, error) {
 	if config == nil {
@@ -244,8 +256,10 @@ func GetTLSConfig(config *aev1.TLSConfig) (*tls.Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to read ca cert file %s, %w", caCertPath, err)
 		}
-		pool := x509.NewCertPool()
-		pool.AppendCertsFromPEM(caCert)
+		pool, err := NewCertPoolFromPEM(caCert)
+		if err != nil {
+			return nil, fmt.Errorf("invalid ca cert file %s, %w", caCertPath, err)
+		}
 		c.RootCAs = pool
 	}
 
@@ -306,7 +320,7 @@ func findTypesRecursive(result *[]interface{}, obj reflect.Value, t reflect.Type
 		*result = append(*result, obj.Interface())
 	}
 	switch obj.Kind() {
-	case reflect.Ptr:
+	case reflect.Pointer:
 		objValue := obj.Elem()
 		// Check if it is nil
 		if !objValue.IsValid() {
@@ -344,36 +358,36 @@ func findTypesRecursive(result *[]interface{}, obj reflect.Value, t reflect.Type
 func GenerateSecretVolumeSpecs(selector *v1.SecretKeySelector) (v1.Volume, v1.VolumeMount) {
 	volName := strings.ReplaceAll("secret-"+selector.Name, "_", "-")
 	return v1.Volume{
-			Name: volName,
-			VolumeSource: v1.VolumeSource{
-				Secret: &v1.SecretVolumeSource{
-					SecretName: selector.Name,
-				},
+		Name: volName,
+		VolumeSource: v1.VolumeSource{
+			Secret: &v1.SecretVolumeSource{
+				SecretName: selector.Name,
 			},
-		}, v1.VolumeMount{
-			Name:      volName,
-			ReadOnly:  true,
-			MountPath: "/argo-events/secrets/" + selector.Name,
-		}
+		},
+	}, v1.VolumeMount{
+		Name:      volName,
+		ReadOnly:  true,
+		MountPath: "/argo-events/secrets/" + selector.Name,
+	}
 }
 
 // GenerateConfigMapVolumeSpecs builds a "volume" and "volumeMount"spec with a configMapKeySelector
 func GenerateConfigMapVolumeSpecs(selector *v1.ConfigMapKeySelector) (v1.Volume, v1.VolumeMount) {
 	volName := strings.ReplaceAll("cm-"+selector.Name, "_", "-")
 	return v1.Volume{
-			Name: volName,
-			VolumeSource: v1.VolumeSource{
-				ConfigMap: &v1.ConfigMapVolumeSource{
-					LocalObjectReference: v1.LocalObjectReference{
-						Name: selector.Name,
-					},
+		Name: volName,
+		VolumeSource: v1.VolumeSource{
+			ConfigMap: &v1.ConfigMapVolumeSource{
+				LocalObjectReference: v1.LocalObjectReference{
+					Name: selector.Name,
 				},
 			},
-		}, v1.VolumeMount{
-			Name:      volName,
-			ReadOnly:  true,
-			MountPath: "/argo-events/config/" + selector.Name,
-		}
+		},
+	}, v1.VolumeMount{
+		Name:      volName,
+		ReadOnly:  true,
+		MountPath: "/argo-events/config/" + selector.Name,
+	}
 }
 
 func uniqueVolumes(vols []v1.Volume) []v1.Volume {

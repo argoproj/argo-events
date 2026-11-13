@@ -32,7 +32,7 @@ import (
 var sensorObj = &v1alpha1.Sensor{
 	ObjectMeta: metav1.ObjectMeta{
 		Name:      "fake-sensor",
-		Namespace: "fake",
+		Namespace: testFake,
 	},
 	Spec: v1alpha1.SensorSpec{
 		Triggers: []v1alpha1.Trigger{
@@ -53,9 +53,9 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 			"kind":       kind,
 			"metadata": map[string]interface{}{
 				"namespace": namespace,
-				"name":      name,
+				testKeyName: name,
 				"labels": map[string]interface{}{
-					"name": name,
+					testKeyName: name,
 				},
 			},
 		},
@@ -80,13 +80,13 @@ type Payload struct {
 
 func TestConstructPayload(t *testing.T) {
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": {
+		testDependency: {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
-				Type:            "webhook",
-				Source:          "webhook-gateway",
+				Type:            testWebhook,
+				Source:          testSource,
 				DataContentType: v1alpha1.MediaTypeJSON,
-				Subject:         "example-1",
+				Subject:         testExample1,
 			},
 			Data: []byte("{\"firstName\": \"fake\"}"),
 		},
@@ -96,17 +96,17 @@ func TestConstructPayload(t *testing.T) {
 				Type:            "calendar",
 				Source:          "calendar-gateway",
 				DataContentType: v1alpha1.MediaTypeJSON,
-				Subject:         "example-1",
+				Subject:         testExample1,
 			},
 			Data: []byte("{\"lastName\": \"foo\"}"),
 		},
-		"use-event-data-type": {
+		testUseEventDataType: {
 			Context: &v1alpha1.EventContext{
 				ID:              "3",
 				Type:            "calendar",
 				Source:          "calendar-gateway",
 				DataContentType: v1alpha1.MediaTypeJSON,
-				Subject:         "example-1",
+				Subject:         testExample1,
 			},
 			Data: []byte("{\"age\": 100, \"isActive\": false, \"countries\": [\"ca\", \"us\", \"mx\"]}"),
 		},
@@ -118,7 +118,7 @@ func TestConstructPayload(t *testing.T) {
 	parameters := []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "firstName",
 				Value:          &defaultFirstName,
 			},
@@ -134,31 +134,31 @@ func TestConstructPayload(t *testing.T) {
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "use-event-data-type",
-				DataKey:        "age",
+				DependencyName: testUseEventDataType,
+				DataKey:        testKeyAge,
 				UseRawData:     true,
 			},
-			Dest: "age",
+			Dest: testKeyAge,
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "use-event-data-type",
-				DataKey:        "isActive",
+				DependencyName: testUseEventDataType,
+				DataKey:        testKeyIsActive,
 				UseRawData:     true,
 			},
-			Dest: "isActive",
+			Dest: testKeyIsActive,
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "use-event-data-type",
-				DataKey:        "age",
+				DependencyName: testUseEventDataType,
+				DataKey:        testKeyAge,
 			},
 			Dest: "typelessAge",
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "use-event-data-type",
-				DataKey:        "isActive",
+				DependencyName: testUseEventDataType,
+				DataKey:        testKeyIsActive,
 			},
 			Dest: "typelessIsActive",
 		},
@@ -171,7 +171,7 @@ func TestConstructPayload(t *testing.T) {
 	var p *Payload
 	err = json.Unmarshal(payloadBytes, &p)
 	assert.Nil(t, err)
-	assert.Equal(t, "fake", p.FirstName)
+	assert.Equal(t, testFake, p.FirstName)
 	assert.Equal(t, "foo", p.LastName)
 	assert.Equal(t, 100, p.Age)
 	assert.Equal(t, false, p.IsActive)
@@ -195,9 +195,9 @@ func TestResolveParamValue(t *testing.T) {
 	event := &v1alpha1.Event{
 		Context: &v1alpha1.EventContext{
 			DataContentType: v1alpha1.MediaTypeJSON,
-			Subject:         "example-1",
-			Source:          "webhook-gateway",
-			Type:            "webhook",
+			Subject:         testExample1,
+			Source:          testSource,
+			Type:            testWebhook,
 			ID:              "1",
 			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
@@ -207,7 +207,7 @@ func TestResolveParamValue(t *testing.T) {
 	assert.Nil(t, err)
 
 	events := map[string]*v1alpha1.Event{
-		"fake-dependency": event,
+		testDependency: event,
 	}
 
 	defaultValue := "hello"
@@ -220,30 +220,30 @@ func TestResolveParamValue(t *testing.T) {
 		{
 			name: "get first name",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
-				DataKey:        "name.first",
+				DependencyName: testDependency,
+				DataKey:        testKeyNameFirst,
 			},
-			result: "fake",
+			result: testFake,
 		},
 		{
 			name: "get the event subject",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				ContextKey:     "subject",
 			},
-			result: "example-1",
+			result: testExample1,
 		},
 		{
 			name: "get the entire payload",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 			},
 			result: string(eventBody),
 		},
 		{
 			name: "get the default value",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				Value:          &defaultValue,
 			},
 			result: defaultValue,
@@ -251,24 +251,24 @@ func TestResolveParamValue(t *testing.T) {
 		{
 			name: "data key has preference over context key",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				ContextKey:     "subject",
-				DataKey:        "name.first",
+				DataKey:        testKeyNameFirst,
 			},
-			result: "fake",
+			result: testFake,
 		},
 		{
 			name: "get first name with template",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataTemplate:   "{{ .Input.name.first }}",
 			},
-			result: "fake",
+			result: testFake,
 		},
 		{
 			name: "get capitalized first name with template",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataTemplate:   "{{ upper .Input.name.first }}",
 			},
 			result: "FAKE",
@@ -276,15 +276,15 @@ func TestResolveParamValue(t *testing.T) {
 		{
 			name: "get subject with template",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName:  "fake-dependency",
+				DependencyName:  testDependency,
 				ContextTemplate: "{{ .Input.subject }}",
 			},
-			result: "example-1",
+			result: testExample1,
 		},
 		{
 			name: "get formatted subject with template",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName:  "fake-dependency",
+				DependencyName:  testDependency,
 				ContextTemplate: `{{ .Input.subject | replace "-" "_" }}`,
 			},
 			result: "example_1",
@@ -292,44 +292,44 @@ func TestResolveParamValue(t *testing.T) {
 		{
 			name: "data template has preference over context template",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName:  "fake-dependency",
+				DependencyName:  testDependency,
 				ContextTemplate: "{{ .Input.subject }}",
 				DataTemplate:    "{{ .Input.name.first }}",
 			},
-			result: "fake",
+			result: testFake,
 		},
 		{
 			name: "data template fails over to data key",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataTemplate:   "{{ .Input.name.non_exist }}",
-				DataKey:        "name.first",
+				DataKey:        testKeyNameFirst,
 			},
-			result: "fake",
+			result: testFake,
 		},
 		{
 			name: "invalid template fails over to data key",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataTemplate:   "{{ no }}",
-				DataKey:        "name.first",
+				DataKey:        testKeyNameFirst,
 			},
-			result: "fake",
+			result: testFake,
 		},
 		{
 			name: "UseRawData set to true - string",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
-				DataKey:        "name.first",
+				DependencyName: testDependency,
+				DataKey:        testKeyNameFirst,
 				UseRawData:     true,
 			},
-			result: "fake",
+			result: testFake,
 		},
 		{
 			name: "UseRawData set to true - json",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
-				DataKey:        "name",
+				DependencyName: testDependency,
+				DataKey:        testKeyName,
 				UseRawData:     true,
 			},
 			result: "{\"first\": \"fake\", \"last\": \"user\"}",
@@ -337,8 +337,8 @@ func TestResolveParamValue(t *testing.T) {
 		{
 			name: "UseRawData set to true - list",
 			source: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
-				DataKey:        "countries",
+				DependencyName: testDependency,
+				DataKey:        testKeyCountries,
 				UseRawData:     true,
 			},
 			result: "[\"ca\", \"us\", \"mx\"]",
@@ -358,9 +358,9 @@ func TestRenderDataAsJSON(t *testing.T) {
 	event := &v1alpha1.Event{
 		Context: &v1alpha1.EventContext{
 			DataContentType: v1alpha1.MediaTypeJSON,
-			Subject:         "example-1",
-			Source:          "webhook-gateway",
-			Type:            "webhook",
+			Subject:         testExample1,
+			Source:          testSource,
+			Type:            testWebhook,
 			ID:              "1",
 			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
@@ -392,9 +392,9 @@ func TestApplyParams(t *testing.T) {
 	event := &v1alpha1.Event{
 		Context: &v1alpha1.EventContext{
 			DataContentType: v1alpha1.MediaTypeJSON,
-			Subject:         "example-1",
-			Source:          "webhook-gateway",
-			Type:            "webhook",
+			Subject:         testExample1,
+			Source:          testSource,
+			Type:            testWebhook,
 			ID:              "1",
 			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
@@ -402,7 +402,7 @@ func TestApplyParams(t *testing.T) {
 	}
 
 	events := map[string]*v1alpha1.Event{
-		"fake-dependency": event,
+		testDependency: event,
 	}
 
 	tests := []struct {
@@ -416,10 +416,10 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName: "fake-dependency",
-						DataKey:        "name.first",
+						DependencyName: testDependency,
+						DataKey:        testKeyNameFirst,
 					},
-					Dest:      "name",
+					Dest:      testKeyName,
 					Operation: v1alpha1.TriggerParameterOpNone,
 				},
 			},
@@ -431,10 +431,10 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName: "fake-dependency",
-						DataKey:        "name.first",
+						DependencyName: testDependency,
+						DataKey:        testKeyNameFirst,
 					},
-					Dest:      "name",
+					Dest:      testKeyName,
 					Operation: v1alpha1.TriggerParameterOpPrepend,
 				},
 			},
@@ -446,10 +446,10 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName: "fake-dependency",
-						DataKey:        "name.first",
+						DependencyName: testDependency,
+						DataKey:        testKeyNameFirst,
 					},
-					Dest:      "name",
+					Dest:      testKeyName,
 					Operation: v1alpha1.TriggerParameterOpAppend,
 				},
 			},
@@ -461,10 +461,10 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName: "fake-dependency",
-						DataKey:        "name.first",
+						DependencyName: testDependency,
+						DataKey:        testKeyNameFirst,
 					},
-					Dest:      "name",
+					Dest:      testKeyName,
 					Operation: v1alpha1.TriggerParameterOpOverwrite,
 				},
 			},
@@ -476,10 +476,10 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName: "fake-dependency",
-						DataKey:        "name",
+						DependencyName: testDependency,
+						DataKey:        testKeyName,
 					},
-					Dest:      "name",
+					Dest:      testKeyName,
 					Operation: v1alpha1.TriggerParameterOpOverwrite,
 				},
 			},
@@ -491,11 +491,11 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName: "fake-dependency",
-						DataKey:        "name",
+						DependencyName: testDependency,
+						DataKey:        testKeyName,
 						UseRawData:     true,
 					},
-					Dest:      "name",
+					Dest:      testKeyName,
 					Operation: v1alpha1.TriggerParameterOpOverwrite,
 				},
 			},
@@ -507,17 +507,17 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName: "fake-dependency",
-						DataKey:        "age",
+						DependencyName: testDependency,
+						DataKey:        testKeyAge,
 						UseRawData:     true,
 					},
-					Dest:      "age",
+					Dest:      testKeyAge,
 					Operation: v1alpha1.TriggerParameterOpOverwrite,
 				},
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName: "fake-dependency",
-						DataKey:        "age",
+						DependencyName: testDependency,
+						DataKey:        testKeyAge,
 						UseRawData:     true,
 					},
 					Dest:      "ageWithYears",
@@ -525,11 +525,11 @@ func TestApplyParams(t *testing.T) {
 				},
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						DependencyName: "fake-dependency",
-						DataKey:        "countries",
+						DependencyName: testDependency,
+						DataKey:        testKeyCountries,
 						UseRawData:     true,
 					},
-					Dest:      "countries",
+					Dest:      testKeyCountries,
 					Operation: v1alpha1.TriggerParameterOpAppend,
 				},
 			},
@@ -549,14 +549,14 @@ func TestApplyParams(t *testing.T) {
 
 func TestApplyResourceParameters(t *testing.T) {
 	obj := sensorObj.DeepCopy()
-	deployment := newUnstructured("apps/v1", "Deployment", "fake-deployment", "fake")
+	deployment := newUnstructured("apps/v1", "Deployment", "fake-deployment", testFake)
 
 	event := &v1alpha1.Event{
 		Context: &v1alpha1.EventContext{
 			DataContentType: v1alpha1.MediaTypeJSON,
-			Subject:         "example-1",
-			Source:          "webhook-gateway",
-			Type:            "webhook",
+			Subject:         testExample1,
+			Source:          testSource,
+			Type:            testWebhook,
 			ID:              "1",
 			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
@@ -564,7 +564,7 @@ func TestApplyResourceParameters(t *testing.T) {
 	}
 
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": event,
+		testDependency: event,
 	}
 
 	artifact := v1alpha1.NewK8SResource(deployment)
@@ -574,8 +574,8 @@ func TestApplyResourceParameters(t *testing.T) {
 	obj.Spec.Triggers[0].Template.K8s.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
-				DataKey:        "name.first",
+				DependencyName: testDependency,
+				DataKey:        testKeyNameFirst,
 			},
 			Operation: v1alpha1.TriggerParameterOpNone,
 			Dest:      "metadata.name",
@@ -592,22 +592,22 @@ func TestApplyTemplateParameters(t *testing.T) {
 	event := &v1alpha1.Event{
 		Context: &v1alpha1.EventContext{
 			DataContentType: v1alpha1.MediaTypeJSON,
-			Subject:         "example-1",
-			Source:          "webhook-gateway",
-			Type:            "webhook",
+			Subject:         testExample1,
+			Source:          testSource,
+			Type:            testWebhook,
 			ID:              "1",
 			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
 		Data: []byte("{\"group\": \"fake\" }"),
 	}
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": event,
+		testDependency: event,
 	}
 
 	obj.Spec.Triggers[0].Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "group",
 			},
 			Operation: v1alpha1.TriggerParameterOpOverwrite,
@@ -635,7 +635,7 @@ func TestGetValueByKey_NullValue(t *testing.T) {
 
 func TestConstructPayload_NullValue(t *testing.T) {
 	events := map[string]*v1alpha1.Event{
-		"test-dep": {
+		testDep: {
 			Data: []byte(`{"nullable_key": null, "other_key": "value"}`),
 			Context: &v1alpha1.EventContext{
 				DataContentType: v1alpha1.MediaTypeJSON,
@@ -646,7 +646,7 @@ func TestConstructPayload_NullValue(t *testing.T) {
 	parameters := []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "test-dep",
+				DependencyName: testDep,
 				DataKey:        "nullable_key",
 				UseRawData:     true,
 			},
@@ -654,7 +654,7 @@ func TestConstructPayload_NullValue(t *testing.T) {
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "test-dep",
+				DependencyName: testDep,
 				DataKey:        "other_key",
 			},
 			Dest: "other_key",

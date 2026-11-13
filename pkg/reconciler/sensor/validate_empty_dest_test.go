@@ -16,7 +16,7 @@ func TestHTTPTriggerWithEmptyDest(t *testing.T) {
 		Payload: []v1alpha1.TriggerParameter{
 			{
 				Src: &v1alpha1.TriggerParameterSource{
-					DependencyName: "test-dep",
+					DependencyName: testDep,
 					UseRawData:     true,
 				},
 				Dest: "", // Empty dest - this should now be allowed for HTTP triggers
@@ -30,10 +30,10 @@ func TestHTTPTriggerWithEmptyDest(t *testing.T) {
 
 	// Test ConstructPayload with empty dest
 	events := map[string]*v1alpha1.Event{
-		"test-dep": {
+		testDep: {
 			Context: &v1alpha1.EventContext{
-				Type:            "test",
-				Source:          "test",
+				Type:            testName,
+				Source:          testName,
 				DataContentType: "application/json",
 			},
 			Data: []byte(`{"message": "hello world"}`),
@@ -53,7 +53,7 @@ func TestNonHTTPTriggerWithEmptyDestShouldFail(t *testing.T) {
 	// Test that non-HTTP triggers still require dest
 	parameter := &v1alpha1.TriggerParameter{
 		Src: &v1alpha1.TriggerParameterSource{
-			DependencyName: "test-dep",
+			DependencyName: testDep,
 			DataKey:        "body",
 		},
 		Dest: "", // Empty dest - this should fail for non-HTTP triggers

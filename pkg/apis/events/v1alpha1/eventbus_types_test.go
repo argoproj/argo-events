@@ -36,7 +36,7 @@ func TestEventBusStatusIsReady(t *testing.T) {
 			s: func() *EventBusStatus {
 				s := &EventBusStatus{}
 				s.InitConditions()
-				s.MarkDeployed("test", "test")
+				s.MarkDeployed(testName, testName)
 				return s
 			}(),
 			expect: false,
@@ -46,7 +46,7 @@ func TestEventBusStatusIsReady(t *testing.T) {
 			s: func() *EventBusStatus {
 				s := &EventBusStatus{}
 				s.InitConditions()
-				s.MarkDeployed("test", "test")
+				s.MarkDeployed(testName, testName)
 				s.MarkConfigured()
 				return s
 			}(),
@@ -94,15 +94,15 @@ func TestEventBusStatusGetCondition(t *testing.T) {
 			s: func() *EventBusStatus {
 				s := &EventBusStatus{}
 				s.InitConditions()
-				s.MarkDeployed("test", "test")
+				s.MarkDeployed(testName, testName)
 				return s
 			}(),
 			qCondition: EventBusConditionDeployed,
 			expect: &Condition{
 				Status:  corev1.ConditionTrue,
 				Type:    EventBusConditionDeployed,
-				Reason:  "test",
-				Message: "test",
+				Reason:  testName,
+				Message: testName,
 			},
 		},
 		{
@@ -110,15 +110,15 @@ func TestEventBusStatusGetCondition(t *testing.T) {
 			s: func() *EventBusStatus {
 				s := &EventBusStatus{}
 				s.InitConditions()
-				s.MarkDeployFailed("test", "test")
+				s.MarkDeployFailed(testName, testName)
 				return s
 			}(),
 			qCondition: EventBusConditionDeployed,
 			expect: &Condition{
 				Status:  corev1.ConditionFalse,
 				Type:    EventBusConditionDeployed,
-				Reason:  "test",
-				Message: "test",
+				Reason:  testName,
+				Message: testName,
 			},
 		},
 		{
@@ -142,15 +142,15 @@ func TestEventBusStatusGetCondition(t *testing.T) {
 			s: func() *EventBusStatus {
 				s := &EventBusStatus{}
 				s.InitConditions()
-				s.MarkNotConfigured("test", "test")
+				s.MarkNotConfigured(testName, testName)
 				return s
 			}(),
 			qCondition: EventBusConditionConfigured,
 			expect: &Condition{
 				Status:  corev1.ConditionFalse,
 				Type:    EventBusConditionConfigured,
-				Reason:  "test",
-				Message: "test",
+				Reason:  testName,
+				Message: testName,
 			},
 		},
 	}

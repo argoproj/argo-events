@@ -15,9 +15,9 @@ import (
 
 func TestRetryableKubeAPIError(t *testing.T) {
 	errUnAuth := errors.NewUnauthorized("reason")
-	errNotFound := errors.NewNotFound(aev1.Resource("sensor"), "hello")
-	errForbidden := errors.NewForbidden(aev1.Resource("sensor"), "hello", nil)
-	errInvalid := errors.NewInvalid(aev1.GroupKind("core/data"), "hello", nil)
+	errNotFound := errors.NewNotFound(aev1.Resource("sensor"), testHello)
+	errForbidden := errors.NewForbidden(aev1.Resource("sensor"), testHello, nil)
+	errInvalid := errors.NewInvalid(aev1.GroupKind("core/data"), testHello, nil)
 	errMethodNotSupported := errors.NewMethodNotSupported(aev1.Resource("sensor"), "action")
 
 	assert.True(t, IsRetryableKubeAPIError(errUnAuth))

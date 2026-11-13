@@ -1,9 +1,17 @@
 package util
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"math/big"
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	aev1 "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -30,8 +38,8 @@ func (f *fakeHttpWriter) WriteHeader(status int) {
 
 func TestHTTPMethods(t *testing.T) {
 	f := &fakeHttpWriter{}
-	SendSuccessResponse(f, "hello")
-	assert.Equal(t, "hello", string(f.payload))
+	SendSuccessResponse(f, testHello)
+	assert.Equal(t, testHello, string(f.payload))
 	assert.Equal(t, http.StatusOK, f.header)
 
 	SendErrorResponse(f, "failure")
@@ -40,7 +48,7 @@ func TestHTTPMethods(t *testing.T) {
 }
 
 func TestFormatEndpoint(t *testing.T) {
-	assert.Equal(t, "/hello", FormatEndpoint("hello"))
+	assert.Equal(t, "/hello", FormatEndpoint(testHello))
 }
 
 func TestFormattedURL(t *testing.T) {
@@ -284,31 +292,65 @@ func TestGetTLSConfig(t *testing.T) {
 
 func TestElementsMatch(t *testing.T) {
 	assert.True(t, ElementsMatch(nil, nil))
-	assert.True(t, ElementsMatch([]string{"hello"}, []string{"hello"}))
-	assert.True(t, ElementsMatch([]string{"hello", "world"}, []string{"hello", "world"}))
+	assert.True(t, ElementsMatch([]string{testHello}, []string{testHello}))
+	assert.True(t, ElementsMatch([]string{testHello, testWorld}, []string{testHello, testWorld}))
 	assert.True(t, ElementsMatch([]string{}, []string{}))
 
-	assert.False(t, ElementsMatch([]string{"hello"}, nil))
-	assert.False(t, ElementsMatch([]string{"hello"}, []string{}))
-	assert.False(t, ElementsMatch([]string{}, []string{"hello"}))
-	assert.False(t, ElementsMatch([]string{"hello"}, []string{"hello", "world"}))
-	assert.False(t, ElementsMatch([]string{"hello", "world"}, []string{"hello"}))
-	assert.False(t, ElementsMatch([]string{"hello", "world"}, []string{"hello", "moon"}))
-	assert.True(t, ElementsMatch([]string{"hello", "world"}, []string{"world", "hello"}))
-	assert.True(t, ElementsMatch([]string{"hello", "world", "hello"}, []string{"hello", "hello", "world", "world"}))
-	assert.True(t, ElementsMatch([]string{"world", "hello"}, []string{"hello", "hello", "world", "world"}))
-	assert.True(t, ElementsMatch([]string{"hello", "hello", "world", "world"}, []string{"world", "hello"}))
-	assert.False(t, ElementsMatch([]string{"hello"}, []string{"*", "hello"}))
-	assert.False(t, ElementsMatch([]string{"hello", "*"}, []string{"hello"}))
-	assert.False(t, ElementsMatch([]string{"*", "hello", "*"}, []string{"hello"}))
-	assert.False(t, ElementsMatch([]string{"hello"}, []string{"world", "world"}))
-	assert.False(t, ElementsMatch([]string{"hello", "hello"}, []string{"world", "world"}))
+	assert.False(t, ElementsMatch([]string{testHello}, nil))
+	assert.False(t, ElementsMatch([]string{testHello}, []string{}))
+	assert.False(t, ElementsMatch([]string{}, []string{testHello}))
+	assert.False(t, ElementsMatch([]string{testHello}, []string{testHello, testWorld}))
+	assert.False(t, ElementsMatch([]string{testHello, testWorld}, []string{testHello}))
+	assert.False(t, ElementsMatch([]string{testHello, testWorld}, []string{testHello, "moon"}))
+	assert.True(t, ElementsMatch([]string{testHello, testWorld}, []string{testWorld, testHello}))
+	assert.True(t, ElementsMatch([]string{testHello, testWorld, testHello}, []string{testHello, testHello, testWorld, testWorld}))
+	assert.True(t, ElementsMatch([]string{testWorld, testHello}, []string{testHello, testHello, testWorld, testWorld}))
+	assert.True(t, ElementsMatch([]string{testHello, testHello, testWorld, testWorld}, []string{testWorld, testHello}))
+	assert.False(t, ElementsMatch([]string{testHello}, []string{"*", testHello}))
+	assert.False(t, ElementsMatch([]string{testHello, "*"}, []string{testHello}))
+	assert.False(t, ElementsMatch([]string{"*", testHello, "*"}, []string{testHello}))
+	assert.False(t, ElementsMatch([]string{testHello}, []string{testWorld, testWorld}))
+	assert.False(t, ElementsMatch([]string{testHello, testHello}, []string{testWorld, testWorld}))
 }
 
 func TestSliceContains(t *testing.T) {
-	assert.True(t, SliceContains([]string{"hello", "*"}, "*"))
-	assert.True(t, SliceContains([]string{"*", "world"}, "*"))
-	assert.True(t, SliceContains([]string{"*", "world"}, "world"))
-	assert.True(t, SliceContains([]string{"*", "hello", "*"}, "*"))
-	assert.False(t, SliceContains([]string{"hello", "world"}, "*"))
+	assert.True(t, SliceContains([]string{testHello, "*"}, "*"))
+	assert.True(t, SliceContains([]string{"*", testWorld}, "*"))
+	assert.True(t, SliceContains([]string{"*", testWorld}, testWorld))
+	assert.True(t, SliceContains([]string{"*", testHello, "*"}, "*"))
+	assert.False(t, SliceContains([]string{testHello, testWorld}, "*"))
+}
+
+func TestNewCertPoolFromPEM(t *testing.T) {
+	t.Run("valid certificate", func(t *testing.T) {
+		key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		assert.NoError(t, err)
+		tmpl := &x509.Certificate{
+			SerialNumber:          big.NewInt(1),
+			Subject:               pkix.Name{CommonName: "test-ca"},
+			NotBefore:             time.Now(),
+			NotAfter:              time.Now().Add(time.Hour),
+			IsCA:                  true,
+			BasicConstraintsValid: true,
+		}
+		der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &key.PublicKey, key)
+		assert.NoError(t, err)
+		caCert := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})
+
+		pool, err := NewCertPoolFromPEM(caCert)
+		assert.NoError(t, err)
+		assert.NotNil(t, pool)
+	})
+
+	for name, caCert := range map[string][]byte{
+		"empty":   {},
+		"not pem": []byte("not a certificate"),
+	} {
+		t.Run(name, func(t *testing.T) {
+			pool, err := NewCertPoolFromPEM(caCert)
+			assert.Nil(t, pool)
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), "no valid PEM encoded certificate found")
+		})
+	}
 }
