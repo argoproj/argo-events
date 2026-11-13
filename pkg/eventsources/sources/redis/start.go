@@ -66,22 +66,34 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	redisEventSource := &el.RedisEventSource
 
-	opt := &redis.Options{
-		Addr: redisEventSource.HostAddress,
-		DB:   int(redisEventSource.DB),
-	}
+	var opt *redis.Options
 
-	log.Info("retrieving password if it has been configured...")
-	if redisEventSource.Password != nil {
-		password, err := sharedutil.GetSecretFromVolume(redisEventSource.Password)
+	if redisEventSource.URL != nil {
+		urlStr, err := sharedutil.GetSecretFromVolume(redisEventSource.URL)
 		if err != nil {
-			return fmt.Errorf("failed to find the secret password %s, %w", redisEventSource.Password.Name, err)
+			return fmt.Errorf("failed to find the secret URL %s, %w", redisEventSource.URL.Name, err)
 		}
-		opt.Password = password
-	}
-
-	if redisEventSource.Username != "" {
-		opt.Username = redisEventSource.Username
+		parsedOpt, err := redis.ParseURL(urlStr)
+		if err != nil {
+			return fmt.Errorf("failed to parse redis URL, %w", err)
+		}
+		opt = parsedOpt
+	} else {
+		opt = &redis.Options{
+			Addr: redisEventSource.HostAddress,
+			DB:   int(redisEventSource.DB),
+		}
+		log.Info("retrieving password if it has been configured...")
+		if redisEventSource.Password != nil {
+			password, err := sharedutil.GetSecretFromVolume(redisEventSource.Password)
+			if err != nil {
+				return fmt.Errorf("failed to find the secret password %s, %w", redisEventSource.Password.Name, err)
+			}
+			opt.Password = password
+		}
+		if redisEventSource.Username != "" {
+			opt.Username = redisEventSource.Username
+		}
 	}
 
 	if redisEventSource.TLS != nil {
@@ -96,7 +108,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	client := redis.NewClient(opt)
 
 	if status := client.Ping(ctx); status.Err() != nil {
-		return fmt.Errorf("failed to connect to host %s and db %d for event source %s, %w", redisEventSource.HostAddress, redisEventSource.DB, el.GetEventName(), status.Err())
+		return fmt.Errorf("failed to connect to host %s and db %d for event source %s, %w", opt.Addr, opt.DB, el.GetEventName(), status.Err())
 	}
 
 	pubsub := client.Subscribe(ctx, redisEventSource.Channels...)
