@@ -85,4 +85,4 @@ The Azure Event Hubs trigger specification is available [here](../../APIs.md#arg
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
-1.  Verify Events have been in ingested in Azure Events Hub by creating a [listener app](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-go-get-started-send#receive-events) or following other [code samples](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-samples). You can optionally create an [Azure Event Hubs Event Source](https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/azure-event-hubs-sensor.yaml).
+1.  Verify Events have been in ingested in Azure Events Hub by creating a [listener app](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-go-get-started-send#receive-events) or following other [code samples](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-samples). You can optionally create an [Azure Event Hubs Event Source](https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/azure-events-hub.yaml).

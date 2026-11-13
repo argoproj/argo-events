@@ -22,7 +22,7 @@ var (
 	testJetStreamEventBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -30,7 +30,7 @@ var (
 		},
 		Spec: v1alpha1.EventBusSpec{
 			JetStream: &v1alpha1.JetStreamBus{
-				Version: "2.7.3",
+				Version: testVersion,
 			},
 		},
 	}
@@ -38,7 +38,7 @@ var (
 	testJetStreamExoticBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -216,7 +216,7 @@ func TestBuildJetStreamStatefulSetSpec(t *testing.T) {
 	})
 
 	t.Run("with persistence", func(t *testing.T) {
-		st := "test"
+		st := testShortName
 		i.eventBus.Spec.JetStream = &v1alpha1.JetStreamBus{
 			Persistence: &v1alpha1.PersistenceStrategy{
 				StorageClassName: &st,
@@ -278,13 +278,13 @@ func TestBuildJetStreamStatefulSetSpec(t *testing.T) {
 
 		js := i.eventBus.Spec.JetStream
 		assert.Equal(t, js.ContainerTemplate.Resources, containers["main"].Resources)
-		assert.Equal(t, js.MetricsContainerTemplate.Resources, containers["metrics"].Resources)
+		assert.Equal(t, js.MetricsContainerTemplate.Resources, containers[metricsName].Resources)
 		assert.Equal(t, js.ReloaderContainerTemplate.Resources, containers["reloader"].Resources)
 	})
 
 	t.Run("with probes", func(t *testing.T) {
 		i.eventBus.Spec.JetStream = &v1alpha1.JetStreamBus{
-			Version: "2.7.3",
+			Version: testVersion,
 		}
 		s := i.buildStatefulSetSpec(&fakeConfig.EventBus.JetStream.Versions[0])
 		mainContainer := s.Template.Spec.Containers[0]

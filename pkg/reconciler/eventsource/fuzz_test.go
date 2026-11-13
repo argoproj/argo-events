@@ -63,7 +63,7 @@ func FuzzEventsourceReconciler(f *testing.F) {
 
 func FuzzResourceReconcile(f *testing.F) {
 	f.Fuzz(func(t *testing.T, data []byte) {
-		testImage := "test-image"
+		testImage := testImage
 		initter.Do(initScheme)
 		f := fuzz.NewConsumer(data)
 		testEventSource := &v1alpha1.EventSource{}

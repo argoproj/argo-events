@@ -100,7 +100,7 @@ func TestKafkaTrigger_ApplyResourceParameters(t *testing.T) {
 	assert.Nil(t, err)
 
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": {
+		testDependency: {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",
@@ -129,7 +129,7 @@ func TestKafkaTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger.Trigger.Template.Kafka.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "url",
 				Value:          &defaultValue,
 			},
@@ -159,7 +159,7 @@ func TestKafkaTrigger_Execute(t *testing.T) {
 	trigger, err := getFakeKafkaTrigger(producers)
 	assert.Nil(t, err)
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": {
+		testDependency: {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",
@@ -177,7 +177,7 @@ func TestKafkaTrigger_Execute(t *testing.T) {
 	trigger.Trigger.Template.Kafka.Payload = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "message",
 				Value:          &defaultValue,
 			},

@@ -14,12 +14,12 @@ func TestFilterEvent_All(t *testing.T) {
 	t.Run("test all valid", func(t *testing.T) {
 		filter := &v1alpha1.EventDependencyFilter{
 			Time: &v1alpha1.TimeFilter{
-				Start: "09:09:09",
-				Stop:  "19:19:19",
+				Start: testStartTime,
+				Stop:  testStopTime,
 			},
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-gateway",
+				Type:   testEventType,
+				Source: testSource,
 			},
 			Data: []v1alpha1.DataFilter{
 				{
@@ -30,7 +30,7 @@ func TestFilterEvent_All(t *testing.T) {
 			},
 			Exprs: []v1alpha1.ExprFilter{
 				{
-					Expr: `k != "x"`,
+					Expr: testExprKNotX,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "k",
@@ -45,15 +45,15 @@ func TestFilterEvent_All(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -67,12 +67,12 @@ func TestFilterEvent_All(t *testing.T) {
 	t.Run("test time not valid", func(t *testing.T) {
 		filter := v1alpha1.EventDependencyFilter{
 			Time: &v1alpha1.TimeFilter{
-				Start: "09:09:09",
+				Start: testStartTime,
 				Stop:  "10:10:10",
 			},
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-gateway",
+				Type:   testEventType,
+				Source: testSource,
 			},
 			Data: []v1alpha1.DataFilter{
 				{
@@ -83,7 +83,7 @@ func TestFilterEvent_All(t *testing.T) {
 			},
 			Exprs: []v1alpha1.ExprFilter{
 				{
-					Expr: `k != "x"`,
+					Expr: testExprKNotX,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "k",
@@ -98,15 +98,15 @@ func TestFilterEvent_All(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -120,12 +120,12 @@ func TestFilterEvent_All(t *testing.T) {
 	t.Run("test ctx not valid", func(t *testing.T) {
 		filter := v1alpha1.EventDependencyFilter{
 			Time: &v1alpha1.TimeFilter{
-				Start: "09:09:09",
-				Stop:  "19:19:19",
+				Start: testStartTime,
+				Stop:  testStopTime,
 			},
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-gateway",
+				Type:   testEventType,
+				Source: testSource,
 			},
 			Data: []v1alpha1.DataFilter{
 				{
@@ -136,7 +136,7 @@ func TestFilterEvent_All(t *testing.T) {
 			},
 			Exprs: []v1alpha1.ExprFilter{
 				{
-					Expr: `k != "x"`,
+					Expr: testExprKNotX,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "k",
@@ -151,15 +151,15 @@ func TestFilterEvent_All(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-fake",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testWebhookFake,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -173,12 +173,12 @@ func TestFilterEvent_All(t *testing.T) {
 	t.Run("test data not valid", func(t *testing.T) {
 		filter := v1alpha1.EventDependencyFilter{
 			Time: &v1alpha1.TimeFilter{
-				Start: "09:09:09",
-				Stop:  "19:19:19",
+				Start: testStartTime,
+				Stop:  testStopTime,
 			},
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-gateway",
+				Type:   testEventType,
+				Source: testSource,
 			},
 			Data: []v1alpha1.DataFilter{
 				{
@@ -204,15 +204,15 @@ func TestFilterEvent_All(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "x"}`),
 		}
@@ -226,12 +226,12 @@ func TestFilterEvent_All(t *testing.T) {
 	t.Run("test expr not valid", func(t *testing.T) {
 		filter := v1alpha1.EventDependencyFilter{
 			Time: &v1alpha1.TimeFilter{
-				Start: "09:09:09",
-				Stop:  "19:19:19",
+				Start: testStartTime,
+				Stop:  testStopTime,
 			},
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-gateway",
+				Type:   testEventType,
+				Source: testSource,
 			},
 			Data: []v1alpha1.DataFilter{
 				{
@@ -257,15 +257,15 @@ func TestFilterEvent_All(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -282,7 +282,7 @@ func TestFilterEvent_Expr(t *testing.T) {
 		filter := v1alpha1.EventDependencyFilter{
 			Exprs: []v1alpha1.ExprFilter{
 				{
-					Expr: `k != "x"`,
+					Expr: testExprKNotX,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "k",
@@ -297,15 +297,15 @@ func TestFilterEvent_Expr(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -335,15 +335,15 @@ func TestFilterEvent_Expr(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -373,15 +373,15 @@ func TestFilterEvent_Expr(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -409,15 +409,15 @@ func TestFilterEvent_Data(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -443,15 +443,15 @@ func TestFilterEvent_Data(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -476,15 +476,15 @@ func TestFilterEvent_Data(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -500,8 +500,8 @@ func TestFilterEvent_Context(t *testing.T) {
 	t.Run("test valid", func(t *testing.T) {
 		filter := v1alpha1.EventDependencyFilter{
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-gateway",
+				Type:   testEventType,
+				Source: testSource,
 			},
 		}
 		filtersLogicalOperator := v1alpha1.AndLogicalOperator
@@ -509,15 +509,15 @@ func TestFilterEvent_Context(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -531,8 +531,8 @@ func TestFilterEvent_Context(t *testing.T) {
 	t.Run("test not valid", func(t *testing.T) {
 		filter := v1alpha1.EventDependencyFilter{
 			Context: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-fake",
+				Type:   testEventType,
+				Source: testWebhookFake,
 			},
 		}
 		filtersLogicalOperator := v1alpha1.AndLogicalOperator
@@ -540,15 +540,15 @@ func TestFilterEvent_Context(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -564,8 +564,8 @@ func TestFilterEvent_Time(t *testing.T) {
 	t.Run("test valid", func(t *testing.T) {
 		filter := v1alpha1.EventDependencyFilter{
 			Time: &v1alpha1.TimeFilter{
-				Start: "09:09:09",
-				Stop:  "19:19:19",
+				Start: testStartTime,
+				Stop:  testStopTime,
 			},
 		}
 		filtersLogicalOperator := v1alpha1.AndLogicalOperator
@@ -573,15 +573,15 @@ func TestFilterEvent_Time(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -595,7 +595,7 @@ func TestFilterEvent_Time(t *testing.T) {
 	t.Run("test not valid", func(t *testing.T) {
 		filter := v1alpha1.EventDependencyFilter{
 			Time: &v1alpha1.TimeFilter{
-				Start: "09:09:09",
+				Start: testStartTime,
 				Stop:  "10:10:10",
 			},
 		}
@@ -604,15 +604,15 @@ func TestFilterEvent_Time(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}
@@ -626,7 +626,7 @@ func TestFilterEvent_Time(t *testing.T) {
 	t.Run("test error", func(t *testing.T) {
 		filter := v1alpha1.EventDependencyFilter{
 			Time: &v1alpha1.TimeFilter{
-				Start: "09:09:09",
+				Start: testStartTime,
 				Stop:  "10:10",
 			},
 		}
@@ -635,15 +635,15 @@ func TestFilterEvent_Time(t *testing.T) {
 		now := time.Now().UTC()
 		event := &v1alpha1.Event{
 			Context: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Date(now.Year(), now.Month(), now.Day(), 16, 36, 34, 0, time.UTC),
 				},
-				DataContentType: "application/json",
-				Subject:         "example-1",
+				DataContentType: testContentType,
+				Subject:         testSubject,
 			},
 			Data: []byte(`{"k": "v"}`),
 		}

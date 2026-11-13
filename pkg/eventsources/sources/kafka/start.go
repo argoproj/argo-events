@@ -304,7 +304,7 @@ func (el *EventListener) partitionConsumer(ctx context.Context, log *zap.Sugared
 				el.Metrics.EventProcessingFailed(el.GetEventSourceName(), el.GetEventName())
 			}
 		case err := <-partitionConsumer.Errors():
-			return fmt.Errorf("failed to consume messages for event source %s, %w", el.GetEventName(), err)
+			return fmt.Errorf("failed to consume messages for event source %s, %w", el.GetEventName(), *err)
 
 		case <-ctx.Done():
 			log.Info("event source is stopped, closing partition consumer")

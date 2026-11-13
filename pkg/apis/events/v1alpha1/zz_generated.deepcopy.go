@@ -1719,6 +1719,11 @@ func (in *EventSourceSpec) DeepCopyInto(out *EventSourceSpec) {
 			(*out)[key] = *val.DeepCopy()
 		}
 	}
+	if in.RevisionHistoryLimit != nil {
+		in, out := &in.RevisionHistoryLimit, &out.RevisionHistoryLimit
+		*out = new(int32)
+		**out = **in
+	}
 	return
 }
 

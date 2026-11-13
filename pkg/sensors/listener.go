@@ -52,15 +52,18 @@ func subscribeOnce(subLock *uint32, subscribe func()) {
 	subscribe()
 }
 
+// needsLeaderElection: kafka sensors scale horizontally, single replica has no one to elect against.
+func needsLeaderElection(isKafka bool, replicas int) bool {
+	return !isKafka && replicas > 1
+}
+
 func (sensorCtx *SensorContext) Start(ctx context.Context) error {
 	log := logging.FromContext(ctx)
 	clusterName := fmt.Sprintf("%s-sensor-%s", sensorCtx.sensor.Namespace, sensorCtx.sensor.Name)
 	replicas := int(sensorCtx.sensor.Spec.GetReplicas())
 	leasename := fmt.Sprintf("sensor-%s", sensorCtx.sensor.Name)
 
-	// sensor for kafka eventbus can be scaled horizontally,
-	// therefore does not require an elector
-	if sensorCtx.eventBusConfig.Kafka != nil {
+	if !needsLeaderElection(sensorCtx.eventBusConfig.Kafka != nil, replicas) {
 		return sensorCtx.listenEvents(ctx)
 	}
 

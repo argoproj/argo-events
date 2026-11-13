@@ -28,6 +28,10 @@ import (
 const (
 	messageTypeSubscriptionConfirmation = "SubscriptionConfirmation"
 	messageTypeNotification             = "Notification"
+
+	// httpNotification field names that are spelled differently in the SNS signing string
+	snsKeyMessageID = "MessageID"
+	snsKeyTopicARN  = "TopicARN"
 )
 
 // Router contains information for a route
