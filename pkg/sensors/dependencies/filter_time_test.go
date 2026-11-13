@@ -74,8 +74,8 @@ func TestFilterTimeWithTimezone(t *testing.T) {
 		eventTime := time.Date(2024, 7, 15, 10, 0, 0, 0, time.UTC)
 
 		timeFilter := &v1alpha1.TimeFilter{
-			Start: "09:00:00",
-			Stop:  "17:00:00",
+			Start: testBusinessStart,
+			Stop:  testBusinessStop,
 			// No timezone specified, defaults to UTC
 		}
 
@@ -89,9 +89,9 @@ func TestFilterTimeWithTimezone(t *testing.T) {
 		eventTime := time.Date(2024, 7, 15, 14, 0, 0, 0, time.UTC)
 
 		timeFilter := &v1alpha1.TimeFilter{
-			Start:    "09:00:00",
-			Stop:     "17:00:00",
-			Timezone: "America/New_York",
+			Start:    testBusinessStart,
+			Stop:     testBusinessStop,
+			Timezone: testTimezone,
 		}
 
 		result, err := filterTime(timeFilter, eventTime)
@@ -104,9 +104,9 @@ func TestFilterTimeWithTimezone(t *testing.T) {
 		eventTime := time.Date(2024, 7, 15, 12, 0, 0, 0, time.UTC)
 
 		timeFilter := &v1alpha1.TimeFilter{
-			Start:    "09:00:00",
-			Stop:     "17:00:00",
-			Timezone: "America/New_York",
+			Start:    testBusinessStart,
+			Stop:     testBusinessStop,
+			Timezone: testTimezone,
 		}
 
 		result, err := filterTime(timeFilter, eventTime)
@@ -119,9 +119,9 @@ func TestFilterTimeWithTimezone(t *testing.T) {
 		eventTime := time.Date(2024, 7, 15, 22, 0, 0, 0, time.UTC)
 
 		timeFilter := &v1alpha1.TimeFilter{
-			Start:    "09:00:00",
-			Stop:     "17:00:00",
-			Timezone: "America/New_York",
+			Start:    testBusinessStart,
+			Stop:     testBusinessStop,
+			Timezone: testTimezone,
 		}
 
 		result, err := filterTime(timeFilter, eventTime)
@@ -149,8 +149,8 @@ func TestFilterTimeWithTimezone(t *testing.T) {
 		eventTime := time.Date(2024, 7, 15, 1, 0, 0, 0, time.UTC)
 
 		timeFilter := &v1alpha1.TimeFilter{
-			Start:    "09:00:00",
-			Stop:     "17:00:00",
+			Start:    testBusinessStart,
+			Stop:     testBusinessStop,
 			Timezone: "Asia/Tokyo",
 		}
 
@@ -163,8 +163,8 @@ func TestFilterTimeWithTimezone(t *testing.T) {
 		eventTime := time.Date(2024, 7, 15, 10, 0, 0, 0, time.UTC)
 
 		timeFilter := &v1alpha1.TimeFilter{
-			Start:    "09:00:00",
-			Stop:     "17:00:00",
+			Start:    testBusinessStart,
+			Stop:     testBusinessStop,
 			Timezone: "Invalid/Timezone",
 		}
 
@@ -181,7 +181,7 @@ func TestFilterTimeWithTimezone(t *testing.T) {
 		timeFilter := &v1alpha1.TimeFilter{
 			Start:    "22:00:00",
 			Stop:     "06:00:00",
-			Timezone: "America/New_York",
+			Timezone: testTimezone,
 		}
 
 		result, err := filterTime(timeFilter, eventTime)
@@ -195,9 +195,9 @@ func TestFilterTimeWithTimezone(t *testing.T) {
 		eventTime := time.Date(2024, 1, 15, 15, 0, 0, 0, time.UTC)
 
 		timeFilter := &v1alpha1.TimeFilter{
-			Start:    "09:00:00",
-			Stop:     "17:00:00",
-			Timezone: "America/New_York",
+			Start:    testBusinessStart,
+			Stop:     testBusinessStop,
+			Timezone: testTimezone,
 		}
 
 		result, err := filterTime(timeFilter, eventTime)

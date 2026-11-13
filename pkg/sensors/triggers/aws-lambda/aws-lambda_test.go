@@ -78,7 +78,7 @@ var sensorObjFull = &v1alpha1.Sensor{
 						Payload: []v1alpha1.TriggerParameter{
 							{
 								Src: &v1alpha1.TriggerParameterSource{
-									DependencyName: "fake-dependency",
+									DependencyName: testDependency,
 									Value:          new(string),
 								},
 								Dest: "metadata.label.value",
@@ -126,7 +126,7 @@ func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 	triggers := getAWSTriggers()
 	for _, trigger := range triggers {
 		testEvents := map[string]*v1alpha1.Event{
-			"fake-dependency": {
+			testDependency: {
 				Context: &v1alpha1.EventContext{
 					ID:              "1",
 					Type:            "webhook",
@@ -140,12 +140,12 @@ func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 		}
 
 		defaultValue := "default"
-		defaultRegion := "region"
+		defaultRegion := testRegion
 
 		trigger.Trigger.Template.AWSLambda.Parameters = []v1alpha1.TriggerParameter{
 			{
 				Src: &v1alpha1.TriggerParameterSource{
-					DependencyName: "fake-dependency",
+					DependencyName: testDependency,
 					DataKey:        "function",
 					Value:          &defaultValue,
 				},
@@ -153,11 +153,11 @@ func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 			},
 			{
 				Src: &v1alpha1.TriggerParameterSource{
-					DependencyName: "fake-dependency",
-					DataKey:        "region",
+					DependencyName: testDependency,
+					DataKey:        testRegion,
 					Value:          &defaultRegion,
 				},
-				Dest: "region",
+				Dest: testRegion,
 			},
 		}
 
@@ -168,7 +168,7 @@ func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 		updatedObj, ok := response.(*v1alpha1.AWSLambdaTrigger)
 		assert.Equal(t, true, ok)
 		assert.Equal(t, "real-function", updatedObj.FunctionName)
-		assert.Equal(t, "region", updatedObj.Region)
+		assert.Equal(t, testRegion, updatedObj.Region)
 	}
 }
 

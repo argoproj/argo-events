@@ -54,8 +54,8 @@ func Test_ApplyToContainer(t *testing.T) {
 		envFroms = append(envFroms, e.Prefix)
 	}
 	assert.Contains(t, envFroms, "a")
-	testContainer.VolumeMounts = []corev1.VolumeMount{{Name: "test", MountPath: "/test"}}
+	testContainer.VolumeMounts = []corev1.VolumeMount{{Name: testName, MountPath: "/test"}}
 	testContainer.ApplyToContainer(c)
 	assert.Equal(t, 1, len(c.VolumeMounts))
-	assert.Equal(t, "test", c.VolumeMounts[0].Name)
+	assert.Equal(t, testName, c.VolumeMounts[0].Name)
 }

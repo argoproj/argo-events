@@ -79,7 +79,7 @@ func TestSlackTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger := getSlackTrigger()
 
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": {
+		testDependency: {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",
@@ -95,14 +95,14 @@ func TestSlackTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger.Trigger.Template.Slack.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "channel",
 			},
 			Dest: "channel",
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "message",
 			},
 			Dest: "message",

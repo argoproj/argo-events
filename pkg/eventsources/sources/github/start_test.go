@@ -53,7 +53,7 @@ func TestRouteActiveHandler(t *testing.T) {
 				},
 				Repositories: []v1alpha1.OwnedRepositories{
 					{
-						Owner: "fake",
+						Owner: testFake,
 						Names: []string{
 							"fake0", "fake1",
 						},
@@ -104,8 +104,8 @@ func TestRouteActiveHandlerDeprecated(t *testing.T) {
 					URL:      "http://webhook-gateway-svc",
 					Port:     "12000",
 				},
-				DeprecatedOwner:      "fake",
-				DeprecatedRepository: "fake",
+				DeprecatedOwner:      testFake, //nolint:staticcheck // exercising the deprecated fields on purpose
+				DeprecatedRepository: testFake, //nolint:staticcheck // exercising the deprecated fields on purpose
 				Events: []string{
 					"PushEvent",
 				},
