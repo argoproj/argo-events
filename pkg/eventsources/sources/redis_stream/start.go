@@ -108,7 +108,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	client := redis.NewClient(opt)
 
 	if status := client.Ping(ctx); status.Err() != nil {
-		return fmt.Errorf("failed to connect to host %s and db %d for event source %s, %w", redisEventSource.HostAddress, redisEventSource.DB, el.GetEventName(), status.Err())
+		return fmt.Errorf("failed to connect to host %s and db %d for event source %s, %w", opt.Addr, opt.DB, el.GetEventName(), status.Err())
 	}
 	log.Infof("connected to redis server %s", redisEventSource.HostAddress)
 

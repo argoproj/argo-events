@@ -31,8 +31,8 @@ func validate(eventSource *v1alpha1.RedisEventSource) error {
 	if eventSource == nil {
 		return v1alpha1.ErrNilEventSource
 	}
-	if eventSource.URL != nil && eventSource.HostAddress != "" {
-		return fmt.Errorf("url and hostAddress are mutually exclusive")
+	if eventSource.URL != nil && (eventSource.HostAddress != "" || eventSource.Password != nil || eventSource.Username != "" || eventSource.DB != 0) {
+		return fmt.Errorf("url cannot be combined with hostAddress, password, username or db, put them in the url instead")
 	}
 	if eventSource.URL == nil && eventSource.HostAddress == "" {
 		return fmt.Errorf("host address must be specified")

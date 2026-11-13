@@ -26,6 +26,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/eventsources/sources"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func TestValidateRedisEventSource(t *testing.T) {
@@ -50,5 +51,32 @@ func TestValidateRedisEventSource(t *testing.T) {
 		}
 		err := l.ValidateEventSource(context.Background())
 		assert.NoError(t, err)
+	}
+}
+
+func TestValidateURL(t *testing.T) {
+	url := &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: "redis"}, Key: "url"}
+	tests := []struct {
+		name    string
+		source  v1alpha1.RedisEventSource
+		wantErr string
+	}{
+		{name: "url only", source: v1alpha1.RedisEventSource{URL: url, Channels: []string{"ch"}}},
+		{name: "url and host", source: v1alpha1.RedisEventSource{URL: url, HostAddress: "localhost:6379", Channels: []string{"ch"}}, wantErr: "url cannot be combined"},
+		{name: "url and password", source: v1alpha1.RedisEventSource{URL: url, Password: url, Channels: []string{"ch"}}, wantErr: "url cannot be combined"},
+		{name: "url and username", source: v1alpha1.RedisEventSource{URL: url, Username: "u", Channels: []string{"ch"}}, wantErr: "url cannot be combined"},
+		{name: "url and db", source: v1alpha1.RedisEventSource{URL: url, DB: 1, Channels: []string{"ch"}}, wantErr: "url cannot be combined"},
+		{name: "neither url nor host", source: v1alpha1.RedisEventSource{Channels: []string{"ch"}}, wantErr: "host address must be specified"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			source := tc.source
+			err := validate(&source)
+			if tc.wantErr == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorContains(t, err, tc.wantErr)
+			}
+		})
 	}
 }
