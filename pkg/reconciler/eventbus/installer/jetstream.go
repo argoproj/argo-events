@@ -546,11 +546,15 @@ func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
 		}
 	}
 
+	if oldClientObjExisting && oldServerObjExisting {
+		return r.upgradeShortEncryptionKey(ctx, oldSObj)
+	}
+
 	if !oldClientObjExisting || !oldServerObjExisting {
 		// Generate server-auth.conf file
 		// 32 bytes satisfies NATS' recommended minimum and exceeds the
 		// 112-bit HMAC key strength required by OpenSSL FIPS providers.
-		encryptionKey := sharedutil.RandomString(32)
+		encryptionKey := sharedutil.RandomString(minEncryptionKeyLength)
 		jsUser := sharedutil.RandomString(8)
 		jsPass := sharedutil.RandomString(16)
 		sysPassword := sharedutil.RandomString(24)
@@ -774,6 +778,67 @@ func (r *jetStreamInstaller) getPVCs(ctx context.Context) ([]corev1.PersistentVo
 		return nil, err
 	}
 	return pvcl.Items, nil
+}
+
+// minEncryptionKeyLength is the shortest key the controller generates. 32 bytes
+// satisfies NATS' recommended minimum and the 112-bit HMAC key strength that
+// OpenSSL FIPS providers require.
+const minEncryptionKeyLength = 32
+
+// upgradeShortEncryptionKey replaces an encryption key shorter than
+// minEncryptionKeyLength, left by releases before #4111, so the EventBus can
+// start on a FIPS nats-server build.
+//
+// Releases before the key was read from the environment encrypted every store
+// with the literal "$JS_KEY", never with the key in the secret, and the server
+// configuration lists that literal as prev_key. So the short key has never
+// encrypted anything, and replacing it before the StatefulSet moves to the
+// new configuration lets the first restart re-encrypt the store straight to
+// the new key. If the StatefulSet already reads the key from the secret, the
+// store may be encrypted with the short key, which prev_key doesn't cover, so
+// the key is left alone.
+func (r *jetStreamInstaller) upgradeShortEncryptionKey(ctx context.Context, serverSecret *corev1.Secret) error {
+	if len(serverSecret.Data[v1alpha1.JetStreamServerSecretEncryptionKey]) >= minEncryptionKeyLength {
+		return nil
+	}
+	if !jetStreamSupportsPrevKey(r.eventBus.Spec.JetStream.Version) {
+		// The server keeps using the literal key, so the one in the secret doesn't matter.
+		return nil
+	}
+
+	sts := &appv1.StatefulSet{}
+	err := r.client.Get(ctx, client.ObjectKey{Namespace: r.eventBus.Namespace, Name: generateJetStreamStatefulSetName(r.eventBus)}, sts)
+	if err != nil && !apierrors.IsNotFound(err) {
+		return fmt.Errorf("failed to check the jetstream statefulset before upgrading the encryption key, err: %w", err)
+	}
+	if err == nil && statefulSetReadsKeyFromSecret(sts) {
+		r.logger.Warnw("jetstream encryption key is shorter than recommended, but the store may already be encrypted with it, so it is not replaced",
+			"length", len(serverSecret.Data[v1alpha1.JetStreamServerSecretEncryptionKey]), "minimum", minEncryptionKeyLength)
+		return nil
+	}
+
+	updated := serverSecret.DeepCopy()
+	updated.Data[v1alpha1.JetStreamServerSecretEncryptionKey] = []byte(sharedutil.RandomString(minEncryptionKeyLength))
+	if err := r.client.Update(ctx, updated); err != nil {
+		return fmt.Errorf("failed to upgrade the jetstream encryption key, err: %w", err)
+	}
+	r.logger.Infow("replaced short jetstream encryption key, the store is re-encrypted on the next start",
+		"previousLength", len(serverSecret.Data[v1alpha1.JetStreamServerSecretEncryptionKey]), "length", minEncryptionKeyLength)
+	return nil
+}
+
+// statefulSetReadsKeyFromSecret reports whether the main container of the
+// StatefulSet gets the encryption key from the secret through JS_KEY_RAW,
+// i.e. whether the server runs with the configuration that uses the real key.
+func statefulSetReadsKeyFromSecret(sts *appv1.StatefulSet) bool {
+	for _, c := range sts.Spec.Template.Spec.Containers {
+		for _, e := range c.Env {
+			if e.Name == "JS_KEY_RAW" {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // jetStreamSupportsPrevKey reports whether the nats-server of the given version accepts the
