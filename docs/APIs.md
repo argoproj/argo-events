@@ -16578,6 +16578,30 @@ Username required for ACL style authentication if any.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>url</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+URL refers to a secret holding a Redis connection URL,
+e.g. redis://user:password@host:<sup>6379</sup>⁄<sub>0</sub>, or
+rediss:// to connect over TLS. It can’t be combined with HostAddress,
+Password, Username or DB.
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -16822,6 +16846,30 @@ Filter
 <p>
 
 Username required for ACL style authentication if any.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>url</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+URL refers to a secret holding a Redis connection URL,
+e.g. redis://user:password@host:<sup>6379</sup>⁄<sub>0</sub>, or
+rediss:// to connect over TLS. It can’t be combined with HostAddress,
+Password, Username or DB.
 </p>
 
 </td>
