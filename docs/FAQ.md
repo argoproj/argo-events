@@ -55,7 +55,7 @@ set up the AWS SNS event-source.
 
 **Q. If I have multiple event dependencies and triggers in a single sensor, can I execute a specific trigger upon a specific event?**  
 
-**A.** Yes, this functionality is offered by the sensor event resolution circuitry. Please take a look at the [Circuit and Switch](https://argoproj.github.io/argo-events/tutorials/06-circuit-and-switch/) tutorial.
+**A.** Yes, this functionality is offered by the sensor event resolution circuitry. Please take a look at the [Trigger Conditions](https://argoproj.github.io/argo-events/tutorials/06-trigger-conditions/) tutorial.
 
 **Q. The latest image tag does not point to latest release tag?**
 

@@ -49,20 +49,20 @@ var (
 				ServiceAccountName: "fake-sa",
 				ImagePullSecrets: []corev1.LocalObjectReference{
 					{
-						Name: "test",
+						Name: testName,
 					},
 				},
 				Container: &v1alpha1.Container{
 					VolumeMounts: []corev1.VolumeMount{
 						{
 							MountPath: "/test-data",
-							Name:      "test-data",
+							Name:      testData,
 						},
 					},
 				},
 				Volumes: []corev1.Volume{
 					{
-						Name: "test-data",
+						Name: testData,
 						VolumeSource: corev1.VolumeSource{
 							EmptyDir: &corev1.EmptyDirVolumeSource{},
 						},
@@ -73,9 +73,9 @@ var (
 			Triggers: []v1alpha1.Trigger{
 				{
 					Template: &v1alpha1.TriggerTemplate{
-						Name: "fake-trigger",
+						Name: testFakeTrigger,
 						K8s: &v1alpha1.StandardK8STrigger{
-							Operation: "create",
+							Operation: testOperationCreate,
 							Source:    &v1alpha1.ArtifactLocation{},
 						},
 					},
@@ -84,8 +84,8 @@ var (
 			Dependencies: []v1alpha1.EventDependency{
 				{
 					Name:            "fake-dep",
-					EventSourceName: "fake-source",
-					EventName:       "fake-one",
+					EventSourceName: testFakeSource,
+					EventName:       testFakeOne,
 				},
 			},
 		},
@@ -94,7 +94,7 @@ var (
 	fakeEventBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -110,7 +110,7 @@ var (
 		Status: v1alpha1.EventBusStatus{
 			Config: v1alpha1.BusConfig{
 				NATS: &v1alpha1.NATSConfig{
-					URL:  "nats://xxxx",
+					URL:  testNATSURL,
 					Auth: &v1alpha1.AuthStrategyToken,
 					AccessSecret: &corev1.SecretKeySelector{
 						Key: "test-key",
@@ -126,7 +126,7 @@ var (
 	fakeEventBusJetstream = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -140,7 +140,7 @@ var (
 		Status: v1alpha1.EventBusStatus{
 			Config: v1alpha1.BusConfig{
 				JetStream: &v1alpha1.JetStreamConfig{
-					URL: "nats://xxxx",
+					URL: testNATSURL,
 				},
 			},
 		},
@@ -149,7 +149,7 @@ var (
 	fakeEventBusJetstreamWithTLS = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -161,23 +161,23 @@ var (
 		Status: v1alpha1.EventBusStatus{
 			Config: v1alpha1.BusConfig{
 				JetStream: &v1alpha1.JetStreamConfig{
-					URL: "nats://xxxx",
+					URL: testNATSURL,
 					TLS: &v1alpha1.TLSConfig{
 						CACertSecret: &corev1.SecretKeySelector{
 							LocalObjectReference: corev1.LocalObjectReference{
-								Name: "secret-0",
+								Name: testSecret0,
 							},
 							Key: "ca.crt",
 						},
 						ClientKeySecret: &corev1.SecretKeySelector{
 							LocalObjectReference: corev1.LocalObjectReference{
-								Name: "secret-1",
+								Name: testSecret1,
 							},
 							Key: "tls.key",
 						},
 						ClientCertSecret: &corev1.SecretKeySelector{
 							LocalObjectReference: corev1.LocalObjectReference{
-								Name: "secret-1",
+								Name: testSecret1,
 							},
 							Key: "tls.crt",
 						},
@@ -190,7 +190,7 @@ var (
 	fakeEventBusKafka = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -226,10 +226,10 @@ func Test_BuildDeployment(t *testing.T) {
 		hasAuthVolume := false
 		hasTmpVolume := false
 		for _, vol := range volumes {
-			if vol.Name == "auth-volume" {
+			if vol.Name == testAuthVolume {
 				hasAuthVolume = true
 			}
-			if vol.Name == "tmp" {
+			if vol.Name == testTmp {
 				hasTmpVolume = true
 			}
 		}
@@ -318,13 +318,13 @@ func Test_BuildDeployment(t *testing.T) {
 		hasCAVolumeMount := false
 		hasCertVolumeMount := false
 		for _, volume := range deployment.Spec.Template.Spec.Volumes {
-			if volume.Name == "secret-0" {
+			if volume.Name == testSecret0 {
 				if hasCAVolume {
 					assert.Fail(t, "Secrets should be de-duplicated")
 				}
 				hasCAVolume = true
 			}
-			if volume.Name == "secret-1" {
+			if volume.Name == testSecret1 {
 				if hasCertVolume {
 					assert.Fail(t, "Secrets should be de-duplicated")
 				}
@@ -332,11 +332,11 @@ func Test_BuildDeployment(t *testing.T) {
 			}
 		}
 		for _, volumeMount := range deployment.Spec.Template.Spec.Containers[0].VolumeMounts {
-			if volumeMount.Name == "secret-0" {
+			if volumeMount.Name == testSecret0 {
 				hasCAVolumeMount = true
 				assert.Equal(t, volumeMount.MountPath, fmt.Sprintf("/argo-events/secrets/%s", volumeMount.Name))
 			}
-			if volumeMount.Name == "secret-1" {
+			if volumeMount.Name == testSecret1 {
 				hasCertVolumeMount = true
 				assert.Equal(t, volumeMount.MountPath, fmt.Sprintf("/argo-events/secrets/%s", volumeMount.Name))
 			}
@@ -355,8 +355,8 @@ func Test_BuildDeployment(t *testing.T) {
 			Labels: testLabels,
 		}
 
-		wantVolumeNames := []string{"test-data", "auth-volume", "tmp"}
-		wantVolumeMountNames := []string{"test-data", "auth-volume", "tmp"}
+		wantVolumeNames := []string{testData, testAuthVolume, testTmp}
+		wantVolumeMountNames := []string{testData, testAuthVolume, testTmp}
 
 		deployment, err := buildDeployment(args, fakeEventBus)
 		assert.Nil(t, err)
@@ -405,7 +405,7 @@ func TestResourceReconcile(t *testing.T) {
 		t.Run("test resource reconcile with eventbus", func(t *testing.T) {
 			ctx := context.TODO()
 			cl := fake.NewClientBuilder().Build()
-			testBus.Status.MarkDeployed("test", "test")
+			testBus.Status.MarkDeployed(testName, testName)
 			testBus.Status.MarkConfigured()
 			err := cl.Create(ctx, testBus)
 			assert.Nil(t, err)
