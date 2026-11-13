@@ -55,6 +55,7 @@ func TestValidateRedisEventSource(t *testing.T) {
 }
 
 func TestValidateURL(t *testing.T) {
+	const errCombined = "url cannot be combined"
 	url := &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: "redis"}, Key: "url"}
 	tests := []struct {
 		name    string
@@ -62,10 +63,10 @@ func TestValidateURL(t *testing.T) {
 		wantErr string
 	}{
 		{name: "url only", source: v1alpha1.RedisStreamEventSource{URL: url, Streams: []string{"st"}}},
-		{name: "url and host", source: v1alpha1.RedisStreamEventSource{URL: url, HostAddress: "localhost:6379", Streams: []string{"st"}}, wantErr: "url cannot be combined"},
-		{name: "url and password", source: v1alpha1.RedisStreamEventSource{URL: url, Password: url, Streams: []string{"st"}}, wantErr: "url cannot be combined"},
-		{name: "url and username", source: v1alpha1.RedisStreamEventSource{URL: url, Username: "u", Streams: []string{"st"}}, wantErr: "url cannot be combined"},
-		{name: "url and db", source: v1alpha1.RedisStreamEventSource{URL: url, DB: 1, Streams: []string{"st"}}, wantErr: "url cannot be combined"},
+		{name: "url and host", source: v1alpha1.RedisStreamEventSource{URL: url, HostAddress: "localhost:6379", Streams: []string{"st"}}, wantErr: errCombined},
+		{name: "url and password", source: v1alpha1.RedisStreamEventSource{URL: url, Password: url, Streams: []string{"st"}}, wantErr: errCombined},
+		{name: "url and username", source: v1alpha1.RedisStreamEventSource{URL: url, Username: "u", Streams: []string{"st"}}, wantErr: errCombined},
+		{name: "url and db", source: v1alpha1.RedisStreamEventSource{URL: url, DB: 1, Streams: []string{"st"}}, wantErr: errCombined},
 		{name: "neither url nor host", source: v1alpha1.RedisStreamEventSource{Streams: []string{"st"}}, wantErr: "host address must be specified"},
 	}
 	for _, tc := range tests {
