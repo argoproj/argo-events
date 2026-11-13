@@ -63,6 +63,10 @@ func (sensorCtx *SensorContext) GetTrigger(ctx context.Context, trigger *v1alpha
 	}
 
 	if trigger.Template.HTTP != nil {
+		if sensorCtx.sensor != nil && sensorCtx.sensor.Spec.LogLevel != "" {
+			log = logging.NewSugaredLoggerWithLevel(sensorCtx.sensor.Spec.LogLevel).
+				With(logging.LabelTriggerName, trigger.Template.Name)
+		}
 		result, err := http.NewHTTPTrigger(sensorCtx.httpClients, sensorCtx.sensor, trigger, log)
 		if err != nil {
 			log.Errorw("failed to new an HTTP trigger", zap.Error(err))

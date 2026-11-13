@@ -14,6 +14,24 @@ func TestNewArgoEventsLogger(t *testing.T) {
 	})
 }
 
+func TestNewSugaredLoggerWithLevel(t *testing.T) {
+	cases := map[string]zap.AtomicLevel{
+		InfoLevel:  zap.NewAtomicLevelAt(zap.InfoLevel),
+		DebugLevel: zap.NewAtomicLevelAt(zap.DebugLevel),
+		ErrorLevel: zap.NewAtomicLevelAt(zap.ErrorLevel),
+		WarnLevel:  zap.NewAtomicLevelAt(zap.WarnLevel),
+		"":         zap.NewAtomicLevelAt(zap.InfoLevel),
+	}
+	for level, want := range cases {
+		t.Run(level, func(t *testing.T) {
+			got := NewSugaredLoggerWithLevel(level).Desugar().Level()
+			if got != want.Level() {
+				t.Fatalf("NewSugaredLoggerWithLevel(%q).Level = %v, want %v", level, got, want.Level())
+			}
+		})
+	}
+}
+
 func TestConfigureLogLevelLogger(t *testing.T) {
 	cases := map[string]zap.AtomicLevel{
 		InfoLevel:  zap.NewAtomicLevelAt(zap.InfoLevel),
