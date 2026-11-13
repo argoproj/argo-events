@@ -12,6 +12,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -315,4 +316,78 @@ func Test_JSBufferGetReplicas(t *testing.T) {
 	five := int32(5)
 	s.Replicas = &five
 	assert.Equal(t, 5, s.GetReplicas())
+}
+
+func TestJetStreamPreExistingSecrets(t *testing.T) {
+	serverName := generateJetStreamServerSecretName(testJetStreamEventBus)
+	clientName := generateJetStreamClientAuthSecretName(testJetStreamEventBus)
+	fullServerData := map[string][]byte{
+		v1alpha1.JetStreamServerSecretAuthKey:       []byte("auth"),
+		v1alpha1.JetStreamServerSecretEncryptionKey: []byte("key"),
+		v1alpha1.JetStreamServerPrivateKeyKey:       []byte("key"),
+		v1alpha1.JetStreamServerCertKey:             []byte("cert"),
+		v1alpha1.JetStreamServerCACertKey:           []byte("ca"),
+		v1alpha1.JetStreamClusterPrivateKeyKey:      []byte("key"),
+		v1alpha1.JetStreamClusterCertKey:            []byte("cert"),
+		v1alpha1.JetStreamClusterCACertKey:          []byte("ca"),
+	}
+	clientData := map[string][]byte{v1alpha1.JetStreamClientAuthSecretKey: []byte("username: u\npassword: p")}
+	secret := func(name string, data map[string][]byte) *corev1.Secret {
+		return &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{Namespace: testJetStreamEventBus.Namespace, Name: name},
+			Data:       data,
+		}
+	}
+
+	tests := []struct {
+		name     string
+		existing []runtime.Object
+		wantErr  string
+	}{
+		{
+			name:     "both provided",
+			existing: []runtime.Object{secret(serverName, fullServerData), secret(clientName, clientData)},
+		},
+		{
+			name:     "only client provided",
+			existing: []runtime.Object{secret(clientName, clientData)},
+			wantErr:  "both have to be provided",
+		},
+		{
+			name:     "only server provided",
+			existing: []runtime.Object{secret(serverName, fullServerData)},
+			wantErr:  "both have to be provided",
+		},
+		{
+			name: "server secret missing keys",
+			existing: []runtime.Object{
+				secret(serverName, map[string][]byte{v1alpha1.JetStreamServerSecretAuthKey: []byte("auth")}),
+				secret(clientName, clientData),
+			},
+			wantErr: "is missing keys",
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			cl := fake.NewClientBuilder().Build()
+			i := &jetStreamInstaller{
+				client:     cl,
+				kubeClient: k8sfake.NewSimpleClientset(tc.existing...),
+				eventBus:   testJetStreamEventBus.DeepCopy(),
+				config:     fakeConfig,
+				labels:     testLabels,
+				logger:     zaptest.NewLogger(t).Sugar(),
+			}
+			err := i.createSecrets(context.TODO())
+			if tc.wantErr != "" {
+				assert.ErrorContains(t, err, tc.wantErr)
+			} else {
+				assert.NoError(t, err)
+			}
+			// pre-existing secrets are never replaced with generated ones
+			secrets := &corev1.SecretList{}
+			assert.NoError(t, cl.List(context.TODO(), secrets))
+			assert.Empty(t, secrets.Items)
+		})
+	}
 }

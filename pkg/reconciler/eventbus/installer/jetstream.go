@@ -521,7 +521,85 @@ func (r *jetStreamInstaller) getSecret(ctx context.Context, name string) (*corev
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
+// getUnownedSecret returns the named secret if it exists but is not controlled
+// by the EventBus, which is the case when it was created ahead of time, e.g.
+// by an external secrets operator.
+func (r *jetStreamInstaller) getUnownedSecret(ctx context.Context, name string) (*corev1.Secret, error) {
+	s, err := r.kubeClient.CoreV1().Secrets(r.eventBus.Namespace).Get(ctx, name, metav1.GetOptions{})
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	if metav1.IsControlledBy(s, r.eventBus) {
+		return nil, nil
+	}
+	return s, nil
+}
+
+func missingSecretKeys(s *corev1.Secret, keys ...string) []string {
+	var missing []string
+	for _, k := range keys {
+		if len(s.Data[k]) == 0 {
+			missing = append(missing, k)
+		}
+	}
+	return missing
+}
+
+// usePreExistingSecrets reports whether both auth secrets were provided ahead
+// of time. They are used as they are: the controller doesn't regenerate, adopt
+// or delete them, so credentials can be shared with other clusters. Since the
+// server config and the client credentials have to match, providing only one
+// of them is an error.
+func (r *jetStreamInstaller) usePreExistingSecrets(ctx context.Context) (bool, error) {
+	serverName := generateJetStreamServerSecretName(r.eventBus)
+	clientName := generateJetStreamClientAuthSecretName(r.eventBus)
+
+	serverObj, err := r.getUnownedSecret(ctx, serverName)
+	if err != nil {
+		return false, fmt.Errorf("failed to check for a pre-existing nats server auth secret, err: %w", err)
+	}
+	clientObj, err := r.getUnownedSecret(ctx, clientName)
+	if err != nil {
+		return false, fmt.Errorf("failed to check for a pre-existing nats client auth secret, err: %w", err)
+	}
+
+	switch {
+	case serverObj == nil && clientObj == nil:
+		return false, nil
+	case serverObj == nil:
+		return false, fmt.Errorf("found pre-existing nats client auth secret %q, but not the server auth secret %q, both have to be provided", clientName, serverName)
+	case clientObj == nil:
+		return false, fmt.Errorf("found pre-existing nats server auth secret %q, but not the client auth secret %q, both have to be provided", serverName, clientName)
+	}
+
+	if missing := missingSecretKeys(serverObj,
+		v1alpha1.JetStreamServerSecretAuthKey,
+		v1alpha1.JetStreamServerSecretEncryptionKey,
+		v1alpha1.JetStreamServerPrivateKeyKey,
+		v1alpha1.JetStreamServerCertKey,
+		v1alpha1.JetStreamServerCACertKey,
+		v1alpha1.JetStreamClusterPrivateKeyKey,
+		v1alpha1.JetStreamClusterCertKey,
+		v1alpha1.JetStreamClusterCACertKey,
+	); len(missing) > 0 {
+		return false, fmt.Errorf("pre-existing nats server auth secret %q is missing keys %v", serverName, missing)
+	}
+	if missing := missingSecretKeys(clientObj, v1alpha1.JetStreamClientAuthSecretKey); len(missing) > 0 {
+		return false, fmt.Errorf("pre-existing nats client auth secret %q is missing keys %v", clientName, missing)
+	}
+
+	r.logger.Infow("using pre-existing nats auth secrets", "serverSecret", serverName, "clientSecret", clientName)
+	return true, nil
+}
+
 func (r *jetStreamInstaller) createSecrets(ctx context.Context) error {
+	if preExisting, err := r.usePreExistingSecrets(ctx); err != nil || preExisting {
+		return err
+	}
+
 	// first check to see if the secrets already exist
 	oldServerObjExisting, oldClientObjExisting := true, true
 
