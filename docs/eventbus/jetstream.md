@@ -61,6 +61,24 @@ spec:
       - "-D"                    # debug-level logs
 ```
 
+### Advertising a different client address
+
+By default the NATS servers advertise their pod IPs to clients. If clients reach the EventBus through another
+address, for example a load balancer in front of the NATS service when a `jetstreamExotic` EventBus in another
+cluster connects to it, set `clientAdvertise` to that `host:port`. It is written to the server configuration
+as [`client_advertise`](https://docs.nats.io/running-a-nats-service/configuration#connection-and-domain-settings).
+
+```
+apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: default
+spec:
+  jetstream:
+    version: latest # Do NOT use "latest" but a specific version in your real deployment
+    clientAdvertise: my-loadbalancer.example.com:4222
+```
+
 ## Security
 
 For Jetstream, TLS is turned on for all client-server communication as well as between Jetstream nodes. In addition, for client-server communication we by default use password authentication (and because TLS is turned on, the password is encrypted).

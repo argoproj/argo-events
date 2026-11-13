@@ -11677,6 +11677,29 @@ Defaults to 1MB
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>clientAdvertise</code></br> <em> string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+ClientAdvertise is the “host:port” that the NATS servers advertise to
+clients, written as the “client_advertise” option of the server
+configuration. Set it when clients reach the servers through an address
+other than the pod IPs, for example a load balancer. See
+<a href="https://docs.nats.io/running-a-nats-service/configuration#connection-and-domain-settings">https://docs.nats.io/running-a-nats-service/configuration#connection-and-domain-settings</a>.
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
