@@ -366,11 +366,11 @@ func TestJetStreamUpgradeShortEncryptionKey(t *testing.T) {
 		sts         *appv1.StatefulSet
 		wantUpgrade bool
 	}{
-		{name: "short key, store still on the literal key", version: "2.10.29", key: shortKey, wantUpgrade: true},
-		{name: "short key, statefulset on the old configuration", version: "2.10.29", key: shortKey, sts: statefulSetWithEnv("JS_KEY"), wantUpgrade: true},
-		{name: "short key, statefulset already reads the key from the secret", version: "2.10.29", key: shortKey, sts: statefulSetWithEnv("JS_KEY_RAW", "JS_KEY")},
+		{name: "short key, store still on the literal key", version: testPrevKeyVersion, key: shortKey, wantUpgrade: true},
+		{name: "short key, statefulset on the old configuration", version: testPrevKeyVersion, key: shortKey, sts: statefulSetWithEnv("JS_KEY"), wantUpgrade: true},
+		{name: "short key, statefulset already reads the key from the secret", version: testPrevKeyVersion, key: shortKey, sts: statefulSetWithEnv("JS_KEY_RAW", "JS_KEY")},
 		{name: "short key, server without prev_key support", version: "2.7.3", key: shortKey},
-		{name: "key already long enough", version: "2.10.29", key: []byte("0123456789abcdef0123456789abcdef")},
+		{name: "key already long enough", version: testPrevKeyVersion, key: []byte("0123456789abcdef0123456789abcdef")},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
