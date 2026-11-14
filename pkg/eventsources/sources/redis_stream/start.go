@@ -19,7 +19,9 @@ package redisstream
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/url"
 	"time"
 
 	redis "github.com/go-redis/redis/v8"
@@ -75,7 +77,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		}
 		parsedOpt, err := redis.ParseURL(urlStr)
 		if err != nil {
-			return fmt.Errorf("failed to parse redis URL, %w", err)
+			return fmt.Errorf("failed to parse the redis URL in secret %s, %w", redisEventSource.URL.Name, withoutURL(err))
 		}
 		opt = parsedOpt
 	} else {
@@ -226,4 +228,14 @@ func (el *EventListener) handleOne(stream string, message redis.XMessage, dispat
 		return fmt.Errorf("failed dispatch a Redis stream event, %w", err)
 	}
 	return nil
+}
+
+// withoutURL drops the URL from a url.Parse error. Its message quotes the
+// whole URL, which would put the password in the logs.
+func withoutURL(err error) error {
+	var urlErr *url.Error
+	if errors.As(err, &urlErr) {
+		return urlErr.Err
+	}
+	return err
 }
