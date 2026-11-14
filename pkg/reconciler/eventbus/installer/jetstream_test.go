@@ -114,8 +114,13 @@ func TestJetStreamCreateObjects(t *testing.T) {
 		for _, e := range sts.Spec.Template.Spec.Containers[0].Env {
 			envNames = append(envNames, e.Name)
 		}
-		for _, e := range []string{"POD_NAME", "SERVER_NAME", "POD_NAMESPACE", "CLUSTER_ADVERTISE", "JS_KEY"} {
+		for _, e := range []string{"POD_NAME", "SERVER_NAME", "POD_NAMESPACE", "CLUSTER_ADVERTISE", "JS_KEY_RAW", "JS_KEY"} {
 			assert.Contains(t, envNames, e)
+		}
+		for _, e := range sts.Spec.Template.Spec.Containers[0].Env {
+			if e.Name == "JS_KEY" {
+				assert.Equal(t, `"$(JS_KEY_RAW)"`, e.Value)
+			}
 		}
 	})
 
@@ -170,7 +175,25 @@ func TestJetStreamCreateObjects(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(c.Data))
 		assert.Contains(t, c.Annotations, v1alpha1.AnnotationResourceSpecHash)
-		assert.NotContains(t, c.Data[v1alpha1.JetStreamConfigMapKey], "client_advertise")
+		conf := c.Data[v1alpha1.JetStreamConfigMapKey]
+		assert.Contains(t, conf, "\n  key: \"$JS_KEY\"\n")
+		assert.NotContains(t, conf, "prev_key")
+		assert.NotContains(t, conf, "client_advertise")
+	})
+
+	t.Run("test create configmap with prev_key", func(t *testing.T) {
+		testObj := testJetStreamEventBus.DeepCopy()
+		testObj.Spec.JetStream.Version = testJetStreamPrevKeyVersion
+		i.eventBus = testObj
+		err := i.createConfigMap(ctx)
+		assert.NoError(t, err)
+		c := &corev1.ConfigMap{}
+		err = cl.Get(ctx, types.NamespacedName{Namespace: testObj.Namespace, Name: generateJetStreamConfigMapName(testObj)}, c)
+		assert.NoError(t, err)
+		conf := c.Data[v1alpha1.JetStreamConfigMapKey]
+		assert.Contains(t, conf, "\n  key: $JS_KEY\n")
+		assert.Contains(t, conf, "\n  prev_key: \"$JS_KEY\"\n")
+		assert.NotContains(t, conf, "\n  key: \"$JS_KEY\"\n")
 	})
 
 	for _, replicas := range []int32{1, 3} {
@@ -186,6 +209,22 @@ func TestJetStreamCreateObjects(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Contains(t, c.Data[v1alpha1.JetStreamConfigMapKey], "\nclient_advertise: \"nats.example.com:4222\"\n")
 		})
+	}
+}
+
+func TestJetStreamSupportsPrevKey(t *testing.T) {
+	for version, want := range map[string]bool{
+		"2.8.2":         false,
+		"2.8.2-alpine":  false,
+		"2.9.16":        false,
+		"2.10.0":        true,
+		"2.10.29":       true,
+		"2.14.4":        true,
+		"latest":        true,
+		"":              false,
+		"not-a-version": false,
+	} {
+		assert.Equal(t, want, jetStreamSupportsPrevKey(version), version)
 	}
 }
 
