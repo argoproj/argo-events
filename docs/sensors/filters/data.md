@@ -116,6 +116,7 @@ filters:
 
 - If data type is `string`, you can pass either an exact value or a regex. In any case that value will be evaluated as a regex.
 - If data types is `bool` or `float`, you have to pass an exact value.
+- For `string` and `bool` data types only the `=` and `!=` comparators apply.
 
 ### Multiple paths
 

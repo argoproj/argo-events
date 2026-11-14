@@ -32,6 +32,7 @@ const (
 	testStartTime           = "09:09:09"
 	testStopTime            = "19:19:19"
 	testSubject             = "example-1"
+	testTrue                = "true"
 	testTimezone            = "America/New_York"
 	testWebhookFake         = "webhook-fake"
 )

@@ -678,6 +678,48 @@ func TestFilterData(t *testing.T) {
 			expectedResult: true,
 			expectErr:      false,
 		},
+		{
+			name: "bool filter with != comparator, value differs",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path:       "k",
+						Type:       v1alpha1.JSONTypeBool,
+						Value:      []string{testTrue},
+						Comparator: "!=",
+					},
+				},
+				operator: v1alpha1.EmptyLogicalOperator,
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: testContentType,
+					},
+					Data: []byte(`{"k": false}`),
+				}},
+			expectedResult: true,
+			expectErr:      false,
+		},
+		{
+			name: "bool filter with != comparator, value equal",
+			args: args{
+				data: []v1alpha1.DataFilter{
+					{
+						Path:       "k",
+						Type:       v1alpha1.JSONTypeBool,
+						Value:      []string{testTrue},
+						Comparator: "!=",
+					},
+				},
+				operator: v1alpha1.EmptyLogicalOperator,
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: testContentType,
+					},
+					Data: []byte(`{"k": true}`),
+				}},
+			expectedResult: false,
+			expectErr:      false,
+		},
 	}
 
 	for _, test := range tests {
