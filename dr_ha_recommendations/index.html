@@ -1942,6 +1942,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#controller" class="md-nav__link">
+    Controller
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#eventbus" class="md-nav__link">
     EventBus
   </a>
@@ -2199,6 +2206,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#controller" class="md-nav__link">
+    Controller
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#eventbus" class="md-nav__link">
     EventBus
   </a>
@@ -2326,6 +2340,14 @@
 
 
 <h1 id="hadr-recommendations">HA/DR Recommendations<a class="headerlink" href="#hadr-recommendations" title="Permanent link">&para;</a></h1>
+<h2 id="controller">Controller<a class="headerlink" href="#controller" title="Permanent link">&para;</a></h2>
+<p>When the controller runs more than one replica with leader election enabled, the timing of the election can be tuned with these environment variables on the controller deployment. Each takes a Go duration such as <code>30s</code>, and leaving one unset keeps the controller-runtime default.</p>
+<ul>
+<li><code>LEADER_ELECTION_LEASE_DURATION</code>: how long non-leaders wait before trying to take over (default <code>15s</code>).</li>
+<li><code>LEADER_ELECTION_RENEW_DEADLINE</code>: how long the leader keeps retrying to renew before giving up (default <code>10s</code>).</li>
+<li><code>LEADER_ELECTION_RETRY_PERIOD</code>: how often clients retry the election (default <code>2s</code>).</li>
+</ul>
+<p>A longer lease makes failover slower but avoids losing leadership when the API server is briefly slow.</p>
 <h2 id="eventbus">EventBus<a class="headerlink" href="#eventbus" title="Permanent link">&para;</a></h2>
 <p>A simple EventBus used for non-prod deployment or testing purposes could be:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
