@@ -1,6 +1,7 @@
 package base
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/IBM/sarama"
@@ -26,8 +27,27 @@ func NewKafka(config *v1alpha1.KafkaBus, logger *zap.SugaredLogger) *Kafka {
 	}
 }
 
-func (k *Kafka) Brokers() []string {
-	return strings.Split(k.config.URL, ",")
+// Brokers returns the broker addresses from url, or from the mounted
+// urlSecret when that is set.
+func (k *Kafka) Brokers() ([]string, error) {
+	url := k.config.URL
+	if k.config.URLSecret != nil {
+		value, err := sharedutil.GetSecretFromVolume(k.config.URLSecret)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read the kafka url secret, %w", err)
+		}
+		url = value
+	}
+	brokers := []string{}
+	for _, broker := range strings.Split(url, ",") {
+		if broker = strings.TrimSpace(broker); broker != "" {
+			brokers = append(brokers, broker)
+		}
+	}
+	if len(brokers) == 0 {
+		return nil, fmt.Errorf("no kafka brokers configured")
+	}
+	return brokers, nil
 }
 
 func (k *Kafka) Config() (*sarama.Config, error) {

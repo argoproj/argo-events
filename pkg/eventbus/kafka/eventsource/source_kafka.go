@@ -35,7 +35,11 @@ func (s *KafkaSource) Connect(string) (eventbuscommon.EventSourceConnection, err
 	config.Producer.Return.Errors = true
 	config.Producer.Return.Successes = true
 
-	client, err := sarama.NewClient(s.Brokers(), config)
+	brokers, err := s.Brokers()
+	if err != nil {
+		return nil, err
+	}
+	client, err := sarama.NewClient(brokers, config)
 	if err != nil {
 		return nil, err
 	}

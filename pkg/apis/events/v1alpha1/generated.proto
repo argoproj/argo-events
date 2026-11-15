@@ -1754,7 +1754,9 @@ message K8SResourcePolicy {
 
 // KafkaBus holds the KafkaBus EventBus information
 message KafkaBus {
-  // URL to kafka cluster, multiple URLs separated by comma
+  // URL to kafka cluster, multiple URLs separated by comma.
+  // Either url or urlSecret is required.
+  // +optional
   optional string url = 1;
 
   // Topic name, defaults to {namespace_name}-{eventbus_name}
@@ -1781,6 +1783,12 @@ message KafkaBus {
   // Supported values: random, hash, roundrobin, manual. Defaults to random.
   // +optional
   optional string partitioner = 7;
+
+  // URLSecret references a key of a Secret holding the URL to kafka cluster,
+  // multiple URLs separated by comma. Use it instead of url to keep the
+  // broker addresses out of the EventBus spec.
+  // +optional
+  optional .k8s.io.api.core.v1.SecretKeySelector urlSecret = 8;
 }
 
 message KafkaConsumerGroup {

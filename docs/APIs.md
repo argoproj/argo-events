@@ -12034,9 +12034,11 @@ Description
 
 <td>
 
+<em>(Optional)</em>
 <p>
 
-URL to kafka cluster, multiple URLs separated by comma
+URL to kafka cluster, multiple URLs separated by comma. Either url or
+urlSecret is required.
 </p>
 
 </td>
@@ -12156,6 +12158,29 @@ Consumer group for kafka client
 
 Partitioner sets the Kafka producer partitioning strategy. Supported
 values: random, hash, roundrobin, manual. Defaults to random.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>urlSecret</code></br> <em>
+<a href="https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+URLSecret references a key of a Secret holding the URL to kafka cluster,
+multiple URLs separated by comma. Use it instead of url to keep the
+broker addresses out of the EventBus spec.
 </p>
 
 </td>

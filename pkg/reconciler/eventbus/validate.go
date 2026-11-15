@@ -45,8 +45,11 @@ func ValidateEventBus(eb *v1alpha1.EventBus) error {
 		}
 	}
 	if x := eb.Spec.Kafka; x != nil {
-		if x.URL == "" {
-			return fmt.Errorf("\"spec.kafka.url\" is missing")
+		if x.URL == "" && x.URLSecret == nil {
+			return fmt.Errorf("either \"spec.kafka.url\" or \"spec.kafka.urlSecret\" is required")
+		}
+		if x.URL != "" && x.URLSecret != nil {
+			return fmt.Errorf("\"spec.kafka.url\" and \"spec.kafka.urlSecret\" can't both be set")
 		}
 	}
 	if x := eb.Spec.JetStreamExotic; x != nil {

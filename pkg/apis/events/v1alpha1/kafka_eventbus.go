@@ -1,8 +1,12 @@
 package v1alpha1
 
+import corev1 "k8s.io/api/core/v1"
+
 // KafkaBus holds the KafkaBus EventBus information
 type KafkaBus struct {
-	// URL to kafka cluster, multiple URLs separated by comma
+	// URL to kafka cluster, multiple URLs separated by comma.
+	// Either url or urlSecret is required.
+	// +optional
 	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
 	// Topic name, defaults to {namespace_name}-{eventbus_name}
 	// +optional
@@ -23,4 +27,9 @@ type KafkaBus struct {
 	// Supported values: random, hash, roundrobin, manual. Defaults to random.
 	// +optional
 	Partitioner string `json:"partitioner,omitempty" protobuf:"bytes,7,opt,name=partitioner"`
+	// URLSecret references a key of a Secret holding the URL to kafka cluster,
+	// multiple URLs separated by comma. Use it instead of url to keep the
+	// broker addresses out of the EventBus spec.
+	// +optional
+	URLSecret *corev1.SecretKeySelector `json:"urlSecret,omitempty" protobuf:"bytes,8,opt,name=urlSecret"`
 }

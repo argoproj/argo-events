@@ -2456,6 +2456,11 @@ func (in *KafkaBus) DeepCopyInto(out *KafkaBus) {
 		*out = new(KafkaConsumerGroup)
 		**out = **in
 	}
+	if in.URLSecret != nil {
+		in, out := &in.URLSecret, &out.URLSecret
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 
