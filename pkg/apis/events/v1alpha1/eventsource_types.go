@@ -108,6 +108,9 @@ type EventSourceSpec struct {
 	Gerrit map[string]GerritEventSource `json:"gerrit,omitempty" protobuf:"bytes,35,rep,name=gerrit"`
 	// MNS event sources
 	MNS map[string]MNSEventSource `json:"mns,omitempty" protobuf:"bytes,36,rep,name=mns"`
+	// RevisionHistoryLimit specifies how many old deployment revisions to retain
+	// +optional
+	RevisionHistoryLimit *int32 `json:"revisionHistoryLimit,omitempty" protobuf:"varint,37,opt,name=revisionHistoryLimit"`
 }
 
 func (e EventSourceSpec) GetReplicas() int32 {
@@ -1380,6 +1383,10 @@ type RedisEventSource struct {
 	// Username required for ACL style authentication if any.
 	// +optional
 	Username string `json:"username,omitempty" protobuf:"bytes,10,opt,name=username"`
+	// URL refers to a secret holding a Redis connection URL, e.g. redis://user:password@host:6379/0,
+	// or rediss:// to connect over TLS. It can't be combined with HostAddress, Password, Username or DB.
+	// +optional
+	URL *corev1.SecretKeySelector `json:"url,omitempty" protobuf:"bytes,11,opt,name=url"`
 }
 
 // RedisStreamEventSource describes an event source for
@@ -1416,6 +1423,10 @@ type RedisStreamEventSource struct {
 	// Username required for ACL style authentication if any.
 	// +optional
 	Username string `json:"username,omitempty" protobuf:"bytes,10,opt,name=username"`
+	// URL refers to a secret holding a Redis connection URL, e.g. redis://user:password@host:6379/0,
+	// or rediss:// to connect over TLS. It can't be combined with HostAddress, Password, Username or DB.
+	// +optional
+	URL *corev1.SecretKeySelector `json:"url,omitempty" protobuf:"bytes,11,opt,name=url"`
 }
 
 // NSQEventSource describes the event source for NSQ PubSub

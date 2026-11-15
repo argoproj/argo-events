@@ -23,6 +23,9 @@ const (
 )
 
 var (
+	// testJetStreamPrevKeyVersion is the first NATS release with prev_key support.
+	testJetStreamPrevKeyVersion = "2.10.29"
+
 	fakeConfig = &reconciler.GlobalConfig{
 		EventBus: &reconciler.EventBusConfig{
 			NATS: &reconciler.StanConfig{
@@ -37,7 +40,13 @@ var (
 			JetStream: &reconciler.JetStreamConfig{
 				Versions: []reconciler.JetStreamVersion{
 					{
-						Version:              "2.7.3",
+						Version:              testVersion,
+						NatsImage:            testJetStreamImage,
+						ConfigReloaderImage:  testJSReloaderImage,
+						MetricsExporterImage: testJetStreamExporterImage,
+					},
+					{
+						Version:              testJetStreamPrevKeyVersion,
 						NatsImage:            testJetStreamImage,
 						ConfigReloaderImage:  testJSReloaderImage,
 						MetricsExporterImage: testJetStreamExporterImage,
@@ -86,7 +95,7 @@ func TestGetLinkedEventSources(t *testing.T) {
 	t.Run("get linked eventsources", func(t *testing.T) {
 		es := fakeEmptyEventSource()
 		es.Spec.EventBusName = "test-sa"
-		es.Spec.Calendar = fakeCalendarEventSourceMap("test")
+		es.Spec.Calendar = fakeCalendarEventSourceMap(testShortName)
 		cl := fake.NewClientBuilder().Build()
 		ctx := context.Background()
 		err := cl.Create(ctx, es, &client.CreateOptions{})

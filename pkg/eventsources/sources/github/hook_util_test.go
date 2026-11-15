@@ -12,23 +12,23 @@ func TestCompareHook(t *testing.T) {
 
 	assert.True(t, compareHook(&gh.Hook{
 		Config: map[string]interface{}{
-			"url": "https://google.com/",
+			testURLKey: "https://google.com/",
 		},
 		Events: []string{"*"},
 	}, "https://google.com/", []string{"*"}))
 
 	assert.False(t, compareHook(&gh.Hook{
 		Config: map[string]interface{}{
-			"url": "https://google.com/",
+			testURLKey: "https://google.com/",
 		},
-		Events: []string{"pull_request"},
+		Events: []string{testPullRequestEvent},
 	}, "https://google.com/", []string{"*"}))
 
 	assert.False(t, compareHook(&gh.Hook{
 		Config: map[string]interface{}{
-			"url": "https://example.com/",
+			testURLKey: testHookURL,
 		},
-		Events: []string{"pull_request"},
+		Events: []string{testPullRequestEvent},
 	}, "https://google.com/", []string{"*"}))
 }
 
@@ -36,18 +36,18 @@ func TestGetHook(t *testing.T) {
 	hooks := []*gh.Hook{
 		{
 			Config: map[string]interface{}{
-				"url": "https://example.com/",
+				testURLKey: testHookURL,
 			},
-			Events: []string{"pull_request"},
+			Events: []string{testPullRequestEvent},
 		},
 		{
 			Config: map[string]interface{}{
-				"url": "https://example.com/",
+				testURLKey: testHookURL,
 			},
 			Events: []string{"*"},
 		},
 	}
 
-	assert.Equal(t, hooks[1], getHook(hooks, "https://example.com/", []string{"*"}))
-	assert.Nil(t, getHook(hooks, "https://example.com/", []string{"does_not_exist"}))
+	assert.Equal(t, hooks[1], getHook(hooks, testHookURL, []string{"*"}))
+	assert.Nil(t, getHook(hooks, testHookURL, []string{"does_not_exist"}))
 }

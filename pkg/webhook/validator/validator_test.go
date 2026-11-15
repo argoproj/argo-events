@@ -42,7 +42,7 @@ func fakeEventBus() *aev1.EventBus {
 	return &aev1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: aev1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -63,7 +63,7 @@ func fakeExoticEventBus() *aev1.EventBus {
 	return &aev1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: aev1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,

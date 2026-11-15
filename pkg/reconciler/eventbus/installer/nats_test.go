@@ -32,7 +32,7 @@ var (
 	testNatsEventBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -44,10 +44,10 @@ var (
 					Auth: &v1alpha1.AuthStrategyToken,
 					ImagePullSecrets: []corev1.LocalObjectReference{
 						{
-							Name: "test",
+							Name: testShortName,
 						},
 					},
-					ServiceAccountName: "test",
+					ServiceAccountName: testShortName,
 				},
 			},
 		},
@@ -56,7 +56,7 @@ var (
 	testEventBusPersist = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -74,7 +74,7 @@ var (
 	testEventBusAuthNone = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -92,7 +92,7 @@ var (
 	testEventBusBad = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
+			Kind:       testEventBusKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNamespace,
@@ -141,7 +141,7 @@ func TestInstallationAuthtoken(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(svcList.Items))
 		for _, s := range svcList.Items {
-			assert.True(t, strings.Contains(s.Name, "stan") || strings.Contains(s.Name, "metrics"))
+			assert.True(t, strings.Contains(s.Name, "stan") || strings.Contains(s.Name, metricsName))
 		}
 
 		cmList := &corev1.ConfigMapList{}

@@ -64,7 +64,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 				},
 			},
@@ -78,7 +78,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "v"}`),
 				},
@@ -98,7 +98,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "v"}`),
 				},
@@ -117,7 +117,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "v"}`),
 				},
@@ -138,7 +138,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "v"}`),
 				},
@@ -159,7 +159,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "v"}`),
 				},
@@ -181,7 +181,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "v"}`),
 				},
@@ -203,7 +203,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "v"}`),
 				},
@@ -218,13 +218,13 @@ func TestFilterData(t *testing.T) {
 					{
 						Path:  "k",
 						Type:  v1alpha1.JSONTypeNumber,
-						Value: []string{"1.0"},
+						Value: []string{testFloatValue},
 					},
 				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "1.0"}`),
 				}},
@@ -238,14 +238,14 @@ func TestFilterData(t *testing.T) {
 					{
 						Path:       "k",
 						Type:       v1alpha1.JSONTypeNumber,
-						Value:      []string{"1.0"},
+						Value:      []string{testFloatValue},
 						Comparator: ">",
 					},
 				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "2.0"}`),
 				}},
@@ -259,14 +259,14 @@ func TestFilterData(t *testing.T) {
 					{
 						Path:       "k",
 						Type:       v1alpha1.JSONTypeNumber,
-						Value:      []string{"1.0"},
+						Value:      []string{testFloatValue},
 						Comparator: "<=",
 					},
 				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "2.0"}`),
 				}},
@@ -280,14 +280,14 @@ func TestFilterData(t *testing.T) {
 					{
 						Path:       "k",
 						Type:       v1alpha1.JSONTypeNumber,
-						Value:      []string{"1.0"},
+						Value:      []string{testFloatValue},
 						Comparator: "!=",
 					},
 				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "1.0"}`),
 				}},
@@ -308,7 +308,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "5.0"}`),
 				}},
@@ -328,7 +328,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "10.0"}`),
 				}},
@@ -342,13 +342,13 @@ func TestFilterData(t *testing.T) {
 					{
 						Path:  "k",
 						Type:  v1alpha1.JSONTypeNumber,
-						Value: []string{"1.0"},
+						Value: []string{testFloatValue},
 					},
 				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": 1.0}`),
 				}},
@@ -362,14 +362,14 @@ func TestFilterData(t *testing.T) {
 					{
 						Path:       "k",
 						Type:       v1alpha1.JSONTypeNumber,
-						Value:      []string{"1.0"},
+						Value:      []string{testFloatValue},
 						Comparator: ">",
 					},
 				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": 2.0}`),
 				}},
@@ -383,14 +383,14 @@ func TestFilterData(t *testing.T) {
 					{
 						Path:       "k",
 						Type:       v1alpha1.JSONTypeNumber,
-						Value:      []string{"1.0"},
+						Value:      []string{testFloatValue},
 						Comparator: "<=",
 					},
 				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": 2.0}`),
 				}},
@@ -404,14 +404,14 @@ func TestFilterData(t *testing.T) {
 					{
 						Path:       "k",
 						Type:       v1alpha1.JSONTypeNumber,
-						Value:      []string{"1.0"},
+						Value:      []string{testFloatValue},
 						Comparator: "!=",
 					},
 				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": 1.0}`),
 				}},
@@ -432,7 +432,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": 5.0}`),
 				}},
@@ -452,7 +452,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": 10.0}`),
 				}},
@@ -469,20 +469,20 @@ func TestFilterData(t *testing.T) {
 						Value: []string{"v"},
 					},
 					{
-						Path:  "k1.k",
+						Path:  testPathK1K,
 						Type:  v1alpha1.JSONTypeNumber,
 						Value: []string{"2.14"},
 					},
 					{
-						Path:  "k1.k2",
+						Path:  testPathK1K2,
 						Type:  v1alpha1.JSONTypeString,
-						Value: []string{"hello,world", "hello there"},
+						Value: []string{testHelloCommaWorld, testHelloThere},
 					},
 				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": true, "k1": {"k": 3.14, "k2": "hello, world"}}`),
 				}},
@@ -499,20 +499,20 @@ func TestFilterData(t *testing.T) {
 						Value: []string{"true"},
 					},
 					{
-						Path:  "k1.k",
+						Path:  testPathK1K,
 						Type:  v1alpha1.JSONTypeNumber,
 						Value: []string{"3.14"},
 					},
 					{
-						Path:  "k1.k2",
+						Path:  testPathK1K2,
 						Type:  v1alpha1.JSONTypeString,
-						Value: []string{"hello,world", "hello, world", "hello there"},
+						Value: []string{testHelloCommaWorld, "hello, world", testHelloThere},
 					},
 				},
 				operator: v1alpha1.AndLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": true, "k1": {"k": 3.14, "k2": "hello, world"}}`),
 				}},
@@ -529,20 +529,20 @@ func TestFilterData(t *testing.T) {
 						Value: []string{"false"},
 					},
 					{
-						Path:  "k1.k",
+						Path:  testPathK1K,
 						Type:  v1alpha1.JSONTypeNumber,
 						Value: []string{"3.14"},
 					},
 					{
-						Path:  "k1.k2",
+						Path:  testPathK1K2,
 						Type:  v1alpha1.JSONTypeString,
-						Value: []string{"hello,world", "hello there"},
+						Value: []string{testHelloCommaWorld, testHelloThere},
 					},
 				},
 				operator: v1alpha1.OrLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": true, "k1": {"k": 3.14, "k2": "hello, world"}}`),
 				}},
@@ -563,7 +563,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "v", "k1": {"a": [{"k2": "v2"}]}}`),
 				},
@@ -584,7 +584,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "v", "k1": {"a": [{"k2": "v2"}, {"k2": "v3"}]}}`),
 				},
@@ -606,7 +606,7 @@ func TestFilterData(t *testing.T) {
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "aGVsbG8gd29ybGQ="}`),
 				}},
@@ -622,13 +622,13 @@ func TestFilterData(t *testing.T) {
 						Type:       v1alpha1.JSONTypeNumber,
 						Value:      []string{"3.13"},
 						Comparator: ">",
-						Template:   `{{ b64dec .Input }}`,
+						Template:   testB64DecTemplate,
 					},
 				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "My4xNA=="}`), // 3.14
 				}},
@@ -643,14 +643,14 @@ func TestFilterData(t *testing.T) {
 						Path:       "k",
 						Type:       v1alpha1.JSONTypeString,
 						Value:      []string{"hello world"},
-						Template:   `{{ b64dec .Input }}`,
+						Template:   testB64DecTemplate,
 						Comparator: "!=",
 					},
 				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "aGVsbG8gd29ybGQ"}`),
 				}},
@@ -665,13 +665,13 @@ func TestFilterData(t *testing.T) {
 						Path:     "k",
 						Type:     v1alpha1.JSONTypeString,
 						Value:    []string{"world$"},
-						Template: `{{ b64dec .Input }}`,
+						Template: testB64DecTemplate,
 					},
 				},
 				operator: v1alpha1.EmptyLogicalOperator,
 				event: &v1alpha1.Event{
 					Context: &v1alpha1.EventContext{
-						DataContentType: "application/json",
+						DataContentType: testContentType,
 					},
 					Data: []byte(`{"k": "aGVsbG8gd29ybGQ="}`),
 				}},

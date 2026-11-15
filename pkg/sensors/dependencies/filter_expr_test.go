@@ -21,7 +21,7 @@ func TestFilterExpr(t *testing.T) {
 			event: nil,
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `a == "b"`,
+					Expr: testExprAEqB,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "a",
@@ -38,7 +38,7 @@ func TestFilterExpr(t *testing.T) {
 			event: &v1alpha1.Event{Data: []byte("a")},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `a == "b"`,
+					Expr: testExprAEqB,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "a",
@@ -54,12 +54,12 @@ func TestFilterExpr(t *testing.T) {
 			name: "empty data",
 			event: &v1alpha1.Event{
 				Context: &v1alpha1.EventContext{
-					DataContentType: "application/json",
+					DataContentType: testContentType,
 				},
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `a == "b"`,
+					Expr: testExprAEqB,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "a",
@@ -75,7 +75,7 @@ func TestFilterExpr(t *testing.T) {
 			name: "nil filters",
 			event: &v1alpha1.Event{
 				Context: &v1alpha1.EventContext{
-					DataContentType: "application/json",
+					DataContentType: testContentType,
 				},
 			},
 			filters:        nil,
@@ -89,7 +89,7 @@ func TestFilterExpr(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `a == "b"`,
+					Expr: testExprAEqB,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "a",
@@ -129,10 +129,10 @@ func TestFilterExpr(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `b == "b"`,
+					Expr: testExprBEqB,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
@@ -152,7 +152,7 @@ func TestFilterExpr(t *testing.T) {
 					Expr: `b == 2`,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
@@ -172,7 +172,7 @@ func TestFilterExpr(t *testing.T) {
 					Expr: `b < 1`,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
@@ -192,7 +192,7 @@ func TestFilterExpr(t *testing.T) {
 					Expr: `b =~ "start"`,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
@@ -212,7 +212,7 @@ func TestFilterExpr(t *testing.T) {
 					Expr: `b !~ "start"`,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
@@ -229,10 +229,10 @@ func TestFilterExpr(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `b == "x"`,
+					Expr: testExprBEqX,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
@@ -241,7 +241,7 @@ func TestFilterExpr(t *testing.T) {
 					Expr: `d == "y"`,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.d",
+							Path: testPathAD,
 							Name: "d",
 						},
 					},
@@ -258,10 +258,10 @@ func TestFilterExpr(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `b == "x"`,
+					Expr: testExprBEqX,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
@@ -270,7 +270,7 @@ func TestFilterExpr(t *testing.T) {
 					Expr: `d == "d"`,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.d",
+							Path: testPathAD,
 							Name: "d",
 						},
 					},
@@ -287,10 +287,10 @@ func TestFilterExpr(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `b == "x"`,
+					Expr: testExprBEqX,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
@@ -299,7 +299,7 @@ func TestFilterExpr(t *testing.T) {
 					Expr: `d == "d"`,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.d",
+							Path: testPathAD,
 							Name: "d",
 						},
 					},
@@ -316,19 +316,19 @@ func TestFilterExpr(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `b == "b"`,
+					Expr: testExprBEqB,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
 				},
 				{
-					Expr: `c == "c"`,
+					Expr: testExprCEqC,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.c",
+							Path: testPathAC,
 							Name: "c",
 						},
 					},
@@ -345,25 +345,25 @@ func TestFilterExpr(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `b == "x"`,
+					Expr: testExprBEqX,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
 				},
 				{
-					Expr: `c == "c"`,
+					Expr: testExprCEqC,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.c",
+							Path: testPathAC,
 							Name: "c",
 						},
 					},
 				},
 				{
-					Expr: `e == true`,
+					Expr: testExprETrue,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "a.d.e",
@@ -383,19 +383,19 @@ func TestFilterExpr(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `b == "b"`,
+					Expr: testExprBEqB,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
 				},
 				{
-					Expr: `c == "c"`,
+					Expr: testExprCEqC,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.c",
+							Path: testPathAC,
 							Name: "c",
 						},
 					},
@@ -412,19 +412,19 @@ func TestFilterExpr(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `b == "x"`,
+					Expr: testExprBEqX,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
 				},
 				{
-					Expr: `c == "c"`,
+					Expr: testExprCEqC,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.c",
+							Path: testPathAC,
 							Name: "c",
 						},
 					},
@@ -441,25 +441,25 @@ func TestFilterExpr(t *testing.T) {
 			},
 			filters: []v1alpha1.ExprFilter{
 				{
-					Expr: `b == "x"`,
+					Expr: testExprBEqX,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 					},
 				},
 				{
-					Expr: `c == "c"`,
+					Expr: testExprCEqC,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.c",
+							Path: testPathAC,
 							Name: "c",
 						},
 					},
 				},
 				{
-					Expr: `e == true`,
+					Expr: testExprETrue,
 					Fields: []v1alpha1.PayloadField{
 						{
 							Path: "a.d.e",
@@ -482,11 +482,11 @@ func TestFilterExpr(t *testing.T) {
 					Expr: `b != "b" && d == true`,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 						{
-							Path: "a.d",
+							Path: testPathAD,
 							Name: "d",
 						},
 					},
@@ -506,11 +506,11 @@ func TestFilterExpr(t *testing.T) {
 					Expr: `b != "b" && d == true`,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 						{
-							Path: "a.c.d",
+							Path: testPathACD,
 							Name: "d",
 						},
 					},
@@ -530,11 +530,11 @@ func TestFilterExpr(t *testing.T) {
 					Expr: `b == "b" || d == true`,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 						{
-							Path: "a.c.d",
+							Path: testPathACD,
 							Name: "d",
 						},
 					},
@@ -554,11 +554,11 @@ func TestFilterExpr(t *testing.T) {
 					Expr: `b == "b" || (d == true && e == 2)`,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "a.b",
+							Path: testPathAB,
 							Name: "b",
 						},
 						{
-							Path: "a.c.d",
+							Path: testPathACD,
 							Name: "d",
 						},
 					},
