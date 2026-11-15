@@ -42,13 +42,13 @@ func TestParseBearerAuthorization(t *testing.T) {
 		wantToken string
 		wantOK    bool
 	}{
-		{name: "canonical scheme", header: "Bearer token", wantToken: "token", wantOK: true},
-		{name: "lowercase scheme", header: "bearer token", wantToken: "token", wantOK: true},
-		{name: "mixed case scheme", header: "bEaReR  token", wantToken: "token", wantOK: true},
+		{name: "canonical scheme", header: "Bearer token", wantToken: testToken, wantOK: true},
+		{name: "lowercase scheme", header: "bearer token", wantToken: testToken, wantOK: true},
+		{name: "mixed case scheme", header: "bEaReR  token", wantToken: testToken, wantOK: true},
 		{name: "wrong scheme", header: "Basic token"},
 		{name: "empty header", header: ""},
 		{name: "scheme only", header: "Bearer"},
-		{name: "token only", header: "token"},
+		{name: "token only", header: testToken},
 		{name: "missing token", header: "Bearer "},
 		{name: "token contains whitespace", header: "Bearer token extra"},
 	}

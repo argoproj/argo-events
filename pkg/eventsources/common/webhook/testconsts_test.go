@@ -4,4 +4,5 @@ package webhook
 const (
 	testEndpoint = "/fake"
 	testUsername = "username"
+	testToken    = "token"
 )

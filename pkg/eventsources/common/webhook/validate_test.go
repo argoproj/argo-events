@@ -53,7 +53,7 @@ func TestValidateWebhookContextBasicAuth(t *testing.T) {
 		context := &aev1.WebhookContext{
 			Endpoint:   testEndpoint,
 			Port:       "12000",
-			AuthSecret: &corev1.SecretKeySelector{Key: "token"},
+			AuthSecret: &corev1.SecretKeySelector{Key: testToken},
 			BasicAuth: &aev1.BasicAuth{
 				Username: &corev1.SecretKeySelector{Key: testUsername},
 				Password: &corev1.SecretKeySelector{Key: "password"},
