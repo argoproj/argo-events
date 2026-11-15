@@ -6491,6 +6491,12 @@ func schema_pkg_apis_events_v1alpha1_RedisEventSource(ref common.ReferenceCallba
 							Format:      "",
 						},
 					},
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Description: "URL refers to a secret holding a Redis connection URL, e.g. redis://user:password@host:6379/0, or rediss:// to connect over TLS. It can't be combined with HostAddress, Password, Username or DB.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
 				},
 				Required: []string{"hostAddress", "channels"},
 			},
@@ -6590,6 +6596,12 @@ func schema_pkg_apis_events_v1alpha1_RedisStreamEventSource(ref common.Reference
 							Description: "Username required for ACL style authentication if any.",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Description: "URL refers to a secret holding a Redis connection URL, e.g. redis://user:password@host:6379/0, or rediss:// to connect over TLS. It can't be combined with HostAddress, Password, Username or DB.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 				},

@@ -1383,6 +1383,10 @@ type RedisEventSource struct {
 	// Username required for ACL style authentication if any.
 	// +optional
 	Username string `json:"username,omitempty" protobuf:"bytes,10,opt,name=username"`
+	// URL refers to a secret holding a Redis connection URL, e.g. redis://user:password@host:6379/0,
+	// or rediss:// to connect over TLS. It can't be combined with HostAddress, Password, Username or DB.
+	// +optional
+	URL *corev1.SecretKeySelector `json:"url,omitempty" protobuf:"bytes,11,opt,name=url"`
 }
 
 // RedisStreamEventSource describes an event source for
@@ -1419,6 +1423,10 @@ type RedisStreamEventSource struct {
 	// Username required for ACL style authentication if any.
 	// +optional
 	Username string `json:"username,omitempty" protobuf:"bytes,10,opt,name=username"`
+	// URL refers to a secret holding a Redis connection URL, e.g. redis://user:password@host:6379/0,
+	// or rediss:// to connect over TLS. It can't be combined with HostAddress, Password, Username or DB.
+	// +optional
+	URL *corev1.SecretKeySelector `json:"url,omitempty" protobuf:"bytes,11,opt,name=url"`
 }
 
 // NSQEventSource describes the event source for NSQ PubSub
