@@ -3440,6 +3440,10 @@
           "description": "TLS configuration for the redis client.",
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.TLSConfig"
         },
+        "url": {
+          "description": "URL refers to a secret holding a Redis connection URL, e.g. redis://user:password@host:6379/0, or rediss:// to connect over TLS. It can't be combined with HostAddress, Password, Username or DB.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
         "username": {
           "description": "Username required for ACL style authentication if any.",
           "type": "string"
@@ -3497,6 +3501,10 @@
         "tls": {
           "description": "TLS configuration for the redis client.",
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.TLSConfig"
+        },
+        "url": {
+          "description": "URL refers to a secret holding a Redis connection URL, e.g. redis://user:password@host:6379/0, or rediss:// to connect over TLS. It can't be combined with HostAddress, Password, Username or DB.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "username": {
           "description": "Username required for ACL style authentication if any.",

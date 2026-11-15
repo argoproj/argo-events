@@ -19,7 +19,9 @@ package redisstream
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/url"
 	"time"
 
 	redis "github.com/go-redis/redis/v8"
@@ -66,22 +68,34 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 
 	redisEventSource := &el.EventSource
 
-	opt := &redis.Options{
-		Addr: redisEventSource.HostAddress,
-		DB:   int(redisEventSource.DB),
-	}
+	var opt *redis.Options
 
-	log.Info("retrieving password if it has been configured...")
-	if redisEventSource.Password != nil {
-		password, err := sharedutil.GetSecretFromVolume(redisEventSource.Password)
+	if redisEventSource.URL != nil {
+		urlStr, err := sharedutil.GetSecretFromVolume(redisEventSource.URL)
 		if err != nil {
-			return fmt.Errorf("failed to find the secret password %s, %w", redisEventSource.Password.Name, err)
+			return fmt.Errorf("failed to find the secret URL %s, %w", redisEventSource.URL.Name, err)
 		}
-		opt.Password = password
-	}
-
-	if redisEventSource.Username != "" {
-		opt.Username = redisEventSource.Username
+		parsedOpt, err := redis.ParseURL(urlStr)
+		if err != nil {
+			return fmt.Errorf("failed to parse the redis URL in secret %s, %w", redisEventSource.URL.Name, withoutURL(err))
+		}
+		opt = parsedOpt
+	} else {
+		opt = &redis.Options{
+			Addr: redisEventSource.HostAddress,
+			DB:   int(redisEventSource.DB),
+		}
+		log.Info("retrieving password if it has been configured...")
+		if redisEventSource.Password != nil {
+			password, err := sharedutil.GetSecretFromVolume(redisEventSource.Password)
+			if err != nil {
+				return fmt.Errorf("failed to find the secret password %s, %w", redisEventSource.Password.Name, err)
+			}
+			opt.Password = password
+		}
+		if redisEventSource.Username != "" {
+			opt.Username = redisEventSource.Username
+		}
 	}
 
 	if redisEventSource.TLS != nil {
@@ -96,7 +110,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 	client := redis.NewClient(opt)
 
 	if status := client.Ping(ctx); status.Err() != nil {
-		return fmt.Errorf("failed to connect to host %s and db %d for event source %s, %w", redisEventSource.HostAddress, redisEventSource.DB, el.GetEventName(), status.Err())
+		return fmt.Errorf("failed to connect to host %s and db %d for event source %s, %w", opt.Addr, opt.DB, el.GetEventName(), status.Err())
 	}
 	log.Infof("connected to redis server %s", redisEventSource.HostAddress)
 
@@ -214,4 +228,14 @@ func (el *EventListener) handleOne(stream string, message redis.XMessage, dispat
 		return fmt.Errorf("failed dispatch a Redis stream event, %w", err)
 	}
 	return nil
+}
+
+// withoutURL drops the URL from a url.Parse error. Its message quotes the
+// whole URL, which would put the password in the logs.
+func withoutURL(err error) error {
+	var urlErr *url.Error
+	if errors.As(err, &urlErr) {
+		return urlErr.Err
+	}
+	return err
 }

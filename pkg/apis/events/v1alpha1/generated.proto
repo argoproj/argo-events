@@ -2527,6 +2527,11 @@ message RedisEventSource {
   // Username required for ACL style authentication if any.
   // +optional
   optional string username = 10;
+
+  // URL refers to a secret holding a Redis connection URL, e.g. redis://user:password@host:6379/0,
+  // or rediss:// to connect over TLS. It can't be combined with HostAddress, Password, Username or DB.
+  // +optional
+  optional .k8s.io.api.core.v1.SecretKeySelector url = 11;
 }
 
 // RedisStreamEventSource describes an event source for
@@ -2572,6 +2577,11 @@ message RedisStreamEventSource {
   // Username required for ACL style authentication if any.
   // +optional
   optional string username = 10;
+
+  // URL refers to a secret holding a Redis connection URL, e.g. redis://user:password@host:6379/0,
+  // or rediss:// to connect over TLS. It can't be combined with HostAddress, Password, Username or DB.
+  // +optional
+  optional .k8s.io.api.core.v1.SecretKeySelector url = 11;
 }
 
 // ResourceEventSource refers to a event-source for K8s resource related events.
