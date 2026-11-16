@@ -119,15 +119,15 @@ func TestPrevCronTimeDSTFallBack(t *testing.T) {
 	}{
 		// Europe/Berlin: 2026-10-25 03:00 CEST (+0200) -> 02:00 CET (+0100).
 		// Walking back through the repeated 02:xx hour used to loop forever.
-		{"2026-10-25T03:30:00+0100", "TZ=Europe/Berlin 0 0 0 * * *", "2026-10-25T00:00:00+0200"},
-		{"2026-10-25T12:00:00+0100", "TZ=Europe/Berlin 0 0 0 * * *", "2026-10-25T00:00:00+0200"},
-		{"2026-10-25T02:30:00+0100", "TZ=Europe/Berlin 0 0 0 * * *", "2026-10-25T00:00:00+0200"},
+		{"2026-10-25T03:30:00+0100", testBerlinDaily, testBerlinMidnight},
+		{"2026-10-25T12:00:00+0100", testBerlinDaily, testBerlinMidnight},
+		{testBerlinAt0230, testBerlinDaily, testBerlinMidnight},
 		{"2026-10-25T03:30:00+0100", "TZ=Europe/Berlin 0 0 1 * * *", "2026-10-25T01:00:00+0200"},
 
 		// Hourly job during the repeated hour: the first 02:00 (CEST) must not
 		// be reported as the second 02:00 (CET), which is in the future.
 		{"2026-10-25T02:30:00+0200", "TZ=Europe/Berlin 0 0 * * * *", "2026-10-25T02:00:00+0200"},
-		{"2026-10-25T02:30:00+0100", "TZ=Europe/Berlin 0 0 * * * *", "2026-10-25T02:00:00+0100"},
+		{testBerlinAt0230, "TZ=Europe/Berlin 0 0 * * * *", "2026-10-25T02:00:00+0100"},
 		{"2026-10-25T03:00:00+0100", "TZ=Europe/Berlin 0 30 * * * *", "2026-10-25T02:30:00+0100"},
 
 		// America/New_York: 2026-11-01 02:00 EDT (-0400) -> 01:00 EST (-0500).
