@@ -114,10 +114,31 @@ func TestAWS(t *testing.T) {
 		})
 
 		convey.Convey("Scheme is added when missing", func() {
-			resolved, err := stsEndpointResolver("localhost:4566").EndpointFor("sts", "mock-region")
+			resolved, err := stsEndpointResolver("localhost:4566", "").EndpointFor("sts", "mock-region")
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(resolved.URL, convey.ShouldEqual, "https://localhost:4566")
 		})
+	})
+
+	convey.Convey("assume a role at a custom STS endpoint without a region in the environment", t, func() {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_ = r.ParseForm()
+			action := r.Form.Get("Action")
+			fmt.Fprintf(w, `<%[1]sResponse><%[1]sResult><Credentials><AccessKeyId>key</AccessKeyId><SecretAccessKey>secret</SecretAccessKey><SessionToken>token</SessionToken><Expiration>2099-01-01T00:00:00Z</Expiration></Credentials></%[1]sResult></%[1]sResponse>`, action)
+		}))
+		defer server.Close()
+
+		t.Setenv("AWS_REGION", "")
+		t.Setenv("AWS_DEFAULT_REGION", "")
+		t.Setenv("AWS_ACCESS_KEY_ID", "id")
+		t.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
+
+		session, err := CreateAWSSessionWithCredsInVolume("mock-region", "arn:aws:iam::123456789012:role/assumed", nil, nil, nil, server.URL)
+		convey.So(err, convey.ShouldBeNil)
+
+		value, err := session.Config.Credentials.Get()
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(value.AccessKeyID, convey.ShouldEqual, "key")
 	})
 
 	convey.Convey("exchange a web identity token at a custom STS endpoint", t, func() {

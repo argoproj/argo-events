@@ -82,13 +82,13 @@ func GetAWSSession(creds *credentials.Credentials, region string) (*session.Sess
 func GetAWSSessionWithoutCreds(region, stsEndpoint string) (*session.Session, error) {
 	return session.NewSession(&aws.Config{
 		Region:           &region,
-		EndpointResolver: stsEndpointResolver(stsEndpoint),
+		EndpointResolver: stsEndpointResolver(stsEndpoint, region),
 	})
 }
 
 func GetAWSAssumeRoleCreds(roleARN, region, stsEndpoint string) (*session.Session, error) {
 	sess := session.Must(session.NewSession(&aws.Config{
-		EndpointResolver: stsEndpointResolver(stsEndpoint),
+		EndpointResolver: stsEndpointResolver(stsEndpoint, region),
 	}))
 	creds := stscreds.NewCredentials(sess, roleARN)
 	return GetAWSSession(creds, region)
@@ -96,13 +96,17 @@ func GetAWSAssumeRoleCreds(roleARN, region, stsEndpoint string) (*session.Sessio
 
 // stsEndpointResolver sends STS requests, including the web identity token exchange done by
 // the default credential chain, to stsEndpoint. Other services keep their default endpoints.
-func stsEndpointResolver(stsEndpoint string) endpoints.Resolver {
+func stsEndpointResolver(stsEndpoint, fallbackRegion string) endpoints.Resolver {
 	if stsEndpoint == "" {
 		return nil
 	}
 	defaultResolver := endpoints.DefaultResolver()
 	return endpoints.ResolverFunc(func(service, region string, optFns ...func(*endpoints.Options)) (endpoints.ResolvedEndpoint, error) {
 		if service == sts.EndpointsID {
+			// Region comes from the ENV by default, take the region from the spec if not set.
+			if region == "" {
+				region = fallbackRegion
+			}
 			return endpoints.ResolvedEndpoint{
 				URL:           endpoints.AddScheme(stsEndpoint, false),
 				SigningRegion: region,
