@@ -35,8 +35,8 @@ func TestNewResourceReader(t *testing.T) {
 				},
 				"type": "Opaque",
 				"data": map[string]string{
-					"access": "c2VjcmV0",
-					"secret": "c2VjcmV0",
+					testAccessKey: "c2VjcmV0",
+					testSecretKey: "c2VjcmV0",
 				},
 			},
 		}

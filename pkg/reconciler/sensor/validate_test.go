@@ -61,9 +61,9 @@ func TestValidDependencies(t *testing.T) {
 	t.Run("test duplicate deps fail for STAN", func(t *testing.T) {
 		sObj := sensorObj.DeepCopy()
 		sObj.Spec.Dependencies = append(sObj.Spec.Dependencies, v1alpha1.EventDependency{
-			Name:            "fake-dep2",
-			EventSourceName: "fake-source",
-			EventName:       "fake-one",
+			Name:            testDep2,
+			EventSourceName: testFakeSource,
+			EventName:       testFakeOne,
 		})
 		err := ValidateSensor(sObj, stanBus)
 		assert.NotNil(t, err)
@@ -73,9 +73,9 @@ func TestValidDependencies(t *testing.T) {
 	t.Run("test duplicate deps are fine for Jetstream", func(t *testing.T) {
 		sObj := sensorObj.DeepCopy()
 		sObj.Spec.Dependencies = append(sObj.Spec.Dependencies, v1alpha1.EventDependency{
-			Name:            "fake-dep2",
-			EventSourceName: "fake-source",
-			EventName:       "fake-one",
+			Name:            testDep2,
+			EventSourceName: testFakeSource,
+			EventName:       testFakeOne,
 		})
 		err := ValidateSensor(sObj, jetstreamBus)
 		assert.Nil(t, err)
@@ -84,8 +84,8 @@ func TestValidDependencies(t *testing.T) {
 	t.Run("test empty event source name", func(t *testing.T) {
 		sObj := sensorObj.DeepCopy()
 		sObj.Spec.Dependencies = append(sObj.Spec.Dependencies, v1alpha1.EventDependency{
-			Name:      "fake-dep2",
-			EventName: "fake-one",
+			Name:      testDep2,
+			EventName: testFakeOne,
 		})
 		err := ValidateSensor(sObj, jetstreamBus)
 		assert.NotNil(t, err)
@@ -95,8 +95,8 @@ func TestValidDependencies(t *testing.T) {
 	t.Run("test empty event name", func(t *testing.T) {
 		sObj := sensorObj.DeepCopy()
 		sObj.Spec.Dependencies = append(sObj.Spec.Dependencies, v1alpha1.EventDependency{
-			Name:            "fake-dep2",
-			EventSourceName: "fake-source",
+			Name:            testDep2,
+			EventSourceName: testFakeSource,
 		})
 		err := ValidateSensor(sObj, jetstreamBus)
 		assert.NotNil(t, err)
@@ -125,7 +125,7 @@ func TestValidateLogicalOperator(t *testing.T) {
 	})
 
 	t.Run("test not valid", func(t *testing.T) {
-		logOp := v1alpha1.LogicalOperator("fake")
+		logOp := v1alpha1.LogicalOperator(testFake)
 
 		err := validateLogicalOperator(logOp)
 
@@ -143,7 +143,7 @@ func TestValidateComparator(t *testing.T) {
 	})
 
 	t.Run("test not valid", func(t *testing.T) {
-		comp := v1alpha1.Comparator("fake")
+		comp := v1alpha1.Comparator(testFake)
 
 		err := validateComparator(comp)
 
@@ -165,11 +165,11 @@ func TestValidateEventFilter(t *testing.T) {
 			ExprLogicalOperator: v1alpha1.OrLogicalOperator,
 			Exprs: []v1alpha1.ExprFilter{
 				{
-					Expr: "fake-expr",
+					Expr: testExpr,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "fake-path",
-							Name: "fake-name",
+							Path: testFakePath,
+							Name: testFakeName,
 						},
 					},
 				},
@@ -177,8 +177,8 @@ func TestValidateEventFilter(t *testing.T) {
 			DataLogicalOperator: v1alpha1.OrLogicalOperator,
 			Data: []v1alpha1.DataFilter{
 				{
-					Path: "fake-path",
-					Type: "fake-type",
+					Path: testFakePath,
+					Type: testFakeType,
 					Value: []string{
 						"fake-value",
 					},
@@ -188,11 +188,11 @@ func TestValidateEventFilter(t *testing.T) {
 				Type:            "type",
 				Subject:         "subject",
 				Source:          "source",
-				DataContentType: "fake-content-type",
+				DataContentType: testContentType,
 			},
 			Time: &v1alpha1.TimeFilter{
-				Start: "00:00:00",
-				Stop:  "06:00:00",
+				Start: testMidnight,
+				Stop:  testSixAM,
 			},
 		}
 
@@ -205,11 +205,11 @@ func TestValidateEventFilter(t *testing.T) {
 		filter := &v1alpha1.EventDependencyFilter{
 			Exprs: []v1alpha1.ExprFilter{
 				{
-					Expr: "fake-expr",
+					Expr: testExpr,
 					Fields: []v1alpha1.PayloadField{
 						{
-							Path: "fake-path",
-							Name: "fake-name",
+							Path: testFakePath,
+							Name: testFakeName,
 						},
 					},
 				},
@@ -225,8 +225,8 @@ func TestValidateEventFilter(t *testing.T) {
 		filter := &v1alpha1.EventDependencyFilter{
 			Data: []v1alpha1.DataFilter{
 				{
-					Path: "fake-path",
-					Type: "fake-type",
+					Path: testFakePath,
+					Type: testFakeType,
 					Value: []string{
 						"fake-value",
 					},
@@ -245,7 +245,7 @@ func TestValidateEventFilter(t *testing.T) {
 				Type:            "type",
 				Subject:         "subject",
 				Source:          "source",
-				DataContentType: "fake-content-type",
+				DataContentType: testContentType,
 			},
 		}
 
@@ -257,8 +257,8 @@ func TestValidateEventFilter(t *testing.T) {
 	t.Run("test valid, time only", func(t *testing.T) {
 		filter := &v1alpha1.EventDependencyFilter{
 			Time: &v1alpha1.TimeFilter{
-				Start: "00:00:00",
-				Stop:  "06:00:00",
+				Start: testMidnight,
+				Stop:  testSixAM,
 			},
 		}
 
@@ -269,7 +269,7 @@ func TestValidateEventFilter(t *testing.T) {
 
 	t.Run("test not valid, wrong logical operator", func(t *testing.T) {
 		filter := &v1alpha1.EventDependencyFilter{
-			DataLogicalOperator: "fake",
+			DataLogicalOperator: testFake,
 		}
 
 		err := validateEventFilter(filter)
@@ -281,11 +281,11 @@ func TestValidateEventFilter(t *testing.T) {
 func TestValidateEventExprFilter(t *testing.T) {
 	t.Run("test valid", func(t *testing.T) {
 		exprFilter := &v1alpha1.ExprFilter{
-			Expr: "fake-expr",
+			Expr: testExpr,
 			Fields: []v1alpha1.PayloadField{
 				{
-					Path: "fake-path",
-					Name: "fake-name",
+					Path: testFakePath,
+					Name: testFakeName,
 				},
 			},
 		}
@@ -299,8 +299,8 @@ func TestValidateEventExprFilter(t *testing.T) {
 		exprFilter := &v1alpha1.ExprFilter{
 			Fields: []v1alpha1.PayloadField{
 				{
-					Path: "fake-path",
-					Name: "fake-name",
+					Path: testFakePath,
+					Name: testFakeName,
 				},
 			},
 		}
@@ -312,10 +312,10 @@ func TestValidateEventExprFilter(t *testing.T) {
 
 	t.Run("test not valid, no field name", func(t *testing.T) {
 		exprFilter := &v1alpha1.ExprFilter{
-			Expr: "fake-expr",
+			Expr: testExpr,
 			Fields: []v1alpha1.PayloadField{
 				{
-					Path: "fake-path",
+					Path: testFakePath,
 				},
 			},
 		}
@@ -329,7 +329,7 @@ func TestValidateEventExprFilter(t *testing.T) {
 func TestValidateEventDataFilter(t *testing.T) {
 	t.Run("test valid", func(t *testing.T) {
 		dataFilter := &v1alpha1.DataFilter{
-			Path:  "body.value",
+			Path:  testPathBodyValue,
 			Type:  "number",
 			Value: []string{"50.0"},
 		}
@@ -352,7 +352,7 @@ func TestValidateEventDataFilter(t *testing.T) {
 
 	t.Run("test not valid, empty value", func(t *testing.T) {
 		dataFilter := &v1alpha1.DataFilter{
-			Path:  "body.value",
+			Path:  testPathBodyValue,
 			Type:  "string",
 			Value: []string{""},
 		}
@@ -364,8 +364,8 @@ func TestValidateEventDataFilter(t *testing.T) {
 
 	t.Run("test not valid, wrong comparator", func(t *testing.T) {
 		dataFilter := &v1alpha1.DataFilter{
-			Comparator: "fake",
-			Path:       "body.value",
+			Comparator: testFake,
+			Path:       testPathBodyValue,
 			Type:       "string",
 			Value:      []string{""},
 		}
@@ -379,10 +379,10 @@ func TestValidateEventDataFilter(t *testing.T) {
 func TestValidateEventCtxFilter(t *testing.T) {
 	t.Run("test all fields", func(t *testing.T) {
 		ctxFilter := &v1alpha1.EventContext{
-			Type:            "fake-type",
+			Type:            testFakeType,
 			Subject:         "fake-subject",
-			Source:          "fake-source",
-			DataContentType: "fake-content-type",
+			Source:          testFakeSource,
+			DataContentType: testContentType,
 		}
 
 		err := validateEventCtxFilter(ctxFilter)
@@ -392,7 +392,7 @@ func TestValidateEventCtxFilter(t *testing.T) {
 
 	t.Run("test single field", func(t *testing.T) {
 		ctxFilter := &v1alpha1.EventContext{
-			Type: "fake-type",
+			Type: testFakeType,
 		}
 
 		err := validateEventCtxFilter(ctxFilter)
@@ -412,8 +412,8 @@ func TestValidateEventCtxFilter(t *testing.T) {
 func TestValidateEventTimeFilter(t *testing.T) {
 	t.Run("test start < stop", func(t *testing.T) {
 		timeFilter := &v1alpha1.TimeFilter{
-			Start: "00:00:00",
-			Stop:  "06:00:00",
+			Start: testMidnight,
+			Stop:  testSixAM,
 		}
 
 		err := validateEventTimeFilter(timeFilter)
@@ -423,8 +423,8 @@ func TestValidateEventTimeFilter(t *testing.T) {
 
 	t.Run("test stop < start", func(t *testing.T) {
 		timeFilter := &v1alpha1.TimeFilter{
-			Start: "06:00:00",
-			Stop:  "00:00:00",
+			Start: testSixAM,
+			Stop:  testMidnight,
 		}
 
 		err := validateEventTimeFilter(timeFilter)
@@ -434,8 +434,8 @@ func TestValidateEventTimeFilter(t *testing.T) {
 
 	t.Run("test start = stop", func(t *testing.T) {
 		timeFilter := &v1alpha1.TimeFilter{
-			Start: "00:00:00",
-			Stop:  "00:00:00",
+			Start: testMidnight,
+			Stop:  testMidnight,
 		}
 
 		err := validateEventTimeFilter(timeFilter)
@@ -445,8 +445,8 @@ func TestValidateEventTimeFilter(t *testing.T) {
 
 	t.Run("test with valid timezone", func(t *testing.T) {
 		timeFilter := &v1alpha1.TimeFilter{
-			Start:    "09:00:00",
-			Stop:     "17:00:00",
+			Start:    testBusinessStart,
+			Stop:     testBusinessStop,
 			Timezone: "America/New_York",
 		}
 
@@ -457,8 +457,8 @@ func TestValidateEventTimeFilter(t *testing.T) {
 
 	t.Run("test with invalid timezone", func(t *testing.T) {
 		timeFilter := &v1alpha1.TimeFilter{
-			Start:    "09:00:00",
-			Stop:     "17:00:00",
+			Start:    testBusinessStart,
+			Stop:     testBusinessStop,
 			Timezone: "Invalid/Timezone",
 		}
 
@@ -470,8 +470,8 @@ func TestValidateEventTimeFilter(t *testing.T) {
 
 	t.Run("test with empty timezone (defaults to UTC)", func(t *testing.T) {
 		timeFilter := &v1alpha1.TimeFilter{
-			Start:    "09:00:00",
-			Stop:     "17:00:00",
+			Start:    testBusinessStart,
+			Stop:     testBusinessStop,
 			Timezone: "",
 		}
 
@@ -486,18 +486,18 @@ func TestValidTriggers(t *testing.T) {
 		triggers := []v1alpha1.Trigger{
 			{
 				Template: &v1alpha1.TriggerTemplate{
-					Name: "fake-trigger",
+					Name: testFakeTrigger,
 					K8s: &v1alpha1.StandardK8STrigger{
-						Operation: "create",
+						Operation: testOperationCreate,
 						Source:    &v1alpha1.ArtifactLocation{},
 					},
 				},
 			},
 			{
 				Template: &v1alpha1.TriggerTemplate{
-					Name: "fake-trigger",
+					Name: testFakeTrigger,
 					K8s: &v1alpha1.StandardK8STrigger{
-						Operation: "create",
+						Operation: testOperationCreate,
 						Source:    &v1alpha1.ArtifactLocation{},
 					},
 				},
@@ -523,9 +523,9 @@ func TestValidTriggers(t *testing.T) {
 		triggers := []v1alpha1.Trigger{
 			{
 				Template: &v1alpha1.TriggerTemplate{
-					Name: "fake-trigger",
+					Name: testFakeTrigger,
 					K8s: &v1alpha1.StandardK8STrigger{
-						Operation: "create",
+						Operation: testOperationCreate,
 						Source:    &v1alpha1.ArtifactLocation{},
 					},
 				},
@@ -533,9 +533,9 @@ func TestValidTriggers(t *testing.T) {
 				DlqTrigger: &v1alpha1.Trigger{
 					AtLeastOnce: true,
 					Template: &v1alpha1.TriggerTemplate{
-						Name: "dlq-fake-trigger",
+						Name: testDLQTrigger,
 						K8s: &v1alpha1.StandardK8STrigger{
-							Operation: "create",
+							Operation: testOperationCreate,
 							Source:    &v1alpha1.ArtifactLocation{},
 						},
 					},
@@ -550,18 +550,18 @@ func TestValidTriggers(t *testing.T) {
 		triggers := []v1alpha1.Trigger{
 			{
 				Template: &v1alpha1.TriggerTemplate{
-					Name: "fake-trigger",
+					Name: testFakeTrigger,
 					K8s: &v1alpha1.StandardK8STrigger{
-						Operation: "create",
+						Operation: testOperationCreate,
 						Source:    &v1alpha1.ArtifactLocation{},
 					},
 				},
 				AtLeastOnce: true,
 				DlqTrigger: &v1alpha1.Trigger{
 					Template: &v1alpha1.TriggerTemplate{
-						Name: "dlq-fake-trigger",
+						Name: testDLQTrigger,
 						K8s: &v1alpha1.StandardK8STrigger{
-							Operation: "create",
+							Operation: testOperationCreate,
 							Source:    &v1alpha1.ArtifactLocation{},
 						},
 					},
@@ -577,17 +577,17 @@ func TestValidTriggers(t *testing.T) {
 		triggers := []v1alpha1.Trigger{
 			{
 				Template: &v1alpha1.TriggerTemplate{
-					Name: "fake-trigger",
+					Name: testFakeTrigger,
 					K8s: &v1alpha1.StandardK8STrigger{
-						Operation: "create",
+						Operation: testOperationCreate,
 						Source:    &v1alpha1.ArtifactLocation{},
 					},
 				},
 				DlqTrigger: &v1alpha1.Trigger{
 					Template: &v1alpha1.TriggerTemplate{
-						Name: "dlq-fake-trigger",
+						Name: testDLQTrigger,
 						K8s: &v1alpha1.StandardK8STrigger{
-							Operation: "create",
+							Operation: testOperationCreate,
 							Source:    &v1alpha1.ArtifactLocation{},
 						},
 					},
@@ -603,7 +603,7 @@ func TestValidTriggers(t *testing.T) {
 		triggers := []v1alpha1.Trigger{
 			{
 				Template: &v1alpha1.TriggerTemplate{
-					Name:       "fake-trigger",
+					Name:       testFakeTrigger,
 					Conditions: "A && B",
 					ConditionsReset: []v1alpha1.ConditionsResetCriteria{
 						{
@@ -613,7 +613,7 @@ func TestValidTriggers(t *testing.T) {
 						},
 					},
 					K8s: &v1alpha1.StandardK8STrigger{
-						Operation: "create",
+						Operation: testOperationCreate,
 						Source:    &v1alpha1.ArtifactLocation{},
 					},
 				},
@@ -628,18 +628,18 @@ func TestValidTriggers(t *testing.T) {
 		triggers := []v1alpha1.Trigger{
 			{
 				Template: &v1alpha1.TriggerTemplate{
-					Name:       "fake-trigger",
+					Name:       testFakeTrigger,
 					Conditions: "A && B",
 					ConditionsReset: []v1alpha1.ConditionsResetCriteria{
 						{
 							ByTime: &v1alpha1.ConditionsResetByTime{
 								Cron:     "* * * * *",
-								Timezone: "fake",
+								Timezone: testFake,
 							},
 						},
 					},
 					K8s: &v1alpha1.StandardK8STrigger{
-						Operation: "create",
+						Operation: testOperationCreate,
 						Source:    &v1alpha1.ArtifactLocation{},
 					},
 				},

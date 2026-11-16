@@ -115,7 +115,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger := getFakeHTTPTrigger()
 
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": {
+		testDependency: {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",
@@ -144,7 +144,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger.Trigger.Template.HTTP.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "url",
 				Value:          &defaultValue,
 			},
@@ -152,7 +152,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "method",
 				Value:          &defaultValue,
 			},
@@ -162,7 +162,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger.Trigger.Template.HTTP.DynamicHeaders = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "Content-Type",
 				Value:          &defaultHeader,
 			},
@@ -170,7 +170,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "X-Github-Event",
 				Value:          &defaultHeader,
 			},

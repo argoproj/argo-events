@@ -34,7 +34,7 @@ func TestGetCredentials(t *testing.T) {
 			Name:      "test",
 			Namespace: "testing",
 		},
-		Data: map[string][]byte{"access": []byte("token"), "secret": []byte("value")},
+		Data: map[string][]byte{testAccessKey: []byte("token"), testSecretKey: []byte("value")},
 	}
 	_, err := fakeClient.CoreV1().Secrets("testing").Create(context.TODO(), mySecretCredentials, metav1.CreateOptions{})
 	assert.Nil(t, err)
@@ -50,8 +50,8 @@ func TestGetArtifactReader(t *testing.T) {
 	// test unknown failure
 	location := &v1alpha1.ArtifactLocation{}
 	creds := &Credentials{
-		accessKey: "access",
-		secretKey: "secret",
+		accessKey: testAccessKey,
+		secretKey: testSecretKey,
 	}
 	_, err := GetArtifactReader(location, creds)
 	assert.NotNil(t, err)

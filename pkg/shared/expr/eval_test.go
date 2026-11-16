@@ -12,11 +12,11 @@ func TestExpand(t *testing.T) {
 	for i := 0; i < 1; i++ { // loop 100 times, because map ordering is not determisitic
 		t.Run(fmt.Sprint(i), func(t *testing.T) {
 			before := map[string]interface{}{
-				"a.b":   1,
-				"a.c.d": 2,
-				"a":     3, // should be deleted
-				"ab":    4,
-				"abb":   5, // should be kept
+				testPathAB: 1,
+				"a.c.d":    2,
+				"a":        3, // should be deleted
+				"ab":       4,
+				"abb":      5, // should be kept
 			}
 			after := Expand(before)
 			assert.Len(t, before, 5, "original map unchanged")
@@ -72,11 +72,11 @@ func TestRemoveConflictingKeys(t *testing.T) {
 		{
 			name: "remove conflicting keys",
 			input: map[string]interface{}{
-				"a.b": 1,
-				"a":   2,
+				testPathAB: 1,
+				"a":        2,
 			},
 			output: map[string]interface{}{
-				"a.b": 1,
+				testPathAB: 1,
 			},
 		},
 		{

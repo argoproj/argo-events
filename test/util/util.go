@@ -15,6 +15,9 @@ import (
 	eventpkg "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/events/v1alpha1"
 )
 
+// runningPodsFieldSelector selects only pods in the Running phase.
+const runningPodsFieldSelector = "status.phase=Running"
+
 func WaitForEventBusReady(ctx context.Context, eventBusClient eventpkg.EventBusInterface, eventBusName string, timeout time.Duration) error {
 	fieldSelector := "metadata.name=" + eventBusName
 	opts := metav1.ListOptions{FieldSelector: fieldSelector}
@@ -132,7 +135,7 @@ func waitForDeploymentAndPodReady(ctx context.Context, kubeClient kubernetes.Int
 			continue
 		}
 		ok = ok && deployList.Items[0].Status.Replicas == deployList.Items[0].Status.ReadyReplicas
-		podList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
+		podList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: runningPodsFieldSelector})
 		if err != nil {
 			return fmt.Errorf("error getting deployment pod list: %w", err)
 		}
@@ -175,7 +178,7 @@ func PodLogCheckOptionWithCount(c int) PodLogCheckOption {
 
 func EventSourcePodLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, eventSourceName, regex string, options ...PodLogCheckOption) (bool, error) {
 	labelSelector := fmt.Sprintf("controller=eventsource-controller,eventsource-name=%s", eventSourceName)
-	podList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
+	podList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: runningPodsFieldSelector})
 	if err != nil {
 		return false, fmt.Errorf("error getting event source pod name: %w", err)
 	}
@@ -185,7 +188,7 @@ func EventSourcePodLogContains(ctx context.Context, kubeClient kubernetes.Interf
 
 func SensorPodLogContains(ctx context.Context, kubeClient kubernetes.Interface, namespace, sensorName, regex string, options ...PodLogCheckOption) (bool, error) {
 	labelSelector := fmt.Sprintf("controller=sensor-controller,sensor-name=%s", sensorName)
-	podList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: "status.phase=Running"})
+	podList, err := kubeClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{LabelSelector: labelSelector, FieldSelector: runningPodsFieldSelector})
 	if err != nil {
 		return false, fmt.Errorf("error getting sensor pod name: %w", err)
 	}

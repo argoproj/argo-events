@@ -20,7 +20,7 @@ func TestFilterContext(t *testing.T) {
 		{
 			name: "different event contexts",
 			expectedContext: &v1alpha1.EventContext{
-				Type: "webhook",
+				Type: testEventType,
 			},
 			actualContext: &v1alpha1.EventContext{
 				Type:   "calendar",
@@ -30,26 +30,26 @@ func TestFilterContext(t *testing.T) {
 					Time: time.Now().UTC(),
 				},
 				DataContentType: v1alpha1.MediaTypeJSON,
-				Subject:         "example-1",
+				Subject:         testSubject,
 			},
 			result: false,
 		},
 		{
 			name: "contexts are same",
 			expectedContext: &v1alpha1.EventContext{
-				Type:   "webhook",
-				Source: "webhook-gateway",
+				Type:   testEventType,
+				Source: testSource,
 			},
 			actualContext: &v1alpha1.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
-				Source:      "webhook-gateway",
+				Type:        testEventType,
+				SpecVersion: testSpecVersion,
+				Source:      testSource,
 				ID:          "1",
 				Time: metav1.Time{
 					Time: time.Now().UTC(),
 				},
 				DataContentType: v1alpha1.MediaTypeJSON,
-				Subject:         "example-1",
+				Subject:         testSubject,
 			},
 			result: true,
 		},

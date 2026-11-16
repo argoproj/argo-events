@@ -50,14 +50,14 @@ func TestRouteActiveHandler(t *testing.T) {
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
-		router.token = "Jhj5dZrVaK7ZwHHjRyZWjbDl"
+		router.token = testToken
 		router.route.Active = true
 
 		convey.Convey("Test url verification request", func() {
 			writer := &webhook.FakeHttpWriter{}
 			urlVer := slackevents.EventsAPIURLVerificationEvent{
 				Type:      slackevents.URLVerification,
-				Token:     "Jhj5dZrVaK7ZwHHjRyZWjbDl",
+				Token:     testToken,
 				Challenge: "3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P",
 			}
 			payload, err := yaml.Marshal(urlVer)
@@ -84,7 +84,7 @@ func TestSlackSignature(t *testing.T) {
 			payload := []byte("payload=%7B%22type%22%3A%22block_actions%22%2C%22team%22%3A%7B%22id%22%3A%22T0CAG%22%2C%22domain%22%3A%22acme-creamery%22%7D%2C%22user%22%3A%7B%22id%22%3A%22U0CA5%22%2C%22username%22%3A%22Amy%20McGee%22%2C%22name%22%3A%22Amy%20McGee%22%2C%22team_id%22%3A%22T3MDE%22%7D%2C%22api_app_id%22%3A%22A0CA5%22%2C%22token%22%3A%22Shh_its_a_seekrit%22%2C%22container%22%3A%7B%22type%22%3A%22message%22%2C%22text%22%3A%22The%20contents%20of%20the%20original%20message%20where%20the%20action%20originated%22%7D%2C%22trigger_id%22%3A%2212466734323.1395872398%22%2C%22response_url%22%3A%22https%3A%2F%2Fwww.postresponsestome.com%2FT123567%2F1509734234%22%2C%22actions%22%3A%5B%7B%22type%22%3A%22button%22%2C%22block_id%22%3A%22actionblock789%22%2C%22action_id%22%3A%2227S%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Link%20Button%22%2C%22emoji%22%3Atrue%7D%2C%22action_ts%22%3A%221564701248.149432%22%7D%5D%7D")
 			h := make(http.Header)
 
-			rts := int(time.Now().UTC().UnixNano())
+			rts := int(time.Now().UTC().Unix())
 			hmac := hmac.New(sha256.New, []byte(router.signingSecret))
 			b := strings.Join([]string{"v0", strconv.Itoa(rts), string(payload)}, ":")
 			_, err := hmac.Write([]byte(b))
@@ -207,7 +207,7 @@ func TestEventHandler(t *testing.T) {
 
 			j := json.RawMessage(event)
 			ce := slackevents.EventsAPICallbackEvent{
-				Token:     "Jhj5dZrVaK7ZwHHjRyZWjbDl",
+				Token:     testToken,
 				Type:      slackevents.CallbackEvent,
 				EventTime: 1234567890,
 				APIAppID:  "AXXXXXXXXX",

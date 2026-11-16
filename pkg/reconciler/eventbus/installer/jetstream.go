@@ -10,6 +10,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
@@ -140,9 +141,9 @@ func (r *jetStreamInstaller) buildJetStreamServiceSpec() corev1.ServiceSpec {
 	return corev1.ServiceSpec{
 		Ports: []corev1.ServicePort{
 			{Name: "tcp-client", Port: jsClientPort},
-			{Name: "cluster", Port: jsClusterPort},
-			{Name: "metrics", Port: jsMetricsPort},
-			{Name: "monitor", Port: jsMonitorPort},
+			{Name: clusterPortName, Port: jsClusterPort},
+			{Name: metricsName, Port: jsMetricsPort},
+			{Name: monitorPortName, Port: jsMonitorPort},
 		},
 		Type:                     corev1.ServiceTypeClusterIP,
 		ClusterIP:                corev1.ClusterIPNone,
@@ -287,9 +288,9 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 				ShareProcessNamespace:         &shareProcessNamespace,
 				TerminationGracePeriodSeconds: &terminationGracePeriodSeconds,
 				Volumes: []corev1.Volume{
-					{Name: "pid", VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}}},
+					{Name: pidVolumeName, VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}}},
 					{
-						Name: "config-volume",
+						Name: configVolumeName,
 						VolumeSource: corev1.VolumeSource{
 							Projected: &corev1.ProjectedVolumeSource{
 								Sources: []corev1.VolumeProjection{
@@ -355,8 +356,8 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 						ImagePullPolicy: jsContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
 							{Name: "client", ContainerPort: jsClientPort},
-							{Name: "cluster", ContainerPort: jsClusterPort},
-							{Name: "monitor", ContainerPort: jsMonitorPort},
+							{Name: clusterPortName, ContainerPort: jsClusterPort},
+							{Name: monitorPortName, ContainerPort: jsMonitorPort},
 						},
 						Command: []string{jsVersion.StartCommand, "--config", "/etc/nats-config/nats-js.conf"},
 						Args:    js.StartArgs,
@@ -365,11 +366,13 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 							{Name: "SERVER_NAME", Value: "$(POD_NAME)"},
 							{Name: "POD_NAMESPACE", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"}}},
 							{Name: "CLUSTER_ADVERTISE", Value: "$(POD_NAME)." + generateJetStreamServiceName(r.eventBus) + ".$(POD_NAMESPACE).svc"},
-							{Name: "JS_KEY", ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: generateJetStreamServerSecretName(r.eventBus)}, Key: v1alpha1.JetStreamServerSecretEncryptionKey}}},
+							{Name: "JS_KEY_RAW", ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: generateJetStreamServerSecretName(r.eventBus)}, Key: v1alpha1.JetStreamServerSecretEncryptionKey}}},
+							// Quoted so that nats-server reads the key as a string whatever characters it holds.
+							{Name: "JS_KEY", Value: `"$(JS_KEY_RAW)"`},
 						},
 						VolumeMounts: []corev1.VolumeMount{
-							{Name: "config-volume", MountPath: "/etc/nats-config"},
-							{Name: "pid", MountPath: "/var/run/nats"},
+							{Name: configVolumeName, MountPath: "/etc/nats-config"},
+							{Name: pidVolumeName, MountPath: "/var/run/nats"},
 						},
 						SecurityContext: jsContainerSecurityContext,
 						StartupProbe: &corev1.Probe{
@@ -420,16 +423,16 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 						SecurityContext: reloaderContainerSecurityContext,
 						Args:            []string{"-pid", "/var/run/nats/nats.pid", "-config", "/etc/nats-config/nats-js.conf"},
 						VolumeMounts: []corev1.VolumeMount{
-							{Name: "config-volume", MountPath: "/etc/nats-config"},
-							{Name: "pid", MountPath: "/var/run/nats"},
+							{Name: configVolumeName, MountPath: "/etc/nats-config"},
+							{Name: pidVolumeName, MountPath: "/var/run/nats"},
 						},
 					},
 					{
-						Name:            "metrics",
+						Name:            metricsName,
 						Image:           jsVersion.MetricsExporterImage,
 						ImagePullPolicy: metricsContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
-							{Name: "metrics", ContainerPort: jsMetricsPort},
+							{Name: metricsName, ContainerPort: jsMetricsPort},
 						},
 						Args:            []string{"-connz", "-routez", "-subz", "-varz", "-prefix=nats", "-use_internal_server_id", "-jsz=all", fmt.Sprintf("http://localhost:%s", strconv.Itoa(int(jsMonitorPort)))},
 						SecurityContext: metricsContainerSecurityContext,
@@ -453,7 +456,7 @@ func (r *jetStreamInstaller) buildStatefulSetSpec(jsVersion *reconciler.JetStrea
 	}
 
 	if js.MetricsContainerTemplate != nil {
-		containers["metrics"].Resources = js.MetricsContainerTemplate.Resources
+		containers[metricsName].Resources = js.MetricsContainerTemplate.Resources
 	}
 
 	if js.ReloaderContainerTemplate != nil {
@@ -676,6 +679,7 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	}
 	var confTplOutput bytes.Buffer
 	if err := confTpl.Execute(&confTplOutput, struct {
+		KeyFromEnv     bool
 		MaxPayloadSize string
 		ClusterName    string
 		MonitorPort    string
@@ -684,6 +688,7 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 		Routes         string
 		Settings       string
 	}{
+		KeyFromEnv:     jetStreamSupportsPrevKey(r.eventBus.Spec.JetStream.Version),
 		MaxPayloadSize: maxPayload,
 		ClusterName:    r.eventBus.Name,
 		MonitorPort:    strconv.Itoa(int(jsMonitorPort)),
@@ -769,6 +774,22 @@ func (r *jetStreamInstaller) getPVCs(ctx context.Context) ([]corev1.PersistentVo
 		return nil, err
 	}
 	return pvcl.Items, nil
+}
+
+// jetStreamSupportsPrevKey reports whether the nats-server of the given version accepts the
+// prev_key setting, added in 2.10. Those servers get the encryption key through an unquoted
+// variable reference, with prev_key set to the literal "$JS_KEY" that older releases of this
+// template encrypted the stores with, so an existing store is re-encrypted on the first start.
+// Older servers keep the quoted reference, as the literal key is the only one they can read.
+func jetStreamSupportsPrevKey(version string) bool {
+	if version == "latest" {
+		return true
+	}
+	v, err := semver.NewVersion(version)
+	if err != nil {
+		return false
+	}
+	return !v.LessThan(semver.MustParse("2.10.0"))
 }
 
 func generateJetStreamServerSecretName(eventBus *v1alpha1.EventBus) string {

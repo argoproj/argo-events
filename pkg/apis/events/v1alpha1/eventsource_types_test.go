@@ -26,8 +26,8 @@ func convertInt(t *testing.T, num int) *int32 {
 
 func TestGithubEventSourceGetRepositories(t *testing.T) {
 	es := GithubEventSource{
-		DeprecatedOwner:      "test",
-		DeprecatedRepository: "test",
+		DeprecatedOwner:      testName,
+		DeprecatedRepository: testName,
 	}
 	assert.Equal(t, len(es.GetOwnedRepositories()), 1)
 	es = GithubEventSource{
@@ -64,18 +64,18 @@ func TestShouldCreateWebhooks(t *testing.T) {
 			name: "Valid Webhooks - Both Projects and Repositories",
 			b: BitbucketServerEventSource{
 				AccessToken:  dummySecretKeySelector,
-				Webhook:      &WebhookContext{URL: "http://example.com"},
-				Projects:     []string{"Project1"},
-				Repositories: []BitbucketServerRepository{{ProjectKey: "Proj1", RepositorySlug: "Repo1"}},
+				Webhook:      &WebhookContext{URL: testURL},
+				Projects:     []string{testProject},
+				Repositories: []BitbucketServerRepository{{ProjectKey: testProjectKey, RepositorySlug: testRepositorySlug}},
 			},
 			want: true,
 		},
 		{
 			name: "No AccessToken",
 			b: BitbucketServerEventSource{
-				Webhook:      &WebhookContext{URL: "http://example.com"},
-				Projects:     []string{"Project1"},
-				Repositories: []BitbucketServerRepository{{ProjectKey: "Proj1", RepositorySlug: "Repo1"}},
+				Webhook:      &WebhookContext{URL: testURL},
+				Projects:     []string{testProject},
+				Repositories: []BitbucketServerRepository{{ProjectKey: testProjectKey, RepositorySlug: testRepositorySlug}},
 			},
 			want: false,
 		},
@@ -83,8 +83,8 @@ func TestShouldCreateWebhooks(t *testing.T) {
 			name: "No Webhook",
 			b: BitbucketServerEventSource{
 				AccessToken:  dummySecretKeySelector,
-				Projects:     []string{"Project1"},
-				Repositories: []BitbucketServerRepository{{ProjectKey: "Proj1", RepositorySlug: "Repo1"}},
+				Projects:     []string{testProject},
+				Repositories: []BitbucketServerRepository{{ProjectKey: testProjectKey, RepositorySlug: testRepositorySlug}},
 			},
 			want: false,
 		},
@@ -93,8 +93,8 @@ func TestShouldCreateWebhooks(t *testing.T) {
 			b: BitbucketServerEventSource{
 				AccessToken:  dummySecretKeySelector,
 				Webhook:      &WebhookContext{},
-				Projects:     []string{"Project1"},
-				Repositories: []BitbucketServerRepository{{ProjectKey: "Proj1", RepositorySlug: "Repo1"}},
+				Projects:     []string{testProject},
+				Repositories: []BitbucketServerRepository{{ProjectKey: testProjectKey, RepositorySlug: testRepositorySlug}},
 			},
 			want: false,
 		},
@@ -102,7 +102,7 @@ func TestShouldCreateWebhooks(t *testing.T) {
 			name: "No Projects or Repositories",
 			b: BitbucketServerEventSource{
 				AccessToken: dummySecretKeySelector,
-				Webhook:     &WebhookContext{URL: "http://example.com"},
+				Webhook:     &WebhookContext{URL: testURL},
 			},
 			want: false,
 		},
@@ -110,8 +110,8 @@ func TestShouldCreateWebhooks(t *testing.T) {
 			name: "Valid with Only Repositories",
 			b: BitbucketServerEventSource{
 				AccessToken:  dummySecretKeySelector,
-				Webhook:      &WebhookContext{URL: "http://example.com"},
-				Repositories: []BitbucketServerRepository{{ProjectKey: "Proj1", RepositorySlug: "Repo1"}},
+				Webhook:      &WebhookContext{URL: testURL},
+				Repositories: []BitbucketServerRepository{{ProjectKey: testProjectKey, RepositorySlug: testRepositorySlug}},
 			},
 			want: true,
 		},
@@ -119,8 +119,8 @@ func TestShouldCreateWebhooks(t *testing.T) {
 			name: "Valid with Only Projects",
 			b: BitbucketServerEventSource{
 				AccessToken: dummySecretKeySelector,
-				Webhook:     &WebhookContext{URL: "http://example.com"},
-				Projects:    []string{"Project1"},
+				Webhook:     &WebhookContext{URL: testURL},
+				Projects:    []string{testProject},
 			},
 			want: true,
 		},

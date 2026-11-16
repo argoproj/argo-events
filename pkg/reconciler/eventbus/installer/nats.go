@@ -41,6 +41,19 @@ const (
 
 	// default nats streaming version to be installed
 	defaultSTANVersion = "0.22.1"
+
+	// port names shared by the nats and jetstream services and containers
+	clusterPortName = "cluster"
+	monitorPortName = "monitor"
+	// name of the metrics port and of the metrics exporter container
+	metricsName = "metrics"
+
+	// volume names shared by the nats and jetstream statefulsets
+	configVolumeName = "config-volume"
+	pidVolumeName    = "pid"
+
+	// value of the marker labels on installed resources
+	labelValueYes = "yes"
 )
 
 // natsInstaller is used create a NATS installation.
@@ -416,8 +429,8 @@ func (i *natsInstaller) buildStanService() (*corev1.Service, error) {
 				// https://github.com/nats-io/nats-operator/issues/88
 				// https://github.com/istio/istio/issues/28623
 				{Name: "tcp-client", Port: clientPort},
-				{Name: "cluster", Port: clusterPort},
-				{Name: "monitor", Port: monitorPort},
+				{Name: clusterPortName, Port: clusterPort},
+				{Name: monitorPortName, Port: monitorPort},
 			},
 			Type:     corev1.ServiceTypeClusterIP,
 			Selector: i.labels,
@@ -676,7 +689,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				Affinity:           i.eventBus.Spec.NATS.Native.Affinity,
 				Volumes: []corev1.Volume{
 					{
-						Name: "config-volume",
+						Name: configVolumeName,
 						VolumeSource: corev1.VolumeSource{
 							Projected: &corev1.ProjectedVolumeSource{
 								Sources: []corev1.VolumeProjection{
@@ -718,8 +731,8 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 						ImagePullPolicy: stanContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
 							{Name: "client", ContainerPort: clientPort},
-							{Name: "cluster", ContainerPort: clusterPort},
-							{Name: "monitor", ContainerPort: monitorPort},
+							{Name: clusterPortName, ContainerPort: clusterPort},
+							{Name: monitorPortName, ContainerPort: monitorPort},
 						},
 						Command: []string{"/nats-streaming-server", "-sc", "/etc/stan-config/stan.conf"},
 						Env: []corev1.EnvVar{
@@ -728,7 +741,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 							{Name: "CLUSTER_ADVERTISE", Value: "$(POD_NAME)." + generateServiceName(i.eventBus) + ".$(POD_NAMESPACE).svc"},
 						},
 						VolumeMounts: []corev1.VolumeMount{
-							{Name: "config-volume", MountPath: "/etc/stan-config"},
+							{Name: configVolumeName, MountPath: "/etc/stan-config"},
 						},
 						Resources:       stanContainerResources,
 						SecurityContext: stanContainerSecurityContext,
@@ -744,11 +757,11 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 						},
 					},
 					{
-						Name:            "metrics",
+						Name:            metricsName,
 						Image:           stanVersion.MetricsExporterImage,
 						ImagePullPolicy: metricsContainerPullPolicy,
 						Ports: []corev1.ContainerPort{
-							{Name: "metrics", ContainerPort: v1alpha1.EventBusMetricsPort},
+							{Name: metricsName, ContainerPort: v1alpha1.EventBusMetricsPort},
 						},
 						Args:            []string{"-connz", "-routez", "-subz", "-varz", "-channelz", "-serverz", fmt.Sprintf("http://localhost:%s", strconv.Itoa(int(monitorPort)))},
 						Resources:       metricsContainerResources,
@@ -920,7 +933,7 @@ func (i *natsInstaller) mergeEventBusLabels(given map[string]string) map[string]
 }
 
 func serverAuthSecretLabels(given map[string]string) map[string]string {
-	result := map[string]string{"server-auth-secret": "yes"}
+	result := map[string]string{"server-auth-secret": labelValueYes}
 	for k, v := range given {
 		result[k] = v
 	}
@@ -928,7 +941,7 @@ func serverAuthSecretLabels(given map[string]string) map[string]string {
 }
 
 func clientAuthSecretLabels(given map[string]string) map[string]string {
-	result := map[string]string{"client-auth-secret": "yes"}
+	result := map[string]string{"client-auth-secret": labelValueYes}
 	for k, v := range given {
 		result[k] = v
 	}
@@ -936,7 +949,7 @@ func clientAuthSecretLabels(given map[string]string) map[string]string {
 }
 
 func stanServiceLabels(given map[string]string) map[string]string {
-	result := map[string]string{"stan": "yes"}
+	result := map[string]string{"stan": labelValueYes}
 	for k, v := range given {
 		result[k] = v
 	}

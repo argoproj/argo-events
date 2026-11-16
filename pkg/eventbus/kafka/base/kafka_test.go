@@ -25,7 +25,7 @@ func TestBrokers(t *testing.T) {
 
 func TestConfig(t *testing.T) {
 	config := &v1alpha1.KafkaBus{
-		URL: "localhost:9092",
+		URL: testBrokerURL,
 	}
 
 	logger := zap.NewNop().Sugar()
@@ -42,7 +42,7 @@ func TestConfig(t *testing.T) {
 
 func TestConfig_StartOldest(t *testing.T) {
 	config := &v1alpha1.KafkaBus{
-		URL: "localhost:9092",
+		URL: testBrokerURL,
 		ConsumerGroup: &v1alpha1.KafkaConsumerGroup{
 			Oldest: true,
 		},
@@ -61,7 +61,7 @@ func TestConfig_StartOldest(t *testing.T) {
 
 func TestConfig_NoSASL(t *testing.T) {
 	config := &v1alpha1.KafkaBus{
-		URL:  "localhost:9092",
+		URL:  testBrokerURL,
 		SASL: nil,
 	}
 
@@ -78,7 +78,7 @@ func TestConfig_NoSASL(t *testing.T) {
 
 func TestConfig_TLS(t *testing.T) {
 	config := &v1alpha1.KafkaBus{
-		URL: "localhost:9092",
+		URL: testBrokerURL,
 		TLS: &v1alpha1.TLSConfig{
 			Enabled: true,
 		},
@@ -99,7 +99,7 @@ func TestConfig_TLS(t *testing.T) {
 
 func TestNewKafka(t *testing.T) {
 	config := &v1alpha1.KafkaBus{
-		URL: "localhost:9092",
+		URL: testBrokerURL,
 	}
 
 	logger := zap.NewNop().Sugar()

@@ -71,7 +71,7 @@ func TestTriggerImpl_ApplyResourceParameters(t *testing.T) {
 	trigger := getFakeTriggerImpl()
 
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": {
+		testDependency: {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",
@@ -89,7 +89,7 @@ func TestTriggerImpl_ApplyResourceParameters(t *testing.T) {
 	trigger.Trigger.Template.OpenWhisk.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "host",
 				Value:          &defaultValue,
 			},
@@ -97,7 +97,7 @@ func TestTriggerImpl_ApplyResourceParameters(t *testing.T) {
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "actionName",
 				Value:          &defaultValue,
 			},
