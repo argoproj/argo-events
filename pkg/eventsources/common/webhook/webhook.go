@@ -87,6 +87,16 @@ func ProcessRouteStatus(ctrl *Controller) {
 	}
 }
 
+// parseBearerAuthorization returns the token of an "Authorization: Bearer <token>" header.
+// The scheme is matched case-insensitively, as HTTP authentication schemes require.
+func parseBearerAuthorization(authHeader string) (string, bool) {
+	parts := strings.Fields(authHeader)
+	if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
+		return "", false
+	}
+	return parts[1], true
+}
+
 // starts a http server
 func startServer(router Router, controller *Controller) {
 	// start a http server only if no other configuration previously started the server on given port
@@ -143,13 +153,13 @@ func startServer(router Router, controller *Controller) {
 					sharedutil.SendInternalErrorResponse(writer, "Error loading auth token")
 					return
 				}
-				authHeader := request.Header.Get("Authorization")
-				if !strings.HasPrefix(authHeader, "Bearer ") {
+				authToken, ok := parseBearerAuthorization(request.Header.Get("Authorization"))
+				if !ok {
 					route.Logger.Error("invalid auth header")
 					sharedutil.SendResponse(writer, http.StatusUnauthorized, "Invalid Authorization Header")
 					return
 				}
-				if strings.TrimPrefix(authHeader, "Bearer ") != token {
+				if subtle.ConstantTimeCompare([]byte(authToken), []byte(token)) != 1 {
 					route.Logger.Error("invalid auth token")
 					sharedutil.SendResponse(writer, http.StatusUnauthorized, "Invalid Auth token")
 					return
