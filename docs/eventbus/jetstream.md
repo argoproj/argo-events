@@ -65,6 +65,8 @@ spec:
 
 For Jetstream, TLS is turned on for all client-server communication as well as between Jetstream nodes. In addition, for client-server communication we by default use password authentication (and because TLS is turned on, the password is encrypted).
 
+The JetStream store on disk is encrypted with a key the controller generates and keeps in the `eventbus-<name>-js-server` Secret. On NATS 2.10 and later the server reads that key from the Secret; a server that was created by an earlier controller release encrypted its store with the literal string `$JS_KEY`, and the configuration names it as `prev_key`, so the store is re-encrypted with the real key on the first start after the upgrade. NATS 2.8 and 2.9 have no `prev_key`, so on those versions the configuration keeps the literal key to leave existing stores readable; move to 2.10 or later to have the generated key used.
+
 ## How it works under the hood
 
 Jetstream has the concept of a Stream, and Subjects (i.e. topics) which are used on a Stream. From the documentation: “Each Stream defines how messages are stored and what the limits (duration, size, interest) of the retention are.” For Argo Events, we have one Stream called "default" with a single set of settings, but we have multiple subjects, each of which is named `default.<eventsourcename>.<eventname>`. Sensors subscribe to the subjects they need using durable consumers.

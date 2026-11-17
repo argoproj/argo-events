@@ -52,7 +52,7 @@ func TestReconcile(t *testing.T) {
 		ctx := context.TODO()
 		cl := fake.NewClientBuilder().Build()
 		testBus := fakeEventBus.DeepCopy()
-		testBus.Status.MarkDeployed("test", "test")
+		testBus.Status.MarkDeployed(testName, testName)
 		testBus.Status.MarkConfigured()
 		err := cl.Create(ctx, testBus)
 		assert.Nil(t, err)

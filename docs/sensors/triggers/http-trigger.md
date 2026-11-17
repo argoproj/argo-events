@@ -63,7 +63,7 @@ We will set up a basic go http server and connect it with the Minio events.
         kubectl -n argo-events port-forward <http-server-pod-name> 8090:8090
 
 5.  Our goals is to seamlessly integrate Minio S3 bucket notifications with REST API server created in previous step. So,
-    lets set up the Minio event-source available [here](https://argoproj.github.io/argo-events/setup/minio/).
+    lets set up the Minio event-source available [here](https://argoproj.github.io/argo-events/eventsources/setup/minio/).
     Don't create the sensor as we will be deploying it in next step.
 
 6.  Create a sensor as follows.
@@ -175,7 +175,7 @@ to invoke OpenFaaS function.
 
 4.  We are going to invoke OpenFaaS function on a message on Redis Subscriber.
 
-5.  Let's set up the Redis Database, Redis PubSub event-source as specified [here](https://argoproj.github.io/argo-events/setup/redis/).
+5.  Let's set up the Redis Database, Redis PubSub event-source as specified [here](https://argoproj.github.io/argo-events/eventsources/setup/redis/).
     Do not create the Redis sensor, we are going to create it in next step.
 
 6.  Let's create the sensor with OpenFaaS trigger.
@@ -222,7 +222,7 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
 
 4.  Now, we are going to invoke the Kubeless function when a message is placed on a NATS queue.
 
-5.  Let's set up the NATS event-source. Follow [instructions](https://argoproj.github.io/argo-events/setup/nats/#setup) for details.
+5.  Let's set up the NATS event-source. Follow [instructions](https://argoproj.github.io/argo-events/eventsources/setup/nats/#setup) for details.
     Do not create the NATS sensor, we are going to create it in next step.
 
 6.  Let's create NATS sensor with HTTP trigger.

@@ -1655,6 +1655,11 @@
           "description": "Resource event sources",
           "type": "object"
         },
+        "revisionHistoryLimit": {
+          "description": "RevisionHistoryLimit specifies how many old deployment revisions to retain",
+          "format": "int32",
+          "type": "integer"
+        },
         "service": {
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.Service",
           "description": "Service is the specifications of the service to expose the event source"
@@ -3447,6 +3452,10 @@
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.TLSConfig",
           "description": "TLS configuration for the redis client."
         },
+        "url": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "URL refers to a secret holding a Redis connection URL, e.g. redis://user:password@host:6379/0, or rediss:// to connect over TLS. It can't be combined with HostAddress, Password, Username or DB."
+        },
         "username": {
           "description": "Username required for ACL style authentication if any.",
           "type": "string"
@@ -3504,6 +3513,10 @@
         "tls": {
           "$ref": "#/definitions/io.argoproj.events.v1alpha1.TLSConfig",
           "description": "TLS configuration for the redis client."
+        },
+        "url": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
+          "description": "URL refers to a secret holding a Redis connection URL, e.g. redis://user:password@host:6379/0, or rediss:// to connect over TLS. It can't be combined with HostAddress, Password, Username or DB."
         },
         "username": {
           "description": "Username required for ACL style authentication if any.",
@@ -3771,6 +3784,10 @@
         "secretKey": {
           "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector",
           "description": "SecretKey refers K8s secret containing aws secret key"
+        },
+        "stsEndpoint": {
+          "description": "STSEndpoint configures connection to a specific STS endpoint instead of Amazons servers, used to assume RoleARN and to exchange a web identity token for credentials",
+          "type": "string"
         },
         "topicArn": {
           "description": "TopicArn",

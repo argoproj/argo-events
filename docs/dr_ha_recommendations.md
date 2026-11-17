@@ -1,5 +1,15 @@
 # HA/DR Recommendations
 
+## Controller
+
+When the controller runs more than one replica with leader election enabled, the timing of the election can be tuned with these environment variables on the controller deployment. Each takes a Go duration such as `30s`, and leaving one unset keeps the controller-runtime default.
+
+- `LEADER_ELECTION_LEASE_DURATION`: how long non-leaders wait before trying to take over (default `15s`).
+- `LEADER_ELECTION_RENEW_DEADLINE`: how long the leader keeps retrying to renew before giving up (default `10s`).
+- `LEADER_ELECTION_RETRY_PERIOD`: how often clients retry the election (default `2s`).
+
+A longer lease makes failover slower but avoids losing leadership when the API server is briefly slow.
+
 ## EventBus
 
 A simple EventBus used for non-prod deployment or testing purposes could be:

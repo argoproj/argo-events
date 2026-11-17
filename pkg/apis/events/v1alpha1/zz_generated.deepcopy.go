@@ -1719,6 +1719,11 @@ func (in *EventSourceSpec) DeepCopyInto(out *EventSourceSpec) {
 			(*out)[key] = *val.DeepCopy()
 		}
 	}
+	if in.RevisionHistoryLimit != nil {
+		in, out := &in.RevisionHistoryLimit, &out.RevisionHistoryLimit
+		*out = new(int32)
+		**out = **in
+	}
 	return
 }
 
@@ -3374,6 +3379,11 @@ func (in *RedisEventSource) DeepCopyInto(out *RedisEventSource) {
 		*out = new(EventSourceFilter)
 		**out = **in
 	}
+	if in.URL != nil {
+		in, out := &in.URL, &out.URL
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 
@@ -3416,6 +3426,11 @@ func (in *RedisStreamEventSource) DeepCopyInto(out *RedisStreamEventSource) {
 		in, out := &in.Filter, &out.Filter
 		*out = new(EventSourceFilter)
 		**out = **in
+	}
+	if in.URL != nil {
+		in, out := &in.URL, &out.URL
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }

@@ -77,7 +77,7 @@ var sensorObj = &v1alpha1.Sensor{
 					Name: "fake-trigger",
 					Pulsar: &v1alpha1.PulsarTrigger{
 						URL:        "fake-pulsar-url",
-						Topic:      "fake-topic",
+						Topic:      testTopic,
 						Parameters: nil,
 						Payload:    nil,
 					},
@@ -93,21 +93,21 @@ func getFakePulsarTrigger(producers sharedutil.StringKeyedMap[pulsar.Producer]) 
 
 func TestNewPulsarTrigger(t *testing.T) {
 	producer := &mockPulsarProducer{
-		topic: "fake-topic",
-		name:  "fake-producer",
+		topic: testTopic,
+		name:  testProducer,
 	}
 	producers := sharedutil.NewStringKeyedMap[pulsar.Producer]()
 	producers.Store("fake-trigger", producer)
 	trigger, err := NewPulsarTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), producers, logging.NewArgoEventsLogger())
 	assert.Nil(t, err)
 	assert.Equal(t, trigger.Trigger.Template.Pulsar.URL, "fake-pulsar-url")
-	assert.Equal(t, trigger.Trigger.Template.Pulsar.Topic, "fake-topic")
+	assert.Equal(t, trigger.Trigger.Template.Pulsar.Topic, testTopic)
 }
 
 func TestPulsarTrigger_FetchResource(t *testing.T) {
 	producer := &mockPulsarProducer{
-		topic: "fake-topic",
-		name:  "fake-producer",
+		topic: testTopic,
+		name:  testProducer,
 	}
 	producers := sharedutil.NewStringKeyedMap[pulsar.Producer]()
 	producers.Store("fake-trigger", producer)
@@ -123,8 +123,8 @@ func TestPulsarTrigger_FetchResource(t *testing.T) {
 
 func TestPulsarTrigger_ApplyResourceParameters(t *testing.T) {
 	producer := &mockPulsarProducer{
-		topic: "fake-topic",
-		name:  "fake-producer",
+		topic: testTopic,
+		name:  testProducer,
 	}
 	producers := sharedutil.NewStringKeyedMap[pulsar.Producer]()
 	producers.Store("fake-trigger", producer)
@@ -132,7 +132,7 @@ func TestPulsarTrigger_ApplyResourceParameters(t *testing.T) {
 	assert.Nil(t, err)
 
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": {
+		testDependency: {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",
@@ -150,7 +150,7 @@ func TestPulsarTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger.Trigger.Template.Pulsar.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "url",
 				Value:          &defaultValue,
 			},
@@ -170,8 +170,8 @@ func TestPulsarTrigger_ApplyResourceParameters(t *testing.T) {
 
 func TestPulsarTrigger_Execute(t *testing.T) {
 	producer := &mockPulsarProducer{
-		topic: "fake-topic",
-		name:  "fake-producer",
+		topic: testTopic,
+		name:  testProducer,
 	}
 	producers := sharedutil.NewStringKeyedMap[pulsar.Producer]()
 	producers.Store("fake-trigger", producer)
@@ -179,7 +179,7 @@ func TestPulsarTrigger_Execute(t *testing.T) {
 	assert.Nil(t, err)
 
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": {
+		testDependency: {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",
@@ -197,7 +197,7 @@ func TestPulsarTrigger_Execute(t *testing.T) {
 	trigger.Trigger.Template.Pulsar.Payload = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "message",
 				Value:          &defaultValue,
 			},

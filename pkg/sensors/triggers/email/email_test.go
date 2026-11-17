@@ -49,7 +49,7 @@ var sensorObj = &v1alpha1.Sensor{
 						Host:     "fake-host",
 						Port:     468,
 						Username: "fake-username",
-						To:       []string{"fake1@email.com", "fake2@email.com"},
+						To:       []string{"fake1@email.com", testEmailTo},
 						From:     "fake-email",
 						Subject:  "fake-subject",
 						Body:     "fake-body",
@@ -80,7 +80,7 @@ func TestEmailTrigger_FetchResource(t *testing.T) {
 	assert.Equal(t, "fake-host", ot.Host)
 	assert.Equal(t, int32(468), ot.Port)
 	assert.Equal(t, "fake-username", ot.Username)
-	assert.Equal(t, []string{"fake1@email.com", "fake2@email.com"}, ot.To)
+	assert.Equal(t, []string{"fake1@email.com", testEmailTo}, ot.To)
 	assert.Equal(t, "fake-email", ot.From)
 	assert.Equal(t, "fake-subject", ot.Subject)
 	assert.Equal(t, "fake-body", ot.Body)
@@ -90,7 +90,7 @@ func TestEmailTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger := getEmailTrigger(nil)
 
 	testEvents := map[string]*v1alpha1.Event{
-		"fake-dependency": {
+		testDependency: {
 			Context: &v1alpha1.EventContext{
 				ID:              "1",
 				Type:            "webhook",
@@ -106,14 +106,14 @@ func TestEmailTrigger_ApplyResourceParameters(t *testing.T) {
 	trigger.Trigger.Template.Email.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "to",
 			},
 			Dest: "to.0",
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				DependencyName: "fake-dependency",
+				DependencyName: testDependency,
 				DataKey:        "body",
 				DataTemplate:   "Hi {{.Input.name}},\n\tHello There.\nThanks,\nObi",
 			},
@@ -130,7 +130,7 @@ func TestEmailTrigger_ApplyResourceParameters(t *testing.T) {
 	assert.Equal(t, "fake-host", ot.Host)
 	assert.Equal(t, int32(468), ot.Port)
 	assert.Equal(t, "fake-username", ot.Username)
-	assert.Equal(t, []string{"real@email.com", "fake2@email.com"}, ot.To)
+	assert.Equal(t, []string{"real@email.com", testEmailTo}, ot.To)
 	assert.Equal(t, "fake-email", ot.From)
 	assert.Equal(t, "fake-subject", ot.Subject)
 	assert.Equal(t, "Hi Luke,\n\tHello There.\nThanks,\nObi", ot.Body)

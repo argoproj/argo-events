@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"go.uber.org/zap"
 	appv1 "k8s.io/api/apps/v1"
@@ -72,6 +73,23 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	if eventsOpts.LeaderElection {
 		opts.LeaderElection = true
 		opts.LeaderElectionID = "argo-events-controller"
+		// Unset variables keep the controller-runtime defaults.
+		for _, d := range []struct {
+			env    string
+			target **time.Duration
+		}{
+			{aev1.EnvVarLeaderElectionLeaseDuration, &opts.LeaseDuration},
+			{aev1.EnvVarLeaderElectionRenewDeadline, &opts.RenewDeadline},
+			{aev1.EnvVarLeaderElectionRetryPeriod, &opts.RetryPeriod},
+		} {
+			v, err := durationFromEnv(d.env)
+			if err != nil {
+				logger.Fatalw("Invalid leader election setting", zap.Error(err))
+			}
+			if v != nil {
+				*d.target = v
+			}
+		}
 	}
 	restConfig := ctrl.GetConfigOrDie()
 	mgr, err := ctrl.NewManager(restConfig, opts)
@@ -191,4 +209,21 @@ func Start(eventsOpts ArgoEventsControllerOpts) {
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
 		logger.Fatalw("Unable to start controller manager", zap.Error(err))
 	}
+}
+
+// durationFromEnv returns the duration set in the given environment variable,
+// or nil if it isn't set.
+func durationFromEnv(env string) (*time.Duration, error) {
+	v, ok := os.LookupEnv(env)
+	if !ok || v == "" {
+		return nil, nil
+	}
+	d, err := time.ParseDuration(v)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", env, err)
+	}
+	if d <= 0 {
+		return nil, fmt.Errorf("%s: must be positive, got %s", env, v)
+	}
+	return &d, nil
 }

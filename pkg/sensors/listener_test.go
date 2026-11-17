@@ -52,9 +52,9 @@ func TestGetDependencyExpression(t *testing.T) {
 		obj := sensorObj.DeepCopy()
 		obj.Spec.Dependencies = []v1alpha1.EventDependency{
 			{
-				Name:            "dep1",
-				EventSourceName: "webhook",
-				EventName:       "example-1",
+				Name:            testDep1,
+				EventSourceName: testWebhook,
+				EventName:       testExample1,
 			},
 		}
 		sensorCtx := &SensorContext{
@@ -62,21 +62,21 @@ func TestGetDependencyExpression(t *testing.T) {
 		}
 		expr, err := sensorCtx.getDependencyExpression(context.Background(), *fakeTrigger)
 		assert.NoError(t, err)
-		assert.Equal(t, "dep1", expr)
+		assert.Equal(t, testDep1, expr)
 	})
 
 	t.Run("get two deps expression", func(t *testing.T) {
 		obj := sensorObj.DeepCopy()
 		obj.Spec.Dependencies = []v1alpha1.EventDependency{
 			{
-				Name:            "dep1",
-				EventSourceName: "webhook",
-				EventName:       "example-1",
+				Name:            testDep1,
+				EventSourceName: testWebhook,
+				EventName:       testExample1,
 			},
 			{
 				Name:            "dep2",
-				EventSourceName: "webhook2",
-				EventName:       "example-2",
+				EventSourceName: testWebhook2,
+				EventName:       testExample2,
 			},
 		}
 		sensorCtx := &SensorContext{
@@ -90,19 +90,19 @@ func TestGetDependencyExpression(t *testing.T) {
 		obj := sensorObj.DeepCopy()
 		obj.Spec.Dependencies = []v1alpha1.EventDependency{
 			{
-				Name:            "dep1",
-				EventSourceName: "webhook",
-				EventName:       "example-1",
+				Name:            testDep1,
+				EventSourceName: testWebhook,
+				EventName:       testExample1,
 			},
 			{
 				Name:            "dep1a",
-				EventSourceName: "webhook",
+				EventSourceName: testWebhook,
 				EventName:       "example-1a",
 			},
 			{
 				Name:            "dep2",
-				EventSourceName: "webhook2",
-				EventName:       "example-2",
+				EventSourceName: testWebhook2,
+				EventName:       testExample2,
 			},
 		}
 		sensorCtx := &SensorContext{
@@ -118,18 +118,18 @@ func TestGetDependencyExpression(t *testing.T) {
 		obj.Spec.Dependencies = []v1alpha1.EventDependency{
 			{
 				Name:            "dep-1",
-				EventSourceName: "webhook",
-				EventName:       "example-1",
+				EventSourceName: testWebhook,
+				EventName:       testExample1,
 			},
 			{
 				Name:            "dep_1a",
-				EventSourceName: "webhook",
+				EventSourceName: testWebhook,
 				EventName:       "example-1a",
 			},
 			{
 				Name:            "dep-2",
-				EventSourceName: "webhook2",
-				EventName:       "example-2",
+				EventSourceName: testWebhook2,
+				EventName:       testExample2,
 			},
 			{
 				Name:            "dep-3",
@@ -145,4 +145,24 @@ func TestGetDependencyExpression(t *testing.T) {
 		_, err := sensorCtx.getDependencyExpression(context.Background(), *trig)
 		assert.NoError(t, err)
 	})
+}
+
+func TestNeedsLeaderElection(t *testing.T) {
+	tests := []struct {
+		name     string
+		isKafka  bool
+		replicas int
+		want     bool
+	}{
+		{"kafka eventbus, single replica", true, 1, false},
+		{"kafka eventbus, multiple replicas", true, 3, false},
+		{"non-kafka eventbus, single replica", false, 1, false},
+		{"non-kafka eventbus, zero replicas", false, 0, false},
+		{"non-kafka eventbus, multiple replicas", false, 3, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, needsLeaderElection(tt.isKafka, tt.replicas))
+		})
+	}
 }
