@@ -129,6 +129,23 @@ func TestValidate(t *testing.T) {
 		assert.Contains(t, err.Error(), "invalid spec: a version")
 	})
 
+	t.Run("test js eventbus client advertise", func(t *testing.T) {
+		for _, v := range []string{"my-lb.elb.amazonaws.com:4222", "10.0.0.1:4222", "[2001:db8::1]:4222"} {
+			eb := testJetStreamEventBus.DeepCopy()
+			eb.Spec.JetStream.ClientAdvertise = ptr.To(v)
+			assert.NoError(t, ValidateEventBus(eb), v)
+		}
+		for _, v := range []string{"", "my-lb", ":4222", "my-lb:", "my-lb:abc", "my-lb:70000", "nats://my-lb:4222", "my-lb:4222\"", "my lb:4222"} {
+			eb := testJetStreamEventBus.DeepCopy()
+			eb.Spec.JetStream.ClientAdvertise = ptr.To(v)
+			err := ValidateEventBus(eb)
+			assert.Error(t, err, v)
+			if err != nil {
+				assert.Contains(t, err.Error(), "spec.jetstream.clientAdvertise", v)
+			}
+		}
+	})
+
 	t.Run("test js eventbus replica", func(t *testing.T) {
 		eb := testJetStreamEventBus.DeepCopy()
 		eb.Spec.JetStream.Replicas = ptr.To[int32](3)
