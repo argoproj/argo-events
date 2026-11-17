@@ -671,6 +671,10 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	if r.eventBus.Spec.JetStream.MaxPayload != nil {
 		maxPayload = *r.eventBus.Spec.JetStream.MaxPayload
 	}
+	clientAdvertise := ""
+	if r.eventBus.Spec.JetStream.ClientAdvertise != nil {
+		clientAdvertise = *r.eventBus.Spec.JetStream.ClientAdvertise
+	}
 	var confTpl *template.Template
 	if replicas > 2 {
 		confTpl = template.Must(template.ParseFS(jetStremAssets, "assets/jetstream/nats-cluster.conf"))
@@ -679,23 +683,25 @@ func (r *jetStreamInstaller) createConfigMap(ctx context.Context) error {
 	}
 	var confTplOutput bytes.Buffer
 	if err := confTpl.Execute(&confTplOutput, struct {
-		KeyFromEnv     bool
-		MaxPayloadSize string
-		ClusterName    string
-		MonitorPort    string
-		ClusterPort    string
-		ClientPort     string
-		Routes         string
-		Settings       string
+		KeyFromEnv      bool
+		MaxPayloadSize  string
+		ClusterName     string
+		MonitorPort     string
+		ClusterPort     string
+		ClientPort      string
+		ClientAdvertise string
+		Routes          string
+		Settings        string
 	}{
-		KeyFromEnv:     jetStreamSupportsPrevKey(r.eventBus.Spec.JetStream.Version),
-		MaxPayloadSize: maxPayload,
-		ClusterName:    r.eventBus.Name,
-		MonitorPort:    strconv.Itoa(int(jsMonitorPort)),
-		ClusterPort:    strconv.Itoa(int(jsClusterPort)),
-		ClientPort:     strconv.Itoa(int(jsClientPort)),
-		Routes:         strings.Join(routes, ","),
-		Settings:       settings,
+		KeyFromEnv:      jetStreamSupportsPrevKey(r.eventBus.Spec.JetStream.Version),
+		MaxPayloadSize:  maxPayload,
+		ClusterName:     r.eventBus.Name,
+		MonitorPort:     strconv.Itoa(int(jsMonitorPort)),
+		ClusterPort:     strconv.Itoa(int(jsClusterPort)),
+		ClientPort:      strconv.Itoa(int(jsClientPort)),
+		ClientAdvertise: clientAdvertise,
+		Routes:          strings.Join(routes, ","),
+		Settings:        settings,
 	}); err != nil {
 		return fmt.Errorf("failed to parse nats config template, error: %w", err)
 	}
