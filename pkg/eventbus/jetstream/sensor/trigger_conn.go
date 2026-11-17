@@ -215,6 +215,13 @@ func (conn *JetstreamTriggerConn) pullSubscribe(
 		default:
 		}
 		if fetchErr != nil && !errors.Is(fetchErr, nats.ErrTimeout) {
+			// Permanent subscription failures should not retry indefinitely
+			if errors.Is(fetchErr, nats.ErrBadSubscription) || errors.Is(fetchErr, nats.ErrSubscriptionClosed) || strings.Contains(fetchErr.Error(), "invalid subscription") {
+				conn.Logger.Errorf("fatal error in pullSubscribe for subscription %+v: %v", subscription, fetchErr)
+				wg.Done()
+				conn.Logger.Infof("exiting pullSubscribe() for subscription %+v", subscription)
+				return
+			}
 			continue
 		}
 
