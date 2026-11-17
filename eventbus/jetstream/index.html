@@ -824,6 +824,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#advertising-a-different-client-address" class="md-nav__link">
+    Advertising a different client address
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2202,6 +2209,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#advertising-a-different-client-address" class="md-nav__link">
+    Advertising a different client address
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2326,6 +2340,20 @@ spec:
       max_file_store: 1GB       # see default values in argo-events-controller-config
     startArgs:
       - "-D"                    # debug-level logs
+</code></pre></div>
+<h3 id="advertising-a-different-client-address">Advertising a different client address<a class="headerlink" href="#advertising-a-different-client-address" title="Permanent link">&para;</a></h3>
+<p>By default the NATS servers advertise their pod IPs to clients. If clients reach the EventBus through another
+address, for example a load balancer in front of the NATS service when a <code>jetstreamExotic</code> EventBus in another
+cluster connects to it, set <code>clientAdvertise</code> to that <code>host:port</code>. It is written to the server configuration
+as <a href="https://docs.nats.io/running-a-nats-service/configuration#connection-and-domain-settings"><code>client_advertise</code></a>.</p>
+<div class="highlight"><pre><span></span><code>apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: default
+spec:
+  jetstream:
+    version: latest # Do NOT use "latest" but a specific version in your real deployment
+    clientAdvertise: my-loadbalancer.example.com:4222
 </code></pre></div>
 <h2 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h2>
 <p>For Jetstream, TLS is turned on for all client-server communication as well as between Jetstream nodes. In addition, for client-server communication we by default use password authentication (and because TLS is turned on, the password is encrypted).</p>
