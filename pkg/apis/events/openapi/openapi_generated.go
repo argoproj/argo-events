@@ -4733,7 +4733,7 @@ func schema_pkg_apis_events_v1alpha1_KafkaBus(ref common.ReferenceCallback) comm
 				Properties: map[string]spec.Schema{
 					"url": {
 						SchemaProps: spec.SchemaProps{
-							Description: "URL to kafka cluster, multiple URLs separated by comma",
+							Description: "URL to kafka cluster, multiple URLs separated by comma. Either url or urlSecret is required.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -4777,11 +4777,17 @@ func schema_pkg_apis_events_v1alpha1_KafkaBus(ref common.ReferenceCallback) comm
 							Format:      "",
 						},
 					},
+					"urlSecret": {
+						SchemaProps: spec.SchemaProps{
+							Description: "URLSecret references a key of a Secret holding the URL to kafka cluster, multiple URLs separated by comma. Use it instead of url to keep the broker addresses out of the EventBus spec.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaConsumerGroup", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaConsumerGroup", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SASLConfig", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

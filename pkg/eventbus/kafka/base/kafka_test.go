@@ -7,6 +7,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func TestBrokers(t *testing.T) {
@@ -18,9 +19,32 @@ func TestBrokers(t *testing.T) {
 	kafka := NewKafka(config, logger)
 
 	expectedBrokers := []string{"broker1:9092", "broker2:9092"}
-	actualBrokers := kafka.Brokers()
+	actualBrokers, err := kafka.Brokers()
 
+	assert.NoError(t, err)
 	assert.Equal(t, expectedBrokers, actualBrokers)
+}
+
+func TestBrokersTrimsSpaces(t *testing.T) {
+	kafka := NewKafka(&v1alpha1.KafkaBus{URL: " broker1:9092 , broker2:9092,"}, zap.NewNop().Sugar())
+
+	brokers, err := kafka.Brokers()
+
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"broker1:9092", "broker2:9092"}, brokers)
+}
+
+func TestBrokersFromMissingSecret(t *testing.T) {
+	kafka := NewKafka(&v1alpha1.KafkaBus{
+		URLSecret: &corev1.SecretKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{Name: "kafka-url"},
+			Key:                  "url",
+		},
+	}, zap.NewNop().Sugar())
+
+	_, err := kafka.Brokers()
+
+	assert.ErrorContains(t, err, "kafka-url")
 }
 
 func TestConfig(t *testing.T) {

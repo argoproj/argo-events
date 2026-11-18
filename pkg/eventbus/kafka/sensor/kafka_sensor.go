@@ -120,7 +120,11 @@ func (s *KafkaSensor) Initialize() error {
 	// sensor specific config
 	config.Producer.Transaction.ID = s.hostname
 
-	client, err := sarama.NewClient(s.Brokers(), config)
+	brokers, err := s.Brokers()
+	if err != nil {
+		return err
+	}
+	client, err := sarama.NewClient(brokers, config)
 	if err != nil {
 		return err
 	}

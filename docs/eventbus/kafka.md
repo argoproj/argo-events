@@ -29,6 +29,20 @@ for the full specification.
 Comma separated list of kafka broker urls, the kafka broker must be managed
 independently of Argo Events.
 
+### urlSecret
+
+The broker urls can also come from a key of a Secret in the EventBus namespace,
+for example one synced from an external secret store. Set either `url` or
+`urlSecret`, not both.
+
+```yaml
+spec:
+  kafka:
+    urlSecret:
+      name: kafka-brokers
+      key: url
+```
+
 ### topic
 
 The topic name, defaults to `{namespace-name}-{eventbus-name}`. Two additional

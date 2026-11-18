@@ -302,6 +302,37 @@ func Test_BuildDeployment(t *testing.T) {
 		assert.True(t, hasTLSSecretVolumeMount)
 	})
 
+	t.Run("test kafka eventbus url secret attached", func(t *testing.T) {
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: sensorObj,
+			Labels: testLabels,
+		}
+
+		testBus := fakeEventBusKafka.DeepCopy()
+		testBus.Spec.Kafka.URL = ""
+		testBus.Spec.Kafka.URLSecret = &corev1.SecretKeySelector{Key: "url", LocalObjectReference: corev1.LocalObjectReference{Name: "kafka-url"}}
+
+		deployment, err := buildDeployment(args, testBus)
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
+
+		hasVolume := false
+		for _, volume := range deployment.Spec.Template.Spec.Volumes {
+			if volume.Name == "secret-kafka-url" {
+				hasVolume = true
+			}
+		}
+		hasVolumeMount := false
+		for _, volumeMount := range deployment.Spec.Template.Spec.Containers[0].VolumeMounts {
+			if volumeMount.Name == "secret-kafka-url" {
+				hasVolumeMount = true
+			}
+		}
+		assert.True(t, hasVolume)
+		assert.True(t, hasVolumeMount)
+	})
+
 	t.Run("test jetstream eventbus secrets attached", func(t *testing.T) {
 		args := &AdaptorArgs{
 			Image:  testImage,

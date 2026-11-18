@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
@@ -161,7 +162,28 @@ func TestValidate(t *testing.T) {
 		eb.Spec.Kafka.URL = ""
 		err := ValidateEventBus(eb)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "\"spec.kafka.url\" is missing")
+		assert.Contains(t, err.Error(), "either \"spec.kafka.url\" or \"spec.kafka.urlSecret\" is required")
+	})
+
+	t.Run("test kafka eventbus with URL secret", func(t *testing.T) {
+		eb := testKafkaEventBus.DeepCopy()
+		eb.Spec.Kafka.URL = ""
+		eb.Spec.Kafka.URLSecret = &corev1.SecretKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{Name: "kafka"},
+			Key:                  "url",
+		}
+		assert.NoError(t, ValidateEventBus(eb))
+	})
+
+	t.Run("test kafka eventbus with both URL and URL secret", func(t *testing.T) {
+		eb := testKafkaEventBus.DeepCopy()
+		eb.Spec.Kafka.URLSecret = &corev1.SecretKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{Name: "kafka"},
+			Key:                  "url",
+		}
+		err := ValidateEventBus(eb)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "can't both be set")
 	})
 
 	t.Run("test exotic js eventbus empty URL", func(t *testing.T) {

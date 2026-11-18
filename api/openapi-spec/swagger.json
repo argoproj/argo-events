@@ -2489,8 +2489,12 @@
           "type": "string"
         },
         "url": {
-          "description": "URL to kafka cluster, multiple URLs separated by comma",
+          "description": "URL to kafka cluster, multiple URLs separated by comma. Either url or urlSecret is required.",
           "type": "string"
+        },
+        "urlSecret": {
+          "description": "URLSecret references a key of a Secret holding the URL to kafka cluster, multiple URLs separated by comma. Use it instead of url to keep the broker addresses out of the EventBus spec.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
         },
         "version": {
           "description": "Kafka version, sarama defaults to the oldest supported stable version",
