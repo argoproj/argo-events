@@ -33,5 +33,12 @@ func (n *SourceJetstream) Connect(clientID string) (eventbuscommon.EventSourceCo
 		return nil, err
 	}
 
+	// the EventBus may have lost the Stream since Initialize() (e.g. it was restarted without persistence)
+	err = n.CreateStream(conn)
+	if err != nil {
+		_ = conn.Close()
+		return nil, err
+	}
+
 	return CreateJetstreamSourceConn(conn, n.eventSourceName), nil
 }

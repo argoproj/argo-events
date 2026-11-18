@@ -102,7 +102,7 @@ func (stream *SensorJetstream) ensureStreamAndKeyValueStore(conn *eventbusjetstr
 
 	_, err = conn.JSContext.KeyValue(stream.sensorName)
 	if errors.Is(err, nats.ErrBucketNotFound) {
-		stream.Logger.Infof("K/V store for sensor %s not found, creating it", stream.sensorName)
+		stream.Logger.Warnf("K/V store for sensor %s not found, creating it", stream.sensorName)
 		_, err = conn.JSContext.CreateKeyValue(&nats.KeyValueConfig{Bucket: stream.sensorName})
 	}
 	if err != nil {
