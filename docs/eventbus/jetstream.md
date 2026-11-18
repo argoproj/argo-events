@@ -85,6 +85,12 @@ For Jetstream, TLS is turned on for all client-server communication as well as b
 
 The JetStream store on disk is encrypted with a key the controller generates and keeps in the `eventbus-<name>-js-server` Secret. On NATS 2.10 and later the server reads that key from the Secret; a server that was created by an earlier controller release encrypted its store with the literal string `$JS_KEY`, and the configuration names it as `prev_key`, so the store is re-encrypted with the real key on the first start after the upgrade. NATS 2.8 and 2.9 have no `prev_key`, so on those versions the configuration keeps the literal key to leave existing stores readable; move to 2.10 or later to have the generated key used.
 
+### Providing the auth secrets yourself
+
+By default the controller generates the credentials, TLS certificates and encryption key in two Secrets, `eventbus-<name>-js-server` and `eventbus-<name>-js-client-auth`. If both Secrets already exist in the EventBus namespace and aren't owned by the EventBus, for example because they're synced by an external secrets operator, the controller uses them as they are and never regenerates or deletes them. This keeps the credentials stable, so they can be shared with `jetstreamExotic` EventBuses in other clusters.
+
+The two Secrets need the same keys as the generated ones: `auth`, `encryption`, `private-key`, `cert`, `ca-cert`, `cluster-private-key`, `cluster-cert` and `cluster-ca-cert` in the server Secret, and `client-auth` in the client Secret, with the same user and password as in the server's `auth` config. Providing only one of them is an error.
+
 ## How it works under the hood
 
 Jetstream has the concept of a Stream, and Subjects (i.e. topics) which are used on a Stream. From the documentation: “Each Stream defines how messages are stored and what the limits (duration, size, interest) of the retention are.” For Argo Events, we have one Stream called "default" with a single set of settings, but we have multiple subjects, each of which is named `default.<eventsourcename>.<eventname>`. Sensors subscribe to the subjects they need using durable consumers.
