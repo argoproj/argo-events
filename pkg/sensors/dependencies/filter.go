@@ -288,7 +288,15 @@ filterData:
 					}
 				}
 
-				if val == pathResult.Bool() {
+				matchResult := false
+				switch f.Comparator {
+				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
+					matchResult = val == pathResult.Bool()
+				case v1alpha1.NotEqualTo:
+					matchResult = val != pathResult.Bool()
+				}
+
+				if matchResult {
 					if operator == v1alpha1.OrLogicalOperator {
 						return true, nil
 					} else {
