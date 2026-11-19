@@ -37,4 +37,18 @@ func TestMakeConnectionTLSOptional(t *testing.T) {
 		_, err = js.MakeConnection()
 		require.Error(t, err)
 	})
+
+	t.Run("credential auth is accepted before dial", func(t *testing.T) {
+		js, err := NewJetstream("nats://127.0.0.1:1", "", &eventbuscommon.Auth{
+			Strategy: v1alpha1.AuthStrategyCredential,
+			Credential: &eventbuscommon.AuthCredential{
+				Credentials: []byte("-----BEGIN NATS USER JWT-----\nx\n------END NATS USER JWT------\n-----BEGIN USER NKEY SEED-----\nSUA\n------END USER NKEY SEED------\n"),
+			},
+		}, logger, nil)
+		require.NoError(t, err)
+
+		_, err = js.MakeConnection()
+		require.Error(t, err)
+		assert.NotContains(t, err.Error(), "unsupported auth strategy")
+	})
 }

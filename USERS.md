@@ -54,6 +54,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Salesforce](https://salesforce.com)
 1. [ReadyOn AI](https://www.readyon.ai)
 1. [SAP Concur](https://www.concur.com/)
+1. [Shopmonkey](https://www.shopmonkey.io)
 1. [Softonic](https://www.softonic.com)
 1. [SternumIOT](https://sternumiot.com/)
 1. [Swissblock Technologies](https://swissblock.net)
