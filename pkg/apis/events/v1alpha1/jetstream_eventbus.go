@@ -85,6 +85,12 @@ type JetStreamBus struct {
 	// Maximum number of bytes in a message payload, 0 means unlimited. Defaults to 1MB
 	// +optional
 	MaxPayload *string `json:"maxPayload,omitempty" protobuf:"bytes,19,opt,name=maxPayload"`
+	// ClientAdvertise is the "host:port" that the NATS servers advertise to clients, written as the
+	// "client_advertise" option of the server configuration. Set it when clients reach the servers
+	// through an address other than the pod IPs, for example a load balancer.
+	// See https://docs.nats.io/running-a-nats-service/configuration#connection-and-domain-settings.
+	// +optional
+	ClientAdvertise *string `json:"clientAdvertise,omitempty" protobuf:"bytes,20,opt,name=clientAdvertise"`
 }
 
 func (j JetStreamBus) GetReplicas() int {

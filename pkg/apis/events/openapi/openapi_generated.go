@@ -4612,6 +4612,13 @@ func schema_pkg_apis_events_v1alpha1_JetStreamBus(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
+					"clientAdvertise": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientAdvertise is the \"host:port\" that the NATS servers advertise to clients, written as the \"client_advertise\" option of the server configuration. Set it when clients reach the servers through an address other than the pod IPs, for example a load balancer. See https://docs.nats.io/running-a-nats-service/configuration#connection-and-domain-settings.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
