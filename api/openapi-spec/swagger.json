@@ -1703,6 +1703,13 @@
           "additionalProperties": {
             "$ref": "#/definitions/io.argoproj.events.v1alpha1.WebhookEventSource"
           }
+        },
+        "websocket": {
+          "description": "WebSocket event sources",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.events.v1alpha1.WebSocketEventSource"
+          }
         }
       }
     },
@@ -4679,6 +4686,53 @@
         },
         "pathRegexp": {
           "description": "PathRegexp is regexp of relative path of object to watch with respect to the directory",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.events.v1alpha1.WebSocketEventSource": {
+      "description": "WebSocketEventSource refers to event-source for WebSocket related events",
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "auth": {
+          "description": "Auth hosts secret selectors for username and password, sent as HTTP basic auth on the upgrade request",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.BasicAuth"
+        },
+        "connectionBackoff": {
+          "description": "ConnectionBackoff holds backoff applied to (re)connection.",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.Backoff"
+        },
+        "filter": {
+          "description": "Filter",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.EventSourceFilter"
+        },
+        "headers": {
+          "description": "Headers are the HTTP headers sent along with the WebSocket upgrade request",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "jsonBody": {
+          "description": "JSONBody specifies that all event body payload coming from this source will be JSON",
+          "type": "boolean"
+        },
+        "metadata": {
+          "description": "Metadata holds the user defined metadata which will passed along the event payload.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "tls": {
+          "description": "TLS configuration for the websocket client.",
+          "$ref": "#/definitions/io.argoproj.events.v1alpha1.TLSConfig"
+        },
+        "url": {
+          "description": "URL to connect to the WebSocket server, e.g. ws://example.com/socket or wss://example.com/socket",
           "type": "string"
         }
       }

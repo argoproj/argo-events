@@ -2623,7 +2623,8 @@ Backoff
 <a href="#argoproj.io/v1alpha1.NSQEventSource">NSQEventSource</a>,
 <a href="#argoproj.io/v1alpha1.PulsarEventSource">PulsarEventSource</a>,
 <a href="#argoproj.io/v1alpha1.PulsarTrigger">PulsarTrigger</a>,
-<a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
+<a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>,
+<a href="#argoproj.io/v1alpha1.WebSocketEventSource">WebSocketEventSource</a>)
 </p>
 
 <p>
@@ -2754,6 +2755,7 @@ BasicAuth
 <a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>,
 <a href="#argoproj.io/v1alpha1.NATSAuth">NATSAuth</a>,
 <a href="#argoproj.io/v1alpha1.SchemaRegistryConfig">SchemaRegistryConfig</a>,
+<a href="#argoproj.io/v1alpha1.WebSocketEventSource">WebSocketEventSource</a>,
 <a href="#argoproj.io/v1alpha1.WebhookContext">WebhookContext</a>)
 </p>
 
@@ -7594,6 +7596,27 @@ MNS event sources
 
 <td>
 
+<code>websocket</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebSocketEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebSocketEventSource
+</a> </em>
+</td>
+
+<td>
+
+<p>
+
+WebSocket event sources
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>revisionHistoryLimit</code></br> <em> int32 </em>
 </td>
 
@@ -7671,6 +7694,7 @@ EventSourceFilter
 <a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SQSEventSource">SQSEventSource</a>,
 <a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>,
+<a href="#argoproj.io/v1alpha1.WebSocketEventSource">WebSocketEventSource</a>,
 <a href="#argoproj.io/v1alpha1.WebhookEventSource">WebhookEventSource</a>)
 </p>
 
@@ -8501,6 +8525,27 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSo
 <p>
 
 MNS event sources
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>websocket</code></br> <em>
+<a href="#argoproj.io/v1alpha1.WebSocketEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebSocketEventSource
+</a> </em>
+</td>
+
+<td>
+
+<p>
+
+WebSocket event sources
 </p>
 
 </td>
@@ -20668,7 +20713,8 @@ TLSConfig
 <a href="#argoproj.io/v1alpha1.PulsarTrigger">PulsarTrigger</a>,
 <a href="#argoproj.io/v1alpha1.RedisEventSource">RedisEventSource</a>,
 <a href="#argoproj.io/v1alpha1.RedisStreamEventSource">RedisStreamEventSource</a>,
-<a href="#argoproj.io/v1alpha1.StorageGridEventSource">StorageGridEventSource</a>)
+<a href="#argoproj.io/v1alpha1.StorageGridEventSource">StorageGridEventSource</a>,
+<a href="#argoproj.io/v1alpha1.WebSocketEventSource">WebSocketEventSource</a>)
 </p>
 
 <p>
@@ -22523,6 +22569,213 @@ Path is relative path of object to watch with respect to the directory
 
 PathRegexp is regexp of relative path of object to watch with respect to
 the directory
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.WebSocketEventSource">
+
+WebSocketEventSource
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+
+<p>
+
+<p>
+
+WebSocketEventSource refers to event-source for WebSocket related events
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+</th>
+
+<th>
+
+Description
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>url</code></br> <em> string </em>
+</td>
+
+<td>
+
+<p>
+
+URL to connect to the WebSocket server, e.g. ws://example.com/socket or
+wss://example.com/socket
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>headers</code></br> <em> map\[string\]string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Headers are the HTTP headers sent along with the WebSocket upgrade
+request
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>connectionBackoff</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Backoff"> Backoff </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+ConnectionBackoff holds backoff applied to (re)connection.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+TLS configuration for the websocket client.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em> map\[string\]string </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Metadata holds the user defined metadata which will passed along the
+event payload.
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>filter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceFilter"> EventSourceFilter
+</a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Filter
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>auth</code></br> <em> <a href="#argoproj.io/v1alpha1.BasicAuth">
+BasicAuth </a> </em>
+</td>
+
+<td>
+
+<em>(Optional)</em>
+<p>
+
+Auth hosts secret selectors for username and password, sent as HTTP
+basic auth on the upgrade request
 </p>
 
 </td>

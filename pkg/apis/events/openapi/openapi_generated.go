@@ -161,6 +161,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.URLArtifact":                  schema_pkg_apis_events_v1alpha1_URLArtifact(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ValueFromSource":              schema_pkg_apis_events_v1alpha1_ValueFromSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WatchPathConfig":              schema_pkg_apis_events_v1alpha1_WatchPathConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebSocketEventSource":         schema_pkg_apis_events_v1alpha1_WebSocketEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebhookContext":               schema_pkg_apis_events_v1alpha1_WebhookContext(ref),
 		"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebhookEventSource":           schema_pkg_apis_events_v1alpha1_WebhookEventSource(ref),
 	}
@@ -3318,6 +3319,21 @@ func schema_pkg_apis_events_v1alpha1_EventSourceSpec(ref common.ReferenceCallbac
 							},
 						},
 					},
+					"websocket": {
+						SchemaProps: spec.SchemaProps{
+							Description: "WebSocket event sources",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebSocketEventSource"),
+									},
+								},
+							},
+						},
+					},
 					"revisionHistoryLimit": {
 						SchemaProps: spec.SchemaProps{
 							Description: "RevisionHistoryLimit specifies how many old deployment revisions to retain",
@@ -3329,7 +3345,7 @@ func schema_pkg_apis_events_v1alpha1_EventSourceSpec(ref common.ReferenceCallbac
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureQueueStorageEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureServiceBusEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BitbucketEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BitbucketServerEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GerritEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PulsarEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisStreamEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SFTPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StripeEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebhookEventSource"},
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureQueueStorageEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.AzureServiceBusEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BitbucketEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BitbucketServerEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GerritEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MNSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.PulsarEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.RedisStreamEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SFTPEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.StripeEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebSocketEventSource", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.WebhookEventSource"},
 	}
 }
 
@@ -8740,6 +8756,93 @@ func schema_pkg_apis_events_v1alpha1_WatchPathConfig(ref common.ReferenceCallbac
 				Required: []string{"directory"},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_events_v1alpha1_WebSocketEventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "WebSocketEventSource refers to event-source for WebSocket related events",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Description: "URL to connect to the WebSocket server, e.g. ws://example.com/socket or wss://example.com/socket",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"headers": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Headers are the HTTP headers sent along with the WebSocket upgrade request",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"connectionBackoff": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ConnectionBackoff holds backoff applied to (re)connection.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Backoff"),
+						},
+					},
+					"jsonBody": {
+						SchemaProps: spec.SchemaProps{
+							Description: "JSONBody specifies that all event body payload coming from this source will be JSON",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the websocket client.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"),
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata holds the user defined metadata which will passed along the event payload.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"filter": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Filter",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter"),
+						},
+					},
+					"auth": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Auth hosts secret selectors for username and password, sent as HTTP basic auth on the upgrade request",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BasicAuth"),
+						},
+					},
+				},
+				Required: []string{"url"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.Backoff", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.EventSourceFilter", "github.com/argoproj/argo-events/pkg/apis/events/v1alpha1.TLSConfig"},
 	}
 }
 

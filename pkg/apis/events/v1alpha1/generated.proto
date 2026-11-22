@@ -1187,6 +1187,9 @@ message EventSourceSpec {
   // MNS event sources
   map<string, MNSEventSource> mns = 36;
 
+  // WebSocket event sources
+  map<string, WebSocketEventSource> websocket = 38;
+
   // RevisionHistoryLimit specifies how many old deployment revisions to retain
   // +optional
   optional int32 revisionHistoryLimit = 37;
@@ -3453,6 +3456,41 @@ message WatchPathConfig {
 
   // PathRegexp is regexp of relative path of object to watch with respect to the directory
   optional string pathRegexp = 3;
+}
+
+// WebSocketEventSource refers to event-source for WebSocket related events
+message WebSocketEventSource {
+  // URL to connect to the WebSocket server, e.g. ws://example.com/socket or wss://example.com/socket
+  optional string url = 1;
+
+  // Headers are the HTTP headers sent along with the WebSocket upgrade request
+  // +optional
+  map<string, string> headers = 2;
+
+  // ConnectionBackoff holds backoff applied to (re)connection.
+  // +optional
+  optional Backoff connectionBackoff = 3;
+
+  // JSONBody specifies that all event body payload coming from this
+  // source will be JSON
+  // +optional
+  optional bool jsonBody = 4;
+
+  // TLS configuration for the websocket client.
+  // +optional
+  optional TLSConfig tls = 5;
+
+  // Metadata holds the user defined metadata which will passed along the event payload.
+  // +optional
+  map<string, string> metadata = 6;
+
+  // Filter
+  // +optional
+  optional EventSourceFilter filter = 7;
+
+  // Auth hosts secret selectors for username and password, sent as HTTP basic auth on the upgrade request
+  // +optional
+  optional BasicAuth auth = 8;
 }
 
 // WebhookContext holds a general purpose REST API context
