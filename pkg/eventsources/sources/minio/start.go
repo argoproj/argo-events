@@ -61,6 +61,19 @@ func (el *EventListener) GetEventSourceType() v1alpha1.EventSourceType {
 	return v1alpha1.MinioEvent
 }
 
+// newClient creates the minio client for the event source. A nil transport makes the client use its default one.
+func (el *EventListener) newClient(accessKey, secretKey string, transport http.RoundTripper) (*minio.Client, error) {
+	client, err := minio.New(el.MinioEventSource.Endpoint, &minio.Options{
+		Creds:     credentials.NewStaticV4(accessKey, secretKey, ""),
+		Secure:    !el.MinioEventSource.Insecure,
+		Transport: transport,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create a client for event source %s, %w", el.GetEventName(), err)
+	}
+	return client, nil
+}
+
 // StartListening starts listening events
 func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byte, ...eventsourcecommon.Option) error) error {
 	log := logging.FromContext(ctx).
@@ -82,8 +95,7 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 		return fmt.Errorf("failed to retrieve the secret key for event source %s, %w", el.GetEventName(), err)
 	}
 
-	var minioClient *minio.Client
-	var clientErr error
+	var transport http.RoundTripper
 	if minioEventSource.CACertificate != nil {
 		log.Info("retrieving CA certificate...")
 		caCertificate, err := sharedutil.GetSecretFromVolume(minioEventSource.CACertificate)
@@ -98,22 +110,15 @@ func (el *EventListener) StartListening(ctx context.Context, dispatch func([]byt
 			RootCAs: caCertPool,
 		}
 		log.Info("setting up a minio client with custom CA...")
-		minioClient, clientErr = minio.New(minioEventSource.Endpoint, &minio.Options{
-			Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
-			Secure: !minioEventSource.Insecure,
-			Transport: &http.Transport{
-				TLSClientConfig: tlsConfig,
-			},
-		})
+		transport = &http.Transport{
+			TLSClientConfig: tlsConfig,
+		}
 	} else {
 		log.Info("setting up a minio client...")
-		minioClient, clientErr = minio.New(minioEventSource.Endpoint, &minio.Options{
-			Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
-			Secure: !minioEventSource.Insecure,
-		})
 	}
-	if clientErr != nil {
-		return fmt.Errorf("failed to create a client for event source %s, %w", el.GetEventName(), err)
+	minioClient, err := el.newClient(accessKey, secretKey, transport)
+	if err != nil {
+		return err
 	}
 
 	prefix, suffix := getFilters(minioEventSource)
