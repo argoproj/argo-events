@@ -108,6 +108,8 @@ type EventSourceSpec struct {
 	Gerrit map[string]GerritEventSource `json:"gerrit,omitempty" protobuf:"bytes,35,rep,name=gerrit"`
 	// MNS event sources
 	MNS map[string]MNSEventSource `json:"mns,omitempty" protobuf:"bytes,36,rep,name=mns"`
+	// WebSocket event sources
+	WebSocket map[string]WebSocketEventSource `json:"websocket,omitempty" protobuf:"bytes,38,rep,name=websocket"`
 	// RevisionHistoryLimit specifies how many old deployment revisions to retain
 	// +optional
 	RevisionHistoryLimit *int32 `json:"revisionHistoryLimit,omitempty" protobuf:"varint,37,opt,name=revisionHistoryLimit"`
@@ -1529,6 +1531,34 @@ type MNSEventSource struct {
 	// Filter
 	// +optional
 	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,6,opt,name=filter"`
+}
+
+// WebSocketEventSource refers to event-source for WebSocket related events
+type WebSocketEventSource struct {
+	// URL to connect to the WebSocket server, e.g. ws://example.com/socket or wss://example.com/socket
+	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+	// Headers are the HTTP headers sent along with the WebSocket upgrade request
+	// +optional
+	Headers map[string]string `json:"headers,omitempty" protobuf:"bytes,2,rep,name=headers"`
+	// ConnectionBackoff holds backoff applied to (re)connection.
+	// +optional
+	ConnectionBackoff *Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,3,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"varint,4,opt,name=jsonBody"`
+	// TLS configuration for the websocket client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+	// Metadata holds the user defined metadata which will passed along the event payload.
+	// +optional
+	Metadata map[string]string `json:"metadata,omitempty" protobuf:"bytes,6,rep,name=metadata"`
+	// Filter
+	// +optional
+	Filter *EventSourceFilter `json:"filter,omitempty" protobuf:"bytes,7,opt,name=filter"`
+	// Auth hosts secret selectors for username and password, sent as HTTP basic auth on the upgrade request
+	// +optional
+	Auth *BasicAuth `json:"auth,omitempty" protobuf:"bytes,8,opt,name=auth"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.

@@ -44,6 +44,7 @@ var (
 	GenericEvent         EventSourceType = "generic"
 	BitbucketServerEvent EventSourceType = "bitbucketserver"
 	BitbucketEvent       EventSourceType = "bitbucket"
+	WebSocketEvent       EventSourceType = "websocket"
 )
 
 var (
@@ -69,6 +70,7 @@ var (
 		FileEvent,
 		SFTPEvent,
 		GenericEvent,
+		WebSocketEvent,
 	}
 )
 

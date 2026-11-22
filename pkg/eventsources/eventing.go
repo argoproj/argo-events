@@ -50,6 +50,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/storagegrid"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/stripe"
 	"github.com/argoproj/argo-events/pkg/eventsources/sources/webhook"
+	"github.com/argoproj/argo-events/pkg/eventsources/sources/websocket"
 	eventsourcemetrics "github.com/argoproj/argo-events/pkg/metrics"
 	"github.com/argoproj/argo-events/pkg/shared/expr"
 	"github.com/argoproj/argo-events/pkg/shared/leaderelection"
@@ -347,6 +348,16 @@ func GetEventingServers(eventSource *aev1.EventSource, metrics *eventsourcemetri
 			servers = append(servers, &webhook.EventListener{EventSourceName: eventSource.Name, EventName: k, Webhook: v, Metrics: metrics})
 		}
 		result[aev1.WebhookEvent] = servers
+	}
+	if len(eventSource.Spec.WebSocket) != 0 {
+		servers := []EventingServer{}
+		for k, v := range eventSource.Spec.WebSocket {
+			if v.Filter != nil {
+				filters[k] = v.Filter
+			}
+			servers = append(servers, &websocket.EventListener{EventSourceName: eventSource.Name, EventName: k, WebSocketEventSource: v, Metrics: metrics})
+		}
+		result[aev1.WebSocketEvent] = servers
 	}
 	if len(eventSource.Spec.Resource) != 0 {
 		servers := []EventingServer{}

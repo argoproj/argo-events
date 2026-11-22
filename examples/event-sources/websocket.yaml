@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: websocket
+spec:
+  websocket:
+    example:
+      # websocket server url
+      url: wss://ws.argo-events:443/socket
+      # jsonBody specifies that all event body payload coming from this
+      # source will be JSON
+      jsonBody: true
+      # optional headers sent along with the websocket upgrade request
+      headers:
+        X-Custom-Header: value
+      # optional backoff for (re)connection attempts.
+      # if not provided, default connection backoff will be used.
+      connectionBackoff:
+        # duration in nanoseconds, or strings like "2s". following value is 10 seconds
+        duration: 10s
+        # how many backoffs
+        steps: 5
+        # factor to increase on each step.
+        # setting factor > 1 makes backoff exponential.
+        factor: 2
+        jitter: 0.2
+      # optional metadata passed along with every event payload
+      metadata:
+        foo: bar
+
+#    example-tls:
+#      url: "wss://ws.argo-events:443/socket"
+#      jsonBody: true
+#      tls:
+#        caCertSecret:
+#          name: my-secret
+#          key: ca-cert-key
+#        clientCertSecret:
+#          name: my-secret
+#          key: client-cert-key
+#        clientKeySecret:
+#          name: my-secret
+#          key: client-key-key
+
+#    example-basic-auth:
+#      url: "wss://ws.argo-events:443/socket"
+#      auth:
+#        username:
+#          name: my-secret
+#          key: username
+#        password:
+#          name: my-secret
+#          key: password

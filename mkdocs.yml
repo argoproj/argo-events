@@ -82,6 +82,7 @@ nav:
               - "eventsources/setup/redis-streams.md"
               - "eventsources/setup/resource.md"
               - "eventsources/setup/webhook.md"
+              - "eventsources/setup/websocket.md"
               - "eventsources/setup/pulsar.md"
               - "eventsources/setup/alibabacloud-mns.md"
           - "eventsources/multiple-events.md"
