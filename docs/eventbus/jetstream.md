@@ -113,14 +113,27 @@ spec:
 
 The `accessSecret` field references a Kubernetes Secret containing the
 credentials used to authenticate with the NATS server. When specified, Argo
-Events uses basic (password) authentication. The Secret key should contain the
-**NATS password or token** as a plain string.
+Events uses basic (username and password) authentication.
+
+The referenced Secret key is mounted into the EventSource and Sensor pods as
+`auth.yaml` and parsed as YAML, so it must contain a YAML document with
+`username` and `password` fields, not a plain password string:
+
+```yaml
+username: argo-events
+password: my-nats-password
+```
 
 For example, create the Secret:
 
 ```bash
+cat <<EOF > auth.yaml
+username: argo-events
+password: my-nats-password
+EOF
+
 kubectl create secret generic nats-auth \
-  --from-literal=password=my-nats-password \
+  --from-file=auth.yaml=auth.yaml \
   -n argo-events
 ```
 
@@ -132,7 +145,7 @@ spec:
     url: nats://my-nats-server:4222
     accessSecret:
       name: nats-auth
-      key: password
+      key: auth.yaml
 ```
 
 If your NATS server does not require authentication (e.g., running in a
