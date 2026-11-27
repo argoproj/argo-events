@@ -3,7 +3,8 @@
 Minio event-source listens to minio bucket notifications and helps sensor trigger the workloads.
 
 **_Note_**: Minio event-source is exclusive for the Minio server. If you want to trigger workloads on AWS S3 bucket notification,
-please set up the AWS SNS event-source.
+please set up the AWS SNS event-source. For other S3-compatible services that deliver bucket notifications as HTTP
+requests, point the notifications at a [Webhook](webhook.md) event-source.
 
 ## Event Structure
 

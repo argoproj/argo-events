@@ -59,6 +59,10 @@ For this tutorial, lets set up a minio server which is S3 compliant store.
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-minio.yaml
 
+    The S3 trigger source also works with other S3-compatible stores. Set `endpoint` to the store's
+    host name without a scheme (for example `s3.example-region.example.com`), set `region` if the store requires one,
+    and leave `insecure` unset so that TLS is used.
+
 6.  Use either Curl or Postman to send a post request to the `http://localhost:12000/example`.
 
         curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
